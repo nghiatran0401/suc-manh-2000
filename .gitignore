@@ -1,0 +1,13 @@
+# client
+client/node_modules
+client/package-lock.json
+client/.DS_Store
+
+# server
+server/node_modules
+server/package-lock.json
+server/.DS_Store
+
+.DS_Store
+.kai_prettierrc.json
+
