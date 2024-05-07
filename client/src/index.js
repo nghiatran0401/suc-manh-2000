@@ -1,10 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "./components/Home";
-import GioiThieu from "./components/GioiThieu";
-import ThongBao from "./components/ThongBao";
-import DuAn2024 from "./components/DuAn2024";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Home from "./pages/Home";
+import GioiThieu from "./pages/GioiThieu";
+import ThongBao from "./pages/ThongBao";
+import DuAn2024 from "./pages/DuAn2024";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: "'Nunito Sans', sans-serif",
+    fontWeightBold: 700,
+    fontWeightMedium: 500,
+    fontWeightRegular: 400,
+    fontWeightLight: 300,
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -28,6 +39,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </React.StrictMode>
 );
+  
