@@ -6,6 +6,7 @@ import HeaderBar from "../components/Header";
 import { SERVER_URL } from "../constants";
 import CarouselMember from "../components/CarouselMember";
 import Footer from "../components/Footer";
+import Companion from "../components/Companion";
 
 export default function Home() {
   const [testData, setTestData] = useState([]);
@@ -34,6 +35,7 @@ export default function Home() {
             </Typography>
           ))}
       </Box>
+      <Companion/>
       <Footer />  
     </div>
   );

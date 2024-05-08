@@ -31,7 +31,6 @@ export default function HeaderBar() {
         <div className='bar-container'>
             <AppBar className='bar' position="static">
                 <Container maxWidth="xl">
-                    hahaha
                     <Toolbar disableGutters>
                         <img src={logo} alt="logo" className='logo'/>
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>

@@ -6,20 +6,9 @@ import logo from '../assets/logo-header.png';
 import './config/styles.css';
 import { Typography } from "@mui/material";
 export default function Footer() {
-
-    const item = [
-        {
-            name: 'Giới thiệu',
-            color: 'red'
-        },
-        {
-            name: 'Tin tức',
-            color: 'blue',
-        },
-    ]
     return (
         <div>
-            <Box sx={{ backgroundColor: '#262626', pt: 3, pb: 3 }}>
+            <Box sx={{ backgroundColor: '#262626', pt: 3 }}>
                 <Grid container spacing={2} justifyContent="center" alignItems="center">
                     <Grid item>
                         <div>
@@ -39,29 +28,29 @@ export default function Footer() {
             <Box sx={{ backgroundColor: '#262626' }}>
                 <Grid container spacing={8} justifyContent="center" >
                     <Grid item>
-                        <Typography variant="h6" color={'#E4E4E4'}>GIỚI THIỆU</Typography>
+                        <Typography variant="h7" color={'#E4E4E4'}>GIỚI THIỆU</Typography>
                         <div className="content-footer">
-                            <a>Sứ mệnh</a>
-                            <a>Đội ngũ</a>
-                            <a>Giải thưởng & ấn phẩm</a>
-                            <a>Yêu cầu hình ảnh</a>
+                            <Typography>Sứ mệnh</Typography>
+                            <Typography>Đội ngũ</Typography>
+                            <Typography>Giải thưởng & ấn phẩm</Typography>
+                            <Typography>Yêu cầu hình ảnh</Typography>
                         </div>
                     </Grid>
                     <Grid item>
-                        <Typography variant="h6" color={'#E4E4E4'}>QUYÊN GÓP </Typography>
+                        <Typography variant="h7" color={'#E4E4E4'}>QUYÊN GÓP </Typography>
                         <div className="content-footer">
-                            <a>Quét QR Momo</a>
-                            <a>Đăng ký bỏ lợn đất</a>
-                            <a> Góp 2000đ mỗi ngày</a>
-                            <a> Rủ 3 người bạn</a>
+                            <Typography>Quét QR Momo</Typography>
+                            <Typography>Đăng ký bỏ lợn đất</Typography>
+                            <Typography> Góp 2000đ mỗi ngày</Typography>
+                            <Typography> Rủ 3 người bạn</Typography>
                         </div>
                     </Grid>
                     <Grid item>
-                        <Typography variant="h6" color={'#E4E4E4'}>LIÊN HỆ</Typography>
+                        <Typography variant="h7" color={'#E4E4E4'}>LIÊN HỆ</Typography>
                         <div className="content-footer">
-                            <a> P702 - 62 Bà Triệu - TW Đoàn.</a>
-                            <a>Điện thoại: 0975 302 307</a>
-                            <a> Email : niemtingroup@gmail.com</a>
+                            <Typography> P702 - 62 Bà Triệu - TW Đoàn.</Typography>
+                            <Typography>Điện thoại: 0975 302 307</Typography>
+                            <Typography> Email : niemtingroup@gmail.com</Typography>
                         </div>
                     </Grid>
                 </Grid>
