@@ -3,59 +3,89 @@ export const getProject = () => {
     author: "user_id",
     publish_date: "date",
     name: "Project name",
+    description: "html/markdown description",
     slug: "project-slug",
     category: "du-an-2024",
-    donors: 
-      {
-        logos: ["logo1", "logo2"],
-        description: "html/markdown description",
-      },
-    
-
+    donor: {
+      name: "Donor name",
+      description: "html/markdown description",
+      images: ["image1"],
+    },
     progress: [
       {
-        title: "Ảnh hiện trạng",
-        description: "progress description",
+        name: "Ảnh hiện trạng",
+        description: "html/markdown description",
         images: ["progress image"],
       },
       {
-        title: "Ảnh hoàn thiện",
-        description: "progress description",
+        name: "Ảnh tiến độ",
+        description: "html/markdown description",
+        images: ["progress image"],
+      },
+      {
+        name: "Ảnh hoàn thiện",
+        description: "html/markdown description",
         images: ["progress image"],
       },
     ],
     content: {
-      description: "Project description",
       tabs: [
         {
           name: "Hoàn cảnh",
-          photos: [],
-          htmlContent: "<h4>NHP</h4>\r\n<p>Hoàn cảnh: </p>\r\n<p> </p>",
-          embeded_url: "https://www.youtube.com/embed/1",
-          slide_show: [{
-            image: "image1",
-            caption: "caption1",
-          }, {
-            image: "image2",
-            caption: "caption2",
-          }, {
-            image: "image3",
-            caption: "caption3",
-          }],
+          description: "html/markdown description",
+          embedded_url: "https://www.youtube.com/embed/1",
+          slide_show: [
+            {
+              image: "image1",
+              caption: "caption1",
+            },
+            {
+              image: "image2",
+              caption: "caption2",
+            },
+            {
+              image: "image3",
+              caption: "caption3",
+            },
+          ],
         },
         {
-          name: "Hoàn cảnh",
-          photos: [],
-          htmlContent: "<h4>NHP</h4>\r\n<p>Hoàn cảnh: </p>\r\n<p> </p>",
-          embeded_url: "https://www.youtube.com/embed/1",
-          slide_show: [],
+          name: "Nhà hảo tâm",
+          description: "html/markdown description",
+          embedded_url: "https://www.youtube.com/embed/1",
+          slide_show: [
+            {
+              image: "image1",
+              caption: "caption1",
+            },
+            {
+              image: "image2",
+              caption: "caption2",
+            },
+            {
+              image: "image3",
+              caption: "caption3",
+            },
+          ],
         },
         {
-          name: "Hoàn cảnh",
-          photos: [],
-          htmlContent: "<h4>NHP</h4>\r\n<p>Hoàn cảnh: </p>\r\n<p> </p>",
-          embeded_url: "https://www.youtube.com/embed/1",
-          slide_show: [],
+          name: "Mô hình xây",
+          description: "html/markdown description",
+          embedded_url: "https://www.youtube.com/embed/1",
+          slide_show: [
+            {
+              image: "image1",
+              caption: "caption1",
+            },
+            {
+              image: "image2",
+              caption: "caption2",
+            },
+            {
+              image: "image3",
+              caption: "caption3",
+            },
+          ],
         },
       ],
     },

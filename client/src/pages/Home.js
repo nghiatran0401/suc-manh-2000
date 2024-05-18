@@ -5,9 +5,10 @@ import Carousel from "react-multi-carousel";
 import { SERVER_URL } from "../constants";
 import { getDownloadURL, ref } from "firebase/storage";
 import { storage } from "../firebase";
+
 // components
 import HeaderBar from "../components/Header";
-import CarouselMember from "../components/CarouselMember";
+import CarouselSlide from "../components/CarouselSlide";
 import Footer from "../components/Footer";
 import Companion from "../components/Companion";
 
@@ -82,7 +83,7 @@ export default function Home() {
   return (
     <Box maxWidth={"1280px"} margin={"auto"}>
       {/* <HeaderBar /> */}
-      {/* <CarouselMember/> */}
+      {/* <CarouselSlide/> */}
 
       <Box display={"flex"} flexDirection={"column"} gap={"16px"} p={"40px"}>
         <Typography variant="h4" fontWeight="bold">
