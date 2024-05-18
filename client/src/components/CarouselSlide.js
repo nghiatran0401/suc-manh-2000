@@ -12,57 +12,6 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import React from "react";
 
-const members = [
-  {
-    caption: "Nguyễn Văn A",
-    role: "CEO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
-  },
-  {
-    caption: "Nguyễn Văn B",
-    role: "CTO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://i.pinimg.com/originals/a1/aa/07/a1aa076c39909394c9ed871f59969e74.jpg",
-  },
-  {
-    caption: "Nguyễn Văn C",
-    role: "CFO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
-  },
-  {
-    caption: "Nguyễn Văn D",
-    role: "CEO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://th.bing.com/th/id/OIP.62UW2I5_9IgQNmE5f305WAHaEK?w=332&h=187&c=7&r=0&o=5&pid=1.7https://i.pinimg.com/originals/a1/aa/07/a1aa076c39909394c9ed871f59969e74.jpg",
-  },
-  {
-    caption: "Nguyễn Văn E",
-    role: "CTO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
-  },
-  {
-    caption: "Nguyễn Văn F",
-    role: "CFO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://web.sucmanh2000.com/wp-content/uploads/2024/03/z5237977652393_76a4a6f6cc29cfdddbda533acbb010bf.jpg",
-  },
-  {
-    caption: "Nguyễn Văn G",
-    role: "CTO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
-  },
-  {
-    caption: "Nguyễn Văn H",
-    role: "CFO",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.",
-    image: "https://web.sucmanh2000.com/wp-content/uploads/2024/03/z5237977652393_76a4a6f6cc29cfdddbda533acbb010bf.jpg",
-  },
-];
-
 export default function CarouselSlide({ title, items }) {
   const responsive = {
     desktop: {
@@ -95,23 +44,34 @@ export default function CarouselSlide({ title, items }) {
           <Card key={index} className="card-contanier" sx={{ m: "16px" }}>
             <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
             <CardContent sx={{ minHeight: "120px" }}>
-              {/* <CardActions>
-                <div className="card-button">
-                  <FacebookOutlinedIcon style={{ color: "red" }} />
-                  <EmailOutlinedIcon />
-                  <LinkedInIcon />
-                  <TwitterIcon />
-                </div>
-              </CardActions> */}
-              {/* <Typography align="center" gutterBottom variant="h5" component="div">
-                {item.caption}
-              </Typography>
-              <Typography align="center" variant="body2" color="text.secondary">
-                {item.caption}
-              </Typography> */}
-              <Typography align="center" variant="body2" color="text.secondary">
-                {item.caption}
-              </Typography>
+              {item.role && (
+                <CardActions>
+                  <div className="card-button">
+                    <FacebookOutlinedIcon style={{ color: "red" }} />
+                    <EmailOutlinedIcon />
+                    <LinkedInIcon />
+                    <TwitterIcon />
+                  </div>
+                </CardActions>
+              )}
+
+              {item.role && (
+                <Typography align="center" gutterBottom variant="h5" component="div">
+                  {item.role}
+                </Typography>
+              )}
+
+              {item.description && (
+                <Typography align="center" variant="body2" color="text.secondary">
+                  {item.description}
+                </Typography>
+              )}
+
+              {item.caption && (
+                <Typography align="center" variant="body2" color="text.secondary">
+                  {item.caption}
+                </Typography>
+              )}
             </CardContent>
           </Card>
         ))}

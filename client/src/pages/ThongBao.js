@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Typography, Avatar, Grid } from "@mui/material";
-import { SERVER_URL } from "../constants";
+import { MEMBERS, SERVER_URL } from "../constants";
 import { getDownloadURL, ref } from "firebase/storage";
 import { storage } from "../firebase";
 import HeaderBar from "../components/Header";
@@ -9,6 +9,7 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
+import CarouselMembers from "../components/CarouselMembers";
 
 export default function ThongBao() {
   const [testData, setTestData] = useState([]);
@@ -112,10 +113,10 @@ export default function ThongBao() {
             </Box>
           </Grid>
         </Grid>
-
-        <Companion />
       </Box>
 
+      <CarouselMembers />
+      <Companion />
       <Footer />
     </Box>
   );

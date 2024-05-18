@@ -93,7 +93,7 @@ function transformData() {
 
       return {
         id: ID,
-        author: post_author ? "Admin" : "N/A",
+        author: post_author ? "Hoàng Hoa Trung" : "Admin Group",
         publish_date: post_date_gmt,
         name: post_title,
         slug: post_name,
