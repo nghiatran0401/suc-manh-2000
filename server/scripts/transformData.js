@@ -1,115 +1,131 @@
 const fs = require("fs");
+const { bucket } = require("../firebase");
 
-function transformData() {
+async function transformData() {
   const jsonData = fs.readFileSync("server/original_db.json", "utf8");
   const data = JSON.parse(jsonData).data;
 
-  const transformed_posts = data
-    .filter((obj) => obj.post_type === "post" && obj.post_status === "publish")
-    .map((obj) => {
-      const { ID, post_author, post_date_gmt, post_title, post_name, post_content } = obj;
+  const transformed_posts = await Promise.all(
+    data
+      .filter((obj) => obj.post_type === "post" && obj.post_status === "publish")
+      .map(async (obj) => {
+        const { ID, post_author, post_date_gmt, post_title, post_name, post_content } = obj;
 
-      let category;
-      switch (true) {
-        case post_name.includes("du-an-suc-manh-2000-cap-nhat-tien-do"):
-          category = "tien-do-xay-xung";
-          break;
-        case post_name.includes("tai-chinh"):
-          category = "bao-cao-tai-chinh";
-          break;
-        default:
-          category = "tin-tuc";
-      }
-
-      function extractEmbedUrl(post_content) {
-        const embedRegex = /\[embed\](.*?)\[\/embed\]/;
-        const match = post_content.match(embedRegex);
-        const embedded_url = match ? match[1] : null;
-
-        // Remove the embed tag from the post_content
-        let contentWithoutEmbeddedUrl;
-        if (embedded_url) {
-          contentWithoutEmbeddedUrl = post_content.replace(embedRegex, "");
+        let category;
+        switch (true) {
+          case post_name.includes("cap-nhat-tien-do"):
+            category = "tien-do-xay-dung";
+            break;
+          case post_name.includes("tai-chinh"):
+            category = "bao-cao-tai-chinh";
+            break;
+          default:
+            category = "tin-tuc";
         }
 
-        return { embedded_url, contentWithoutEmbeddedUrl };
-      }
+        function extractEmbedUrl(post_content) {
+          const embedRegex = /\[embed\](.*?)\[\/embed\]/;
+          const match = post_content.match(embedRegex);
+          const embedded_url = match ? match[1] : null;
 
-      function extractImagesAndContent(htmlString) {
-        // Regular expression to find image tags and capture their source attribute
-        const imageRegex = /<img[^>]+src="(.*?)"[^>]*>/g;
-        let matches;
-        let images = [];
-        let firstImageStartIndex = -1; // Initialize to -1 to indicate no images found
-
-        // This regular expression is used to clean up the src attribute to match the desired output
-        const srcCleanupRegex = /^http(s)?:\/\/web\.sucmanh2000\.com\/wp-content\//;
-
-        // Loop over each image tag found
-        while ((matches = imageRegex.exec(htmlString)) !== null) {
-          const imageUrl = matches[1].replace(srcCleanupRegex, ""); // Clean up the src to required format
-          const imageStartIndex = matches.index;
-          const imageEndIndex = imageRegex.lastIndex;
-
-          // Check and set the start index of the first image
-          if (firstImageStartIndex === -1) {
-            firstImageStartIndex = imageStartIndex;
+          // Remove the embed tag from the post_content
+          let contentWithoutEmbeddedUrl;
+          if (embedded_url) {
+            contentWithoutEmbeddedUrl = post_content.replace(embedRegex, "");
           }
 
-          // Extract caption: starts from the end of current image tag to the start of next image or end of string
-          const captionStartIndex = imageEndIndex;
-          const captionEndIndex = htmlString.indexOf("<img", captionStartIndex);
-          let caption = htmlString.substring(captionStartIndex, captionEndIndex > -1 ? captionEndIndex : undefined).trim();
+          return { embedded_url, contentWithoutEmbeddedUrl };
+        }
 
-          // Clean up the caption from any HTML tags or unwanted white spaces/new lines
-          caption = caption.replace(/<\/?[^>]+(>|$)/g, "").trim(); // Remove HTML tags
-          if (caption) {
-            // Split by new lines and take the relevant line for the caption if necessary
-            const captionLines = caption.split(/[\r\n]+/);
-            caption = captionLines[0]; // Assuming the first line after the image is the caption
+        async function extractImagesAndContent(htmlString) {
+          // Regular expression to find image tags and capture their source attribute
+          const imageRegex = /<img[^>]+src="(.*?)"[^>]*>/g;
+          let matches;
+          let images = [];
+          let firstImageStartIndex = -1; // Initialize to -1 to indicate no images found
+
+          // This regular expression is used to clean up the src attribute to match the desired output
+          const srcCleanupRegex = /^http(s)?:\/\/web\.sucmanh2000\.com\/wp-content\//;
+
+          // Loop over each image tag found
+          while ((matches = imageRegex.exec(htmlString)) !== null) {
+            const imageUrl = matches[1].replace(srcCleanupRegex, ""); // Clean up the src to required format
+            const imageStartIndex = matches.index;
+            const imageEndIndex = imageRegex.lastIndex;
+
+            // Check and set the start index of the first image
+            if (firstImageStartIndex === -1) {
+              firstImageStartIndex = imageStartIndex;
+            }
+
+            // Extract caption: starts from the end of current image tag to the start of next image or end of string
+            const captionStartIndex = imageEndIndex;
+            const captionEndIndex = htmlString.indexOf("<img", captionStartIndex);
+            let caption = htmlString.substring(captionStartIndex, captionEndIndex > -1 ? captionEndIndex : undefined).trim();
+
+            // Clean up the caption from any HTML tags or unwanted white spaces/new lines
+            caption = caption.replace(/<\/?[^>]+(>|$)/g, "").trim(); // Remove HTML tags
+            if (caption) {
+              // Split by new lines and take the relevant line for the caption if necessary
+              const captionLines = caption.split(/[\r\n]+/);
+              caption = captionLines[0]; // Assuming the first line after the image is the caption
+            }
+
+            images.push({
+              image: imageUrl,
+              caption: caption || undefined, // Include the caption only if it's not empty
+            });
           }
 
-          images.push({
-            image: imageUrl,
-            caption: caption || undefined, // Include the caption only if it's not empty
+          // Inherit captions if there are images without captions
+          for (let i = images.length - 2; i >= 0; i--) {
+            if (!images[i].caption) {
+              images[i].caption = images[i + 1].caption;
+            }
+          }
+
+          // After extracting the images, get the download URLs
+          const imagePromises = images.map(async (image) => {
+            const file = bucket.file(image.image);
+            const url = await file.getSignedUrl({
+              action: "read",
+              expires: "03-09-2491",
+            });
+
+            return { image: url[0], caption: image.caption };
           });
+
+          const imageObjects = await Promise.all(imagePromises);
+
+          // Only keep content up to the start of the first image
+          let contentWithoutImages = firstImageStartIndex !== -1 ? htmlString.substring(0, firstImageStartIndex) : htmlString;
+
+          return { images: imageObjects, contentWithoutImages };
         }
 
-        // Inherit captions if there are images without captions
-        for (let i = images.length - 2; i >= 0; i--) {
-          if (!images[i].caption) {
-            images[i].caption = images[i + 1].caption;
-          }
-        }
+        const { embedded_url, contentWithoutEmbeddedUrl } = extractEmbedUrl(post_content);
+        const { images, contentWithoutImages } = await extractImagesAndContent(embedded_url ? contentWithoutEmbeddedUrl : post_content);
 
-        // Only keep content up to the start of the first image
-        let contentWithoutImages = firstImageStartIndex !== -1 ? htmlString.substring(0, firstImageStartIndex) : htmlString;
-
-        return { images, contentWithoutImages };
-      }
-
-      const { embedded_url, contentWithoutEmbeddedUrl } = extractEmbedUrl(post_content);
-      const { images, contentWithoutImages } = extractImagesAndContent(embedded_url ? contentWithoutEmbeddedUrl : post_content);
-
-      return {
-        id: ID,
-        author: post_author ? "Hoàng Hoa Trung" : "Admin Group",
-        publish_date: post_date_gmt,
-        name: post_title,
-        slug: post_name,
-        category: category,
-        content: {
-          tabs: [
-            {
-              name: "Main content",
-              description: contentWithoutImages,
-              embedded_url: embedded_url,
-              slide_show: images,
-            },
-          ],
-        },
-      };
-    });
+        return {
+          id: ID,
+          author: post_author ? "Hoàng Hoa Trung" : "Admin",
+          publish_date: post_date_gmt,
+          name: post_title,
+          slug: post_name,
+          category: category,
+          content: {
+            tabs: [
+              {
+                name: "Main content",
+                description: contentWithoutImages,
+                embedded_url: embedded_url,
+                slide_show: images,
+              },
+            ],
+          },
+        };
+      })
+  );
 
   const transformed_attachments = data
     .filter((obj) => obj.post_type === "attachment")

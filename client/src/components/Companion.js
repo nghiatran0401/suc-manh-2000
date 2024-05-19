@@ -21,7 +21,7 @@ export default function Companion() {
   ];
 
   return (
-    <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"100px auto"}>
+    <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
       <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đơn vị đồng hành
       </Typography>

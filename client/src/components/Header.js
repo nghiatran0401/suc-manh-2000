@@ -11,7 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import MenuItem from "@mui/material/MenuItem";
 import { Link } from "react-router-dom";
-import { route } from "../routes";
+import { routes } from "../routes";
 
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
@@ -57,17 +57,19 @@ export default function HeaderBar() {
               </Menu>
             </Box>
             <Box display={"flex"} flexGrow={1} gap={"24px"} alignItems={"center"}>
-              {route.map((item, index) => {
-                if (item.name === "Home") {
-                  return <img key={index} src={logo} alt="logo" className="logo" onClick={() => navigate(item.path)} style={{ cursor: "pointer" }} />;
-                }
+              {routes
+                .filter((item) => item.path.split("/").length - 1 === 1)
+                .map((item, index) => {
+                  if (item.name === "Home") {
+                    return <img key={index} src={logo} alt="logo" className="logo" onClick={() => navigate(item.path)} style={{ cursor: "pointer" }} />;
+                  }
 
-                return (
-                  <Typography variant="body1" fontWeight={"bold"} color="#666666D9" noWrap key={index} onClick={() => navigate(item.path)} style={{ cursor: "pointer" }}>
-                    {item.name}
-                  </Typography>
-                );
-              })}
+                  return (
+                    <Typography variant="body1" fontWeight={"bold"} color="#666666D9" noWrap key={index} onClick={() => navigate(item.path)} style={{ cursor: "pointer" }}>
+                      {item.name}
+                    </Typography>
+                  );
+                })}
             </Box>
           </Toolbar>
         </Container>

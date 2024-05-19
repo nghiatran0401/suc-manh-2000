@@ -1,0 +1,91 @@
+import { Box, Typography, Grid, CardContent, Card as MuiCard, LinearProgress } from "@mui/material";
+import { styled } from "@mui/system";
+import { Link } from "react-router-dom";
+import { truncate } from "../helpers";
+
+const Card = styled(MuiCard)({
+  minHeight: "500px",
+  cursor: "pointer",
+  transition: "transform 0.3s",
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
+});
+
+export default function CardList(props) {
+  return (
+    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
+        <Typography variant="h6" fontWeight={"bold"}>
+          {props.title}
+        </Typography>
+      </Box>
+
+      <Grid container spacing={3}>
+        {props.loading && (
+          <Box sx={{ width: "100%" }}>
+            <LinearProgress />
+          </Box>
+        )}
+        {!props.loading &&
+          props.posts?.map((post, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Link to={`/thong-bao/${post.slug}`} style={{ textDecoration: "none" }}>
+                <Card style={{ overflow: "visible", minHeight: "fit-content" }}>
+                  <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        zIndex: 1,
+                        left: "-10px",
+                        top: "20px",
+                        width: "50px",
+                        height: "50px",
+                        backgroundColor: "white",
+                        border: "1px solid red",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box textAlign={"center"}>
+                        <Typography variant="body1" fontWeight={"bold"}>
+                          {new Date(post.publish_date).getDate()}
+                        </Typography>
+                        <Typography variant="body2">Th{new Date(post.publish_date).getMonth() + 1}</Typography>
+                      </Box>
+                    </div>
+                    <img
+                      width="100%"
+                      height="225"
+                      src={post.content?.tabs[0]?.slide_show[0]?.image ? post.content?.tabs[0]?.slide_show[0]?.image : "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+                    />
+                  </div>
+                  <CardContent>
+                    <Typography variant="body1" fontWeight={"bold"} minHeight={"100px"}>
+                      {post.name}
+                    </Typography>
+                    {post.content.tabs[0].description && (
+                      <>
+                        <div
+                          style={{
+                            backgroundColor: "rgba(0, 0, 0, .1)",
+                            display: "block",
+                            height: "2px",
+                            margin: "0.5em 0",
+                            maxWidth: "30px",
+                            width: "100%",
+                          }}
+                        ></div>
+                        <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.content.tabs[0].description, 100) }} />
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            </Grid>
+          ))}
+      </Grid>
+    </Box>
+  );
+}

@@ -16,13 +16,13 @@ export default function CarouselSlide({ title, items }) {
   const responsive = {
     desktop: {
       breakpoint: { max: 3000, min: 1024 },
-      items: 3,
-      slidesToSlide: 3, // optional, default to 1.
+      items: 1,
+      slidesToSlide: 1, // optional, default to 1.
     },
     tablet: {
       breakpoint: { max: 1024, min: 464 },
-      items: 2,
-      slidesToSlide: 2, // optional, default to 1.
+      items: 1,
+      slidesToSlide: 1, // optional, default to 1.
     },
     mobile: {
       breakpoint: { max: 464, min: 0 },
@@ -39,40 +39,42 @@ export default function CarouselSlide({ title, items }) {
         </Typography>
       )}
 
-      <Carousel itemClass="carousel-item-padding" responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
+      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
         {items.map((item, index) => (
-          <Card key={index} className="card-contanier" sx={{ m: "16px" }}>
-            <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
-            <CardContent sx={{ minHeight: "120px" }}>
-              {item.role && (
-                <CardActions>
-                  <div className="card-button">
-                    <FacebookOutlinedIcon style={{ color: "red" }} />
-                    <EmailOutlinedIcon />
-                    <LinkedInIcon />
-                    <TwitterIcon />
-                  </div>
-                </CardActions>
-              )}
+          <Card key={index} sx={{ m: "16px" }}>
+            <CardMedia component="img" alt={item.caption} height="500" image={item.image} />
+            {(item.caption || item.role || item.description) && (
+              <CardContent>
+                {item.role && (
+                  <CardActions>
+                    <div className="card-button">
+                      <FacebookOutlinedIcon style={{ color: "red" }} />
+                      <EmailOutlinedIcon />
+                      <LinkedInIcon />
+                      <TwitterIcon />
+                    </div>
+                  </CardActions>
+                )}
 
-              {item.role && (
-                <Typography align="center" gutterBottom variant="h5" component="div">
-                  {item.role}
-                </Typography>
-              )}
+                {item.role && (
+                  <Typography align="center" gutterBottom variant="h5" component="div">
+                    {item.role}
+                  </Typography>
+                )}
 
-              {item.description && (
-                <Typography align="center" variant="body2" color="text.secondary">
-                  {item.description}
-                </Typography>
-              )}
+                {item.description && (
+                  <Typography align="center" variant="body2" color="text.secondary">
+                    {item.description}
+                  </Typography>
+                )}
 
-              {item.caption && (
-                <Typography align="center" variant="body2" color="text.secondary">
-                  {item.caption}
-                </Typography>
-              )}
-            </CardContent>
+                {item.caption && (
+                  <Typography align="center" variant="body2" color="text.secondary">
+                    {item.caption}
+                  </Typography>
+                )}
+              </CardContent>
+            )}
           </Card>
         ))}
       </Carousel>
