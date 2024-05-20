@@ -14,7 +14,7 @@ async function transformData() {
         let category;
         switch (true) {
           case post_name.includes("cap-nhat-tien-do"):
-            category = "tien-do-xay-dung";
+            category = "thong-bao";
             break;
           case post_name.includes("tai-chinh"):
             category = "bao-cao-tai-chinh";
@@ -108,7 +108,7 @@ async function transformData() {
 
         return {
           id: ID,
-          author: post_author ? "Hoàng Hoa Trung" : "Admin",
+          author: post_author ? "Hoàng Hoa Trung" : "Admin Group",
           publish_date: post_date_gmt,
           name: post_title,
           slug: post_name,
@@ -140,187 +140,201 @@ async function transformData() {
       };
     });
 
-  const transformed_pages = data
-    .filter((obj) => obj.post_type === "page" && obj.post_status === "publish")
-    .map((obj) => {
-      const { ID, post_author, post_date_gmt, post_title, post_name, post_content, post_parent } = obj;
-      let donor_content, tab1_content, tab2_content, tab3_content;
-      let donor_images, tab1_images, tab2_images, tab3_images;
-      let description, category, embedded_url;
-      let before = [],
-        in_progress = [],
-        after = [];
+  const transformed_pages = await Promise.all(
+    data
+      .filter((obj) => obj.post_type === "page" && obj.post_status === "publish")
+      .map(async (obj) => {
+        const { ID, post_author, post_date_gmt, post_title, post_name, post_content, post_parent } = obj;
+        let donor_content, tab1_content, tab2_content, tab3_content;
+        let donor_images, tab1_images, tab2_images, tab3_images;
+        let description, category, embedded_url;
+        let before = [],
+          in_progress = [],
+          after = [];
 
-      function extractImages(content) {
-        let images = [];
-        if (content) {
-          const imgSrcPattern = /<img[^>]+src="(.*?)"[^>]*>/g;
-          const uxImagePattern = /\[ux_image id="(\d+)"[^]*?\]/g;
-          let imgSrcMatch, uxImageMatch;
+        async function extractImages(content) {
+          let images = [];
+          if (content) {
+            const imgSrcPattern = /<img[^>]+src="(.*?)"[^>]*>/g;
+            const uxImagePattern = /\[ux_image id="(\d+)"[^]*?\]/g;
+            let imgSrcMatch, uxImageMatch;
 
-          while ((imgSrcMatch = imgSrcPattern.exec(content)) !== null) {
-            const imageUrl = imgSrcMatch[1] ? imgSrcMatch[1].replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
-            if (!imageUrl) console.log("!imageUrl1", imgSrcMatch[1]);
-            images.push(imageUrl);
+            while ((imgSrcMatch = imgSrcPattern.exec(content)) !== null) {
+              const imageUrl = imgSrcMatch[1] ? imgSrcMatch[1].replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
+              if (!imageUrl) console.log("!imageUrl1", imgSrcMatch[1]);
+              images.push(imageUrl);
+            }
+            while ((uxImageMatch = uxImagePattern.exec(content)) !== null) {
+              const imageId = uxImageMatch[1];
+              const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
+              const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
+              if (!imageUrl) console.log("!imageUrl2", imageId);
+              images.push(imageUrl);
+            }
+            content = content.replace(/<img[^>]*>/g, "").replace(uxImagePattern, "");
           }
-          while ((uxImageMatch = uxImagePattern.exec(content)) !== null) {
-            const imageId = uxImageMatch[1];
-            const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
-            const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
-            if (!imageUrl) console.log("!imageUrl2", imageId);
-            images.push(imageUrl);
-          }
-          content = content.replace(/<img[^>]*>/g, "").replace(uxImagePattern, "");
+
+          // After extracting the images, get the download URLs
+          const imagePromises = images.map(async (image) => {
+            const file = bucket.file(image);
+            const url = await file.getSignedUrl({
+              action: "read",
+              expires: "03-09-2491",
+            });
+
+            return url[0];
+          });
+
+          return await Promise.all(imagePromises);
         }
-        return images;
-      }
 
-      function extractContent() {
-        const patterns = [
-          /\[row.*?Tài Trợ.*?\[\/row\]/is,
-          /\[tab title="Hoàn cảnh"\](.*?)\[\/tab\]/s,
-          /\[tab title="Nhà hảo tâm"\](.*?)\[\/tab\]/s,
-          /\[tab title="Mô hình xây"\](.*?)\[\/tab\]/s,
-          /\[ux_image_box[^\]]*\](.*?)\[\/ux_image_box\]/s,
-          /\[title text="ẢNH HIỆN TRẠNG"(.*?)\[\/col\]/gis,
-          /\[title text="ẢNH TIẾN ĐỘ"(.*?)\[\/col\]/gis,
-          /\[title text="ẢNH HOÀN THIỆN"(.*?)\[\/col\]/gis,
-        ];
-        const imgIdPattern = /\[ux_image id="(.*?)"\]/g;
-        const results = [donor_content, tab1_content, tab2_content, tab3_content, description];
-        const imageArrays = [before, in_progress, after];
+        async function extractContent() {
+          const patterns = [
+            /\[row.*?Tài Trợ.*?\[\/row\]/is,
+            /\[tab title="Hoàn cảnh"\](.*?)\[\/tab\]/s,
+            /\[tab title="Nhà hảo tâm"\](.*?)\[\/tab\]/s,
+            /\[tab title="Mô hình xây"\](.*?)\[\/tab\]/s,
+            /\[ux_image_box[^\]]*\](.*?)\[\/ux_image_box\]/s,
+            /\[title text="ẢNH HIỆN TRẠNG"(.*?)\[\/col\]/gis,
+            /\[title text="ẢNH TIẾN ĐỘ"(.*?)\[\/col\]/gis,
+            /\[title text="ẢNH HOÀN THIỆN"(.*?)\[\/col\]/gis,
+          ];
+          const imgIdPattern = /\[ux_image id="(.*?)"\]/g;
+          const results = [donor_content, tab1_content, tab2_content, tab3_content, description];
+          const imageArrays = [before, in_progress, after];
 
-        patterns.forEach((pattern, index) => {
-          const match = post_content.toString().match(pattern);
-          if (index < 5) {
-            results[index] = match ? match[0].replace(/\[ux_html\]|\[\/ux_html\]/g, "").trim() : null;
-          } else {
-            const blockMatch = pattern.exec(post_content.toString());
-            if (blockMatch) {
-              const block = blockMatch[1];
-              let imgIdMatch;
-              while ((imgIdMatch = imgIdPattern.exec(block)) !== null) {
-                imageArrays[index - 5].push(imgIdMatch[1]);
+          patterns.forEach((pattern, index) => {
+            const match = post_content.toString().match(pattern);
+            if (index < 5) {
+              results[index] = match ? match[0].replace(/\[ux_html\]|\[\/ux_html\]/g, "").trim() : null;
+            } else {
+              const blockMatch = pattern.exec(post_content.toString());
+              if (blockMatch) {
+                const block = blockMatch[1];
+                let imgIdMatch;
+                while ((imgIdMatch = imgIdPattern.exec(block)) !== null) {
+                  imageArrays[index - 5].push(imgIdMatch[1]);
+                }
               }
             }
+          });
+
+          [donor_content, tab1_content, tab2_content, tab3_content, description] = results;
+          donor_images = await extractImages(donor_content);
+          tab1_images = await extractImages(tab1_content);
+          tab2_images = await extractImages(tab2_content);
+          tab3_images = await extractImages(tab3_content);
+
+          if (donor_content) {
+            const firstColMatch = donor_content.match(/\[row.*?\[col.*?\](.*?)\[\/col\]/is);
+            donor_content = firstColMatch ? firstColMatch[1] : null;
           }
-        });
-
-        [donor_content, tab1_content, tab2_content, tab3_content, description] = results;
-        donor_images = extractImages(donor_content);
-        tab1_images = extractImages(tab1_content);
-        tab2_images = extractImages(tab2_content);
-        tab3_images = extractImages(tab3_content);
-
-        if (donor_content) {
-          const firstColMatch = donor_content.match(/\[row.*?\[col.*?\](.*?)\[\/col\]/is);
-          donor_content = firstColMatch ? firstColMatch[1] : null;
-        }
-        if (tab1_content) {
-          tab1_content = tab1_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
-        }
-        if (tab2_content) {
-          const iframeMatch = tab2_content.match(/<iframe[^>]*src="([^"]*)"[^>]*>/i);
-          if (iframeMatch) {
-            embedded_url = iframeMatch[1];
-            tab2_content = tab2_content.replace(/<iframe[^>]*>.*?<\/iframe>/gs, "");
+          if (tab1_content) {
+            tab1_content = tab1_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
           }
-          tab2_content = tab2_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)[^\]]*\]/gs, "");
-          tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\n*\s*\[\/(row_inner|col_inner)\]/gs, "");
-          tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
-        }
-        if (tab3_content) {
-          tab3_content = tab3_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
-          tab3_content = tab3_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
-        }
-        if (description) {
-          description = description.replace(/\[ux_image_box[^\]]*\]/g, "").replace(/\[\/ux_image_box\]/g, "");
+          if (tab2_content) {
+            const iframeMatch = tab2_content.match(/<iframe[^>]*src="([^"]*)"[^>]*>/i);
+            if (iframeMatch) {
+              embedded_url = iframeMatch[1];
+              tab2_content = tab2_content.replace(/<iframe[^>]*>.*?<\/iframe>/gs, "");
+            }
+            tab2_content = tab2_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)[^\]]*\]/gs, "");
+            tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\n*\s*\[\/(row_inner|col_inner)\]/gs, "");
+            tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
+          }
+          if (tab3_content) {
+            tab3_content = tab3_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
+            tab3_content = tab3_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
+          }
+          if (description) {
+            description = description.replace(/\[ux_image_box[^\]]*\]/g, "").replace(/\[\/ux_image_box\]/g, "");
+          }
+
+          [before, in_progress, after] = imageArrays;
+          [before, in_progress, after] = [before, in_progress, after].map((array) =>
+            array.map((item) => {
+              const imageId = item
+                .replace(/" height="[^"]*/g, "")
+                .replace(/" width="[^"]*/g, "")
+                .replace(/" image_size="[^"]*/g, "");
+              const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
+              const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
+              if (!imageUrl) console.log("!imageUrl3", imageId);
+              return imageUrl;
+            })
+          );
+
+          tab1_images = tab1_images.map((image) => ({ image, caption: "" }));
+          tab2_images = tab2_images.map((image) => ({ image, caption: "" }));
+          tab3_images = tab3_images.map((image) => ({ image, caption: "" }));
         }
 
-        [before, in_progress, after] = imageArrays;
-        [before, in_progress, after] = [before, in_progress, after].map((array) =>
-          array.map((item) => {
-            const imageId = item
-              .replace(/" height="[^"]*/g, "")
-              .replace(/" width="[^"]*/g, "")
-              .replace(/" image_size="[^"]*/g, "");
-            const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
-            const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
-            if (!imageUrl) console.log("!imageUrl3", imageId);
-            return imageUrl;
-          })
-        );
-
-        tab1_images = tab1_images.map((image) => ({ image, caption: "" }));
-        tab2_images = tab2_images.map((image) => ({ image, caption: "" }));
-        tab3_images = tab3_images.map((image) => ({ image, caption: "" }));
-      }
-
-      function extractCategory() {
-        if (post_parent && post_parent !== "0") {
-          const parentPost = data.filter((obj) => obj.post_type === "page" && obj.post_status === "publish").find((page) => page.ID === post_parent);
-          if (parentPost) {
-            category = parentPost.post_name.replace("cac-", "");
+        function extractCategory() {
+          if (post_parent && post_parent !== "0") {
+            const parentPost = data.filter((obj) => obj.post_type === "page" && obj.post_status === "publish").find((page) => page.ID === post_parent);
+            if (parentPost) {
+              category = parentPost.post_name.replace("cac-", "");
+            }
           }
         }
-      }
 
-      extractCategory();
-      extractContent();
+        extractCategory();
+        await extractContent();
 
-      return {
-        id: ID,
-        author: post_author ? "Admin" : "N/A",
-        publish_date: post_date_gmt,
-        name: post_title,
-        description: description,
-        slug: post_name,
-        category: category,
-        donor: {
-          name: "Nhà tài trợ",
-          description: donor_content,
-          images: donor_images,
-        },
-        progress: [
-          {
-            name: "Ảnh hiện trạng",
-            images: before,
+        return {
+          id: ID,
+          author: post_author ? "Admin" : "N/A",
+          publish_date: post_date_gmt,
+          name: post_title,
+          description: description,
+          slug: post_name,
+          category: category,
+          donor: {
+            name: "Nhà tài trợ",
+            description: donor_content,
+            images: donor_images,
           },
-          {
-            name: "Ảnh tiến độ",
-            images: in_progress,
-          },
-          {
-            name: "Ảnh hoàn thiện",
-            images: after,
-          },
-        ],
-        content: {
-          tabs: [
+          progress: [
             {
-              name: "Hoàn cảnh",
-              description: tab1_content,
-              slide_show: tab1_images,
+              name: "Ảnh hiện trạng",
+              images: before,
             },
             {
-              name: "Nhà hảo tâm",
-              description: tab2_content,
-              embedded_url: embedded_url,
-              slide_show: tab2_images,
+              name: "Ảnh tiến độ",
+              images: in_progress,
             },
             {
-              name: "Mô hình xây",
-              description: tab3_content,
-              slide_show: tab3_images,
+              name: "Ảnh hoàn thiện",
+              images: after,
             },
           ],
-        },
-      };
-    });
+          content: {
+            tabs: [
+              {
+                name: "Hoàn cảnh",
+                description: tab1_content,
+                slide_show: tab1_images,
+              },
+              {
+                name: "Nhà hảo tâm",
+                description: tab2_content,
+                embedded_url: embedded_url,
+                slide_show: tab2_images,
+              },
+              {
+                name: "Mô hình xây",
+                description: tab3_content,
+                slide_show: tab3_images,
+              },
+            ],
+          },
+        };
+      })
+  );
 
   // Divide data into smaller chunks
-  fs.writeFileSync("server/transformed_posts.json", JSON.stringify(transformed_posts));
-  // fs.writeFileSync("server/transformed_pages.json", JSON.stringify(transformed_pages));
+  // fs.writeFileSync("server/transformed_posts.json", JSON.stringify(transformed_posts));
+  fs.writeFileSync("server/transformed_pages.json", JSON.stringify(transformed_pages));
   // fs.writeFileSync("server/transformed_attachments.json", JSON.stringify(transformed_attachments));
 }
 

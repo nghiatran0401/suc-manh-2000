@@ -12,6 +12,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import React from "react";
 
+// TODO: Combine CarouselSlide and CarouselMembers into 1
 export default function CarouselSlide({ title, items }) {
   const responsive = {
     desktop: {
@@ -42,7 +43,8 @@ export default function CarouselSlide({ title, items }) {
       <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
         {items.map((item, index) => (
           <Card key={index} sx={{ m: "16px" }}>
-            <CardMedia component="img" alt={item.caption} height="500" image={item.image} />
+            <CardMedia component="img" alt={item.caption} height="100%" image={item.image} />
+
             {(item.caption || item.role || item.description) && (
               <CardContent>
                 {item.role && (

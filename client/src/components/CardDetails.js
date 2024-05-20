@@ -1,4 +1,4 @@
-import { Box, Typography, Avatar, Grid, CircularProgress } from "@mui/material";
+import { Box, Typography, Avatar, Grid } from "@mui/material";
 import { Link } from "react-router-dom";
 import { convertToEmbedUrl } from "../helpers";
 import EventIcon from "@mui/icons-material/Event";
@@ -9,7 +9,7 @@ export default function CardDetails(props) {
 
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
-      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
+      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px 0"}>
         <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
         <Box display={"flex"} gap={"24px"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
