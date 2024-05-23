@@ -6,4 +6,6 @@ admin.initializeApp({
   storageBucket: "sucmanh2000-2b5f0.appspot.com",
 });
 
-module.exports = { admin };
+const bucket = admin.storage().bucket();
+
+module.exports = { admin, bucket };

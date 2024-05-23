@@ -1,42 +1,47 @@
 declare namespace Sucmanh2000 {
-  type PostInfor = {
+  type Post = {
     author: string;
     publish_date: string;
     name: string;
+    description: string;
     slug: string;
     category: string;
     description?: string;
   };
 
-  type ContentModule = {
+  type Donor = {
+    name: string;
+    description: string;
+    images: string[];
+  };
+
+  type Progress = {
+    name: string;
     description?: string;
-    htmlContent?: string;
-    embeded_url?: string;
+    images: string[];
+  }[];
+
+  type TabsContent = {
+    name: string;
+    description: string;
+    embedded_url?: string;
     slide_show?: {
       image: string;
       caption?: string;
     }[];
-  };
+  }[];
 
-  type Project = PostInfor & {
-    donor?: {
-      logos?: string[];
-      description: string;
-    };
-    progress: {
-      title: string;
-      description: string;
-      images: string[];
-    }[];
-    body?: {
-      tabs?: {
-        name: string;
-        content: ContentModule;
-      }[];
+  type Project = Post & {
+    donor: Donor;
+    progress: Progress;
+    content: {
+      tabs: TabsContent;
     };
   };
 
-  type Post = PostInfor & {
-    body?: ContentModule;
+  type News = Post & {
+    content: {
+      tabs: TabsContent;
+    };
   };
 }

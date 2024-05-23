@@ -1,82 +1,60 @@
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import MenuItem from '@mui/material/MenuItem';
-import { Link } from 'react-router-dom';
-import { route } from '../routes';
-
-import './config/styles.css'
-import logo from '../assets/logo-header.png'
-const pages = ['Giới thiệu', 'Tin Tức', 'Dự án'];
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Container, Typography, AppBar, Box, Toolbar } from "@mui/material";
+import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
+import "@coreui/coreui/dist/css/coreui.min.css";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import "./config/styles.css";
+import logo from "../assets/logo-header.png";
+import SearchBar from "./SearchBar";
+import { HEADER_DROPDOWN_LIST } from "../constants";
 
 export default function HeaderBar() {
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
+  return (
+    <Box className="bar-container">
+      <AppBar className="bar" position="static">
+        <Container sx={{ maxWidth: "1080px !important", m: "auto", p: "0 !important" }}>
+          <Toolbar>
+            {HEADER_DROPDOWN_LIST.map((item, index) => (
+              <Box key={index} display={"flex"} m={"0 16px"} style={{ cursor: "pointer" }}>
+                {item.title === "Home" && (
+                  <Box display={"flex"}>
+                    <img key={index} src={logo} alt="logo" className="logo" onClick={() => navigate(item.path)} />
+                  </Box>
+                )}
 
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
+                {item.title !== "Home" && (
+                  <Box display={"flex"}>
+                    {item.children.length > 0 ? (
+                      <CDropdown className="hover-dropdown">
+                        <Typography display={"flex"} alignItems={"center"} variant="body1" fontWeight={"bold"} color="#666666D9">
+                          {item.title}
+                          <ArrowDropDownIcon />
+                        </Typography>
+                        <CDropdownMenu className="dropdown-menu-position" color="secondary">
+                          {item.children.map((child, childIndex) => (
+                            <CDropdownItem key={childIndex} href={child.path} style={{ margin: "10px 0" }}>
+                              {child.title}
+                            </CDropdownItem>
+                          ))}
+                        </CDropdownMenu>
+                      </CDropdown>
+                    ) : (
+                      <Typography display={"flex"} alignItems={"center"} variant="body1" fontWeight={"bold"} color="#666666D9" onClick={() => navigate(item.path)}>
+                        {item.title}
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            ))}
 
-
-    return (
-        <div className='bar-container'>
-            <AppBar className='bar' position="static">
-                <Container maxWidth="xl">
-                    <Toolbar disableGutters>
-                        <img src={logo} alt="logo" className='logo'/>
-                        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                            <Menu
-                                id="menu-appbar"
-                                anchorEl={anchorElNav}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                                open={Boolean(anchorElNav)}
-                                onClose={handleCloseNavMenu}
-                                sx={{
-                                    display: { xs: 'block', md: 'none' },
-                                }}
-                            >
-                                {pages.map((page) => (
-                                    <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                        <Typography textAlign="center">{page}</Typography>
-                                    </MenuItem>
-                                ))}
-                            </Menu>
-                        </Box>
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                            {route.map((item, index) => (
-                                <Typography
-                                    variant="h6"
-                                    color="#666666D9"
-                                    noWrap
-                                    key={index}
-                                    onClick={() => navigate(item.path)}
-                                    style={{ cursor: 'pointer', margin: '0 20px'}}
-                                >
-                                    {item.name}
-                                </Typography>
-                            ))}
-                        </Box>
-                    </Toolbar>
-                </Container>
-            </AppBar>
-        </div>
-
-    );
+            {/* <SearchBar /> */}
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </Box>
+  );
 }

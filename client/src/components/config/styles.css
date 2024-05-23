@@ -1,26 +1,33 @@
 .bar-container {
-    .bar {
-        background-color: #fff;
-    }
+  .bar {
+    background-color: #fff;
+  }
 
-    .logo {
-        max-width: 70px;
-    }
+  .logo {
+    max-width: 70px;
+  }
+}
+
+.hover-dropdown:hover .dropdown-menu {
+  display: block;
+}
+.dropdown-menu-position {
+  margin-top: 24px !important;
 }
 
 .card-contanier {
-    .card-button{
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
+  .card-button {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 }
 
-.content-footer{
-    color: #B4B4B4;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 5px;
+.content-footer {
+  color: #b4b4b4;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 5px;
 }

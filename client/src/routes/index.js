@@ -1,27 +1,26 @@
+import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/Home";
 import GioiThieu from "../pages/GioiThieu";
-import ThongBao from "../pages/ThongBao";
-import DuAn2024 from "../pages/DuAn2024";
+import PostList from "../pages/PostList";
+import PostDetails from "../pages/PostDetails";
 
-export const route = [
-    {
-        path: "/",
-        name: "Home",
-        component: Home,
-    },
-    {
-        path: "/gioi-thieu",
-        name: "Giới Thiệu",
-        component: GioiThieu
-    },
-    {
-        path: "/thong-bao",
-        name: "Thông báo",
-        component: ThongBao,
-    },
-    {
-        path: "/du-an-2024",
-        name: "Dự án 2024",
-        component: DuAn2024,
-    },
-]
+export const routes = [
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/gioi-thieu",
+    element: <GioiThieu />,
+  },
+  {
+    path: "/:category",
+    element: <PostList />,
+  },
+  {
+    path: "/:category/:id",
+    element: <PostDetails />,
+  },
+];
+
+export const router = createBrowserRouter(routes);
