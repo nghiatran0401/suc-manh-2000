@@ -7,11 +7,10 @@ import ImgCrop from "antd-img-crop";
 import { uploadFileToFirebaseStorage } from "../../firebase/storage";
 import { generateNewDocumentId } from "../../firebase/firestore";
 import { ProjectResource } from "../../resources";
-import { categoryOptions, styleOptions } from "../../constants/options";
+import { ProjectCategories } from "../../constants/options";
 import TextArea from "antd/es/input/TextArea";
 import { v4 } from "uuid";
 import Group from "antd/lib/input/Group";
-import { projectDescriptions } from "./edit";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -63,7 +62,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select>
-            {categoryOptions.map((option) => (
+            {ProjectCategories.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
@@ -80,7 +79,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select>
-            {styleOptions.map((option) => (
+            {ProjectCategories.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
@@ -110,26 +109,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           <TextArea rows={4}  />
         </Form.Item>
         <Group style={{ marginBottom: "12px" }}>
-          {projectDescriptions.map((value, index) => {
-            return (
-              <Tooltip
-                placement="bottom"
-                style={{ marginRight: "6px" }}
-                key={index}
-                title={value}
-              >
-                <Button
-                  onClick={() => {
-                    formProps.form?.setFieldValue("htmlContent", undefined);
-
-                    formProps.form?.setFieldValue("description", value);
-                  }}
-                >
-                  Mẫu mô tả {index + 1}
-                </Button>
-              </Tooltip>
-            );
-          })}
+          
         </Group>
         <Form.Item label={translate("projects.fields.thumbnailUrl")}>
           <Form.Item

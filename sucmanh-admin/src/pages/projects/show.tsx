@@ -4,11 +4,10 @@ import {
   useShow,
   useTranslate,
 } from "@refinedev/core";
-import { Show, TextField, ImageField } from "@refinedev/antd";
+import { Show, TextField, ImageField, DateField, MarkdownField } from "@refinedev/antd";
 import { Col, Row, Typography } from "antd";
 import GaleryUploader from "../../components/galery-uploader";
 import LoadingScreen from "../state/loading";
-import { categoryOptions, styleOptions } from "../../constants/options";
 import Link from "antd/lib/typography/Link";
 
 const { Title } = Typography;
@@ -21,54 +20,61 @@ export const ProjectShow: React.FC<IResourceComponentsProps> = () => {
   const record = data?.data;
   if (isLoading) return <LoadingScreen />;
   return (
-    <Row>
-
-      <Col  span={12} >
-        <Show isLoading={isLoading}>
-          <Link target="_blank" href={`https://Sucmanh2000-interior.com/du-an/${record?.id}`} >Mở trang</Link>
-          <Title level={5}>{translate("projects.fields.id")}</Title>
-          <TextField value={record?.id} />
-          <Title level={5}>{translate("projects.fields.name")}</Title>
-          <TextField value={record?.name} />
-          <Title level={5}>{translate("projects.fields.category")}</Title>
-          <TextField
-            value={
-              categoryOptions.find((item) => item.value === record?.category)
-                ?.label ?? ""
-            }
-          />
-          <Title level={5}>{translate("projects.fields.style")}</Title>
-          <TextField
-            value={
-              styleOptions.find((item) => item.value === record?.style)
-                ?.label ?? ""
-            }
-          />
-
-          <Title level={5}>{translate("projects.fields.time")}</Title>
-          <TextField value={record?.time} />
-          <Title level={5}>{translate("projects.fields.description")}</Title>
-          <TextField value={record?.description} />
-          <Title level={5}>{translate("projects.fields.thumbnailUrl")}</Title>
-          <ImageField style={{ maxWidth: 200 }} value={record?.thumbnailUrl} />
-          <Title level={5}>{translate("projects.fields.imgUrls")}</Title>
-          <GaleryUploader
-            collection="projects"
-            docId={record?.id ?? ""}
-            imgUrls={record?.imgUrls ?? []}
-          />
-        </Show>
-      </Col>
-      <Col span={1} ></Col>
-      <Col span={11} >
-        <iframe
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
-          src={`https://Sucmanh2000-interior.com/du-an/${record?.id}`}
-        ></iframe>
-      </Col>
-    </Row>
+    <Show isLoading={isLoading}>
+      <Title level={5}>{translate("projects.fields.slug")}</Title>
+      <TextField value={record?.slug} />
+      <Title level={5}>{translate("projects.fields.name")}</Title>
+      <TextField value={record?.name} />
+      <Title level={5}>{translate("projects.fields.description")}</Title>
+      <TextField value={record?.description} />
+      <Title level={5}>{translate("projects.fields.category")}</Title>
+      <TextField value={record?.category} />
+      <Title level={5}>{translate("projects.fields.publish_date")}</Title>
+      <DateField value={record?.publish_date} />
+      <Title level={5}>{translate("projects.fields.donor")}</Title>
+      <TextField value={record?.donor?.description} />
+      <div>
+        {record?.donor?.logos?.map((logo, index) => (
+          <ImageField key={index} value={logo} style={{ maxWidth: 50 }} />
+        ))}
+      </div>
+      <Title level={5}>{translate("projects.fields.progress")}</Title>
+      <div>
+        {
+          record?.progress.map((progress, index) => (
+            <div key={index}>
+              <Title level={5}>{progress.title}</Title>
+              <TextField value={progress.description} />
+              <Row gutter={16}>
+                {
+                  progress.images.map((img, i) => (
+                    <Col key={i} span={8}>
+                      <ImageField value={img} />
+                    </Col>
+                  ))
+                }
+              </Row>
+            </div>
+          ))
+        }
+      </div>
+      <Title level={5}>{translate("projects.fields.thumbnailUrl")}</Title>
+      <ImageField style={{ maxWidth: 200 }} value={'https://placehold.co/200x200/yellow/blue'} />
+      <Title level={5}>{translate("projects.fields.body")}</Title>
+      <div>
+        {
+          record?.body?.tabs?.map((tab, index) => (
+            <div key={index}>
+              <Title level={5}>{tab.name}</Title>
+              <MarkdownField value={tab.content.description} />
+              <br/>
+              <MarkdownField value={tab.content.htmlContent} />
+              <br/>
+              <MarkdownField value={tab.content.embeded_url} />
+            </div>
+          ))
+        }
+      </div>
+    </Show>
   );
 };

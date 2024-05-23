@@ -1,4 +1,4 @@
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { Modal, Upload, UploadFile } from "antd";
 import { RcFile, UploadProps } from "antd/es/upload";
 import React, { useState } from "react";
@@ -6,8 +6,6 @@ import {
   addImageToProject,
   removeImageFrom,
 } from "../../services/image.services";
-import { availableParallelism } from "os";
-import { ProjectResource } from "../../resources";
 import { getBase64 } from "../../utils";
 export type GaleryUploaderProps = {
   collection: string;

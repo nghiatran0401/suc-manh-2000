@@ -36,11 +36,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             </Space>
           )}
         />
-        <Table.Column
-          title={translate("table.id")}
-          dataIndex="id"
-          render={(_, record: BaseRecord) => <Space>{record.id}</Space>}
-        />
 
         <Table.Column
           title={translate("table.category")}
@@ -49,15 +44,15 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         />
 
         <Table.Column
-          title={translate("table.style")}
-          dataIndex="style"
-          render={(_, record: BaseRecord) => <Space>{record.style}</Space>}
+          title={translate("projects.fields.name")}
+          dataIndex="name"
+          render={(_, record: BaseRecord) => <Space>{record.name}</Space>}
         />
 
         <Table.Column
-          title={translate("table.name")}
-          dataIndex="name"
-          render={(_, record: BaseRecord) => <Space>{record.name}</Space>}
+          title={translate("projects.fields.publish_date")}
+          dataIndex="publish_date"
+          render={(_, record: BaseRecord) => <Space> { new Date(Number(record.publish_date)).toString().slice(0,15)}</Space>}
         />
       </Table>
     </List>

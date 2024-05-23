@@ -25,11 +25,10 @@ import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Login } from "./pages/login";
+
 import {
-  ConstructionResource,
-  ContactResource,
+  PostResource,
   ProjectResource,
-  ServiceResource,
 } from "./resources";
 import {
   ProjectCreate,
@@ -76,7 +75,7 @@ function App() {
             authProvider={authProvider}
             i18nProvider={i18nProvider}
             routerProvider={routerBindings}
-            resources={[ProjectResource, ServiceResource, ConstructionResource, ContactResource]}
+            resources={[ProjectResource, PostResource]}
             options={{
               syncWithLocation: true,
               warnWhenUnsavedChanges: true,

@@ -5,6 +5,7 @@ declare namespace Sucmanh2000 {
     name: string;
     slug: string;
     category: string;
+    description?: string;
   };
 
   type ContentModule = {
@@ -28,7 +29,6 @@ declare namespace Sucmanh2000 {
       images: string[];
     }[];
     body?: {
-      description?: string;
       tabs?: {
         name: string;
         content: ContentModule;

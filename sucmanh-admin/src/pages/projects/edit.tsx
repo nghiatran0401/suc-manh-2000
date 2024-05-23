@@ -1,30 +1,22 @@
 import React, { useState } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
-import { Edit, useForm, getValueFromEvent } from "@refinedev/antd";
+import { Edit, useForm } from "@refinedev/antd";
 import {
   Button,
+  Dropdown,
   Form,
   Input,
   Select,
-  Tooltip,
+  Space,
   Upload,
   UploadFile,
   UploadProps,
 } from "antd";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { DownOutlined, PlusOutlined, UserOutlined } from "@ant-design/icons";
 import LoadingScreen from "../state/loading";
 import { uploadFileToFirebaseStorage } from "../../firebase/storage";
-import { v4 } from "uuid";
 import TextArea from "antd/es/input/TextArea";
-import { categoryOptions, styleOptions } from "../../constants/options";
-import { Group } from "antd/es/avatar";
-export const projectDescriptions = [
-  "Dự án kiến trúc tinh tế với phong cách hiện đại và sự kết hợp hài hòa giữa yếu tố truyền thống, nổi bật trong việc tạo dấu ấn riêng. Dự án thuộc loại căn hộ cao cấp, đáp ứng nhu cầu cuộc sống đẳng cấp. Chủ sở hữu của dự án là một nhà đầu tư tài ba với nhiều năm kinh nghiệm trong lĩnh vực bất động sản. Nằm tại khu vực trung tâm thành phố lớn, dự án tận dụng mọi tiện ích xung quanh như trung tâm thương mại, công viên, và giao thông thuận lợi. Diện tích toàn dự án rộng 10000m², tạo không gian sống thoải mái và thoáng đãng. Phong thủy được coi trọng, với việc tối ưu hóa luồng không khí và ánh sáng tự nhiên.",
-  "Mang phong cách kiến trúc hiện đại đầy thú vị, dự án này là một tòa nhà văn phòng tinh xảo. Được xây dựng bởi một công ty công nghệ đang nổi đình đám, dự án thể hiện tính sáng tạo và tiên phong. Tọa lạc tại khu vực công nghệ cao, tòa nhà rộng 8000m² là nơi chốn cho những tâm hồn nghệ sĩ làm việc và sáng tạo. Với việc tối ưu hóa không gian làm việc và dùng công nghệ xanh, dự án hướng đến môi trường làm việc thoải mái và bền vững.",
-  "Dự án kiến trúc mang phong cách đương đại với những đường nét tối giản và màu sắc trung tính. Đây là một khu dân cư cao cấp, thể hiện phong cách sống đẳng cấp và tiện nghi. Chủ sở hữu của dự án là một gia đình thế hệ thứ ba trong ngành xây dựng, với tâm huyết và tầm nhìn xa. Dự án nằm ở vị trí ven biển, mang đến không gian yên bình và gần gũi với thiên nhiên. Diện tích khu đất là 15000m², tạo cơ hội cho việc xây dựng không gian sinh thái và tiện ích xanh. Phong thủy được coi trọng để tạo sự hài hòa với môi trường.",
-  "Dự án kiến trúc độc đáo kết hợp giữa phong cách công nghiệp và sự sáng tạo đầy bất ngờ. Đây là một khu trung tâm thương mại và giải trí, tạo nên không gian pha trộn giữa mua sắm và giải trí. Chủ sở hữu của dự án là một tập đoàn đa quốc gia, đang mở rộng hoạt động kinh doanh vào lĩnh vực mới. Dự án nằm tại trung tâm thành phố, là điểm hẹn cho cư dân và du khách. Với diện tích 12000m², dự án tạo nên không gian sôi động và linh hoạt, đồng thời mang tính chất thương mại mạnh mẽ.",
-  "Mang phong cách kiến trúc cổ điển với những chi tiết tinh tế, dự án là một biệt thự sang trọng. Chủ sở hữu của dự án là một doanh nhân thành đạt trong lĩnh vực nghệ thuật, quyết định xây dựng một không gian riêng tư và độc đáo. Nằm tại vùng ngoại ô yên bình, biệt thự có diện tích 2000m² là nơi anh ta thư giãn và tận hưởng cuộc sống gia đình. Phong thủy và sự cân nhắc về vị trí của các yếu tố tự nhiên được đặt lên hàng đầu, để tạo ra một không gian thư thái và hài hòa.",
-];
+import { ProjectCategories } from "../../constants/options";
 
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -33,13 +25,12 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const projectData = queryResult?.data?.data;
   const isLoading = queryResult?.isFetching || queryResult?.isLoading;
   if (isLoading || !projectData) return <LoadingScreen />;
-  
   return (
     <Edit saveButtonProps={saveButtonProps}>
       <Form
         {...formProps}
         initialValues={projectData ?? { thumbnailUrl: "14" }}
-        layout="horizontal"
+        layout="vertical"
       >
         <Form.Item
           label={translate("projects.fields.name")}
@@ -62,40 +53,12 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select>
-            {categoryOptions.map((option) => (
+            {ProjectCategories.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
             ))}
           </Select>
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.style")}
-          name={["style"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select>
-            {styleOptions.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.time")}
-          name={["time"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
         </Form.Item>
         <Form.Item
           label={translate("projects.fields.description")}
@@ -108,46 +71,150 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         >
           <TextArea rows={4} />
         </Form.Item>
-        <Group style={{ marginBottom: "12px" }}>
-          {projectDescriptions.map((value, index)=>{
-            return <Tooltip placement="bottom" style={{marginRight: '6px'}} key={index} title={value}>
-            <Button
-              onClick={() => {
-                formProps.form?.setFieldValue("htmlContent", undefined);
-
-                formProps.form?.setFieldValue("description", value);
-              }}
+        <Form.Item label={translate("projects.fields.donor")}>
+          <div style={{ marginLeft: "16px" }}>
+            <div>
+              <Form.Item
+                label={translate("projects.fields.description")}
+                name={["donor.description"]}
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <TextArea rows={4} />
+              </Form.Item>
+            </div>
+            <Form.Item
+              label={translate("projects.fields.logo")}
+              name="donor.logos"
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
             >
-              Mẫu mô tả {index + 1}
-            </Button>
-          </Tooltip>
-          })}
-          
-        </Group>
-        {projectData && (
-          <Form.Item
-            label={translate("projects.fields.thumbnailUrl")}
-            name="thumbnailUrl"
-            rules={[
               {
-                required: true,
-              },
-            ]}
-          >
-            {
-              <ImageUploader
-                docId={formProps.form?.getFieldValue("id")}
-                handleChange={(url) => {
-                  formProps.form?.setFieldValue("thumbnailUrl", url);
+                <ImageUploader
+                  docId={formProps.form?.getFieldValue("id")}
+                  handleChange={(url) => {
+                    formProps.form?.setFieldValue("thumbnailUrl", url);
+                  }}
+                  thumbnailUrl={
+                    formProps.form?.getFieldValue("thumbnailUrl") ??
+                    projectData.thumbnailUrl
+                  }
+                />
+              }
+            </Form.Item>
+          </div>
+        </Form.Item>
+
+        <Form.Item label={translate("projects.fields.progress")}>
+          <div style={{ marginLeft: "16px" }}>
+            <div>
+              <Form.Item
+                label={translate("projects.fields.stage")}
+                name={["progress.0.title"]}
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label={translate("projects.fields.description")}
+                name={["progress.0.description"]}
+                rules={[]}
+              >
+                <Input />
+              </Form.Item>
+            </div>
+            <Form.Item
+              label={translate("projects.fields.images")}
+              name="progress.images"
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              {
+                <ImageUploader
+                  docId={formProps.form?.getFieldValue("id")}
+                  handleChange={(url) => {
+                    formProps.form?.setFieldValue("thumbnailUrl", url);
+                  }}
+                  thumbnailUrl={
+                    formProps.form?.getFieldValue("thumbnailUrl") ??
+                    projectData.thumbnailUrl
+                  }
+                />
+              }
+            </Form.Item>
+          </div>
+          <div>
+            <Button style={{ width: "100%" }}>Thêm giai đoạn</Button>
+          </div>
+        </Form.Item>
+
+        <Form.Item label={translate("projects.fields.body")}>
+          <div style={{ marginLeft: "16px" }}>
+            <div>
+              <Form.Item
+                label={translate("projects.fields.tab_name")}
+                name={["progress.0.title"]}
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label={translate("projects.fields.content")}
+                name={["progress.0.description"]}
+                rules={[]}
+              >
+                <TextArea rows={4} />
+              </Form.Item>
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      label: "Slide show",
+                      key: "1",
+                      icon: <UserOutlined />,
+                    },
+                    {
+                      label: "Iframe",
+                      key: "2",
+                      icon: <UserOutlined />,
+                    },
+                    
+                  ],
+                  onClick: (e) => {
+                    console.log("click", e);
+                  },
                 }}
-                thumbnailUrl={
-                  formProps.form?.getFieldValue("thumbnailUrl") ??
-                  projectData.thumbnailUrl
-                }
-              />
-            }
-          </Form.Item>
-        )}
+              >
+                <Button>
+                  <Space>
+                    Thêm mục
+                    <DownOutlined />
+                  </Space>
+                </Button>
+              </Dropdown>
+            </div>
+          </div>
+          <div>
+            <Button style={{ width: "100%", marginTop: '20px' }}>Thêm Tab</Button>
+          </div>
+        </Form.Item>
       </Form>
     </Edit>
   );
