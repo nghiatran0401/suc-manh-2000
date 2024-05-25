@@ -14,6 +14,12 @@ import React from "react";
 
 export const MEMBERS = [
   {
+    name: "HOÀNG HOA TRUNG",
+    role: "Điều hành dự án",
+    description: "Chỉ tốt nghiệp cấp 3. Với 14 năm gắn bó với các HĐXH vùng cao. Forbes 30Under30 Việt Nam - Gương mặt trẻ Việt Nam tiêu biểu.",
+    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
+  },
+  {
     name: "NGUYỄN THỊ HIỀN",
     role: "Phó chủ nhiệm dự án sức mạnh 2000",
     description: "12 năm hoạt động công tác xã hội và tình nguyện từ các CLB sinh viên, các tổ chức tại Việt Nam, Thái Lan. Tiến Sỹ Thủy Văn và Môi Trường tại Ý.",
@@ -32,9 +38,21 @@ export const MEMBERS = [
     image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
   },
   {
+    name: "LÝ PHƯƠNG THẢO",
+    role: "Partnership",
+    description: "Một sinh viên năng nổ của Đại Học Thương Mại, sinh viên năm 3 và 2 năm HĐXH.",
+    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
+  },
+  {
     name: "VÕ THỊ TUYẾT MINH",
     role: "Phụ trách sao kê, góp lẻ",
-    description: "Cử nhân tài chính kế toán.",
+    description: "",
+    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
+  },
+  {
+    name: "PHẠM NGỌC CHÂM",
+    role: "Phụ trách Góp lẻ SM2000 & Nuôi Em Campuchia-Kenya",
+    description: "",
     image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
   },
 ];
@@ -64,30 +82,32 @@ export default function CarouselMembers({ title, items }) {
         Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
 
-      <Carousel itemClass="carousel-item-padding" responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
+      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
         {MEMBERS.map((item, index) => (
           <Card key={index} className="card-contanier" sx={{ m: "16px" }}>
             <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
-            <CardContent sx={{ minHeight: "250px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-              {item.role && (
-                <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-                  <FacebookOutlinedIcon />
-                  <EmailOutlinedIcon />
-                  <LinkedInIcon />
-                  <TwitterIcon />
-                </CardActions>
-              )}
+            <CardContent sx={{ minHeight: "300px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+              {item.name && item.role && (
+                <>
+                  <Typography align="center" variant="h6" fontWeight={"bold"}>
+                    {item.name}
+                  </Typography>
 
-              {item.role && (
-                <Typography align="center" variant="h6" fontWeight={"bold"} lineHeight={1.3}>
-                  {item.role}
-                </Typography>
-              )}
+                  <Typography align="center" variant="body1" fontWeight={"bold"}>
+                    {item.role}
+                  </Typography>
 
-              {item.description && (
-                <Typography align="center" variant="body2">
-                  {item.description}
-                </Typography>
+                  <CardActions sx={{ display: "flex", justifyContent: "center" }}>
+                    <FacebookOutlinedIcon />
+                    <EmailOutlinedIcon />
+                    <LinkedInIcon />
+                    <TwitterIcon />
+                  </CardActions>
+
+                  <Typography align="center" variant="body2">
+                    {item.description}
+                  </Typography>
+                </>
               )}
 
               {item.caption && (

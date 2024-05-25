@@ -26,8 +26,7 @@ export default function PostDetails() {
       .catch((e) => console.error(e));
   }, [id]);
 
-  console.log("post", post);
-  console.log("latestPosts", latestPosts);
+  console.log("post", { post, latestPosts });
 
   if (!post || Object.keys(post).length <= 0) return <></>;
   return (

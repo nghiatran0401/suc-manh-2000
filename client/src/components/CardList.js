@@ -6,7 +6,7 @@ import { truncate } from "../helpers";
 const Card = styled(MuiCard)({
   minHeight: "500px",
   cursor: "pointer",
-  transition: "transform 0.3s",
+  transition: "transform 0.3s ease-in-out",
   "&:hover": {
     transform: "scale(1.05)",
   },
@@ -17,11 +17,13 @@ export default function CardList(props) {
 
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
-        <Typography variant="h6" fontWeight={"bold"}>
-          {props.title}
-        </Typography>
-      </Box>
+      {props.title && (
+        <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
+          <Typography variant="h6" fontWeight={"bold"}>
+            {props.title}
+          </Typography>
+        </Box>
+      )}
 
       <Grid container spacing={3}>
         {props.loading && (
@@ -33,8 +35,8 @@ export default function CardList(props) {
         {!props.loading &&
           props.posts?.map((post, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
-              <Link to={`/${category}/${post.slug}`} style={{ textDecoration: "none" }}>
-                <Card style={{ overflow: "visible", minHeight: "fit-content" }}>
+              <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
+                <Card style={{ overflow: "visible", minHeight: "fit-content", minHeight: props.showDescription ? "500px" : "400px" }}>
                   <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                     <div
                       style={{
@@ -59,17 +61,16 @@ export default function CardList(props) {
                       </Box>
                     </div>
                     <img
-                      width="100%"
-                      height="225"
+                      style={{ width: "100%", height: "225px", objectFit: "cover" }}
                       alt={post.name}
-                      src={post.content?.tabs[0]?.slide_show[0]?.image ? post.content?.tabs[0]?.slide_show[0]?.image : "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+                      src={post.progress?.length > 0 ? post.progress[0]?.images[0] : post.content?.tabs[0]?.slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
                     />
                   </div>
                   <CardContent>
                     <Typography variant="body1" fontWeight={"bold"} minHeight={"100px"}>
                       {post.name}
                     </Typography>
-                    {/* {post.content.tabs[0].description && (
+                    {props.showDescription && post.content.tabs[0].description && (
                       <>
                         <div
                           style={{
@@ -83,7 +84,7 @@ export default function CardList(props) {
                         />
                         <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.content.tabs[0].description.replace(/h1/g, "div"), 100) }} />
                       </>
-                    )} */}
+                    )}
                   </CardContent>
                 </Card>
               </Link>

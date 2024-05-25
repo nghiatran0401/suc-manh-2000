@@ -1,40 +1,99 @@
 const fs = require("fs");
 const { bucket } = require("../firebase");
 
+function extractUnnecessaryRegex(htmlString) {
+  const imgTagRegex = /<img[^>]*>/g;
+  const emptyDivRegex = /<div[^>]*>\s*<\/div>\r?\n/g;
+  const lineBreaksRegex = /(<[^>]*>)\r\n\r\n\r\n([^<]*<\/[^>]*>)/g;
+  const classRegex1 = / class="kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x c1et5uql ii04i59q"/g;
+  const classRegex2 =
+    / class="x9f619 x1n2onr6 x1ja2u2z x78zum5 xdt5ytf x193iq5w xeuugli x1r8uery x1iyjqo2 xs83m0k x10b6aqq x1yrsyyn x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xa49m3k xqeqjp1 x2hbi6w x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xdl72j9 x2lah0s xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x2lwn1j xeuugli xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x3nfvp2 x1q0g3np x87ps6o x1lku1pv x1a2a7pz"/g;
+  const classRegex3 =
+    / class="oajrlxb2 g5ia77u1 qu0x051f esr5mh6w e9989ue4 r7d6kgcz rq0escxv nhd2j8a9 nc684nl6 p7hjln8o kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x jb3vyjys rz4wbd8a qt6c0cv9 a8nywdso i1ao9s8h esuyzwwr f1sip0of lzcic4wl gpro0wi8 q66pz984 b1v8xokw"/g;
+  const classRegex4 = / class="x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s x126k92a"/g;
+  const classRegex5 = / class="x9f619 x1n2onr6 x1ja2u2z x78zum5 x2lah0s x1qughib x1qjc9v5 xozqiw3 x1q0g3np xjkvuk6 x1iorvi4 x4cne27 xifccgj"/g;
+  const classRegex6 = / class="x9f619 x1n2onr6 x1ja2u2z x78zum5 xdt5ytf x193iq5w xeuugli x1r8uery x1iyjqo2 xs83m0k x10b6aqq x1yrsyyn"/g;
+  const classRegex7 = / class="cxmmr5t8 oygrvhab hcukyx3x c1et5uql o9v6fnle ii04i59q"/g;
+  const finetunedContent = htmlString
+    .replace(imgTagRegex, "")
+    .replace(emptyDivRegex, "")
+    .replace(lineBreaksRegex, "")
+    .replace(classRegex1, "")
+    .replace(classRegex2, "")
+    .replace(classRegex3, "")
+    .replace(classRegex4, "")
+    .replace(classRegex5, "")
+    .replace(classRegex6, "")
+    .replace(classRegex7, "");
+
+  return finetunedContent;
+}
+
+// TODO: Get high resolution images
+// TODO: Render Momo button correctly
+
 async function transformData() {
   const jsonData = fs.readFileSync("server/original_db.json", "utf8");
   const data = JSON.parse(jsonData).data;
 
   const transformed_posts = await Promise.all(
     data
-      .filter((obj) => obj.post_type === "post" && obj.post_status === "publish")
+      .filter((obj) => obj.post_type === "post" && obj.post_status === "publish" && !obj.post_content.includes("ş") && !obj.post_content.includes("ğ") && !obj.post_content.includes("ö"))
       .map(async (obj) => {
         const { ID, post_author, post_date_gmt, post_title, post_name, post_content } = obj;
 
         let category;
-        switch (true) {
-          case post_name.includes("cap-nhat-tien-do"):
-            category = "thong-bao";
-            break;
-          case post_name.includes("tai-chinh"):
-            category = "bao-cao-tai-chinh";
-            break;
-          default:
-            category = "tin-tuc";
+        if (post_name.includes("cap-nhat-tien-do")) {
+          category = "thong-bao";
+        } else if (post_name.includes("tai-chinh")) {
+          category = "bao-cao-tai-chinh";
+        } else if (
+          [
+            "vtv6-suc-manh-2000-ban-tin-the-he-so-28-4-2020-tren-vtv6",
+            "hoi-dua-vov2-len-lam-chuong-trinh-phat-mung-2-tet",
+            "viec-tu-te-lan-2-voi-2-du-an-trong-do-co-suc-manh-2000",
+            "chuyen-trung-dong-nat-xay-truong-nuoi-tre-vung-cao",
+            "anh-sang-nui-rung-so-5-dai-th-ha-noi-cau-noi-yeu-thuong-tap-1",
+            "cam-on-viec-tu-te-cam-on-ca-si-ngoc-anh-nhac-si-nguyen-hong-thuan-da-danh-tang-bai-hat-ngan-uoc-mo-viet-nam-cho-hoang-hoa-trung-doi-ngu-nuoi-em-trong-gala-viec-tu-te-thang-4",
+            "viec-tu-te-vtv24-hoang-hoa-trung-lan-dau-len-song-nam-2018",
+            "bao-thieu-nien-bang-rung-vuot-mua-lu-de-mang-truong-moi-cho-hoc-sinh-muong-toong",
+          ].includes(post_name)
+        ) {
+          category = "bao-chi-truyen-hinh";
+        } else if (
+          [
+            "du-an-lap-nang-luong-gio-mat-troi-cho-cac-diem-truong-chua-bao-gio-co-dien",
+            "cau-so-3-tai-lang-kon-trang-kbang-gia-lai-can-191-trieu-cau-sat",
+            "chuyen-khoan-tien-nuoi-em-thang-910-hai-huyen-nam-po-va-dien-bien-dong-bao-cao-tai-chinh-so-02-nam-hoc-2020-2021",
+            "mo-quyen-gop-1-chia-se-giup-cau-xay-nhanh-cau-so-8-tra-vinh-200-trieu-con-thieu-cho-xay-cau-dan-sinh-tai-ap-soc-cau-xa-hung-hoa-huyen-tieu-can-tra-vinh-da-xuong-cap-venh-nghieng-ca-chan",
+            "chuc-mung-04-em-soi-da-co-chu-moi-du-an-em-soi-va-truong-gay-quy-thanh-cong-15-558-888d",
+            "4-3-2020-nay-cac-em-chung-minh-lai-co-diem-truong-moi-cam-on-bidv-chi-nhanh-dai-la",
+            "ket-qua-nhan-tai-tro-sau-khi-len-thoi-su-19h-26-trieu-ngay-12-4-va-56-trieu-ngay-13-4",
+          ].includes(post_name)
+        ) {
+          category = "tai-tro";
+        } else {
+          category = "cau-chuyen";
         }
 
         function extractEmbedUrl(post_content) {
-          const embedRegex = /\[embed\](.*?)\[\/embed\]/;
-          const match = post_content.match(embedRegex);
-          const embedded_url = match ? match[1] : null;
-
-          // Remove the embed tag from the post_content
-          let contentWithoutEmbeddedUrl;
-          if (embedded_url) {
-            contentWithoutEmbeddedUrl = post_content.replace(embedRegex, "");
+          if (!post_content) {
+            return { combined_url: [], contentWithoutEmbeddedUrl: "" };
           }
 
-          return { embedded_url, contentWithoutEmbeddedUrl };
+          const embedRegex = /\[embed\](.*?)\[\/embed\]/g;
+          const videoRegex = /\[video.*?mp4="(.*?)".*?\]\[\/video\]/g;
+
+          const embedded_urls = [...post_content.matchAll(embedRegex)].map((match) => match[1]);
+          const video_urls = [...post_content.matchAll(videoRegex)].map((match) => match[1]);
+
+          // Remove the embed and video tags from the post_content
+          let contentWithoutEmbeddedUrl = post_content.replace(embedRegex, "").replace(videoRegex, "");
+
+          // Combine both URLs into one array
+          const combined_urls = [...embedded_urls, ...video_urls];
+
+          return { combined_urls, contentWithoutEmbeddedUrl };
         }
 
         async function extractImagesAndContent(htmlString) {
@@ -64,7 +123,10 @@ async function transformData() {
             let caption = htmlString.substring(captionStartIndex, captionEndIndex > -1 ? captionEndIndex : undefined).trim();
 
             // Clean up the caption from any HTML tags or unwanted white spaces/new lines
-            caption = caption.replace(/<\/?[^>]+(>|$)/g, "").trim(); // Remove HTML tags
+            caption = caption
+              .replace(/<\/?[^>]+(>|$)/g, "")
+              .replace(/&nbsp;/g, "")
+              .trim(); // Remove HTML tags and &nbsp;
             if (caption) {
               // Split by new lines and take the relevant line for the caption if necessary
               const captionLines = caption.split(/[\r\n]+/);
@@ -78,14 +140,24 @@ async function transformData() {
           }
 
           // Inherit captions if there are images without captions
-          for (let i = images.length - 2; i >= 0; i--) {
-            if (!images[i].caption) {
-              images[i].caption = images[i + 1].caption;
+          const imageArr = images.filter((image) => image.image?.includes("uploads/"));
+          let lastCaption;
+          for (let i = 0; i <= imageArr.length - 1; i++) {
+            if (imageArr[i].caption) {
+              lastCaption = imageArr[i].caption;
+            } else if (lastCaption) {
+              imageArr[i].caption = lastCaption;
             }
           }
 
+          const imageResults = imageArr.map((image) => {
+            let imageUrl = image.image;
+            imageUrl = imageUrl.replace(/.*\/uploads\//, "uploads/");
+            return { image: imageUrl, caption: image.caption };
+          });
+
           // After extracting the images, get the download URLs
-          const imagePromises = images.map(async (image) => {
+          const imagePromises = imageResults.map(async (image) => {
             const file = bucket.file(image.image);
             const url = await file.getSignedUrl({
               action: "read",
@@ -97,14 +169,26 @@ async function transformData() {
 
           const imageObjects = await Promise.all(imagePromises);
 
+          const finetunedContent = extractUnnecessaryRegex(htmlString);
+
           // Only keep content up to the start of the first image
-          let contentWithoutImages = firstImageStartIndex !== -1 ? htmlString.substring(0, firstImageStartIndex) : htmlString;
+          let contentWithoutImages;
+          const detailIndex = finetunedContent.indexOf("(Chi tiết xem từng ảnh)") || finetunedContent.indexOf("Chi tiết xem từng ảnh") || finetunedContent.indexOf("( Chi tiết xem từng ảnh )");
+          if (detailIndex !== -1) {
+            contentWithoutImages = finetunedContent.substring(0, detailIndex);
+          } else {
+            contentWithoutImages = finetunedContent;
+          }
 
           return { images: imageObjects, contentWithoutImages };
         }
 
-        const { embedded_url, contentWithoutEmbeddedUrl } = extractEmbedUrl(post_content);
-        const { images, contentWithoutImages } = await extractImagesAndContent(embedded_url ? contentWithoutEmbeddedUrl : post_content);
+        const { combined_urls, contentWithoutEmbeddedUrl } = extractEmbedUrl(post_content);
+        const { images, contentWithoutImages } = await extractImagesAndContent(combined_urls && combined_urls.length > 0 ? contentWithoutEmbeddedUrl : post_content);
+
+        // if (post_name === "hoi-dua-vov2-len-lam-chuong-trinh-phat-mung-2-tet") {
+        //   console.log("here2", combined_urls);
+        // }
 
         return {
           id: ID,
@@ -118,7 +202,7 @@ async function transformData() {
               {
                 name: "Main content",
                 description: contentWithoutImages,
-                embedded_url: embedded_url,
+                embedded_url: combined_urls,
                 slide_show: images,
               },
             ],
@@ -228,9 +312,11 @@ async function transformData() {
           if (donor_content) {
             const firstColMatch = donor_content.match(/\[row.*?\[col.*?\](.*?)\[\/col\]/is);
             donor_content = firstColMatch ? firstColMatch[1] : null;
+            donor_content = extractUnnecessaryRegex(donor_content);
           }
           if (tab1_content) {
             tab1_content = tab1_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
+            tab1_content = extractUnnecessaryRegex(tab1_content);
           }
           if (tab2_content) {
             const iframeMatch = tab2_content.match(/<iframe[^>]*src="([^"]*)"[^>]*>/i);
@@ -241,27 +327,41 @@ async function transformData() {
             tab2_content = tab2_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)[^\]]*\]/gs, "");
             tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\n*\s*\[\/(row_inner|col_inner)\]/gs, "");
             tab2_content = tab2_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
+            tab2_content = extractUnnecessaryRegex(tab2_content);
           }
           if (tab3_content) {
             tab3_content = tab3_content.replace(/<img[^>]*>/g, "").replace(/\[(ux_slider|ux_image)\].*?\[\/(ux_slider|ux_image)\]/gs, "");
             tab3_content = tab3_content.replace(/\[(row_inner|col_inner)[^\]]*\]\s*\[\/(row_inner|col_inner)\]/gs, "");
+            tab3_content = extractUnnecessaryRegex(tab3_content);
           }
           if (description) {
             description = description.replace(/\[ux_image_box[^\]]*\]/g, "").replace(/\[\/ux_image_box\]/g, "");
+            description = extractUnnecessaryRegex(description);
           }
 
           [before, in_progress, after] = imageArrays;
-          [before, in_progress, after] = [before, in_progress, after].map((array) =>
-            array.map((item) => {
-              const imageId = item
-                .replace(/" height="[^"]*/g, "")
-                .replace(/" width="[^"]*/g, "")
-                .replace(/" image_size="[^"]*/g, "");
-              const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
-              const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
-              if (!imageUrl) console.log("!imageUrl3", imageId);
-              return imageUrl;
-            })
+          [before, in_progress, after] = await Promise.all(
+            [before, in_progress, after].map(async (array) =>
+              Promise.all(
+                array.map(async (item) => {
+                  const imageId = item
+                    .replace(/" height="[^"]*/g, "")
+                    .replace(/" width="[^"]*/g, "")
+                    .replace(/" image_size="[^"]*/g, "");
+                  const imageObject = transformed_attachments.find((attachment) => attachment.id === imageId);
+                  const imageUrl = imageObject ? imageObject.url.replace(/http(s)?:\/\/web.sucmanh2000.com\/wp-content\//, "") : null;
+                  if (!imageUrl) return;
+
+                  const file = bucket.file(imageUrl);
+                  const url = await file.getSignedUrl({
+                    action: "read",
+                    expires: "03-09-2491",
+                  });
+
+                  return url[0];
+                })
+              )
+            )
           );
 
           tab1_images = tab1_images.map((image) => ({ image, caption: "" }));

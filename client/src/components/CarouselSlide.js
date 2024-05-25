@@ -40,10 +40,10 @@ export default function CarouselSlide({ title, items }) {
         </Typography>
       )}
 
-      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
+      <Carousel itemClass="carousel-height-800px" responsive={responsive} autoPlay infinite autoPlaySpeed={5000} arrows={items.length > 1}>
         {items.map((item, index) => (
           <Card key={index} sx={{ m: "16px" }}>
-            <CardMedia component="img" alt={item.caption} height="100%" image={item.image} />
+            <CardMedia component="img" alt={item.caption} height="100%" image={item.image} sx={{ ".MuiCardMedia-img": { width: "100%", height: "225px", objectFit: "cover" } }} />
 
             {(item.caption || item.role || item.description) && (
               <CardContent>

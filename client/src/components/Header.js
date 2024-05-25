@@ -12,11 +12,17 @@ import { HEADER_DROPDOWN_LIST } from "../constants";
 export default function HeaderBar() {
   const navigate = useNavigate();
 
+  // TODO: Get totalPosts of projects
+  // TODO: Implement search - sort - filter
+
+  // TODO: Render phong tin hoc
+  // TODO: check phan liet ke
+
   return (
     <Box className="bar-container">
       <AppBar className="bar" position="static">
         <Container sx={{ maxWidth: "1080px !important", m: "auto", p: "0 !important" }}>
-          <Toolbar>
+          <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }}>
             {HEADER_DROPDOWN_LIST.map((item, index) => (
               <Box key={index} display={"flex"} m={"0 16px"} style={{ cursor: "pointer" }}>
                 {item.title === "Home" && (

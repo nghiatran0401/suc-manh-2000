@@ -41,6 +41,7 @@ export const HEADER_DROPDOWN_LIST = [
   },
   {
     path: "#",
+    name: "tin-tuc",
     title: "Tin Sức mạnh 2000",
     children: [
       {
@@ -48,7 +49,7 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Thông báo Sức Mạnh 2000",
       },
       {
-        path: "#",
+        path: "/thong-bao",
         title: "Tiến độ xây dựng",
       },
       {
@@ -56,11 +57,11 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Báo cáo tài chính",
       },
       {
-        path: "#",
+        path: "/bao-chi",
         title: "Báo chí – truyền hình đưa tin",
       },
       {
-        path: "#",
+        path: "/cau-chuyen",
         title: "Câu chuyện",
       },
       {
@@ -68,13 +69,14 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Gây quỹ",
       },
       {
-        path: "#",
+        path: "/tai-tro",
         title: "Tài trợ",
       },
     ],
   },
   {
     path: "#",
+    name: "du-an",
     title: "Xem Dự án theo năm",
     children: [
       {
