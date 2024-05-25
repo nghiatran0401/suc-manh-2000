@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Container, Typography, AppBar, Box, Toolbar } from "@mui/material";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -8,16 +8,29 @@ import "./config/styles.css";
 import logo from "../assets/logo-header.png";
 import SearchBar from "./SearchBar";
 import { HEADER_DROPDOWN_LIST } from "../constants";
+import axios from "axios";
+import { SERVER_URL } from "../constants";
+
+// TODO: Implement search - sort - filter
+// TODO: Render phong tin hoc
 
 export default function HeaderBar() {
   const navigate = useNavigate();
+  const [general, setGeneral] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // TODO: Get totalPosts of projects
-  // TODO: Implement search - sort - filter
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(SERVER_URL + "/getGeneralData")
+      .then((res) => {
+        setGeneral(res.data);
+        setLoading(false);
+      })
+      .catch((e) => console.error(e));
+  }, []);
 
-  // TODO: Render phong tin hoc
-  // TODO: check phan liet ke
-
+  if (loading || Object.keys(general).length <= 0) return <></>;
   return (
     <Box className="bar-container">
       <AppBar className="bar" position="static">
@@ -42,7 +55,13 @@ export default function HeaderBar() {
                         <CDropdownMenu className="dropdown-menu-position" color="secondary">
                           {item.children.map((child, childIndex) => (
                             <CDropdownItem key={childIndex} href={child.path} style={{ margin: "10px 0" }}>
-                              {child.title}
+                              {/* {console.log("here", child.path.includes("du-an") && child.path)}
+                              {child.title} */}
+
+                              <Typography variant="body1">
+                                {child.title}
+                                {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
+                              </Typography>
                             </CDropdownItem>
                           ))}
                         </CDropdownMenu>

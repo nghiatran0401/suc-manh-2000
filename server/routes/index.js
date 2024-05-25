@@ -2,8 +2,8 @@ const homeRouter = require("./home");
 const postRouter = require("./post");
 
 function routes(app) {
-  app.use("/:category", postRouter);
   app.use("/", homeRouter);
+  app.use("/:category", postRouter);
 }
 
 module.exports = routes;

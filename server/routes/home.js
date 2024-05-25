@@ -3,20 +3,32 @@ const fs = require("fs");
 
 const homeRouter = express.Router();
 
-// Show a list of Tin tức / Dự án
-homeRouter.get("/", (req, res) => {
-  const jsonData = fs.readFileSync("../server/transformed_pages.json", "utf8");
-  const data = JSON.parse(jsonData);
+homeRouter.get("/getGeneralData", (req, res) => {
+  const database = fs.readFileSync("../server/transformed_pages.json", "utf8");
+  const data = JSON.parse(database);
 
-  const idToStartFrom = "15496";
-  const indexToStartFrom = data.findIndex((item) => item.id === idToStartFrom);
+  const classificationCounts = data.reduce((counts, page) => {
+    const classification = page.classification;
+    if (!counts[classification]) {
+      counts[classification] = 0;
+    }
+    counts[classification]++;
+    if (classification !== "loai-khac") {
+      counts.total = (counts.total || 0) + 1;
+    }
+    return counts;
+  }, {});
 
-  if (indexToStartFrom !== -1) {
-    const slicedData = data.slice(indexToStartFrom, indexToStartFrom + 10);
-    res.status(200).send({ data: slicedData });
-  } else {
-    res.status(404).send({ error: "ID not found" });
-  }
+  const categoryCounts = data.reduce((counts, page) => {
+    const category = page.category;
+    if (!counts[category]) {
+      counts[category] = 0;
+    }
+    counts[category]++;
+    return counts;
+  }, {});
+
+  res.status(200).send({ classification: classificationCounts, category: categoryCounts });
 });
 
 module.exports = homeRouter;

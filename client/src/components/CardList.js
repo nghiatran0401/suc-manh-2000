@@ -63,7 +63,7 @@ export default function CardList(props) {
                     <img
                       style={{ width: "100%", height: "225px", objectFit: "cover" }}
                       alt={post.name}
-                      src={post.progress?.length > 0 ? post.progress[0]?.images[0] : post.content?.tabs[0]?.slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+                      src={post.progress?.length > 0 ? post.progress[0]?.images[0].image : post.content?.tabs[0]?.slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
                     />
                   </div>
                   <CardContent>

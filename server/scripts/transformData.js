@@ -364,9 +364,13 @@ async function transformData() {
             )
           );
 
+          donor_images = donor_images.map((image) => ({ image, caption: "" }));
           tab1_images = tab1_images.map((image) => ({ image, caption: "" }));
           tab2_images = tab2_images.map((image) => ({ image, caption: "" }));
           tab3_images = tab3_images.map((image) => ({ image, caption: "" }));
+          before = before.map((image) => ({ image, caption: "" }));
+          in_progress = in_progress.map((image) => ({ image, caption: "" }));
+          after = after.map((image) => ({ image, caption: "" }));
         }
 
         function extractCategory() {
@@ -376,6 +380,32 @@ async function transformData() {
               category = parentPost.post_name.replace("cac-", "");
             }
           }
+        }
+
+        let classification;
+        if (post_title.includes("nội trú") || post_title.includes("NỘI TRÚ") || post_title.includes("Nội trú")) {
+          classification = "khu-noi-tru";
+        } else if (post_title.includes("NHP") || post_title.includes("Nhà Hạnh Phúc") || post_title.includes("Nhà hạnh phúc")) {
+          classification = "nha-hanh-phuc";
+        } else if (post_title.includes("cầu") || post_title.includes("CẦU") || post_title.includes("Cầu")) {
+          classification = "cau-hanh-phuc";
+        } else if (
+          post_title.includes("trường") ||
+          post_title.includes("TRƯỜNG") ||
+          post_title.includes("Trường") ||
+          post_title.includes("ĐT") ||
+          post_title.includes("Mầm non") ||
+          post_title.includes("Tiểu học")
+          // ||
+          // post_title.includes("trung tâm") ||
+          // post_title.includes("Điểm") ||
+          // post_title.includes("ĐIỂM")
+        ) {
+          classification = "truong-hoc";
+        } else if (post_title.includes("Nhà WC")) {
+          classification = "wc";
+        } else {
+          classification = "loai-khac";
         }
 
         extractCategory();
@@ -389,6 +419,7 @@ async function transformData() {
           description: description,
           slug: post_name,
           category: category,
+          classification: classification,
           donor: {
             name: "Nhà tài trợ",
             description: donor_content,
@@ -431,6 +462,12 @@ async function transformData() {
         };
       })
   );
+
+  // transformed_pages.map((obj) => {
+  //   const other = obj.classification === "loai-khac" && obj.name.includes("DA0") ? obj.name : "";
+  //   if (other) console.log("DA0", other);
+  //   return obj;
+  // });
 
   // Divide data into smaller chunks
   // fs.writeFileSync("server/transformed_posts.json", JSON.stringify(transformed_posts));

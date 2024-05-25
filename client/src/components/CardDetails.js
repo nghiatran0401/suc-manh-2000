@@ -7,7 +7,6 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
 // TODO: work on the embeded video urls
-// TODO: render progress images, donor info and sub content
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
@@ -26,7 +25,7 @@ export default function CardDetails(props) {
         <Typography color="textPrimary">{id}</Typography>
       </Breadcrumbs>
 
-      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px 0"}>
+      <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
         <Box display={"flex"} gap={"24px"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
@@ -40,8 +39,26 @@ export default function CardDetails(props) {
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={9}>
+      {post?.donor && Object.keys(post?.donor).length > 0 && (
+        <Box bgcolor={"#abb8c3"}>
+          <Box p={"24px"}>
+            <Typography variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
+          </Box>
+        </Box>
+      )}
+
+      {post?.progress && post?.progress?.length > 0 && (
+        <Grid container spacing={3} sx={{ m: "16px 0px" }}>
+          {post?.progress?.map((progress, index) => (
+            <Grid item xs={4} p={"0px !important"}>
+              <CarouselSlide key={index} title={progress.name} items={progress.images} position="progress" />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      <Grid container spacing={3} sx={{ m: "16px 0px" }}>
+        <Grid item xs={9} p={"0px !important"}>
           <Box sx={{ wordWrap: "break-word" }}>
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
@@ -116,6 +133,12 @@ export default function CardDetails(props) {
         </Grid>
 
         <Grid item xs={3}>
+          {post.description && (
+            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} padding={"16px"} bgcolor={"#abb8c3"} mb={"40px"}>
+              <Typography variant="body2" textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+            </Box>
+          )}
+
           {/* TODO: Refactor this as a reused component */}
           <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
             <Typography variant="h6" fontWeight={"bold"}>

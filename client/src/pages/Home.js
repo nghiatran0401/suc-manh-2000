@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { HEADER_DROPDOWN_LIST, POSTS_PER_PAGE, SERVER_URL } from "../constants";
 import { Box, Typography, Grid, Card, Link, CardContent, Avatar } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import CountUp from "react-countup";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { HEADER_DROPDOWN_LIST, POSTS_PER_PAGE, SERVER_URL } from "../constants";
 import HeaderBar from "../components/Header";
 import Footer from "../components/Footer";
 import Companion from "../components/Companion";
 import CarouselMembers from "../components/CarouselMembers";
-import CarouselSlide from "../components/CarouselSlide";
 import CardList from "../components/CardList";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
@@ -17,6 +17,7 @@ const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 export default function Home() {
   const [news, setNews] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [general, setGeneral] = useState([]);
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +27,14 @@ export default function Home() {
       .get(SERVER_URL + "/thong-bao" + "/getLatestPosts")
       .then((news) => {
         setNews(news.data.data);
+        setLoading(false);
+      })
+      .catch((e) => console.error(e));
+
+    axios
+      .get(SERVER_URL + "/getGeneralData")
+      .then((res) => {
+        setGeneral(res.data);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -42,13 +51,12 @@ export default function Home() {
       .catch((e) => console.error(e));
   }, [projectTab]);
 
-  console.log("home", { news, projects });
+  console.log("home", general);
 
-  if (Object.keys(news).length <= 0 || Object.keys(projects).length <= 0) return <></>;
+  if (Object.keys(news).length <= 0 || Object.keys(projects).length <= 0 || Object.keys(general).length <= 0 || loading) return <></>;
   return (
     <Box>
-      <HeaderBar />
-
+      <HeaderBar general={general} />
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"32px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
@@ -126,7 +134,6 @@ export default function Home() {
           </Grid>
         </Box>
       </Box>
-
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Dự án thiện nguyện
@@ -136,7 +143,9 @@ export default function Home() {
           <TabList>
             {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
               <Tab key={index} onClick={() => setProjectTab(child.path)}>
-                {child.title}
+                <Typography variant="body1">
+                  {child.title} ({general?.category[child.path.replace("/", "")]})
+                </Typography>
               </Tab>
             ))}
           </TabList>
@@ -146,6 +155,69 @@ export default function Home() {
             </TabPanel>
           ))}
         </Tabs>
+      </Box>
+
+      <Box bgcolor={"#f2f2f2"} height={"550px"}>
+        <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"32px"}>
+          <Typography variant="h3" color={"red"} textAlign={"center"}>
+            Dự Án Sức Mạnh 2000
+          </Typography>
+        </Box>
+
+        <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
+          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
+            <Grid item xs={6} sx={{ textAlign: "right" }}>
+              <Typography variant="h6">
+                Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sx={{ textAlign: "center" }}>
+              <Typography variant="h1" fontWeight={"bold"} color={"red"}>
+                <CountUp start={0} end={general?.classification?.total} duration={10} />
+              </Typography>
+              <Typography variant="h6" fontWeight={"bold"}>
+                TỔNG DỰ ÁN ĐÃ THỰC HIỆN
+              </Typography>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Box maxWidth={"1080px"} display={"flex"} gap={"24px"} m={"96px auto"}>
+          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
+            <Grid item xs={3}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+                <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
+              </Typography>
+              <Typography variant="body1" fontWeight={"bold"}>
+                Dự án xây trường đang thực hiện trên toàn quốc.
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+                <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
+              </Typography>
+              <Typography variant="body1" fontWeight={"bold"}>
+                Khu nội trú đã hoàn thiện và tiếp tục tăng
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+                <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
+              </Typography>
+              <Typography variant="body1" fontWeight={"bold"}>
+                Nhà hạnh phúc đã và đang được xây dựng
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+                <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
+              </Typography>
+              <Typography variant="body1" fontWeight={"bold"}>
+                Cầu hạnh phúc đã và đang được xây dựng
+              </Typography>
+            </Grid>
+          </Grid>
+        </Box>
       </Box>
 
       <CarouselMembers />

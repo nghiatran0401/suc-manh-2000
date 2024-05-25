@@ -55,6 +55,12 @@ export const MEMBERS = [
     description: "",
     image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
   },
+  {
+    name: "NGUYỄN THỊ ANH ĐÀO",
+    role: "Vận hành dự án Nuôi em 500 thuộc Nhà hạnh phúc",
+    description: "Hơn 5 năm hoạt động công tác xã hội, phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi. Hiện tại đang là Quản lý Nhân sự của Tập đoàn đa quốc gia tại Việt Nam.",
+    image: "https://th.bing.com/th/id/OIP.ZZf5ANaOGgdbBM-ot_12FgHaHa?w=212&h=212&c=7&r=0&o=5&pid=1.7",
+  },
 ];
 
 export default function CarouselMembers({ title, items }) {
@@ -86,7 +92,7 @@ export default function CarouselMembers({ title, items }) {
         {MEMBERS.map((item, index) => (
           <Card key={index} className="card-contanier" sx={{ m: "16px" }}>
             <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
-            <CardContent sx={{ minHeight: "300px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <CardContent sx={{ minHeight: "350px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
               {item.name && item.role && (
                 <>
                   <Typography align="center" variant="h6" fontWeight={"bold"}>

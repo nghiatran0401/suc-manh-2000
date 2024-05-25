@@ -43,16 +43,14 @@ postRouter.get("/getLatestPosts", (req, res) => {
   const data = JSON.parse(database);
   const filteredData = data.filter((item) => item.category === category);
 
-  // const sortedData = filteredData.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
-  const latestPosts = filteredData
-    .slice(0, 5)
-    .map((post) => ({
-      name: post.name,
-      author: post.author,
-      publish_date: post.publish_date,
-      slug: post.slug,
-      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-    }));
+  const sortedData = filteredData.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+  const latestPosts = sortedData.slice(0, 5).map((post) => ({
+    name: post.name,
+    author: post.author,
+    publish_date: post.publish_date,
+    slug: post.slug,
+    image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
+  }));
 
   if (latestPosts.length > 0) {
     res.status(200).send({ data: latestPosts });
