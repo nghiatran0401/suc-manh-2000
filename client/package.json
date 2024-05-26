@@ -2,7 +2,6 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:4000",
   "dependencies": {
     "@coreui/coreui": "^5.0.1",
     "@coreui/react": "^5.0.0",
@@ -12,6 +11,7 @@
     "@mui/material": "^5.15.16",
     "@mui/system": "^5.15.15",
     "axios": "^1.6.8",
+    "env-cmd": "^10.1.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-countup": "^6.5.3",
@@ -19,12 +19,12 @@
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
-    "react-tabs": "^6.0.2"
+    "react-tabs": "^6.0.2",
+    "react-typed": "^2.0.12"
   },
   "scripts": {
-    "client": "npm run start",
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+    "client": "env-cmd -f .env.local react-scripts start",
+    "deploy:client": "env-cmd -f .env.prod react-scripts build && firebase use savvy-serenity-424116-g1 && firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": [

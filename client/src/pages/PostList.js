@@ -9,47 +9,35 @@ import Footer from "../components/Footer";
 import CarouselMembers from "../components/CarouselMembers";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
+import LoadingScreen from "../components/LoadingScreen";
 
 export default function PostList() {
   const { category } = useParams();
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
 
   useEffect(() => {
-    setLoading(true);
     axios
       .get(SERVER_URL + "/" + category, { params: { page, POSTS_PER_PAGE } })
       .then((res) => {
         setPosts(res.data.data);
         setTotalPosts(res.data.totalPosts);
-        setLoading(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       })
       .catch((e) => console.error(e));
   }, [page]);
 
-  console.log("posts", { posts, totalPosts });
-
-  if (!posts || Object.keys(posts).length <= 0 || !totalPosts) return <></>;
+  if (posts?.length <= 0) return <LoadingScreen />;
   return (
     <Box>
       <HeaderBar />
 
-      <CardList title={title} posts={posts} loading={loading} showDescription={true} />
+      <CardList title={title} posts={posts} showDescription={true} />
       {totalPosts > POSTS_PER_PAGE && (
         <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
-          <Pagination
-            count={POSTS_PER_PAGE}
-            page={page}
-            onChange={(event, value) => {
-              setPage(value);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            variant="outlined"
-            shape="rounded"
-          />
+          <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
         </Box>
       )}
 

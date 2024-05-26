@@ -5,47 +5,25 @@
   },
   "functions": [
     {
-      "region": "asia-southeast2",
-      "source": "functions",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run build"
-      ]
+      "source": "server",
+      "region": "asia-southeast1",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"]
     }
   ],
-  "hosting": [
-    {
-      "target": "user",
-      "public": "client/build",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "/robots.txt",
-          "destination": "/robots.txt"
-        },
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
-    {
-      "target": "admin",
-      "public": "sucmanh-admin/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ],
+  "hosting": {
+    "public": "client/build",
+    "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+    "rewrites": [
+      {
+        "source": "/robots.txt",
+        "destination": "/robots.txt"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
   "storage": {
     "rules": "storage.rules"
   }

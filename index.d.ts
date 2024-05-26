@@ -3,22 +3,27 @@ declare namespace Sucmanh2000 {
     author: string;
     publish_date: string;
     name: string;
-    description: string;
     slug: string;
     category: string;
     description?: string;
+    classification?: string;
   };
 
   type Donor = {
     name: string;
     description: string;
-    images: string[];
+    images: {
+      image: string;
+      caption?: string;
+    }[];
   };
 
   type Progress = {
     name: string;
-    description?: string;
-    images: string[];
+    images: {
+      image: string;
+      caption?: string;
+    }[];
   }[];
 
   type TabsContent = {

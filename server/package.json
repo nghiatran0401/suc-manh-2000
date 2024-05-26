@@ -1,10 +1,12 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
-    "server": "nodemon index.js"
+    "server": "nodemon index.js",
+    "deploy:server": "firebase use savvy-serenity-424116-g1 && firebase deploy --only functions"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
     "express": "^4.19.2",
     "firebase": "^10.11.1",
     "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

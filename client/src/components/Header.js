@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Container, Typography, AppBar, Box, Toolbar } from "@mui/material";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -10,27 +10,25 @@ import SearchBar from "./SearchBar";
 import { HEADER_DROPDOWN_LIST } from "../constants";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
+import LoadingScreen from "./LoadingScreen";
 
 // TODO: Implement search - sort - filter
 // TODO: Render phong tin hoc
 
 export default function HeaderBar() {
   const navigate = useNavigate();
-  const [general, setGeneral] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [general, setGeneral] = useState({});
 
   useEffect(() => {
-    setLoading(true);
     axios
       .get(SERVER_URL + "/getGeneralData")
       .then((res) => {
         setGeneral(res.data);
-        setLoading(false);
       })
       .catch((e) => console.error(e));
   }, []);
 
-  if (loading || Object.keys(general).length <= 0) return <></>;
+  if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <Box className="bar-container">
       <AppBar className="bar" position="static">

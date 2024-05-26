@@ -1,11 +1,17 @@
-const admin = require("firebase-admin");
-const serviceAccount = require("./sucmanh2000-2b5f0-30283b427af5.json");
+const firebase = require("firebase-admin");
+const serviceAccount = require("./savvy-serenity-424116-g1-c96d21178642.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "sucmanh2000-2b5f0.appspot.com",
+firebase.initializeApp({
+  credential: firebase.credential.cert(serviceAccount),
+  storageBucket: "gs://savvy-serenity-424116-g1.appspot.com",
 });
+const firestore = firebase.firestore();
+const auth = firebase.auth();
+const bucket = firebase.storage().bucket();
 
-const bucket = admin.storage().bucket();
-
-module.exports = { admin, bucket };
+module.exports = {
+  firestore,
+  auth,
+  bucket,
+  firebase,
+};

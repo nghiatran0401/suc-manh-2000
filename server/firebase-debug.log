@@ -1,0 +1,14 @@
+[debug] [2024-05-26T11:50:06.569Z] ----------------------------------------------------------------------
+[debug] [2024-05-26T11:50:06.571Z] Command:       /Users/nghiatran/.nvm/versions/node/v20.5.1/bin/node /Users/nghiatran/.nvm/versions/node/v20.5.1/bin/firebase use savvy-serenity-424116-g1
+[debug] [2024-05-26T11:50:06.571Z] CLI Version:   13.10.1
+[debug] [2024-05-26T11:50:06.571Z] Platform:      darwin
+[debug] [2024-05-26T11:50:06.571Z] Node Version:  v20.5.1
+[debug] [2024-05-26T11:50:06.571Z] Time:          Sun May 26 2024 18:50:06 GMT+0700 (Indochina Time)
+[debug] [2024-05-26T11:50:06.572Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-05-26T11:50:06.628Z] Field ".functions" in "firebase.json" is possibly invalid: should be object
+[debug] [2024-05-26T11:50:06.628Z] Object ".functions[0]" in "firebase.json" has unknown property: {"additionalProperty":"region"}
+[debug] [2024-05-26T11:50:06.628Z] Field ".functions" in "firebase.json" is possibly invalid: should match some schema in anyOf
+[debug] [2024-05-26T11:50:06.631Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-05-26T11:50:06.632Z] > authorizing via signed-in user (duansucmanh2000@gmail.com)
+[debug] [2024-05-26T11:50:06.633Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/savvy-serenity-424116-g1 [none]

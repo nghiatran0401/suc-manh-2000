@@ -1,34 +1,26 @@
 const express = require("express");
-const fs = require("fs");
+const { firestore } = require("../firebase");
 
 const homeRouter = express.Router();
 
-homeRouter.get("/getGeneralData", (req, res) => {
-  const database = fs.readFileSync("../server/transformed_pages.json", "utf8");
-  const data = JSON.parse(database);
+homeRouter.get("/getGeneralData", async (req, res) => {
+  try {
+    const classificationDoc = await firestore.collection("counts").doc("classification").get();
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
 
-  const classificationCounts = data.reduce((counts, page) => {
-    const classification = page.classification;
-    if (!counts[classification]) {
-      counts[classification] = 0;
+    if (!classificationDoc.exists || !categoryDoc.exists) {
+      res.status(404).send({ error: "No data found for this page" });
+      return;
     }
-    counts[classification]++;
-    if (classification !== "loai-khac") {
-      counts.total = (counts.total || 0) + 1;
-    }
-    return counts;
-  }, {});
 
-  const categoryCounts = data.reduce((counts, page) => {
-    const category = page.category;
-    if (!counts[category]) {
-      counts[category] = 0;
-    }
-    counts[category]++;
-    return counts;
-  }, {});
+    const classificationCounts = classificationDoc.data();
+    const categoryCounts = categoryDoc.data();
 
-  res.status(200).send({ classification: classificationCounts, category: categoryCounts });
+    res.status(200).send({ classification: classificationCounts, category: categoryCounts });
+  } catch (error) {
+    console.error("Failed to fetch counts:", error);
+    res.status(500).send({ error: "Failed to fetch data" });
+  }
 });
 
 module.exports = homeRouter;

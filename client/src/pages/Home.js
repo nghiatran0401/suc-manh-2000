@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { HEADER_DROPDOWN_LIST, POSTS_PER_PAGE, SERVER_URL } from "../constants";
+import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
 import { Box, Typography, Grid, Card, Link, CardContent, Avatar } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -11,52 +11,51 @@ import Footer from "../components/Footer";
 import Companion from "../components/Companion";
 import CarouselMembers from "../components/CarouselMembers";
 import CardList from "../components/CardList";
+import LoadingScreen from "../components/LoadingScreen";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
 export default function Home() {
   const [news, setNews] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [general, setGeneral] = useState([]);
+  const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    axios
-      .get(SERVER_URL + "/thong-bao" + "/getLatestPosts")
-      .then((news) => {
+    const startTime = performance.now();
+    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
+      .then(([news, general]) => {
         setNews(news.data.data);
+        setGeneral(general.data);
         setLoading(false);
-      })
-      .catch((e) => console.error(e));
-
-    axios
-      .get(SERVER_URL + "/getGeneralData")
-      .then((res) => {
-        setGeneral(res.data);
-        setLoading(false);
+        const endTime = performance.now();
+        console.log(`Loading time 1: ${endTime - startTime} milliseconds`);
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
+    const startTime = performance.now();
     axios
       .get(SERVER_URL + projectTab, { params: { page: 1, postsPerPage: 8 } })
       .then((projects) => {
         setProjects(projects.data.data);
         setLoading(false);
+        const endTime = performance.now();
+        console.log(`Loading time 2: ${endTime - startTime} milliseconds`);
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
 
-  console.log("home", general);
+  console.log("home", { news, projects, general });
 
-  if (Object.keys(news).length <= 0 || Object.keys(projects).length <= 0 || Object.keys(general).length <= 0 || loading) return <></>;
+  if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
-      <HeaderBar general={general} />
+      <HeaderBar />
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"32px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
@@ -89,7 +88,7 @@ export default function Home() {
                         {news[0].name}
                       </Typography>
                       <Typography variant="body1" color="#fff">
-                        {new Date(news[0].publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}{" "}
+                        {new Date(news[0].publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
                   </Box>

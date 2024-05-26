@@ -34,7 +34,7 @@ export default function CardDetails(props) {
           </Box>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <EventIcon sx={{ width: 32, height: 32 }} />
-            <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split(" ")[0] }} />
+            <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
           </Box>
         </Box>
       </Box>
