@@ -18,7 +18,7 @@ export default function PostDetails() {
   useEffect(() => {
     Promise.all([axios.get(SERVER_URL + "/" + category + "/" + id), axios.get(SERVER_URL + "/" + category + "/getLatestPosts")])
       .then(([postRes, latestPostsRes]) => {
-        setPost(postRes.data.data);
+        setPost(postRes.data);
         setLatestPosts(latestPostsRes.data.data);
         window.scrollTo({ top: 0, behavior: "smooth" });
       })

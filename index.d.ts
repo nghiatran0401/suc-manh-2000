@@ -1,5 +1,6 @@
 declare namespace Sucmanh2000 {
   type Post = {
+    id: number;
     author: string;
     publish_date: string;
     name: string;
@@ -7,10 +8,14 @@ declare namespace Sucmanh2000 {
     category: string;
     description?: string;
     classification?: string;
+    donor?: Donor;
+    progress?: Progress;
+    content: {
+      tabs: TabsContent;
+    };
   };
 
   type Donor = {
-    name: string;
     description: string;
     images: {
       image: string;
@@ -35,18 +40,4 @@ declare namespace Sucmanh2000 {
       caption?: string;
     }[];
   }[];
-
-  type Project = Post & {
-    donor: Donor;
-    progress: Progress;
-    content: {
-      tabs: TabsContent;
-    };
-  };
-
-  type News = Post & {
-    content: {
-      tabs: TabsContent;
-    };
-  };
 }

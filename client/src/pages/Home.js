@@ -24,33 +24,25 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    const startTime = performance.now();
     Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
       .then(([news, general]) => {
         setNews(news.data.data);
         setGeneral(general.data);
         setLoading(false);
-        const endTime = performance.now();
-        console.log(`Loading time 1: ${endTime - startTime} milliseconds`);
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
-    const startTime = performance.now();
     axios
       .get(SERVER_URL + projectTab, { params: { page: 1, postsPerPage: 8 } })
       .then((projects) => {
         setProjects(projects.data.data);
         setLoading(false);
-        const endTime = performance.now();
-        console.log(`Loading time 2: ${endTime - startTime} milliseconds`);
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
-
-  console.log("home", { news, projects, general });
 
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (

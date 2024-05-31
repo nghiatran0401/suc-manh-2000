@@ -14,20 +14,23 @@ import LoadingScreen from "../components/LoadingScreen";
 export default function PostList() {
   const { category } = useParams();
   const [posts, setPosts] = useState([]);
-  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalPosts, setTotalPosts] = useState({});
   const [page, setPage] = useState(1);
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
 
   useEffect(() => {
+    const startData = (page - 1) * POSTS_PER_PAGE;
+    const endData = startData + POSTS_PER_PAGE;
+
     axios
-      .get(SERVER_URL + "/" + category, { params: { page, POSTS_PER_PAGE } })
-      .then((res) => {
-        setPosts(res.data.data);
-        setTotalPosts(res.data.totalPosts);
+      .get(SERVER_URL + "/" + category, { params: { _start: startData, _end: endData } })
+      .then((posts) => {
+        setTotalPosts(posts.headers["x-total-count"]);
+        setPosts(posts.data);
         window.scrollTo({ top: 0, behavior: "smooth" });
       })
       .catch((e) => console.error(e));
-  }, [page]);
+  }, [page, category]);
 
   if (posts?.length <= 0) return <LoadingScreen />;
   return (

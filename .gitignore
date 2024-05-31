@@ -1,12 +1,23 @@
 # client
 client/node_modules
+client/build
 client/package-lock.json
 client/.DS_Store
 
 # server
 server/node_modules
+server/build
 server/package-lock.json
 server/.DS_Store
+
+# admin
+admin/node_modules
+admin/build
+admin/package-lock.json
+admin/.DS_Store
+
+# Firebase
+.firebase/
 
 .DS_Store
 .kai_prettierrc.json
