@@ -3,7 +3,7 @@ const fsPromises = require("fs").promises;
 const { bucket } = require("../server/firebase");
 
 // TODO: Get high resolution images
-// TODO: Render Momo button correctly
+// TODO: Render Momo button
 
 function extractUnnecessaryRegex(htmlString) {
   const imgTagRegex = /<img[^>]*>/g;

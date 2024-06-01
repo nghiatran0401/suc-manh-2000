@@ -1,4 +1,6 @@
 .bar-container {
+  margin-bottom: 80px;
+
   .bar {
     background-color: #fff;
   }

@@ -2,14 +2,6 @@ export const SERVER_URL = import.meta.env.VITE_BASE_URL || "http://localhost:400
 
 export const POSTS_PER_PAGE = 12;
 
-export const ProjectCategories = new Array(new Date(Date.now()).getFullYear() - 2012)
-  .fill(0)
-  .map((_, index) => ({
-    label: "Dự án " + (2012 + index),
-    value: String(2012 + index),
-  }))
-  .reverse();
-
 export const categoryMapping = {
   "du-an-2024": "Dự án 2024",
   "du-an-2023": "Dự án 2023",

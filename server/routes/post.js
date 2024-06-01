@@ -69,7 +69,7 @@ postRouter.get("/getLatestPosts", async (req, res) => {
   }
 });
 
-// Get a single detailed post
+// Get a single post
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
 
@@ -92,23 +92,6 @@ postRouter.get("/:id", async (req, res) => {
   }
 });
 
-// export const getProjectBySlug = async (req: Request, res: Response) => {
-//   try {
-//     const projectId = req.params.slug;
-//     const docRef = firestore.collection(FirebaseCollections.PROJECTS).doc(projectId);
-//     const snapshot = await docRef.get();
-
-//     if (snapshot.exists) {
-//       const project = snapshot.data() as Sucmanh2000.Project;
-//       res.status(200).json(project);
-//     } else {
-//       res.status(404).json({ message: "Project not found" });
-//     }
-//   } catch (e: any) {
-//     res.status(500).json(e);
-//   }
-// };
-
 // export const addNewProject = async (req: Request, res: Response) => {
 //   try {
 //     const newProject = req.body as Sucmanh2000.Project;
@@ -120,18 +103,62 @@ postRouter.get("/:id", async (req, res) => {
 //   }
 // };
 
-// export const updateProjectById = async (req: Request, res: Response) => {
-//   try {
-//     const projectId = req.params.id;
-//     const updatedProject = req.body;
-//     const docRef = firestore.collection(FirebaseCollections.PROJECTS).doc(projectId);
-//     await docRef.update(updatedProject);
+// Edit a single post
+postRouter.patch("/:id", async (req, res) => {
+  const { category, id } = req.params;
+  const updatedPost = req.body;
+  const transformedPost = {
+    name: updatedPost.name,
+    category: updatedPost.category,
+    description: updatedPost.description,
+    classification: updatedPost.classification,
+    donor: {
+      description: updatedPost.donor?.description ?? "",
+      images: updatedPost.donor?.images ?? [],
+    },
+    progress: [
+      {
+        name: "Ảnh hiện trạng",
+        images: updatedPost.progress?.images1 ?? [],
+      },
+      {
+        name: "Ảnh tiến độ",
+        images: updatedPost.progress?.images2 ?? [],
+      },
+      {
+        name: "Ảnh hoàn thiện",
+        images: updatedPost.progress?.images3 ?? [],
+      },
+    ],
+    content: {
+      tabs: [
+        {
+          name: "Hoàn cảnh",
+          description: updatedPost.content?.description1 ?? "",
+          slide_show: updatedPost.content?.images1 ?? [],
+        },
+        {
+          name: "Nhà hảo tâm",
+          description: updatedPost.content?.description2 ?? "",
+          slide_show: updatedPost.content?.images2 ?? [],
+        },
+        {
+          name: "Mô hình xây",
+          description: updatedPost.content?.description3 ?? "",
+          slide_show: updatedPost.content?.images3 ?? [],
+        },
+      ],
+    },
+  };
 
-//     res.status(200).json({ message: "Project updated successfully" });
-//   } catch (e: any) {
-//     res.status(500).json(e);
-//   }
-// };
+  try {
+    const postDocRef = firestore.collection(category).where("slug", "==", id);
+    // await postDocRef.update(transformedPost);
+    res.status(200).json(transformedPost);
+  } catch (error) {
+    res.status(404).send({ error: `Error updating a document: ${error.message}` });
+  }
+});
 
 // export const removeProjectById = async (req: Request, res: Response) => {
 //   try {

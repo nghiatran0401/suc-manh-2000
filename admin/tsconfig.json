@@ -17,7 +17,7 @@
     "types": ["../"],
     "jsx": "react-jsx"
   },
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "vite.config.ts"], // Add "src" to include the directory
   "references": [
     {
       "path": "./tsconfig.node.json"

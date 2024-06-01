@@ -5,7 +5,7 @@ export const ProjectResource = {
   list: "/du-an-2024",
   // show: "/du-an-2024/:id",
   create: "/projects/create",
-  edit: "/du-an-2024/:id",
+  edit: "/du-an-2024/edit/:id",
   meta: {
     icon: <CustomerServiceOutlined />,
     label: "Project",

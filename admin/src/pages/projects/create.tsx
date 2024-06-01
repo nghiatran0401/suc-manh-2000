@@ -4,18 +4,15 @@ import { Create, useForm } from "@refinedev/antd";
 import { Button, Form, Input, Select, Tooltip, Upload } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
-import { uploadFileToFirebaseStorage } from "../../firebase/storage";
 import { generateNewDocumentId } from "../../firebase/firestore";
 import { ProjectResource } from "../../resources";
-import { ProjectCategories } from "../../constants";
 import TextArea from "antd/es/input/TextArea";
-import { v4 } from "uuid";
 import Group from "antd/lib/input/Group";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const ref = useRef(generateNewDocumentId({ collection: ProjectResource.name }));
-  const { formProps, saveButtonProps, queryResult } = useForm<Sucmanh2000.Project>({});
+  const { formProps, saveButtonProps, queryResult } = useForm<Sucmanh2000.Post>({});
 
   console.log({ data: formProps.form?.getFieldValue("thumbnailUrl") });
   return (
@@ -54,11 +51,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select>
-            {ProjectCategories.map((option) => (
+            {/* {ProjectCategories.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
-            ))}
+            ))} */}
           </Select>
         </Form.Item>
         <Form.Item
@@ -71,11 +68,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select>
-            {ProjectCategories.map((option) => (
+            {/* {ProjectCategories.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
-            ))}
+            ))} */}
           </Select>
         </Form.Item>
         <Form.Item
@@ -111,7 +108,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               },
             ]}
           >
-            <ImgCrop aspect={1.25} rotationSlider>
+            {/* <ImgCrop aspect={1.25} rotationSlider>
               <Upload
                 maxCount={1}
                 accept="image/*"
@@ -151,7 +148,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                   <div style={{ marginTop: 8 }}>Upload</div>
                 </div>
               </Upload>
-            </ImgCrop>
+            </ImgCrop> */}
           </Form.Item>
         </Form.Item>
       </Form>

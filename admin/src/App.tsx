@@ -8,9 +8,7 @@ import { useTranslation } from "react-i18next";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { authProvider } from "./authProvider";
-import { AppIcon } from "./components/app-icon";
-import { Header } from "./components/header";
-import { ColorModeContextProvider } from "./contexts/color-mode";
+import Header from "./components/Header";
 import { Login } from "./pages/auth";
 import { PostResource, ProjectResource } from "./resources";
 import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/projects";
@@ -44,59 +42,53 @@ function App() {
   return (
     <BrowserRouter>
       <RefineKbarProvider>
-        <ColorModeContextProvider>
-          <Refine
-            dataProvider={dataProvider(`${import.meta.env.VITE_BASE_URL}`, axiosInstance)}
-            notificationProvider={notificationProvider}
-            authProvider={authProvider}
-            i18nProvider={i18nProvider}
-            routerProvider={routerBindings}
-            resources={[ProjectResource, PostResource]}
-            options={{
-              syncWithLocation: true,
-              warnWhenUnsavedChanges: true,
-            }}
-          >
-            <Routes>
-              <Route
-                element={
-                  <Authenticated fallback={<CatchAllNavigate to="/login" />}>
-                    <ThemedLayoutV2
-                      Header={() => <Header sticky />}
-                      Sider={(props) => <ThemedSiderV2 {...props} fixed />}
-                      Title={({ collapsed }) => <ThemedTitleV2 collapsed={collapsed} text="Sức Mạnh 2000" icon={<AppIcon />} />}
-                    >
-                      <Outlet />
-                    </ThemedLayoutV2>
-                  </Authenticated>
-                }
-              >
-                <Route index element={<NavigateToResource resource={ProjectResource.name} />} />
-                <Route path={ProjectResource.name}>
-                  <Route index element={<ProjectList />} />
-                  {/* <Route path="create" element={<ProjectCreate />} /> */}
-                  <Route path=":id" element={<ProjectEdit />} />
-                  {/* <Route path=":id" element={<ProjectShow />} /> */}
-                </Route>
-                <Route path="*" element={<ErrorComponent />} />
+        <Refine
+          dataProvider={dataProvider(`${import.meta.env.VITE_BASE_URL}`, axiosInstance)}
+          notificationProvider={notificationProvider}
+          authProvider={authProvider}
+          i18nProvider={i18nProvider}
+          routerProvider={routerBindings}
+          resources={[ProjectResource, PostResource]}
+          options={{
+            syncWithLocation: true,
+            warnWhenUnsavedChanges: true,
+          }}
+        >
+          <Routes>
+            <Route
+              element={
+                <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                  <ThemedLayoutV2 Header={() => <Header sticky />} Sider={(props) => <ThemedSiderV2 {...props} fixed />} Title={({ collapsed }) => <ThemedTitleV2 collapsed={collapsed} text="Sức Mạnh 2000" />}>
+                    <Outlet />
+                  </ThemedLayoutV2>
+                </Authenticated>
+              }
+            >
+              <Route index element={<NavigateToResource resource={ProjectResource.name} />} />
+              <Route path={ProjectResource.name}>
+                <Route index element={<ProjectList />} />
+                {/* <Route path="create" element={<ProjectCreate />} /> */}
+                <Route path="edit/:id" element={<ProjectEdit />} />
+                {/* <Route path=":id" element={<ProjectShow />} /> */}
               </Route>
+              <Route path="*" element={<ErrorComponent />} />
+            </Route>
 
-              <Route
-                element={
-                  <Authenticated fallback={<Outlet />}>
-                    <NavigateToResource />
-                  </Authenticated>
-                }
-              >
-                <Route path="/login" element={<Login />} />
-              </Route>
-            </Routes>
+            <Route
+              element={
+                <Authenticated fallback={<Outlet />}>
+                  <NavigateToResource />
+                </Authenticated>
+              }
+            >
+              <Route path="/login" element={<Login />} />
+            </Route>
+          </Routes>
 
-            <RefineKbar />
-            <UnsavedChangesNotifier />
-            <DocumentTitleHandler />
-          </Refine>
-        </ColorModeContextProvider>
+          <RefineKbar />
+          <UnsavedChangesNotifier />
+          <DocumentTitleHandler />
+        </Refine>
       </RefineKbarProvider>
     </BrowserRouter>
   );

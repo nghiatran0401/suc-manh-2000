@@ -11,7 +11,7 @@ const resources = {
         publish_date: "Ngày tạo",
         actions: "Tùy chọn",
       },
-      projects: {
+      post: {
         fields: {
           id: "ID",
           author: "Tác giả",
@@ -24,25 +24,22 @@ const resources = {
           donor: {
             name: "Nhà tài trợ",
             description: "Mô tả",
-            image: "Ảnh",
+            images: "Ảnh",
           },
           progress: {
-            name: "Tiến độ",
-            section1: "Ảnh hiện trạng",
-            section2: "Ảnh tiến độ",
-            section3: "Ảnh hoàn thiện",
+            name: "Tiến độ dự án",
+            images1: "Ảnh hiện trạng",
+            images2: "Ảnh tiến độ",
+            images3: "Ảnh hoàn thiện",
           },
           content: {
             name: "Nội dung",
+            description: "Mô tả",
+            images: "Ảnh",
             section1: "Hoàn cảnh",
             section2: "Nhà hảo tâm",
             section3: "Mô hình xây",
-            description: "Mô tả",
             embedded_url: "URL nhúng",
-            slide_show: {
-              image: "Ảnh",
-              caption: "Chú thích",
-            },
           },
         },
       },

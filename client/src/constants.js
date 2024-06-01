@@ -57,7 +57,7 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Báo cáo tài chính",
       },
       {
-        path: "/bao-chi",
+        path: "/bao-chi-truyen-hinh",
         title: "Báo chí – truyền hình đưa tin",
       },
       {
