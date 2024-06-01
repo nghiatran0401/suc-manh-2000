@@ -31,9 +31,9 @@ export default function HeaderBar() {
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <Box className="bar-container">
-      <AppBar className="bar" position="static">
+      <AppBar className="bar" position="fixed" sx={{ top: 0, zIndex: 1000 }}>
         <Container sx={{ maxWidth: "1080px !important", m: "auto", p: "0 !important" }}>
-          <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }}>
+          <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }} >
             {HEADER_DROPDOWN_LIST.map((item, index) => (
               <Box key={index} display={"flex"} m={"0 16px"} style={{ cursor: "pointer" }}>
                 {item.title === "Home" && (

@@ -12,7 +12,9 @@ export default function CardDetails(props) {
   const { category, id } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
-
+  const goBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mt: "32px" }}>
@@ -160,7 +162,10 @@ export default function CardDetails(props) {
       </Grid>
 
       <Box display={"flex"} justifyContent={"center"} width={"100%"}>
-        <Button variant="contained" onClick={() => navigate(`/${category}`)}>
+        {/* <Button variant="contained" onClick={() => navigate(`/${category}`)}>
+          Quay lai trang trước
+        </Button> */}
+        <Button variant="contained" onClick={goBack}>
           Quay lai trang trước
         </Button>
       </Box>
