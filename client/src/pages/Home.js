@@ -36,9 +36,9 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { page: 1, postsPerPage: 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 1, _end: 8 } })
       .then((projects) => {
-        setProjects(projects.data.data);
+        setProjects(projects.data);
         setLoading(false);
       })
       .catch((e) => console.error(e));
