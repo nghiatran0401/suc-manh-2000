@@ -10,11 +10,26 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { authProvider } from "./authProvider";
 import Header from "./components/Header";
 import { Login } from "./pages/auth";
-import { PostResource, ProjectResource } from "./resources";
 import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/projects";
 import { useEffect } from "react";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
+import { categoryMapping, icons } from "./constants";
+
+const resources = Object.keys(categoryMapping).map((key, idx) => {
+  const Icon = icons[idx];
+
+  return {
+    name: key,
+    list: `/${key}`,
+    create: `/${key}/create`,
+    edit: `/${key}/edit/:id`,
+    meta: {
+      icon: <Icon />,
+      label: categoryMapping[key as keyof typeof categoryMapping],
+    },
+  };
+});
 
 function App() {
   const onUserChanged = async (user?: User | null) => {
@@ -48,7 +63,7 @@ function App() {
           authProvider={authProvider}
           i18nProvider={i18nProvider}
           routerProvider={routerBindings}
-          resources={[ProjectResource, PostResource]}
+          resources={resources}
           options={{
             syncWithLocation: true,
             warnWhenUnsavedChanges: true,
@@ -64,13 +79,15 @@ function App() {
                 </Authenticated>
               }
             >
-              <Route index element={<NavigateToResource resource={ProjectResource.name} />} />
-              <Route path={ProjectResource.name}>
-                <Route index element={<ProjectList />} />
-                <Route path="create" element={<ProjectCreate />} />
-                <Route path="edit/:id" element={<ProjectEdit />} />
-                {/* <Route path="show/:id" element={<ProjectShow />} /> */}
-              </Route>
+              <Route index element={<NavigateToResource resource={"du-an-2024"} />} />
+              {resources.map((resource) => (
+                <Route key={resource.name} path={resource.name}>
+                  <Route index element={<ProjectList />} />
+                  <Route path="create" element={<ProjectCreate />} />
+                  <Route path="edit/:id" element={<ProjectEdit />} />
+                  {/* <Route path="show/:id" element={<ProjectShow />} /> */}
+                </Route>
+              ))}
               <Route path="*" element={<ErrorComponent />} />
             </Route>
 

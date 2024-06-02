@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
-import { ProjectResource } from "../../resources";
+import { useLocation } from "react-router-dom";
 import { categoryMapping, classificationMapping } from "../../constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
@@ -10,12 +10,21 @@ import { generateNewDocumentId } from "../../helpers";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
-  const ref = useRef(generateNewDocumentId({ collection: ProjectResource.name }));
+  const { pathname } = useLocation();
+  const collectionName = pathname.split("/")[1];
+
+  const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({});
+
+  useEffect(() => {
+    formProps.form?.setFieldValue("id", ref.current);
+    formProps.form?.setFieldValue("category", collectionName);
+    formProps.form?.setFieldValue("classification", "Trường học");
+  }, []);
 
   return (
     <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} initialValues={{ id: ref.current, category: ProjectResource.meta.label, classification: "Trường học" }} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <Form {...formProps} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {/* ID */}
         <div style={{ display: "flex" }}>
           <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.id")}</div>
@@ -28,7 +37,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         <div style={{ display: "flex" }}>
           <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.name")}</div>
           <Form.Item name={"name"} rules={[{ required: true }]} style={{ width: "80%" }}>
-            <Input />
+            <Input autoFocus />
           </Form.Item>
         </div>
 
@@ -36,7 +45,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         <div style={{ display: "flex" }}>
           <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.category")}</div>
           <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "80%" }}>
-            <Select disabled>
+            <Select disabled onChange={(value) => formProps.form?.setFieldValue("category", value)}>
               {Object.entries(categoryMapping).map(([value, label]) => (
                 <Select.Option key={value} value={value}>
                   {label}
@@ -125,7 +134,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                <Form.Item name={"content.description"}>
+                <Form.Item name={"content.description1"}>
                   <RichTextEditor initialContent={""} onChange={() => {}} />
                 </Form.Item>
               </div>
@@ -146,7 +155,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                <Form.Item name={"content.description"}>
+                <Form.Item name={"content.description2"}>
                   <RichTextEditor initialContent={""} onChange={() => {}} />
                 </Form.Item>
               </div>
@@ -167,7 +176,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                <Form.Item name={"content.description"}>
+                <Form.Item name={"content.description3"}>
                   <RichTextEditor initialContent={""} onChange={() => {}} />
                 </Form.Item>
               </div>

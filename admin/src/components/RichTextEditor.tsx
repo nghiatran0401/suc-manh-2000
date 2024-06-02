@@ -5,7 +5,6 @@ const RichTextEditor = (props: { initialContent?: string; hideButtonList?: boole
   return (
     <div style={{ fontFamily: "inherit !important" }}>
       <SunEditor
-        autoFocus={true}
         width="100%"
         // height="390px"
         setOptions={{

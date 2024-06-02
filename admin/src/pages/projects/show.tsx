@@ -2,7 +2,6 @@ import React from "react";
 import { IResourceComponentsProps, useShow, useTranslate } from "@refinedev/core";
 import { Show, TextField, ImageField, DateField, MarkdownField } from "@refinedev/antd";
 import { Col, Row, Typography } from "antd";
-import GaleryUploader from "../../components/galery-uploader";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useLocation, useNavigate } from "react-router-dom";
 

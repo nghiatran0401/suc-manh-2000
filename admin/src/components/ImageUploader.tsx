@@ -3,10 +3,22 @@ import { Upload, UploadFile, UploadProps } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage } from "firebase/storage";
 import Compressor from "compressorjs";
+import { useLocation } from "react-router-dom";
 import { storage } from "../firebase/client";
 
-const ImageUploader = (props: { handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+const ImageUploader = (props: { initialImages?: { image?: string; caption?: string }[]; handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
+  const { pathname } = useLocation();
+  const [fileList, setFileList] = useState<UploadFile[]>(
+    props.initialImages?.map((image, index) => ({
+      uid: index.toString(),
+      name: image.caption ?? "Image",
+      thumbUrl: image.image,
+      status: "done",
+      response: {
+        url: image.image,
+      },
+    })) ?? []
+  );
 
   const handleChange: UploadProps["onChange"] = ({ file, fileList: newFileList }) => {
     if (newFileList.every((f) => f.status === "done")) {
@@ -23,11 +35,39 @@ const ImageUploader = (props: { handleChange: (urls: { image: string; caption?: 
       multiple={true}
       fileList={fileList}
       onChange={handleChange}
-      onRemove={(file) => deleteFileOnFirebase(file.response.url)}
+      onRemove={async (file) => {
+        await deleteFileOnFirebase(file.response.url);
+        const urls = fileList
+          .filter((f) => f.response?.url !== file.response.url)
+          .map((f, idx) => ({
+            uid: idx.toString(),
+            name: f.name ?? "Image",
+            image: f.response.url,
+            response: {
+              url: f.response.url,
+            },
+          }));
+        props.handleChange(urls);
+      }}
       customRequest={async ({ file, onSuccess, onError, onProgress }) => {
+        const collectionName = pathname.split("/")[1];
+        const year = collectionName.split("-").pop();
+
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+
+        let filePath;
+        if (String(year) === String(currentYear)) {
+          filePath = `uploads/${year}/${currentMonth}/${(file as File).name}`;
+        } else {
+          filePath = `uploads/${year}/${(file as File).name}`;
+        }
+
         try {
           uploadFileToFirebaseStorage({
             file: file as File,
+            filePath: filePath,
             handleUrlResponse(url: any) {
               onSuccess?.call(this, { url }, undefined);
             },
@@ -54,12 +94,8 @@ const ImageUploader = (props: { handleChange: (urls: { image: string; caption?: 
   );
 };
 
-export const uploadFileToFirebaseStorage = ({ file, handleSnapshot, handleError, handleUrlResponse }: any): void => {
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-
-  const storageRef: StorageReference = ref(storage, `uploads/${currentYear}/${currentMonth}/${file.name}`);
+export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
+  const storageRef: StorageReference = ref(storage, filePath);
   const FILE_MAX_SIZE = 512000;
 
   const fileSize = file.size;

@@ -58,7 +58,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </Form.Item>
 
             <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.images")}</span>} name={"donor.images"}>
-              <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("donor.images", urls)} />
+              <ImageUploader initialImages={projectData.donor?.images} handleChange={(urls) => formProps.form?.setFieldValue("donor.images", urls)} />
             </Form.Item>
           </div>
         </Form.Item>
@@ -67,13 +67,22 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.name")}</span>}>
           <div style={{ marginLeft: "24px", display: "flex", justifyContent: "space-between" }}>
             <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images1")}</span>} name={"progress.images1"}>
-              <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("progress.images1", url)} />
+              <ImageUploader
+                initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images1"))?.images}
+                handleChange={(urls) => formProps.form?.setFieldValue("progress.images1", urls)}
+              />
             </Form.Item>
             <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images2")}</span>} name={"progress.images2"}>
-              <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("progress.images2", url)} />
+              <ImageUploader
+                initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images2"))?.images}
+                handleChange={(urls) => formProps.form?.setFieldValue("progress.images2", urls)}
+              />
             </Form.Item>
             <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images3")}</span>} name={"progress.images3"}>
-              <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("progress.images3", url)} />
+              <ImageUploader
+                initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images3"))?.images}
+                handleChange={(urls) => formProps.form?.setFieldValue("progress.images3", urls)}
+              />
             </Form.Item>
           </div>
         </Form.Item>
@@ -88,7 +97,10 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 </Form.Item>
 
                 <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images1"}>
-                  <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("content.images1", url)} />
+                  <ImageUploader
+                    initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section1"))?.slide_show}
+                    handleChange={(urls) => formProps.form?.setFieldValue("content.images1", urls)}
+                  />
                 </Form.Item>
               </div>
             </Form.Item>
@@ -100,7 +112,10 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 </Form.Item>
 
                 <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images2"}>
-                  <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("content.images2", url)} />
+                  <ImageUploader
+                    initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section2"))?.slide_show}
+                    handleChange={(urls) => formProps.form?.setFieldValue("content.images2", urls)}
+                  />
                 </Form.Item>
               </div>
             </Form.Item>
@@ -112,7 +127,10 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 </Form.Item>
 
                 <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images3"}>
-                  <ImageUploader handleChange={(url) => formProps.form?.setFieldValue("content.images3", url)} />
+                  <ImageUploader
+                    initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section3"))?.slide_show}
+                    handleChange={(urls) => formProps.form?.setFieldValue("content.images3", urls)}
+                  />
                 </Form.Item>
               </div>
             </Form.Item>

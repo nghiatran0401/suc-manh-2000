@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate } from "@refinedev/core";
 import { useTable, List, EditButton, ShowButton, DeleteButton } from "@refinedev/antd";
 import { Table, Space } from "antd";
@@ -6,6 +6,10 @@ import { categoryMapping } from "../../constants";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const { tableProps } = useTable<Sucmanh2000.Post>({
     syncWithLocation: true,

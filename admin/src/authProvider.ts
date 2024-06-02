@@ -2,24 +2,22 @@ import { AuthBindings } from "@refinedev/core";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
 import { AuthService } from "./firebase/authentication";
-import { ProjectResource } from "./resources";
 
 export const TOKEN_KEY = "refine-auth";
 
 export const authProvider: AuthBindings = {
   login: async (props) => {
     const { email, password } = props;
-    console.log(props)
+
     try {
       let user: User | null = null;
-
       user = await AuthService.loginWithEmailAndPassword(email, password);
-      console.log(user)
+
       if (user) {
         localStorage.setItem(TOKEN_KEY, JSON.stringify(user));
         return {
           success: true,
-          redirectTo: ProjectResource.list,
+          redirectTo: "/du-an-2024",
         };
       } else {
         return {
