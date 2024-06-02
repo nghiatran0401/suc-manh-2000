@@ -67,9 +67,9 @@ function App() {
               <Route index element={<NavigateToResource resource={ProjectResource.name} />} />
               <Route path={ProjectResource.name}>
                 <Route index element={<ProjectList />} />
-                {/* <Route path="create" element={<ProjectCreate />} /> */}
+                <Route path="create" element={<ProjectCreate />} />
                 <Route path="edit/:id" element={<ProjectEdit />} />
-                {/* <Route path=":id" element={<ProjectShow />} /> */}
+                {/* <Route path="show/:id" element={<ProjectShow />} /> */}
               </Route>
               <Route path="*" element={<ErrorComponent />} />
             </Route>

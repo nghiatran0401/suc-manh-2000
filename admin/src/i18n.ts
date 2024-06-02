@@ -39,7 +39,6 @@ const resources = {
             section1: "Hoàn cảnh",
             section2: "Nhà hảo tâm",
             section3: "Mô hình xây",
-            embedded_url: "URL nhúng",
           },
         },
       },

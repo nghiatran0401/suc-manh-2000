@@ -1,156 +1,185 @@
 import React, { useRef } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Create, useForm } from "@refinedev/antd";
-import { Button, Form, Input, Select, Tooltip, Upload } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import ImgCrop from "antd-img-crop";
-import { generateNewDocumentId } from "../../firebase/firestore";
+import { Form, Input, Select } from "antd";
 import { ProjectResource } from "../../resources";
-import TextArea from "antd/es/input/TextArea";
-import Group from "antd/lib/input/Group";
+import { categoryMapping, classificationMapping } from "../../constants";
+import RichTextEditor from "../../components/RichTextEditor";
+import ImageUploader from "../../components/ImageUploader";
+import { generateNewDocumentId } from "../../helpers";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const ref = useRef(generateNewDocumentId({ collection: ProjectResource.name }));
-  const { formProps, saveButtonProps, queryResult } = useForm<Sucmanh2000.Post>({});
+  const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({});
 
-  console.log({ data: formProps.form?.getFieldValue("thumbnailUrl") });
   return (
     <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} initialValues={{ id: ref.current }} layout="horizontal">
-        <Form.Item
-          label={translate("projects.fields.id")}
-          name={["id"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input disabled value={3} />
-        </Form.Item>
-
-        <Form.Item
-          label={translate("projects.fields.name")}
-          name={["name"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.category")}
-          name={["category"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select>
-            {/* {ProjectCategories.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))} */}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.style")}
-          name={["style"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select>
-            {/* {ProjectCategories.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))} */}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.time")}
-          name={["time"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("projects.fields.description")}
-          name={["description"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <TextArea rows={4} />
-        </Form.Item>
-        <Group style={{ marginBottom: "12px" }}></Group>
-        <Form.Item label={translate("projects.fields.thumbnailUrl")}>
-          <Form.Item
-            name="thumbnailUrl"
-            noStyle
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            {/* <ImgCrop aspect={1.25} rotationSlider>
-              <Upload
-                maxCount={1}
-                accept="image/*"
-                onChange={(info) => {
-                  if (info.file.status === "done") {
-                    const url = info.file.response.url;
-                    formProps.form?.setFieldValue("thumbnailUrl", url);
-                  }
-                }}
-                customRequest={async ({ file, onSuccess, onError, onProgress }) => {
-                  try {
-                    uploadFileToFirebaseStorage({
-                      file: file as File,
-                      fileName: formProps.form?.getFieldValue("id") ?? v4() + ".png",
-                      bucketName: "thumbnail",
-                      handleUrlResponse(url) {
-                        onSuccess?.call(this, { url }, undefined);
-                      },
-                      handleError(error) {
-                        console.log({ error });
-                        onError?.call(this, error);
-                      },
-                      handleSnapshot: (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        onProgress?.call(this, { percent: progress });
-                      },
-                    });
-                  } catch (error: any) {
-                    console.log(error);
-                    onError?.call(this, error);
-                  }
-                }}
-                listType="picture-card"
-              >
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              </Upload>
-            </ImgCrop> */}
+      <Form {...formProps} initialValues={{ id: ref.current, category: ProjectResource.meta.label, classification: "Trường học" }} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* ID */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.id")}</div>
+          <Form.Item name={"id"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Input disabled />
           </Form.Item>
-        </Form.Item>
+        </div>
+
+        {/* Name */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.name")}</div>
+          <Form.Item name={"name"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Input />
+          </Form.Item>
+        </div>
+
+        {/* Category */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.category")}</div>
+          <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Select disabled>
+              {Object.entries(categoryMapping).map(([value, label]) => (
+                <Select.Option key={value} value={value}>
+                  {label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </div>
+
+        {/* Classification */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.classification")}</div>
+          <Form.Item name={"classification"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Select>
+              {Object.entries(classificationMapping).map(([value, label]) => (
+                <Select.Option key={value} value={value}>
+                  {label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </div>
+
+        {/* Description */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.description")}</div>
+          <Form.Item name={"description"} style={{ width: "80%" }}>
+            <RichTextEditor initialContent={""} onChange={() => {}} />
+          </Form.Item>
+        </div>
+
+        {/* Donor */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px", paddingRight: "10px" }}>{translate("post.fields.donor.name")}</div>
+
+          <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.description")}</div>
+              <Form.Item name={"donor.description"}>
+                <RichTextEditor initialContent={""} onChange={() => {}} />
+              </Form.Item>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.images")}</div>
+              <Form.Item name={"donor.images"}>
+                <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("donor.images", urls)} />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.name")}</div>
+
+          <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images1")}</div>
+              <Form.Item name={"progress.images1"}>
+                <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images1", urls)} />
+              </Form.Item>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images2")}</div>
+              <Form.Item name={"progress.images2"}>
+                <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images2", urls)} />
+              </Form.Item>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images3")}</div>
+              <Form.Item name={"progress.images3"}>
+                <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images3", urls)} />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs content */}
+        <div>
+          <div style={{ display: "flex" }}>
+            <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>
+              {translate("post.fields.content.name")} ({translate("post.fields.content.section1")})
+            </div>
+
+            <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
+                <Form.Item name={"content.description"}>
+                  <RichTextEditor initialContent={""} onChange={() => {}} />
+                </Form.Item>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
+                <Form.Item name={"content.images1"}>
+                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images1", urls)} />
+                </Form.Item>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex" }}>
+            <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>
+              {translate("post.fields.content.name")} ({translate("post.fields.content.section2")})
+            </div>
+
+            <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
+                <Form.Item name={"content.description"}>
+                  <RichTextEditor initialContent={""} onChange={() => {}} />
+                </Form.Item>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
+                <Form.Item name={"content.images2"}>
+                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images2", urls)} />
+                </Form.Item>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex" }}>
+            <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>
+              {translate("post.fields.content.name")} ({translate("post.fields.content.section3")})
+            </div>
+
+            <div style={{ display: "flex", width: "80%", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
+                <Form.Item name={"content.description"}>
+                  <RichTextEditor initialContent={""} onChange={() => {}} />
+                </Form.Item>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
+                <Form.Item name={"content.images3"}>
+                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images3", urls)} />
+                </Form.Item>
+              </div>
+            </div>
+          </div>
+        </div>
       </Form>
     </Create>
   );

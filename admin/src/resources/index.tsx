@@ -3,12 +3,12 @@ import { ContactsOutlined, CustomerServiceOutlined } from "@ant-design/icons";
 export const ProjectResource = {
   name: "du-an-2024",
   list: "/du-an-2024",
-  // show: "/du-an-2024/:id",
-  create: "/projects/create",
+  create: "/du-an-2024/create",
   edit: "/du-an-2024/edit/:id",
+  // show: "/du-an-2024/show/:id",
   meta: {
     icon: <CustomerServiceOutlined />,
-    label: "Project",
+    label: "Dự án 2024",
   },
 };
 

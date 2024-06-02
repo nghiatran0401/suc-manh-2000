@@ -2,8 +2,6 @@
 
 ### How to run project locally
 
-Open 2 terminals
-
 1. Client
 
 - Go to `client`
@@ -15,3 +13,9 @@ Open 2 terminals
 - Go to `server`
 - Install package dependency `npm install`
 - Start backend `npm run server`
+
+3. Admin
+
+- Go to `admin`
+- Install package dependency `npm install`
+- Start backend `npm run admin`
