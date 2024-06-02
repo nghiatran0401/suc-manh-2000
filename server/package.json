@@ -6,7 +6,7 @@
   },
   "scripts": {
     "server": "nodemon index.js",
-    "deploy:server": "firebase use savvy-serenity-424116-g1 && firebase deploy --only functions"
+    "deploy:server": "firebase deploy --only functions"
   },
   "keywords": [],
   "author": "",

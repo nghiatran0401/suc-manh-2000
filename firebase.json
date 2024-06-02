@@ -10,20 +10,38 @@
       "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"]
     }
   ],
-  "hosting": {
-    "public": "client/build",
-    "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
-    "rewrites": [
-      {
-        "source": "/robots.txt",
-        "destination": "/robots.txt"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  },
+  "hosting": [
+    {
+      "site": "savvy-serenity-424116-g1",
+      "public": "client/build",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+      "rewrites": [
+        {
+          "source": "/robots.txt",
+          "destination": "/robots.txt"
+        },
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "site": "admin-ec04c",
+      "public": "admin/dist",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+      "rewrites": [
+        {
+          "source": "/robots.txt",
+          "destination": "/robots.txt"
+        },
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ],
   "storage": {
     "rules": "storage.rules"
   }

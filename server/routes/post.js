@@ -210,8 +210,6 @@ postRouter.patch("/:id", async (req, res) => {
         },
       };
 
-      console.log("here", mergedData);
-
       await docRef.update(mergedData);
       res.status(200).json({ message: "Post updated successfully" });
     } else {

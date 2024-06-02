@@ -24,7 +24,7 @@
   },
   "scripts": {
     "client": "env-cmd -f .env.local react-scripts start",
-    "deploy:client": "env-cmd -f .env.prod react-scripts build && firebase use savvy-serenity-424116-g1 && firebase deploy --only hosting"
+    "deploy:client": "env-cmd -f .env.prod react-scripts build && firebase deploy --only hosting:savvy-serenity-424116-g1"
   },
   "eslintConfig": {
     "extends": [

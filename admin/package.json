@@ -25,6 +25,7 @@
     "antd": "^5.0.5",
     "antd-img-crop": "^4.12.2",
     "compressorjs": "^1.2.1",
+    "env-cmd": "^10.1.0",
     "firebase": "^10.0.0",
     "i18next": "^20.1.0",
     "i18next-browser-languagedetector": "^6.1.1",
@@ -53,11 +54,8 @@
     "vite": "^4.3.1"
   },
   "scripts": {
-    "admin": "refine dev",
-    "deploy": "yarn build && firebase deploy --only hosting:admin",
-    "build": "tsc && refine build",
-    "preview": "refine start",
-    "refine": "refine"
+    "admin": "env-cmd -f .env.local refine dev",
+    "deploy:admin": "env-cmd -f .env.prod tsc && refine build && firebase deploy --only hosting:admin-ec04c"
   },
   "browserslist": {
     "production": [

@@ -3,18 +3,22 @@ client/node_modules
 client/build
 client/package-lock.json
 client/.DS_Store
+client/.env
 
 # server
 server/node_modules
 server/build
 server/package-lock.json
 server/.DS_Store
+server/.env
 
 # admin
 admin/node_modules
-admin/build
+admin/dist
 admin/package-lock.json
+admin/yarn.lock
 admin/.DS_Store
+admin/.env
 
 # Firebase
 .firebase/

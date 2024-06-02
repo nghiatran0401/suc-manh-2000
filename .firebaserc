@@ -1,5 +1,16 @@
 {
   "projects": {
     "default": "savvy-serenity-424116-g1"
-  }
+  },
+  "targets": {
+    "savvy-serenity-424116-g1": {
+      "hosting": {
+        "admin-ec04c": [
+          "savvy-serenity-424116-g1"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
