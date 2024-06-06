@@ -6,15 +6,24 @@ const RichTextEditor = (props: { initialContent?: string; hideButtonList?: boole
     <div style={{ fontFamily: "inherit !important" }}>
       <SunEditor
         width="100%"
-        // height="390px"
+        height="400px"
         setOptions={{
           buttonList: props.hideButtonList
             ? []
             : [
                 ["undo", "redo"],
+                ["fontSize"],
                 ["formatBlock"],
                 ["bold", "underline", "italic", "strike"],
-                ["fontColor", "hiliteColor", "outdent", "indent", "align", "horizontalRule", "list"],
+                [
+                  "fontColor",
+                  "hiliteColor",
+                  "outdent",
+                  "indent",
+                  "align",
+                  "horizontalRule",
+                  "list",
+                ],
                 ["link", "video"],
                 // ["table", "link", "image"],
                 // ["codeView", "preview"],

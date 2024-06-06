@@ -1,12 +1,31 @@
 import React, { useState } from "react";
 import { Upload, UploadFile, UploadProps } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage } from "firebase/storage";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+  StorageReference,
+  getStorage,
+} from "firebase/storage";
 import Compressor from "compressorjs";
 import { useLocation } from "react-router-dom";
 import { storage } from "../firebase/client";
 
-const ImageUploader = (props: { initialImages?: { image?: string; caption?: string }[]; handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
+const getBase64 = (file: any): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+
+const ImageUploader = (props: {
+  maxCount?: number;
+  initialImages?: { image?: string; caption?: string }[];
+  handleChange: (urls: { image: string; caption?: string }[]) => any;
+}) => {
   const { pathname } = useLocation();
   const [fileList, setFileList] = useState<UploadFile[]>(
     props.initialImages?.map((image, index) => ({
@@ -20,9 +39,15 @@ const ImageUploader = (props: { initialImages?: { image?: string; caption?: stri
     })) ?? []
   );
 
-  const handleChange: UploadProps["onChange"] = ({ file, fileList: newFileList }) => {
+  const handleChange: UploadProps["onChange"] = ({
+    file,
+    fileList: newFileList,
+  }) => {
     if (newFileList.every((f) => f.status === "done")) {
-      const urls = newFileList.map((f: any) => ({ image: f?.response?.url, caption: f.name }));
+      const urls = newFileList.map((f: any) => ({
+        image: f?.response?.url,
+        caption: f.name,
+      }));
       props.handleChange(urls);
     }
     setFileList(newFileList);
@@ -31,6 +56,10 @@ const ImageUploader = (props: { initialImages?: { image?: string; caption?: stri
   return (
     <Upload
       accept="images/**"
+      maxCount={props.maxCount}
+      onPreview={async (file: UploadFile) => {
+          window.open(file.response?.url, "_blank");
+      }}
       listType="picture-card"
       multiple={true}
       fileList={fileList}
@@ -55,7 +84,9 @@ const ImageUploader = (props: { initialImages?: { image?: string; caption?: stri
 
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+        const currentMonth = (currentDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0");
 
         let filePath;
         if (String(year) === String(currentYear)) {
@@ -76,7 +107,8 @@ const ImageUploader = (props: { initialImages?: { image?: string; caption?: stri
               onError?.call(this, error);
             },
             handleSnapshot: (snapshot: any) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
               onProgress?.call(this, { percent: progress });
             },
           });
@@ -94,7 +126,13 @@ const ImageUploader = (props: { initialImages?: { image?: string; caption?: stri
   );
 };
 
-export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
+export const uploadFileToFirebaseStorage = ({
+  file,
+  filePath,
+  handleSnapshot,
+  handleError,
+  handleUrlResponse,
+}: any): void => {
   const storageRef: StorageReference = ref(storage, filePath);
   const FILE_MAX_SIZE = 512000;
 

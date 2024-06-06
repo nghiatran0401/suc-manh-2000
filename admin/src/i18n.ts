@@ -19,6 +19,7 @@ const resources = {
           name: "Tên dự án",
           slug: "Slug",
           category: "Danh mục",
+          thumbnail: "Ảnh đại diện",
           description: "Mô tả",
           classification: "Phân loại",
           donor: {

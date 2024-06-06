@@ -50,6 +50,7 @@ postRouter.post("/", async (req, res) => {
   const transformedPost = {
     id: createdPost.id,
     name: createdPost.name,
+    thumbnail: createdPost.thumbnail,
     author: "Admin",
     publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
@@ -168,6 +169,7 @@ postRouter.patch("/:id", async (req, res) => {
 
       const mergedData = {
         name: updatedPost.name,
+        thumbnail: updatedPost.thumbnail,
         description: updatedPost.description,
         category: updatedPost.category,
         classification: updatedPost.classification,

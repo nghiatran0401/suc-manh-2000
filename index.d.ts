@@ -2,6 +2,7 @@ declare namespace Sucmanh2000 {
   type Post = {
     id: number;
     name: string;
+    thumbnail: string
     author: string;
     publish_date: string;
     slug: string;
