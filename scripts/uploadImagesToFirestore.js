@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
-const { bucket } = require("../firebase");
+const { bucket } = require("./firebase");
 
 const getAllFiles = (dir) => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true }).map((dirent) => ({ dirent, path: path.resolve(dir, dirent.name) }));
@@ -34,7 +34,7 @@ const getAllFilesInFolder = (dir) => {
 };
 
 const uploadImagesToFirestore = async () => {
-  const dir = "server/uploads";
+  const dir = "uploads";
   const files = getAllFilesInFolder(dir);
   let startUploading = false;
 
@@ -43,7 +43,7 @@ const uploadImagesToFirestore = async () => {
 
     // Skip files until the specified file is found
     if (!startUploading) {
-      if (file.shortPosixPath === "uploads/2023/06/z4382789180768_c56396495537a223c9a5c841d0ec22b8-150x150.jpg") {
+      if (file.shortPosixPath === "uploads/2024/02/0-02-05-bdabb75ff07ec8d3f84819919e8e63e9c363e3793ef164ed87d7ec35ac668574_full.jpg") {
         startUploading = true;
         console.log("Lets goo!");
       } else {
