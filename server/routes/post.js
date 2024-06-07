@@ -97,9 +97,26 @@ postRouter.post("/", async (req, res) => {
   };
 
   try {
-    const postDocRef = firestore.collection(category).doc();
+    const postDocRef = firestore.collection(category).doc(createdPost.id);
     await postDocRef.set(transformedPost);
-    res.status(200).json({ message: "Post created successfully" });
+
+    // Increase the count of the post's category and classification
+    const classificationDoc = await firestore.collection("counts").doc("classification").get();
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
+
+    if (classificationDoc.exists) {
+      const classificationCounts = classificationDoc.data();
+      classificationCounts[createdPost.classification] = (classificationCounts[createdPost.classification] || 0) + 1;
+      await firestore.collection("counts").doc("classification").set(classificationCounts);
+    }
+
+    if (categoryDoc.exists) {
+      const categoryCounts = categoryDoc.data();
+      categoryCounts[createdPost.category] = (categoryCounts[createdPost.category] || 0) + 1;
+      await firestore.collection("counts").doc("category").set(categoryCounts);
+    }
+
+    res.status(200).json(transformedPost);
   } catch (error) {
     res.status(404).send({ error: `Error creating a document: ${error.message}` });
   }
@@ -231,6 +248,24 @@ postRouter.delete("/:id", async (req, res) => {
 
     if (!querySnapshot.empty) {
       const docRef = querySnapshot.docs[0].ref;
+      const docData = querySnapshot.docs[0].data();
+
+      // Decrease the count of the post's category and classification
+      const classificationDoc = await firestore.collection("counts").doc("classification").get();
+      const categoryDoc = await firestore.collection("counts").doc("category").get();
+
+      if (classificationDoc.exists) {
+        const classificationCounts = classificationDoc.data();
+        classificationCounts[docData.classification] = (classificationCounts[docData.classification] || 0) - 1;
+        await firestore.collection("counts").doc("classification").set(classificationCounts);
+      }
+
+      if (categoryDoc.exists) {
+        const categoryCounts = categoryDoc.data();
+        categoryCounts[docData.category] = (categoryCounts[docData.category] || 0) - 1;
+        await firestore.collection("counts").doc("category").set(categoryCounts);
+      }
+
       await docRef.delete();
       res.status(200).json({ message: "Post deleted successfully" });
     } else {

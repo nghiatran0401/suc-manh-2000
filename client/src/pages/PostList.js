@@ -37,7 +37,7 @@ export default function PostList() {
     <Box>
       <HeaderBar />
 
-      <CardList title={title} posts={posts} showDescription={true} />
+      <CardList title={title} posts={posts} showDescription={false} />
       {totalPosts > POSTS_PER_PAGE && (
         <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
           <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />

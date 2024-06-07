@@ -31,39 +31,14 @@ export default function CardList(props) {
             <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
               <Card style={{ overflow: "visible", minHeight: "fit-content", minHeight: props.showDescription ? "500px" : "400px" }}>
                 <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-                  <div
-                    style={{
-                      position: "absolute",
-                      zIndex: 1,
-                      left: "-10px",
-                      top: "20px",
-                      width: "50px",
-                      height: "50px",
-                      backgroundColor: "white",
-                      border: "1px solid red",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box textAlign={"center"}>
-                      <Typography variant="body1" fontWeight={"bold"}>
-                        {new Date(post.publish_date).getDate()}
-                      </Typography>
-                      <Typography variant="body2">Th{new Date(post.publish_date).getMonth() + 1}</Typography>
-                    </Box>
-                  </div>
-                  <img
-                    style={{ width: "100%", height: "225px", objectFit: "cover" }}
-                    alt={post.name}
-                    src={post.progress?.length > 0 ? post.progress[0]?.images[0].image : post.content?.tabs[0]?.slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
-                  />
+                  <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
                 </div>
                 <CardContent>
-                  <Typography variant="body1" fontWeight={"bold"} minHeight={"100px"}>
+                  <Typography variant="body1" fontWeight={"bold"}>
                     {post.name}
                   </Typography>
-                  {props.showDescription && post.content.tabs[0].description && (
+
+                  {props.showDescription && post.description && (
                     <>
                       <div
                         style={{
@@ -75,9 +50,13 @@ export default function CardList(props) {
                           width: "100%",
                         }}
                       />
-                      <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.content.tabs[0].description.replace(/h1/g, "div"), 100) }} />
+                      <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
                     </>
                   )}
+
+                  <Typography variant="body2" mt={"16px"}>
+                    {new Date(post.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                  </Typography>
                 </CardContent>
               </Card>
             </Link>

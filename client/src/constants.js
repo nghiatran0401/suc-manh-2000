@@ -116,7 +116,7 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Dự án 2016",
       },
       {
-        path: "/du-an-2024-2015",
+        path: "/du-an-2014-2015",
         title: "Dự án 2014 - 2015",
       },
       {

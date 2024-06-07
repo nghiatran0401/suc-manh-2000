@@ -12,9 +12,6 @@ import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 
-// TODO: Implement search - sort - filter
-// TODO: Render phong tin hoc
-
 export default function HeaderBar() {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
@@ -53,9 +50,6 @@ export default function HeaderBar() {
                         <CDropdownMenu className="dropdown-menu-position" color="secondary">
                           {item.children.map((child, childIndex) => (
                             <CDropdownItem key={childIndex} href={child.path} style={{ margin: "10px 0" }}>
-                              {/* {console.log("here", child.path.includes("du-an") && child.path)}
-                              {child.title} */}
-
                               <Typography variant="body1">
                                 {child.title}
                                 {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}

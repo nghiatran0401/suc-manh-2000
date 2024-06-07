@@ -28,6 +28,17 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         <Table.Column title={translate("post.fields.name")} dataIndex="name" render={(_, record: BaseRecord) => <Space>{record.name}</Space>} />
 
         <Table.Column
+          title={translate("post.fields.url")}
+          dataIndex="url"
+          render={(_, record: BaseRecord) => (
+            <Space>
+              <a href={`${import.meta.env.VITE_CLIENT_URL}/${record.category}/${record.slug}`} target="_blank" rel="noopener noreferrer">
+                Link
+              </a>
+            </Space>
+          )}
+        />
+        <Table.Column
           title={translate("post.fields.publish_date")}
           dataIndex="publish_date"
           render={(_, record: BaseRecord) => <Space>{new Date(record.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}</Space>}
