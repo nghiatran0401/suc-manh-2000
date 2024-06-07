@@ -37,13 +37,13 @@ export const categoryMapping = {
   "du-an-2016": "Dự án 2016",
   "du-an-2024-2015": "Dự án 2014 - 2015",
   "du-an-2012": "Dự án 2012",
-  // "thong-bao": "Thông báo Sức Mạnh 2000",
-  // // "tien-do-xay-dung": "Tiến độ xây dựng",
-  // "bao-cao-tai-chinh": "Báo cáo tài chính",
-  // "bao-chi-truyen-hinh": "Báo chí – truyền hình đưa tin",
-  // "cau-chuyen": "Câu chuyện",
-  // "gay-quy": "Gây quỹ",
-  // "tai-tro": "Tài trợ",
+  "thong-bao": "Tiến độ xây dựng",
+  // "tien-do-xay-dung": "Tiến độ xây dựng",
+  "bao-cao-tai-chinh": "Báo cáo tài chính",
+  "bao-chi-truyen-hinh": "Báo chí – truyền hình đưa tin",
+  "cau-chuyen": "Câu chuyện",
+  "gay-quy": "Gây quỹ",
+  "tai-tro": "Tài trợ",
 };
 
 export const classificationMapping = {

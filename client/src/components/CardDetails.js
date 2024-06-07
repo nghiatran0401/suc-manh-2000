@@ -5,6 +5,7 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
+import { HEADER_DROPDOWN_LIST } from "../constants";
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
@@ -15,12 +16,20 @@ export default function CardDetails(props) {
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mt: "32px" }}>
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
-          Home
+          Trang chủ
         </Link>
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to={`/${category}`}>
-          {category}
+          {HEADER_DROPDOWN_LIST.map((item) => {
+            if (item.children.length > 0) {
+              const foundChild = item.children.find((child) => child.path === `/${category}`);
+              if (foundChild) {
+                return foundChild.title;
+              }
+            }
+            return null;
+          })}
         </Link>
-        <Typography color="textPrimary">{id}</Typography>
+        <Typography color="textPrimary">{post.name}</Typography>
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
@@ -38,9 +47,9 @@ export default function CardDetails(props) {
       </Box>
 
       {post?.donor && Object.keys(post?.donor).length > 0 && (
-        <Box bgcolor={"#abb8c3"}>
+        <Box bgcolor={"#f1f1f1"}>
           <Box p={"24px"}>
-            <Typography variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
+            <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
           </Box>
         </Box>
       )}
@@ -64,24 +73,16 @@ export default function CardDetails(props) {
                   <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                     <Typography key={index} variant="body1" maxWidth={"720px"} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
 
-                    {/* <Box>
-                      {tab.embedded_url?.length > 0 &&
-                        tab.embedded_url?.map((url, index) => (
-                          <iframe
-                            key={index}
-                            width="100%"
-                            height="500"
-                            src={url.includes("uploads/") ? url : convertToEmbedUrl(url)}
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                          />
-                        ))}
-                    </Box> */}
-
                     {tab.slide_show?.length > 0 && (
                       <Box width={"720px"}>
-                        <CarouselSlide items={tab.slide_show} />
+                        {tab.slide_show.map((img, idx) => (
+                          <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                            <img key={idx} src={img.image} alt={img.caption} style={{ width: "100%", height: "auto" }} />
+                            <Typography variant="body2" color={"#77777"}>
+                              {img.caption}
+                            </Typography>
+                          </Box>
+                        ))}
                       </Box>
                     )}
                   </Box>
@@ -96,10 +97,11 @@ export default function CardDetails(props) {
                   </TabList>
 
                   {post.content.tabs.map((tab, index) => (
-                    <TabPanel key={index} style={{ marginTop: "50px" }}>
+                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "720px" }}>
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        <Typography key={index} variant="body1" maxWidth={"720px"} dangerouslySetInnerHTML={{ __html: tab.description }} />
-                        {/* .replace(/\n/g, "<br>") */}
+                        <Box key={index} maxWidth={"720px"} style={{ wordWrap: "break-word" }}>
+                          <Typography variant="body1" dangerouslySetInnerHTML={{ __html: tab.description }} />
+                        </Box>
 
                         {/* <Box>
                           {tab.embedded_url?.length > 0 &&
@@ -118,7 +120,15 @@ export default function CardDetails(props) {
 
                         {tab.slide_show?.length > 0 && (
                           <Box width={"720px"}>
-                            <CarouselSlide items={tab.slide_show} />
+                            {/* <CarouselSlide items={tab.slide_show} /> */}
+                            {tab.slide_show.map((img, idx) => (
+                              <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                                <img key={idx} src={img.image} alt={img.caption} style={{ width: "100%", height: "auto" }} />
+                                <Typography variant="body2" color={"#77777"}>
+                                  {img.caption}
+                                </Typography>
+                              </Box>
+                            ))}
                           </Box>
                         )}
                       </Box>
@@ -132,8 +142,8 @@ export default function CardDetails(props) {
 
         <Grid item xs={3}>
           {post.description && (
-            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} padding={"16px"} bgcolor={"#abb8c3"} mb={"40px"}>
-              <Typography variant="body2" textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} padding={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
+              <Typography variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
             </Box>
           )}
 
@@ -144,7 +154,7 @@ export default function CardDetails(props) {
             </Typography>
             <Typography variant="h6">-----</Typography>
             {latestPosts.map((latestPost, index) => (
-              <Link component={RouterLink} to={`/${category}/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+              <Link component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                 <Box key={index} display={"flex"} gap={"8px"} alignItems={"center"} minHeight={"56px"}>
                   <Avatar variant="rounded" src={latestPost.image} />
                   <Typography variant="body2" color="#334862">

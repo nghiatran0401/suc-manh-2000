@@ -1,14 +1,11 @@
-import { Typography, Box } from "@mui/material";
+import React from "react";
+import { Typography, Box, Card, CardContent } from "@mui/material";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import CardActions from "@mui/material/CardActions";
 import "./config/styles.css";
-import React from "react";
 
 // TODO: Combine CarouselSlide and CarouselMembers into 1
+
 export default function CarouselSlide({ title, items, position }) {
   const responsive = {
     desktop: {
@@ -36,19 +33,18 @@ export default function CarouselSlide({ title, items, position }) {
         </Typography>
       )}
 
-      <Carousel itemClass={position === "progress" ? "carousel-height-400px" : "carousel-height-800px"} responsive={responsive} autoPlay infinite autoPlaySpeed={5000} arrows={items.length > 1}>
+      <Carousel itemClass={position === "progress" ? "carousel-height-300px" : "carousel-height-800px"} responsive={responsive} autoPlay infinite autoPlaySpeed={5000} arrows={items.length > 1}>
         {items.map((item, index) => (
-          <Card key={index} sx={{ mr: "16px" }}>
-            <img src={item.image} alt={item.caption} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            {/* <CardMedia component="img" alt={item.caption} height="100%" image={item.image} sx={{ ".MuiCardMedia-img": { width: "100%", height: position === "progress" ? "100px" : "225px", objectFit: "cover" } }} /> */}
+          <Card key={index} style={{ margin: "8px" }}>
+            <img src={item.image} alt={item.caption} style={{ width: "100%", height: "300px", objectFit: "cover", objectPosition: "center" }} />
 
-            {item.caption && (
+            {/* {item.caption && (
               <CardContent>
                 <Typography align="center" variant="body2" color="text.secondary">
                   {item.caption}
                 </Typography>
               </CardContent>
-            )}
+            )} */}
           </Card>
         ))}
       </Carousel>

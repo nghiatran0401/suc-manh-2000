@@ -17,7 +17,7 @@ const RichTextEditor = (props: { initialContent?: string; hideButtonList?: boole
                 ["bold", "underline", "italic", "strike"],
                 ["fontColor", "hiliteColor", "outdent", "indent", "align", "horizontalRule", "list"],
                 ["link", "video"],
-                // ["table", "link", "image"],
+                // ["table", "image"],
                 // ["codeView", "preview"],
                 // ["fullScreen"],
               ],

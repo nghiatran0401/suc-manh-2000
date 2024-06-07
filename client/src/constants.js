@@ -125,29 +125,12 @@ export const HEADER_DROPDOWN_LIST = [
       },
     ],
   },
-  // {
-  //   name: "liet-ke",
-  //   path: "/liet-ke",
-  //   title: "Liệt Kê",
-  //   children: [
-  //     {
-  //       name: "quyen-gop",
-  //       path: "/quyen-gop",
-  //       title: "Quyên Góp",
-  //     },
-  //     {
-  //       name: "quyen-gop",
-  //       path: "/quyen-gop",
-  //       title: "Quyên Góp",
-  //     },
-  //   ],
-  // },
   {
     path: "#",
     title: "Phòng Tin Học Cho Em",
     children: [
       {
-        path: "#",
+        path: "/phong-tin-hoc-2023",
         title: "Phòng tin học 2023",
       },
     ],

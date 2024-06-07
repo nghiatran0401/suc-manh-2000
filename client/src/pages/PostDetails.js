@@ -14,13 +14,17 @@ export default function PostDetails() {
   const { category, id } = useParams();
   const [post, setPost] = useState({});
   const [latestPosts, setLatestPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([axios.get(SERVER_URL + "/" + category + "/" + id), axios.get(SERVER_URL + "/" + category + "/getLatestPosts")])
+    setLoading(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    Promise.all([axios.get(SERVER_URL + `/${category}/${id}`), axios.get(SERVER_URL + `/thong-bao/getLatestPosts`)])
       .then(([postRes, latestPostsRes]) => {
         setPost(postRes.data);
-        setLatestPosts(latestPostsRes.data.data);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setLatestPosts(latestPostsRes.data);
+        setLoading(false);
       })
       .catch((e) => console.error(e));
   }, [id]);
@@ -30,7 +34,7 @@ export default function PostDetails() {
     <Box>
       <HeaderBar />
 
-      <CardDetails post={post} latestPosts={latestPosts} />
+      {loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}
 
       <CarouselMembers />
       <Companion />

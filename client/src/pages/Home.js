@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { Box, Typography, Grid, Card, Link, CardContent, Avatar } from "@mui/material";
+import { Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
+import { useNavigate } from "react-router-dom";
 import HeaderBar from "../components/Header";
 import Footer from "../components/Footer";
 import Companion from "../components/Companion";
@@ -21,12 +22,13 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
     Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
       .then(([news, general]) => {
-        setNews(news.data.data);
+        setNews(news.data);
         setGeneral(general.data);
         setLoading(false);
       })
@@ -36,7 +38,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 1, _end: 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);
@@ -142,11 +144,29 @@ export default function Home() {
               </Tab>
             ))}
           </TabList>
-          {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
-            <TabPanel key={index} style={{ marginTop: "24px" }}>
-              <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
-            </TabPanel>
-          ))}
+
+          {loading && (
+            <Box minHeight={"500px"} mt={"200px"}>
+              <LinearProgress />
+            </Box>
+          )}
+          {!loading && (
+            <>
+              {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
+                <Box display={"flex"} flexDirection={"column"} gap="24px">
+                  <TabPanel key={index} style={{ marginTop: "24px" }}>
+                    <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+                  </TabPanel>
+
+                  {projectTab === child.path && (
+                    <Button variant="contained" onClick={() => navigate(child.path)}>
+                      Xem các {child.title}
+                    </Button>
+                  )}
+                </Box>
+              ))}
+            </>
+          )}
         </Tabs>
       </Box>
 
