@@ -1,7 +1,8 @@
-import { Box, Typography, Grid, CardContent, Card as MuiCard } from "@mui/material";
+import { Box, Typography, Grid, CardContent, Card as MuiCard, Button } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import { truncate } from "../helpers";
+
 
 const Card = styled(MuiCard)({
   minHeight: "500px",
@@ -14,7 +15,7 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
-
+  console.log(props.tabName  )
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
       {props.title && (
@@ -83,6 +84,13 @@ export default function CardList(props) {
             </Link>
           </Grid>
         ))}
+        <Grid item xs={12} sm={6} md={3}>
+          <Button>
+            <Link to={`/${props.category ? props.category : category}`} style={{ textDecoration: "none" }}>
+              Xem thêm
+            </Link>
+          </Button>
+          </Grid>
       </Grid>
     </Box>
   );

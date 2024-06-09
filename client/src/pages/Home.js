@@ -21,7 +21,7 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
-
+  console.log('projectTab',projectTab)
   useEffect(() => {
     setLoading(true);
     Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
@@ -144,7 +144,7 @@ export default function Home() {
           </TabList>
           {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
             <TabPanel key={index} style={{ marginTop: "24px" }}>
-              <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+              <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} tabName={projectTab}  />
             </TabPanel>
           ))}
         </Tabs>
@@ -216,7 +216,7 @@ export default function Home() {
               <Typography variant="body1" fontWeight={"bold"}>
                 WC đã và đang được xây dựng
               </Typography>
-            </Grid>
+            </Grid> 
           </Grid>
         </Box>
       </Box>
