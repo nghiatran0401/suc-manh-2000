@@ -11,6 +11,7 @@
     "@mui/material": "^5.15.16",
     "@mui/system": "^5.15.15",
     "axios": "^1.6.8",
+    "env-cmd": "^10.1.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-countup": "^6.5.3",
@@ -22,8 +23,8 @@
     "react-typed": "^2.0.12"
   },
   "scripts": {
-    "client": "cp .env.local .env && react-scripts start",
-    "deploy:client": "cp .env.prod .env && react-scripts build && firebase deploy --only hosting:savvy-serenity-424116-g1"
+    "client": "cp .env.local .env && env-cmd -f .env react-scripts start",
+    "deploy:client": "cp .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
   },
   "eslintConfig": {
     "extends": [
