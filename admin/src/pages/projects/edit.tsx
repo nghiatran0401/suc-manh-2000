@@ -11,9 +11,9 @@ import ImageUploader from "../../components/ImageUploader";
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
-  const isProject = pathname.includes("du-an");
+  const collectionName = pathname.split("/")[1];
+  const isProject = collectionName.includes("du-an");
   const { formProps, saveButtonProps, queryResult } = useForm();
-
   const projectData = queryResult?.data?.data as Sucmanh2000.Post;
   const isLoading = queryResult?.isFetching || queryResult?.isLoading;
 
@@ -48,7 +48,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         {/* Category */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>} name={"category"} rules={[{ required: true }]}>
-          <Select>
+          <Select disabled>
             {Object.entries(categoryMapping).map(([value, label]) => (
               <Select.Option key={value} value={value}>
                 {label}
@@ -142,7 +142,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 }}
               >
                 <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description1"}>
-                  <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section1"))?.description} onChange={() => {}} />
+                  <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section1") || t.name === "Main content")?.description} onChange={() => {}} />
                 </Form.Item>
 
                 <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images1"}>

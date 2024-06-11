@@ -18,4 +18,9 @@
 
 - Go to `admin`
 - Install package dependency `npm install`
-- Start backend `npm run admin`
+- Start admin `npm run admin`
+
+Note:
+
+- Ask Nghia for env files + service account file
+- Create PR with at least 1 approval before any deployments

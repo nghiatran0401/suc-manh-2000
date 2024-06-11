@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
-import { IResourceComponentsProps, BaseRecord, useTranslate } from "@refinedev/core";
+import React, { useState, useEffect } from "react";
+import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters } from "@refinedev/core";
 import { useTable, List, EditButton, ShowButton, DeleteButton } from "@refinedev/antd";
-import { Table, Space } from "antd";
-import { categoryMapping } from "../../constants";
+import { Table, Space, Input } from "antd";
+import { CLIENT_URL, categoryMapping, classificationMapping } from "../../constants";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -25,14 +25,20 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       <Table {...tableProps} rowKey="id">
         <Table.Column title={translate("table.category")} dataIndex="category" render={(_, record: BaseRecord) => <Space>{categoryMapping && categoryMapping[record.category as keyof typeof categoryMapping]}</Space>} />
 
-        <Table.Column title={translate("post.fields.name")} dataIndex="name" render={(_, record: BaseRecord) => <Space>{record.name}</Space>} />
+        <Table.Column title={"name"} dataIndex="name" render={(_, record: BaseRecord) => <Space>{record.name}</Space>} />
+
+        <Table.Column
+          title={translate("post.fields.classification")}
+          dataIndex="classification"
+          render={(_, record: BaseRecord) => <Space>{classificationMapping[record.classification as keyof typeof classificationMapping] ?? "N/A"}</Space>}
+        />
 
         <Table.Column
           title={translate("post.fields.url")}
           dataIndex="url"
           render={(_, record: BaseRecord) => (
             <Space>
-              <a href={`${import.meta.env.VITE_CLIENT_URL}/${record.category}/${record.slug}`} target="_blank" rel="noopener noreferrer">
+              <a href={`${CLIENT_URL}/${record.category}/${record.slug}`} target="_blank" rel="noopener noreferrer">
                 Link
               </a>
             </Space>

@@ -12,8 +12,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = pathname.includes("du-an");
-
+  const isProject = collectionName.includes("du-an");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",
@@ -49,7 +48,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               paddingRight: "10px",
             }}
           >
-            {translate("post.fields.name")}
+            <span style={{ color: "red" }}>*</span> {translate("post.fields.name")}
           </div>
           <Form.Item name={"name"} rules={[{ required: true }]} style={{ width: "80%" }}>
             <Input autoFocus />
@@ -66,7 +65,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               paddingRight: "10px",
             }}
           >
-            {translate("post.fields.thumbnail")}
+            <span style={{ color: "red" }}>*</span> {translate("post.fields.thumbnail")}
           </div>
           <Form.Item name={"thumbnail"} rules={[{ required: true }]}>
             <ImageUploader
@@ -88,7 +87,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               paddingRight: "10px",
             }}
           >
-            {translate("post.fields.category")}
+            <span style={{ color: "red" }}>*</span> {translate("post.fields.category")}
           </div>
           <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "80%" }}>
             <Select disabled onChange={(value) => formProps.form?.setFieldValue("category", value)}>
@@ -112,9 +111,9 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 paddingRight: "10px",
               }}
             >
-              {translate("post.fields.classification")}
+              <span style={{ color: "red" }}>*</span> {translate("post.fields.classification")}
             </div>
-            <Form.Item name={"classification"} style={{ width: "80%" }}>
+            <Form.Item name={"classification"} rules={[{ required: true }]} style={{ width: "80%" }}>
               <Select>
                 {Object.entries(classificationMapping).map(([value, label]) => (
                   <Select.Option key={value} value={value}>

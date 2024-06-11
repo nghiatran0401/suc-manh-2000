@@ -2,8 +2,6 @@ const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 
-// TODO: Save common data into Redis cache
-
 const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
@@ -211,13 +209,13 @@ postRouter.patch("/:id", async (req, res) => {
       let mergedData;
       if (isProject) {
         mergedData = {
-          name: updatedPost.name,
-          thumbnail: updatedPost.thumbnail,
-          description: updatedPost.description,
-          category: updatedPost.category,
-          classification: updatedPost.classification,
+          name: updatedPost.name ?? docData.name,
+          thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
+          description: updatedPost.description ?? docData.description,
+          category: updatedPost.category ?? docData.category,
+          classification: updatedPost.classification ?? docData.classification,
           donor: {
-            description: updatedPost["donor.description"],
+            description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
           },
           progress: [
@@ -254,11 +252,23 @@ postRouter.patch("/:id", async (req, res) => {
             ],
           },
         };
+
+        if (updatedPost.classification !== docData.classification) {
+          // Increase the count of the post's classification
+          const classificationDoc = await firestore.collection("counts").doc("classification").get();
+          if (classificationDoc.exists) {
+            const classificationCounts = classificationDoc.data();
+            classificationCounts[updatedPost.classification] = (classificationCounts[updatedPost.classification] || 0) + 1;
+            classificationCounts[docData.classification] = (classificationCounts[docData.classification] || 0) - 1;
+
+            await firestore.collection("counts").doc("classification").set(classificationCounts);
+          }
+        }
       } else {
         mergedData = {
-          name: updatedPost.name,
-          thumbnail: updatedPost.thumbnail,
-          category: updatedPost.category,
+          name: updatedPost.name ?? docData.name,
+          thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
+          category: updatedPost.category ?? docData.category,
           content: {
             tabs: [
               {

@@ -22,6 +22,7 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
+  const [totalProjects, setTotalProjects] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +31,13 @@ export default function Home() {
       .then(([news, general]) => {
         setNews(news.data);
         setGeneral(general.data);
+        setTotalProjects(
+          general.data.classification["truong-hoc"] +
+            general.data.classification["khu-noi-tru"] +
+            general.data.classification["nha-hanh-phuc"] +
+            general.data.classification["cau-hanh-phuc"] +
+            general.data.classification["wc"]
+        );
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -186,7 +194,7 @@ export default function Home() {
             </Grid>
             <Grid item xs={6} sx={{ textAlign: "center" }}>
               <Typography variant="h1" fontWeight={"bold"} color={"red"}>
-                <CountUp start={0} end={general?.classification?.total} duration={10} />
+                <CountUp start={0} end={totalProjects} duration={10} />
               </Typography>
               <Typography variant="h6" fontWeight={"bold"}>
                 TỔNG DỰ ÁN ĐÃ THỰC HIỆN

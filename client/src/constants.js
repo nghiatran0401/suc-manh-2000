@@ -1,4 +1,4 @@
-export const SERVER_URL = process.env.REACT_APP_SERVER_URL || "http://localhost:4000";
+export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 export const POSTS_PER_PAGE = 12;
 
@@ -44,10 +44,10 @@ export const HEADER_DROPDOWN_LIST = [
     name: "tin-tuc",
     title: "Tin Sức mạnh 2000",
     children: [
-      {
-        path: "/thong-bao",
-        title: "Thông báo Sức Mạnh 2000",
-      },
+      // {
+      //   path: "/thong-bao",
+      //   title: "Thông báo Sức Mạnh 2000",
+      // },
       {
         path: "/thong-bao",
         title: "Tiến độ xây dựng",

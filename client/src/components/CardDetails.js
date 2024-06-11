@@ -142,8 +142,13 @@ export default function CardDetails(props) {
 
         <Grid item xs={3}>
           {post.description && (
-            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} padding={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
-              <Typography variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
+              <img
+                style={{ width: "100%", height: "225px", objectFit: "cover", borderRadius: "16px 16px 0 0" }}
+                alt={post.name}
+                src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+              />
+              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
             </Box>
           )}
 

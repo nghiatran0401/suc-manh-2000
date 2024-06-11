@@ -14,7 +14,7 @@ import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/pr
 import { useEffect } from "react";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
-import { categoryMapping, icons } from "./constants";
+import { SERVER_URL, categoryMapping, icons } from "./constants";
 
 const resources = Object.keys(categoryMapping).map((key, idx) => {
   const Icon = icons[idx];
@@ -58,7 +58,7 @@ function App() {
     <BrowserRouter>
       <RefineKbarProvider>
         <Refine
-          dataProvider={dataProvider(`${import.meta.env.VITE_BASE_URL}`, axiosInstance)}
+          dataProvider={dataProvider(SERVER_URL, axiosInstance)}
           notificationProvider={notificationProvider}
           authProvider={authProvider}
           i18nProvider={i18nProvider}
