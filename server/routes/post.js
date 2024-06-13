@@ -218,6 +218,11 @@ postRouter.patch("/:id", async (req, res) => {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
           },
+          metadata: {
+            totalStudents: updatedPost["metadata.totalStudents"] ?? docData.metadata.totalStudents,
+            totalMoney: updatedPost["metadata.totalMoney"] ?? docData.metadata.totalMoney,
+            totalRooms: updatedPost["metadata.totalRooms"] ?? docData.metadata.totalRooms,
+          },
           progress: [
             {
               name: "Ảnh hiện trạng",

@@ -16,6 +16,15 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",
+    errorNotification(error, values, resource) {
+      console.log({ error, values, resource });
+      return {
+        message: error?.message ??  'Error code: ' + error?.statusCode,
+        description: "Có lỗi xảy ra khi tạo dữ liệu",
+        type: "error",
+      };
+    },
+    
     onMutationSuccess: (data) => {
       window.location.href = `/${collectionName}/edit/${data.data.slug}`;
     },

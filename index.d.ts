@@ -15,6 +15,11 @@ declare namespace Sucmanh2000 {
     content: {
       tabs: TabsContent;
     };
+    metadata: {
+      totalStudents: number,
+      totalMoney: number,
+      totalRooms: number,
+    }
   };
 
   type Donor = {
