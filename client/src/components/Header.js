@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar } from "@mui/material";
+import { useMediaQuery, Container, Typography, AppBar, Box, Toolbar, Menu } from "@mui/material";
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
-import SearchBar from "./SearchBar";
 import { HEADER_DROPDOWN_LIST } from "../constants";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
-
-// TODO: Implement search - sort - filter
-// TODO: Render phong tin hoc
-
 export default function HeaderBar() {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
+  const isMobile = useMediaQuery('(max-width:800px)');
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     axios
@@ -31,8 +39,8 @@ export default function HeaderBar() {
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <Box className="bar-container">
-      <AppBar className="bar" position="fixed" sx={{ top: 0, zIndex: 1000 }}>
-        <Container sx={{ maxWidth: "1080px !important", m: "auto", p: "0 !important" }}>
+      <AppBar className="bar" position="fixed">
+        <Container sx={{ maxWidth: isMobile ? '100%' : '1080px !important', m: "auto", p: "0 !important" }}>
           <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }}>
             {HEADER_DROPDOWN_LIST.map((item, index) => (
               <Box key={index} display={"flex"} m={"0 16px"} style={{ cursor: "pointer" }}>
@@ -41,9 +49,8 @@ export default function HeaderBar() {
                     <img key={index} src={logo} alt="logo" className="logo" onClick={() => navigate(item.path)} />
                   </Box>
                 )}
-
-                {item.title !== "Home" && (
-                  <Box display={"flex"}>
+                {item.title !== "Home" && !isMobile && (
+                  <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} >
                     {item.children.length > 0 ? (
                       <CDropdown className="hover-dropdown">
                         <Typography display={"flex"} alignItems={"center"} variant="body1" fontWeight={"bold"} color="#666666D9">
@@ -53,9 +60,6 @@ export default function HeaderBar() {
                         <CDropdownMenu className="dropdown-menu-position" color="secondary">
                           {item.children.map((child, childIndex) => (
                             <CDropdownItem key={childIndex} href={child.path} style={{ margin: "10px 0" }}>
-                              {/* {console.log("here", child.path.includes("du-an") && child.path)}
-                              {child.title} */}
-
                               <Typography variant="body1">
                                 {child.title}
                                 {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
@@ -73,8 +77,35 @@ export default function HeaderBar() {
                 )}
               </Box>
             ))}
-
-            {/* <SearchBar /> */}
+            {isMobile && (
+              <>
+                <IconButton edge="start" aria-label="menu" onClick={handleMenuOpen}>
+                  <MenuIcon />
+                </IconButton>
+                <Menu
+                  color="red"
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  {HEADER_DROPDOWN_LIST.map((item, index) => (
+                    <MenuItem key={index} onClick={() => { handleMenuClose(); navigate(item.path); }}>
+                      <Typography textAlign="center">{item.title}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            )}
           </Toolbar>
         </Container>
       </AppBar>

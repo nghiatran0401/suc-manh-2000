@@ -17,6 +17,7 @@ const resources = {
           author: "Tác giả",
           publish_date: "Ngày tạo",
           name: "Tên dự án",
+          url: "Link",
           slug: "Slug",
           category: "Danh mục",
           thumbnail: "Ảnh đại diện",

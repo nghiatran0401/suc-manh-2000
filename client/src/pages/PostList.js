@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Box, Pagination } from "@mui/material";
+import { Box, Pagination, LinearProgress } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST } from "../constants";
 import HeaderBar from "../components/Header";
@@ -14,11 +14,15 @@ import LoadingScreen from "../components/LoadingScreen";
 export default function PostList() {
   const { category } = useParams();
   const [posts, setPosts] = useState([]);
-  const [totalPosts, setTotalPosts] = useState({});
+  const [totalPosts, setTotalPosts] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
 
   useEffect(() => {
+    setLoading(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     const startData = (page - 1) * POSTS_PER_PAGE;
     const endData = startData + POSTS_PER_PAGE;
 
@@ -27,7 +31,7 @@ export default function PostList() {
       .then((posts) => {
         setTotalPosts(posts.headers["x-total-count"]);
         setPosts(posts.data);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setLoading(false);
       })
       .catch((e) => console.error(e));
   }, [page, category]);
@@ -37,11 +41,19 @@ export default function PostList() {
     <Box>
       <HeaderBar />
 
-      <CardList title={title} posts={posts} showDescription={true} />
-      {totalPosts > POSTS_PER_PAGE && (
-        <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
-          <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
+      {loading ? (
+        <Box minHeight={"1000px"} width={"1080px"} m={"200px auto"}>
+          <LinearProgress />
         </Box>
+      ) : (
+        <>
+          <CardList title={title} posts={posts} showDescription={false} />
+          {totalPosts > POSTS_PER_PAGE && (
+            <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
+              <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
+            </Box>
+          )}
+        </>
       )}
 
       <CarouselMembers />

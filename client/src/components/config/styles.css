@@ -33,8 +33,8 @@
   margin-top: 10px;
   margin-bottom: 5px;
 }
-.carousel-height-400px {
-  height: 400px;
+.carousel-height-300px {
+  height: 300px;
 }
 
 .carousel-height-800px {
@@ -64,4 +64,12 @@
 
 .rotating {
   animation: square-rotate 2s linear infinite;
+}
+
+@media(max-width: 600px) {
+  .bar-container {
+    .bar {
+      justify-content: center;
+    }
+  }
 }

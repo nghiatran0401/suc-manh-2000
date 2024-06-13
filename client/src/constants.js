@@ -116,7 +116,7 @@ export const HEADER_DROPDOWN_LIST = [
         title: "Dự án 2016",
       },
       {
-        path: "/du-an-2024-2015",
+        path: "/du-an-2014-2015",
         title: "Dự án 2014 - 2015",
       },
       {
@@ -125,29 +125,12 @@ export const HEADER_DROPDOWN_LIST = [
       },
     ],
   },
-  // {
-  //   name: "liet-ke",
-  //   path: "/liet-ke",
-  //   title: "Liệt Kê",
-  //   children: [
-  //     {
-  //       name: "quyen-gop",
-  //       path: "/quyen-gop",
-  //       title: "Quyên Góp",
-  //     },
-  //     {
-  //       name: "quyen-gop",
-  //       path: "/quyen-gop",
-  //       title: "Quyên Góp",
-  //     },
-  //   ],
-  // },
   {
     path: "#",
     title: "Phòng Tin Học Cho Em",
     children: [
       {
-        path: "#",
+        path: "/phong-tin-hoc-2023",
         title: "Phòng tin học 2023",
       },
     ],
