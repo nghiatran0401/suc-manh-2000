@@ -56,6 +56,14 @@ postRouter.post("/", async (req, res) => {
     publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
     description: createdPost.description ?? null,
+    metadata: {
+      totalStudents:
+        updatedPost["metadata.totalStudents"] ?? null,
+      totalMoney:
+        updatedPost["metadata.totalMoney"] ?? null,
+      totalRooms:
+        updatedPost["metadata.totalRooms"] ?? null,
+    },
     category: createdPost.category,
     classification: createdPost.classification ?? null,
     donor: {
