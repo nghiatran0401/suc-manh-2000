@@ -15,8 +15,6 @@ async function updateSlugForAllDocuments() {
   }
 }
 
-// updateSlugForAllDocuments().catch(console.error);
-
 async function updateThumbnailForAllDocuments() {
   const collections = await firestore.listCollections();
   for (const collection of collections) {
@@ -44,4 +42,74 @@ async function updateThumbnailForAllDocuments() {
   }
 }
 
+async function uploadDataToFirestore(file) {
+  // Read the data from the file
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+
+  // Iterate over each item in the data
+  for (const item of data) {
+    // Skip the item if it doesn't have a category
+    if (!item.category) {
+      console.log(`Skipping item ${item.id}`);
+      continue;
+    }
+
+    // Upload the item to Firestore
+    try {
+      await firestore.collection(item.category).doc(item.id).set(item);
+      console.log(`Uploaded item ${item.id} to collection ${item.category}`);
+    } catch (error) {
+      console.error(`Failed to upload item ${item.id}:`, error);
+    }
+  }
+}
+
+async function updateClassificationAndCategoryCounts() {
+  let classificationCounts = {};
+  let categoryCounts = {};
+
+  // Get all collections
+  const collections = await firestore.listCollections();
+
+  // Iterate over each collection
+  for (const collection of collections) {
+    // Get all documents in the collection
+    const documents = await collection.get();
+
+    // Iterate over each document
+    for (const doc of documents.docs) {
+      const data = doc.data();
+      const classification = data.classification;
+      const category = data.category;
+
+      if (classification) {
+        if (!classificationCounts[classification]) {
+          classificationCounts[classification] = 0;
+        }
+        classificationCounts[classification]++;
+      }
+
+      if (category) {
+        if (!categoryCounts[category]) {
+          categoryCounts[category] = 0;
+        }
+        categoryCounts[category]++;
+      }
+    }
+  }
+
+  // Upload the counts to Firestore
+  try {
+    await firestore.collection("counts").doc("classification").set(classificationCounts);
+    await firestore.collection("counts").doc("category").set(categoryCounts);
+    console.log("counts", { classificationCounts, categoryCounts });
+    console.log("Updated classification and category counts");
+  } catch (error) {
+    console.error("Failed to upload counts:", error);
+  }
+}
+
+// updateSlugForAllDocuments().catch(console.error);
 // updateThumbnailForAllDocuments().catch(console.error);
+// uploadDataToFirestore("../transformed_pages.json").catch(console.error);
+updateClassificationAndCategoryCounts().catch(console.error);

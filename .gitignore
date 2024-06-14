@@ -1,42 +1,16 @@
-# client
-client/node_modules
-client/build
-client/package-lock.json
-client/.DS_Store
-client/.env
-
-# server
-server/node_modules
-server/build
-server/package-lock.json
-server/.DS_Store
-server/.env
-
-# admin
-admin/node_modules
-admin/dist
-admin/package-lock.json
-admin/yarn.lock
-admin/.DS_Store
-admin/.env
-
-# Firebase
-.firebase/
-
-.DS_Store
-.kai_prettierrc.json
-
 */.DS_Store
+.DS_Store
 */.env
 */.env.local
-*/.env.development
-*/.env.test
-*/.env.production
-*/.env.staging
-*/.env.local
-*/.env.development.local
-*/.env.test.local
-*/.env.production.local
-*/.env.staging.local
+*/.env.prod
 */node_modules
+*/package-lock.json
+*/yarn.lock
+*/savvy-serenity-424116-g1-c96d21178642.json
 
+client/build
+server/build
+admin/dist
+
+.firebase/
+.kai_prettierrc.json

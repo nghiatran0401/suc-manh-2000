@@ -21,7 +21,8 @@ import {
   InboxOutlined,
 } from "@ant-design/icons";
 
-export const SERVER_URL = import.meta.env.VITE_BASE_URL || "http://localhost:4000";
+export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+export const CLIENT_URL = import.meta.env.VITE_CLIENT_URL;
 
 export const POSTS_PER_PAGE = 12;
 
@@ -42,7 +43,7 @@ export const categoryMapping = {
   "bao-cao-tai-chinh": "Báo cáo tài chính",
   "bao-chi-truyen-hinh": "Báo chí – truyền hình đưa tin",
   "cau-chuyen": "Câu chuyện",
-  "gay-quy": "Gây quỹ",
+  // "gay-quy": "Gây quỹ",
   "tai-tro": "Tài trợ",
 };
 

@@ -23,8 +23,8 @@
     "react-typed": "^2.0.12"
   },
   "scripts": {
-    "client": "env-cmd -f .env.local react-scripts start",
-    "deploy:client": "env-cmd -f .env.prod react-scripts build && firebase deploy --only hosting:savvy-serenity-424116-g1"
+    "client": "copy .env.local .env && env-cmd -f .env react-scripts start",
+    "deploy:client": "copy .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
   },
   "eslintConfig": {
     "extends": [

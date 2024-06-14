@@ -12,8 +12,9 @@ const RichTextEditor = (props: { initialContent?: string; hideButtonList?: boole
             ? []
             : [
                 ["undo", "redo"],
-                ["fontSize"],
+                ["font"],
                 ["formatBlock"],
+                ["fontSize"],
                 ["bold", "underline", "italic", "strike"],
                 ["fontColor", "hiliteColor", "outdent", "indent", "align", "horizontalRule", "list"],
                 ["link", "video"],

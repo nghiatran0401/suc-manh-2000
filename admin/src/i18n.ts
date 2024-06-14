@@ -7,6 +7,7 @@ const resources = {
       table: {
         id: "ID",
         name: "Tên dự án",
+        search: "Tìm kiếm",
         category: "Danh mục",
         publish_date: "Ngày tạo",
         actions: "Tùy chọn",
