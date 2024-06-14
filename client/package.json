@@ -23,8 +23,9 @@
     "react-typed": "^2.0.12"
   },
   "scripts": {
-    "client": "copy .env.local .env && env-cmd -f .env react-scripts start",
-    "deploy:client": "copy .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
+    "client": "cp .env.local .env && env-cmd -f .env react-scripts start",
+    "client:windows": "copy .env.local .env && env-cmd -f .env react-scripts start",
+    "deploy:client": "cp .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
   },
   "eslintConfig": {
     "extends": [

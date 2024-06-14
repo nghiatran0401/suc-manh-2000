@@ -36,7 +36,7 @@ export default function CarouselSlide({ title, items, position }) {
       <Carousel itemClass={position === "progress" ? "carousel-height-300px" : "carousel-height-800px"} responsive={responsive} autoPlay infinite autoPlaySpeed={5000} arrows={items.length > 1}>
         {items.map((item, index) => (
           <Card key={index} style={{ margin: "8px" }}>
-            <img src={item.image} alt={item.caption} style={{ width: "100%", height: "300px", objectFit: "cover", objectPosition: "center" }} />
+            <img src={item.image} alt={item.caption} style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} />
 
             {/* {item.caption && (
               <CardContent>

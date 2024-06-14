@@ -64,10 +64,10 @@ export const HEADER_DROPDOWN_LIST = [
         path: "/cau-chuyen",
         title: "Câu chuyện",
       },
-      {
-        path: "#",
-        title: "Gây quỹ",
-      },
+      // {
+      //   path: "#",
+      //   title: "Gây quỹ",
+      // },
       {
         path: "/tai-tro",
         title: "Tài trợ",
