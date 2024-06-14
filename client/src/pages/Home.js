@@ -170,7 +170,7 @@ export default function Home() {
         </Tabs>
       </Box>
 
-      <Box bgcolor={"#f2f2f2"} height={"100%"}>
+    <Box bgcolor={"#f2f2f2"} height={"100%"}>
   <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
     <Typography variant="h3" color={"red"} textAlign={"center"}>
       Dự Án Sức Mạnh 2000

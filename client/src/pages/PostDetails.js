@@ -35,7 +35,6 @@ export default function PostDetails() {
       <HeaderBar />
 
       {loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}
-
       <CarouselMembers />
       <Companion />
       <Footer />

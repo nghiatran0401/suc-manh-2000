@@ -3,6 +3,9 @@ import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import { convertToEmbedUrl } from "../helpers";
 import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { HEADER_DROPDOWN_LIST } from "../constants";
@@ -10,6 +13,8 @@ import { HEADER_DROPDOWN_LIST } from "../constants";
 export default function CardDetails(props) {
   const { category, id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { post, latestPosts } = props;
 
   return (
@@ -65,7 +70,7 @@ export default function CardDetails(props) {
       )}
 
       <Grid container spacing={3} sx={{ m: "16px 0px" }}>
-        <Grid item xs={9} p={"0px !important"}>
+        <Grid item xs={12} sm= {9} p={"0px !important"}>
           <Box sx={{ wordWrap: "break-word" }}>
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
@@ -97,29 +102,13 @@ export default function CardDetails(props) {
                   </TabList>
 
                   {post.content.tabs.map((tab, index) => (
-                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "720px" }}>
+                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: isMobile ? "100%" : "720px" }}>
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        <Box key={index} maxWidth={"720px"} style={{ wordWrap: "break-word" }}>
+                        <Box key={index} maxWidth={isMobile ? "100%" : "720px"} style={{ wordWrap: "break-word" }}>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: tab.description }} />
                         </Box>
-
-                        {/* <Box>
-                          {tab.embedded_url?.length > 0 &&
-                            tab.embedded_url?.map((url, index) => (
-                              <iframe
-                                key={index}
-                                width="100%"
-                                height="500"
-                                src={url.includes("uploads/") ? url : convertToEmbedUrl(url)}
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                              />
-                            ))}
-                        </Box> */}
-
                         {tab.slide_show?.length > 0 && (
-                          <Box width={"720px"}>
+                          <Box width={isMobile ? "100%" : "720px"}>
                             {/* <CarouselSlide items={tab.slide_show} /> */}
                             {tab.slide_show.map((img, idx) => (
                               <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
@@ -140,7 +129,7 @@ export default function CardDetails(props) {
           </Box>
         </Grid>
 
-        <Grid item xs={3}>
+        <Grid item xs={12} sm= {9} p={"0px !important"} >
           {post.description && (
             <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} padding={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
               <Typography variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
