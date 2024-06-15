@@ -6,15 +6,12 @@ const {
   indexingDataforSearch,
   createRedisIndex,
 } = require("./services/redis");
-
-const redis = new Redis(
-  "redis://default:8xbGVbUUVgIiD7a3HsgvHcSiUFWSsNyo@redis-12784.c1.asia-northeast1-1.gce.redns.redis-cloud.com:12784"
-);
-
+// Initialize Redis
+const redis = new Redis(process.env.REDIS_URL);
 async function indexFirestoreData() {
   // List all collections
   const collections = await firestore.listCollections();
- await createRedisIndex(INDEX_NAME, INDEX_SCHEMA);
+await createRedisIndex(INDEX_NAME, INDEX_SCHEMA);
   for (const collection of collections) {
     const snapshot = await collection.get();
     snapshot.forEach((doc) => {

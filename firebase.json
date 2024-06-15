@@ -7,14 +7,25 @@
     {
       "source": "server",
       "region": "asia-southeast1",
-      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"]
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
     }
   ],
   "hosting": [
     {
       "site": "savvy-serenity-424116-g1",
       "public": "client/build",
-      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
       "rewrites": [
         {
           "source": "/robots.txt",
@@ -29,7 +40,12 @@
     {
       "site": "admin-ec04c",
       "public": "admin/dist",
-      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
       "rewrites": [
         {
           "source": "/robots.txt",
@@ -42,7 +58,23 @@
       ]
     }
   ],
-  "storage": {
-    "rules": "storage.rules"
+
+  "emulators": {
+    "auth": {
+      "port": 4001
+    },
+    "firestore": {
+      "port": 4002
+    },
+    "functions": {
+      "port": 4003
+    },
+    "hosting": {
+      "port": 4004
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4005
+    }
   }
 }

@@ -4,6 +4,7 @@ const redis = new Redis(
   process.env.REDIS_URL
 );
 
+console.log({ REDIS_URL: process.env.REDIS_URL });
 const INDEX_NAME = "cleanName";
 const INDEX_KEY = "cleanName";
 const INDEX_SCHEMA = [
@@ -30,7 +31,8 @@ const redisSearchByName = async (keyword, limit) => {
     0,
     limit ?? 20
   );
-  return result;
+  const {totalCount, documents} = transformRedisSearchResult(result);
+  return documents;
 };
 
 const removeRedisIndex = async (indexName) => {
@@ -89,6 +91,27 @@ async function createRedisIndex(indexName, schema) {
   } catch (error) {
     console.error(`Error creating index '${indexName}':`, error);
   }
+}
+
+function transformRedisSearchResult(data) {
+  const result = [];
+  const totalCount = data[0];
+
+  for (let i = 1; i < data.length; i += 2) {
+    const redisKey = data[i];
+    const fields = data[i + 1];
+    const obj = { redisKey };
+
+    for (let j = 0; j < fields.length; j += 2) {
+      const key = fields[j];
+      const value = fields[j + 1];
+      obj[key] = value;
+    }
+
+    result.push(obj);
+  }
+
+  return { totalCount, documents: result };
 }
 
 module.exports = {
