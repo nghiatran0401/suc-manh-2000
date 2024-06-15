@@ -13,4 +13,6 @@ server/build
 admin/dist
 
 .firebase/
+firebase-debug.log
+firestore-debug.log
 .kai_prettierrc.json
