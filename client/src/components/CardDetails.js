@@ -7,15 +7,20 @@ import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { HEADER_DROPDOWN_LIST } from "../constants";
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
   const [isIframeLoading, setIsIframeLoading] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
+    <Box  maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"} 
+     sx={{ mt: { xs: "0", md: "64px" } }}>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mt: "32px" }}>
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
@@ -72,7 +77,7 @@ export default function CardDetails(props) {
         </Grid>
       )}
 
-      <Grid container spacing={3} sx={{ m: "16px 0px" }}>
+      <Grid item xs={12} md={6} sx={{ m: "16px 0px" }}>   
         <Grid item xs={9} p={"0px !important"}>
           <Box sx={{ wordWrap: "break-word" }}>
             <Box display={"flex"} gap={"10px"}>
@@ -220,16 +225,16 @@ export default function CardDetails(props) {
           )}
 
           {/* TODO: Refactor this as a reused component */}
-          <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+          <Box display={"flex"} flexDirection={"column"} gap={isMobile ? "8px" : "16px"}>
             <Typography variant="h6" fontWeight={"bold"}>
               BÀI VIẾT MỚI NHẤT
             </Typography>
             <Typography variant="h6">-----</Typography>
             {latestPosts.map((latestPost, index) => (
-              <Link component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
-                <Box key={index} display={"flex"} gap={"8px"} alignItems={"center"} minHeight={"56px"}>
-                  <Avatar variant="rounded" src={latestPost.image} />
-                  <Typography variant="body2" color="#334862">
+              <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                <Box display={"flex"} gap={"8px"} alignItems={"center"} minHeight={isMobile ? "40px" : "56px"}>
+                  <Avatar variant="rounded" src={latestPost.image} style={{ width: isMobile ? 30 : 50, height: isMobile ? 30 : 50 }} />
+                  <Typography variant="body2" color="#334862" style={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
                     {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
                   </Typography>
                 </Box>

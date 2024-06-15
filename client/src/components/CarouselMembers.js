@@ -83,7 +83,16 @@ export default function CarouselMembers() {
   };
 
   return (
-    <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+    <Box maxWidth={"1080px"} 
+    display={"flex"} 
+    flexDirection={"column"} 
+    gap={"24px"} m={"64px auto"}   
+    sx={{
+      "@media (max-width: 600px)": {
+        m: "20px auto",
+        p: "0 10px",
+      },
+    }}>
       <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
