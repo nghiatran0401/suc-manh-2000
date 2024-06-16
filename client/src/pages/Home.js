@@ -50,7 +50,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: isMobile ? 4 : 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: isMobile ? 6 : 8 } })
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);

@@ -1,3 +1,4 @@
+import React from "react";
 import { Box, Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
@@ -19,14 +20,9 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
+
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-      {props.title && (
-        <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
-          {props.title}
-        </Typography>
-      )}
-
       <Grid container spacing={3}>
         {props.posts?.map((post, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
@@ -34,29 +30,30 @@ export default function CardList(props) {
               <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
                 <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                   <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
-                  <div style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "rgba(0, 0, 0, 0.8)", padding: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    {post.status === "can-quyen-gop" && <PaidIcon />}
-                    {post.status === "dang-xay-dung" && <EngineeringIcon />}
-                    {post.status === "da-hoan-thanh" && <BeenhereIcon />}
-                    {statusMapping[post.status]}
-                  </div>
+                  {post.status && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        color: "#000",
+                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                        padding: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {post.status === "can-quyen-gop" && <PaidIcon />}
+                      {post.status === "dang-xay-dung" && <EngineeringIcon />}
+                      {post.status === "da-hoan-thanh" && <BeenhereIcon />}
+                      {statusMapping[post.status]}
+                    </div>
+                  )}
                 </div>
 
                 <CardContent>
-                  {post.totalFund !== undefined && (
-                    <Chip
-                      icon={<AttachMoneyIcon />}
-                      label={`Tổng tiền: ${
-                        post.totalFund > 0
-                          ? `${
-                              (post.totalFund / 1000000).toString().length === 4 ? (post.totalFund / 1000000).toString().slice(0, 1) + "." + (post.totalFund / 1000000).toString().slice(1) : post.totalFund / 1000000
-                            } triệu`
-                          : "Đang xử lý"
-                      }`}
-                      variant="outlined"
-                      color="primary"
-                    />
-                  )}
+                  {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
 
                   <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
                     {post.name}

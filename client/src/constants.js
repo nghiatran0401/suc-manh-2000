@@ -1,6 +1,6 @@
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-export const POSTS_PER_PAGE = 12;
+export const POSTS_PER_PAGE = 48;
 
 export const HEADER_DROPDOWN_LIST = [
   {
@@ -144,6 +144,14 @@ export const classificationMapping = {
   "cau-hanh-phuc": "Cầu hạnh phúc",
   wc: "WC",
   "loai-khac": "Loại khác",
+};
+
+export const totalFundMapping = {
+  "less-than-100": "Dưới 100 triệu",
+  "100-to-200": "100 - 200 triệu",
+  "200-to-300": "200 - 300 triệu",
+  "300-to-400": "300 - 400 triệu",
+  "more-than-400": "Hơn 400 triệu",
 };
 
 export const statusMapping = {

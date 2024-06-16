@@ -6,23 +6,55 @@ const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
-  const { _start, _end } = req.query;
+  const { _start, _end, filter } = req.query;
   const { category } = req.params;
 
   try {
     const postCollectionRef = firestore.collection(category);
-    const categoryDoc = await firestore.collection("counts").doc("category").get();
 
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
     let totalCount = categoryDoc.data()[category];
     if (!totalCount) {
       totalCount = await postCollectionRef.get().then((snap) => snap.size);
     }
 
-    const query = postCollectionRef.orderBy("publish_date", "desc");
-    const postCollectionSnapshot = await query
-      .offset(Number(_start))
-      .limit(Number(_end - _start))
-      .get();
+    let query = postCollectionRef.orderBy("publish_date", "desc");
+
+    if (filter && filter.classificationFilter !== "all") {
+      query = query.where("classification", "==", filter.classificationFilter);
+    }
+
+    if (filter && filter.totalFundFilter !== "all") {
+      switch (filter.totalFundFilter) {
+        case "less-than-100":
+          query = query.where("totalFund", "<", 100000000);
+          break;
+        case "100-to-200":
+          query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
+          break;
+        case "200-to-300":
+          query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
+          break;
+        case "300-to-400":
+          query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
+          break;
+        case "more-than-400":
+          query = query.where("totalFund", ">=", 400000000);
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (filter && filter.statusFilter !== "all") {
+      query = query.where("status", "==", filter.statusFilter);
+    }
+
+    if (_end !== undefined) {
+      query = query.offset(Number(_start)).limit(Number(_end - _start));
+    }
+
+    const postCollectionSnapshot = await query.get();
 
     const postCollectionData = postCollectionSnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -32,12 +64,8 @@ postRouter.get("/", async (req, res) => {
       return data;
     });
 
-    if (postCollectionData.length > 0) {
-      res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
-      res.status(200).send(postCollectionData);
-    } else {
-      res.status(404).send({ error: "No posts found for this page" });
-    }
+    res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
+    res.status(200).send(postCollectionData);
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }
