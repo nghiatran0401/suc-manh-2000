@@ -63,7 +63,7 @@ export default function Home() {
     <Box>
       <HeaderBar />
 
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "80px auto"}>
+      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -225,7 +225,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Dự án xây trường đang thực hiện trên toàn quốc.
+                Dự án xây trường
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
@@ -233,7 +233,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Khu nội trú đã hoàn thiện và tiếp tục tăng
+                Khu nội trú
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
@@ -241,7 +241,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Nhà hạnh phúc đã và đang được xây dựng
+                Nhà hạnh phúc
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
@@ -249,7 +249,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Cầu hạnh phúc đã và đang được xây dựng
+                Cầu đi học
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
@@ -257,7 +257,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["wc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                WC đã và đang được xây dựng
+                Nhà vệ sinh
               </Typography>
             </Grid>
           </Grid>

@@ -14,7 +14,7 @@ export default function GioiThieu() {
     <Box>
       <HeaderBar />
 
-      <Box maxWidth={"1080px"} m={isMobile ? "24px 16px" : "80px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+      <Box maxWidth={"1080px"} m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
         <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
           <Typography variant="h5" fontWeight="bold" color={"red"}>
             Về “Sức mạnh 2000” – About The Power of VND 2000

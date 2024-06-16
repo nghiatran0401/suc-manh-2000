@@ -32,7 +32,7 @@ const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({ sticky }) => {
   }
 
   return (
-    <Layout.Header style={headerStyles}>
+    <Layout.Header style={{ ...headerStyles, zIndex: 100 }}>
       <Space size="middle">{user?.name && <Text strong>{user.name}</Text>}</Space>
     </Layout.Header>
   );

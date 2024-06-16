@@ -24,6 +24,8 @@ const resources = {
           thumbnail: "Ảnh đại diện",
           description: "Mô tả",
           classification: "Phân loại",
+          status: "Trạng thái",
+          totalFund: "Tổng tiền",
           donor: {
             name: "Nhà tài trợ",
             description: "Mô tả",

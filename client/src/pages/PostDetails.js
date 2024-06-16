@@ -38,7 +38,7 @@ export default function PostDetails() {
     <Box>
       <HeaderBar />
 
-      <Box m={isMobile ? "24px 16px" : "80px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>
+      <Box m={isMobile ? "24px 16px" : "88px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>
 
       <CarouselMembers />
       <Companion />

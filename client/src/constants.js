@@ -136,3 +136,18 @@ export const HEADER_DROPDOWN_LIST = [
     ],
   },
 ];
+
+export const classificationMapping = {
+  "truong-hoc": "Trường học",
+  "nha-hanh-phuc": "Nhà hạnh phúc",
+  "khu-noi-tru": "Khu nội trú",
+  "cau-hanh-phuc": "Cầu hạnh phúc",
+  wc: "WC",
+  "loai-khac": "Loại khác",
+};
+
+export const statusMapping = {
+  "can-quyen-gop": "Cần quyên góp",
+  "dang-xay-dung": "Đang xây dựng",
+  "da-hoan-thanh": "Đã hoàn thành",
+};

@@ -51,21 +51,23 @@ postRouter.post("/", async (req, res) => {
   const transformedProjectPost = {
     id: createdPost.id,
     name: createdPost.name,
-    thumbnail: createdPost.thumbnail,
     author: "Admin",
     publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
     description: createdPost.description ?? null,
-    metadata: {
-      totalStudents:
-        updatedPost["metadata.totalStudents"] ?? null,
-      totalMoney:
-        updatedPost["metadata.totalMoney"] ?? null,
-      totalRooms:
-        updatedPost["metadata.totalRooms"] ?? null,
-    },
+    thumbnail: createdPost.thumbnail,
+    // metadata: {
+    //   totalStudents:
+    //     updatedPost["metadata.totalStudents"] ?? null,
+    //   totalMoney:
+    //     updatedPost["metadata.totalMoney"] ?? null,
+    //   totalRooms:
+    //     updatedPost["metadata.totalRooms"] ?? null,
+    // },
+    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
     category: createdPost.category,
-    classification: createdPost.classification ?? null,
+    classification: createdPost.classification,
+    status: createdPost.status,
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -216,21 +218,24 @@ postRouter.patch("/:id", async (req, res) => {
 
       let mergedData;
       if (isProject) {
+        // This is a project post
         mergedData = {
           name: updatedPost.name ?? docData.name,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
           description: updatedPost.description ?? docData.description,
+          totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund,
           category: updatedPost.category ?? docData.category,
           classification: updatedPost.classification ?? docData.classification,
+          status: updatedPost.status ?? docData.status,
           donor: {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
           },
-          metadata: {
-            totalStudents: updatedPost["metadata.totalStudents"] ?? docData.metadata.totalStudents,
-            totalMoney: updatedPost["metadata.totalMoney"] ?? docData.metadata.totalMoney,
-            totalRooms: updatedPost["metadata.totalRooms"] ?? docData.metadata.totalRooms,
-          },
+          // metadata: {
+          //   totalStudents: updatedPost["metadata.totalStudents"] ?? docData.metadata.totalStudents,
+          //   totalMoney: updatedPost["metadata.totalMoney"] ?? docData.metadata.totalMoney,
+          //   totalRooms: updatedPost["metadata.totalRooms"] ?? docData.metadata.totalRooms,
+          // },
           progress: [
             {
               name: "Ảnh hiện trạng",
@@ -278,6 +283,7 @@ postRouter.patch("/:id", async (req, res) => {
           }
         }
       } else {
+        // This is an news post
         mergedData = {
           name: updatedPost.name ?? docData.name,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,

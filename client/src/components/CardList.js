@@ -1,7 +1,12 @@
-import { Box, Typography, Grid, CardContent, Card as MuiCard, Button } from "@mui/material";
+import { Box, Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import BeenhereIcon from "@mui/icons-material/Beenhere";
+import PaidIcon from "@mui/icons-material/Paid";
 import { truncate } from "../helpers";
+import { classificationMapping, statusMapping } from "../constants";
 
 const Card = styled(MuiCard)({
   minHeight: "500px",
@@ -26,12 +31,34 @@ export default function CardList(props) {
         {props.posts?.map((post, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-              <Card style={{ overflow: "visible", minHeight: "fit-content", minHeight: props.showDescription ? "500px" : "400px" }}>
+              <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
                 <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                   <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+                  <div style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "rgba(0, 0, 0, 0.8)", padding: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    {post.status === "can-quyen-gop" && <PaidIcon />}
+                    {post.status === "dang-xay-dung" && <EngineeringIcon />}
+                    {post.status === "da-hoan-thanh" && <BeenhereIcon />}
+                    {statusMapping[post.status]}
+                  </div>
                 </div>
+
                 <CardContent>
-                  <Typography variant="body1" fontWeight={"bold"}>
+                  {post.totalFund !== undefined && (
+                    <Chip
+                      icon={<AttachMoneyIcon />}
+                      label={`Tổng tiền: ${
+                        post.totalFund > 0
+                          ? `${
+                              (post.totalFund / 1000000).toString().length === 4 ? (post.totalFund / 1000000).toString().slice(0, 1) + "." + (post.totalFund / 1000000).toString().slice(1) : post.totalFund / 1000000
+                            } triệu`
+                          : "Đang xử lý"
+                      }`}
+                      variant="outlined"
+                      color="primary"
+                    />
+                  )}
+
+                  <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
                     {post.name}
                   </Typography>
 
@@ -51,9 +78,11 @@ export default function CardList(props) {
                     </>
                   )}
 
-                  <Typography variant="body2" mt={"16px"}>
-                    {new Date(post.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
-                  </Typography>
+                  {post.classification && (
+                    <Typography variant="body2" mt={"16px"} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                      {classificationMapping[post.classification]}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Link>

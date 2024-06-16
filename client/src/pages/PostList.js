@@ -45,7 +45,7 @@ export default function PostList() {
     <Box>
       <HeaderBar />
 
-      <Box m={isMobile ? "24px 16px" : "80px auto"}>
+      <Box m={isMobile ? "24px 16px" : "88px auto"}>
         {loading ? (
           <Box m={"auto"}>
             <LinearProgress />
