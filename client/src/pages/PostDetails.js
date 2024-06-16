@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import { useParams } from "react-router-dom";
-import { Box } from "@mui/material";
+import { useMediaQuery, Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
@@ -15,6 +16,9 @@ export default function PostDetails() {
   const [post, setPost] = useState({});
   const [latestPosts, setLatestPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setLoading(true);
@@ -34,7 +38,8 @@ export default function PostDetails() {
     <Box>
       <HeaderBar />
 
-      {loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}
+      <Box m={isMobile ? "24px 16px" : "80px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>
+
       <CarouselMembers />
       <Companion />
       <Footer />

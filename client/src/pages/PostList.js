@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Box, Pagination, LinearProgress } from "@mui/material";
+import { useMediaQuery, Box, Pagination, LinearProgress } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST } from "../constants";
 import HeaderBar from "../components/Header";
@@ -17,7 +18,10 @@ export default function PostList() {
   const [totalPosts, setTotalPosts] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setLoading(true);
@@ -41,20 +45,22 @@ export default function PostList() {
     <Box>
       <HeaderBar />
 
-      {loading ? (
-        <Box minHeight={"1000px"} width={"1080px"} m={"200px auto"}>
-          <LinearProgress />
-        </Box>
-      ) : (
-        <>
-          <CardList title={title} posts={posts} showDescription={false} />
-          {totalPosts > POSTS_PER_PAGE && (
-            <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
-              <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
-            </Box>
-          )}
-        </>
-      )}
+      <Box m={isMobile ? "24px 16px" : "80px auto"}>
+        {loading ? (
+          <Box m={"auto"}>
+            <LinearProgress />
+          </Box>
+        ) : (
+          <>
+            <CardList title={title} posts={posts} showDescription={false} />
+            {totalPosts > POSTS_PER_PAGE && (
+              <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
+                <Pagination count={POSTS_PER_PAGE} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
+              </Box>
+            )}
+          </>
+        )}
+      </Box>
 
       <CarouselMembers />
       <Companion />

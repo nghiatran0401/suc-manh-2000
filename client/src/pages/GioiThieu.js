@@ -1,18 +1,22 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { useMediaQuery, Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import HeaderBar from "../components/Header";
 import CarouselMembers from "../components/CarouselMembers";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
 
 export default function GioiThieu() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box>
       <HeaderBar />
 
-      <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-        <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px"}>
-          <Typography variant="h6" fontWeight={"bold"}>
+      <Box maxWidth={"1080px"} m={isMobile ? "24px 16px" : "80px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+        <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+          <Typography variant="h5" fontWeight="bold" color={"red"}>
             Về “Sức mạnh 2000” – About The Power of VND 2000
           </Typography>
 

@@ -3,7 +3,6 @@ import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import { truncate } from "../helpers";
 
-
 const Card = styled(MuiCard)({
   minHeight: "500px",
   cursor: "pointer",
@@ -15,15 +14,12 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
-  console.log(props.tabName  )
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
       {props.title && (
-        <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
-          <Typography variant="h6" fontWeight={"bold"}>
-            {props.title}
-          </Typography>
-        </Box>
+        <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
+          {props.title}
+        </Typography>
       )}
 
       <Grid container spacing={3}>

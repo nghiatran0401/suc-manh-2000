@@ -58,7 +58,7 @@ export const MEMBERS = [
   {
     name: "NGUYỄN THỊ ANH ĐÀO",
     role: "Vận hành dự án Nuôi em 500 thuộc Nhà hạnh phúc",
-    description: "Hơn 5 năm hoạt động công tác xã hội, phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi. Hiện tại đang là Quản lý Nhân sự của Tập đoàn đa quốc gia tại Việt Nam.",
+    description: "Hơn 5 năm hoạt động công tác xã hội, phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi.",
     image: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/team%2FNguyen_Thi_Anh_Dao.jpg?alt=media&token=b1bccfc0-53d0-4e32-b371-7ec58ecfebd4",
   },
 ];
@@ -83,25 +83,37 @@ export default function CarouselMembers() {
   };
 
   return (
-    <Box maxWidth={"1080px"} 
-    display={"flex"} 
-    flexDirection={"column"} 
-    gap={"24px"} m={"64px auto"}   
-    sx={{
-      "@media (max-width: 600px)": {
-        m: "20px auto",
-        p: "0 10px",
-      },
-    }}>
+    <Box
+      maxWidth={"1080px"}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"24px"}
+      m={"64px auto"}
+      sx={{
+        "@media (max-width: 600px)": {
+          m: "16px auto",
+          p: "0 16px",
+        },
+      }}
+    >
       <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
 
       <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
         {MEMBERS.map((item, index) => (
-          <Card key={index} className="card-contanier" sx={{ m: "16px" }}>
+          <Card
+            key={index}
+            className="card-contanier"
+            sx={{
+              m: "16px",
+              "@media (max-width: 600px)": {
+                m: 0,
+              },
+            }}
+          >
             <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
-            <CardContent sx={{ minHeight: "350px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <CardContent sx={{ minHeight: "300px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
               {item.name && item.role && (
                 <>
                   <Typography align="center" variant="h6" fontWeight={"bold"}>
