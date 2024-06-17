@@ -26,15 +26,35 @@ const COMPANIONS = [
 
 export default function Companion() {
   return (
-    <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+    <Box
+      maxWidth={"1080px"}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"24px"}
+      m={"64px auto"}
+      sx={{
+        "@media (max-width: 600px)": {
+          m: "16px auto",
+          p: "0 16px",
+        },
+      }}
+    >
       <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đơn vị đồng hành
       </Typography>
 
-      <Grid display={"flex"} gap={5} flexWrap="nowrap" alignItems={"center"} justifyContent={"space-between"}>
+      <Grid container display={"flex"} gap={5} flexWrap="nowrap" alignItems={"center"} justifyContent={"space-between"}>
         {COMPANIONS.map((d, i) => (
           <Grid item xs={12} sm={6} md={4} key={i}>
-            <img src={d.url} alt style={{ width: "100%", height: "100px", objectFit: "contain" }} />
+            <img
+              src={d.url}
+              alt=""
+              style={{
+                width: "100%",
+                height: "100px",
+                objectFit: "contain",
+              }}
+            />
           </Grid>
         ))}
       </Grid>

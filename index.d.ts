@@ -2,24 +2,25 @@ declare namespace Sucmanh2000 {
   type Post = {
     id: number;
     name: string;
-    thumbnail: string
     author: string;
     publish_date: string;
     slug: string;
-    category: string;
     description?: string;
+    thumbnail: string;
     category?: string;
     classification?: string;
+    totalFund?: number;
+    status?: string;
     donor?: Donor;
     progress?: Progress;
     content: {
       tabs: TabsContent;
     };
-    metadata: {
-      totalStudents: number,
-      totalMoney: number,
-      totalRooms: number,
-    }
+    // metadata: {
+    //   totalStudents: number,
+    //   totalMoney: number,
+    //   totalRooms: number,
+    // }
   };
 
   type Donor = {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -23,21 +24,24 @@ export default function Home() {
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
   const [totalProjects, setTotalProjects] = useState(0);
+
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setLoading(true);
     Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
       .then(([news, general]) => {
+        const total =
+          general.data.classification["truong-hoc"] +
+          general.data.classification["khu-noi-tru"] +
+          general.data.classification["nha-hanh-phuc"] +
+          general.data.classification["cau-hanh-phuc"] +
+          general.data.classification["wc"];
         setNews(news.data);
         setGeneral(general.data);
-        setTotalProjects(
-          general.data.classification["truong-hoc"] +
-            general.data.classification["khu-noi-tru"] +
-            general.data.classification["nha-hanh-phuc"] +
-            general.data.classification["cau-hanh-phuc"] +
-            general.data.classification["wc"]
-        );
+        setTotalProjects(total);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -46,7 +50,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: isMobile ? 6 : 8 } })
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);
@@ -59,14 +63,14 @@ export default function Home() {
     <Box>
       <HeaderBar />
 
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"32px auto"}>
+      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
 
         <Box>
           <Grid container spacing={3}>
-            <Grid item xs={8}>
+            <Grid item xs={12} sm={8}>
               <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`}>
                 <Card
                   sx={{
@@ -98,7 +102,7 @@ export default function Home() {
                 </Card>
               </Link>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12} sm={4}>
               <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
@@ -137,7 +141,19 @@ export default function Home() {
         </Box>
       </Box>
 
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+      <Box
+        maxWidth={"1080px"}
+        display={"flex"}
+        flexDirection={"column"}
+        gap={"24px"}
+        m={"64px auto"}
+        sx={{
+          "@media (max-width: 600px)": {
+            m: "16px auto",
+            p: "0 16px",
+          },
+        }}
+      >
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Dự án thiện nguyện
         </Typography>
@@ -153,12 +169,11 @@ export default function Home() {
             ))}
           </TabList>
 
-          {loading && (
+          {loading ? (
             <Box minHeight={"500px"} mt={"200px"}>
               <LinearProgress />
             </Box>
-          )}
-          {!loading && (
+          ) : (
             <>
               {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
                 <Box display={"flex"} flexDirection={"column"} gap="24px">
@@ -178,8 +193,8 @@ export default function Home() {
         </Tabs>
       </Box>
 
-      <Box bgcolor={"#f2f2f2"} height={"550px"}>
-        <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"32px"}>
+      <Box bgcolor={"#f2f2f2"} height={"100%"} p={"8px 0"}>
+        <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
           <Typography variant="h3" color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
@@ -187,12 +202,12 @@ export default function Home() {
 
         <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={6} sx={{ textAlign: "right" }}>
+            <Grid item xs={12} sm={6} sx={{ textAlign: { xs: "center", sm: "right" } }}>
               <Typography variant="h6">
                 Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
               </Typography>
             </Grid>
-            <Grid item xs={6} sx={{ textAlign: "center" }}>
+            <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
               <Typography variant="h1" fontWeight={"bold"} color={"red"}>
                 <CountUp start={0} end={totalProjects} duration={10} />
               </Typography>
@@ -203,46 +218,46 @@ export default function Home() {
           </Grid>
         </Box>
 
-        <Box maxWidth={"1080px"} display={"flex"} gap={"24px"} m={"96px auto"}>
+        <Box maxWidth={"1080px"} display={"flex"} gap={"24px"} m={"32px auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"}>
-                Dự án xây trường đang thực hiện trên toàn quốc.
+              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+                Dự án xây trường
               </Typography>
             </Grid>
-            <Grid item xs={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"}>
-                Khu nội trú đã hoàn thiện và tiếp tục tăng
+              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+                Khu nội trú
               </Typography>
             </Grid>
-            <Grid item xs={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"}>
-                Nhà hạnh phúc đã và đang được xây dựng
+              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+                Nhà hạnh phúc
               </Typography>
             </Grid>
-            <Grid item xs={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"}>
-                Cầu hạnh phúc đã và đang được xây dựng
+              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+                Cầu đi học
               </Typography>
             </Grid>
-            <Grid item xs={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["wc"]} duration={10} />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"}>
-                WC đã và đang được xây dựng
+              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+                Nhà vệ sinh
               </Typography>
             </Grid>
           </Grid>

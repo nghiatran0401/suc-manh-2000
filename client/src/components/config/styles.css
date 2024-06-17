@@ -65,3 +65,11 @@
 .rotating {
   animation: square-rotate 2s linear infinite;
 }
+
+@media(max-width: 600px) {
+  .bar-container {
+    .bar {
+      justify-content: center;
+    }
+  }
+}

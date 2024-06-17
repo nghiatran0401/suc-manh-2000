@@ -2,7 +2,7 @@ export function truncate(str, num) {
   return str.length > num ? str.slice(0, num) + "..." : str;
 }
 
-export function convertToEmbedUrl(url) {
+export function convertToYoutubeUrl(url) {
   const videoId = url.split("v=")[1];
   const ampersandPosition = videoId.indexOf("&");
   if (ampersandPosition !== -1) {

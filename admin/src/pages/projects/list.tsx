@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters, HttpError } from "@refinedev/core";
 import { useTable, List, EditButton, ShowButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form } from "antd";
-import { CLIENT_URL, categoryMapping, classificationMapping } from "../../constants";
+import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -15,11 +15,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
     name: string;
   }
 
-  const { tableProps, searchFormProps } = useTable<
-    Sucmanh2000.Post,
-    HttpError,
-    ISearch
-  >({
+  const { tableProps, searchFormProps } = useTable<Sucmanh2000.Post, HttpError, ISearch>({
     syncWithLocation: true,
     pagination: {
       mode: "server",
@@ -54,47 +50,24 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         <SaveButton onClick={searchFormProps.form?.submit} />
       </Form>
       <Table {...tableProps} rowKey="id">
-        <Table.Column
-          title={translate("table.category")}
-          dataIndex="category"
-          render={(_, record: BaseRecord) => (
-            <Space>
-              {categoryMapping &&
-                categoryMapping[
-                  record.category as keyof typeof categoryMapping
-                ]}
-            </Space>
-          )}
-        />
+        <Table.Column title={translate("table.category")} dataIndex="category" render={(_, record: BaseRecord) => <Space>{categoryMapping && categoryMapping[record.category as keyof typeof categoryMapping]}</Space>} />
 
-        <Table.Column
-          title={"name"}
-          dataIndex="name"
-          render={(_, record: BaseRecord) => <Space>{record.name}</Space>}
-        />
+        <Table.Column title={translate("table.name")} dataIndex="name" render={(_, record: BaseRecord) => <Space>{record.name}</Space>} />
 
         <Table.Column
           title={translate("post.fields.classification")}
           dataIndex="classification"
-          render={(_, record: BaseRecord) => (
-            <Space>
-              {classificationMapping[
-                record.classification as keyof typeof classificationMapping
-              ] ?? "N/A"}
-            </Space>
-          )}
+          render={(_, record: BaseRecord) => <Space>{classificationMapping[record.classification as keyof typeof classificationMapping] ?? "N/A"}</Space>}
         />
+
+        <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />
 
         <Table.Column
           title={translate("post.fields.url")}
           dataIndex="url"
           render={(_, record: BaseRecord) => (
             <Space>
-              <a
-                href={`${CLIENT_URL}/${record.category}/${record.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={`${CLIENT_URL}/${record.category}/${record.slug}`} target="_blank" rel="noopener noreferrer">
                 Link
               </a>
             </Space>
