@@ -8,11 +8,11 @@ const postRouter = express.Router({ mergeParams: true });
 postRouter.get("/", async (req, res) => {
   const { _start, _end } = req.query;
   const { category } = req.params;
-
+  console.log({ category, _start, _end});
   try {
     const postCollectionRef = firestore.collection(category);
     const categoryDoc = await firestore.collection("counts").doc("category").get();
-
+    console.log(categoryDoc.data());
     let totalCount = categoryDoc.data()[category];
     if (!totalCount) {
       totalCount = await postCollectionRef.get().then((snap) => snap.size);
@@ -39,6 +39,7 @@ postRouter.get("/", async (req, res) => {
       res.status(404).send({ error: "No posts found for this page" });
     }
   } catch (error) {
+    console.log({ error });
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }
 });
