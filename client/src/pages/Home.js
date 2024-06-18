@@ -50,7 +50,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: isMobile ? 6 : 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);
@@ -176,9 +176,11 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
-                <Box display={"flex"} flexDirection={"column"} gap="24px">
+                <Box display={"flex"} flexDirection={"column"} gap="">
                   <TabPanel key={index} style={{ marginTop: "24px" }}>
-                    <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+                    <Grid container spacing={3} p={"16px"}>
+                      <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+                    </Grid>
                   </TabPanel>
 
                   {projectTab === child.path && (

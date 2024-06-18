@@ -1,6 +1,6 @@
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-export const POSTS_PER_PAGE = 48;
+export const POSTS_PER_PAGE = 8;
 
 export const HEADER_DROPDOWN_LIST = [
   {

@@ -8,7 +8,8 @@ const postRouter = express.Router({ mergeParams: true });
 postRouter.get("/", async (req, res) => {
   const { _start, _end, filter } = req.query;
   const { category } = req.params;
-  console.log({ category, _start, _end });
+  const isProject = category.includes("du-an");
+
   try {
     const postCollectionRef = firestore.collection(category);
     const categoryDoc = await firestore.collection("counts").doc("category").get();
@@ -19,35 +20,50 @@ postRouter.get("/", async (req, res) => {
     }
 
     let query = postCollectionRef.orderBy("publish_date", "desc");
+    let totalFilterCount;
 
-    if (filter && filter.classificationFilter !== "all") {
-      query = query.where("classification", "==", filter.classificationFilter);
-    }
+    if (filter && isProject) {
+      const ALL = "all";
+      const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
+      const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
 
-    if (filter && filter.totalFundFilter !== "all") {
-      switch (filter.totalFundFilter) {
-        case "less-than-100":
-          query = query.where("totalFund", "<", 100000000);
-          break;
-        case "100-to-200":
-          query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
-          break;
-        case "200-to-300":
-          query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
-          break;
-        case "300-to-400":
-          query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
-          break;
-        case "more-than-400":
-          query = query.where("totalFund", ">=", 400000000);
-          break;
-        default:
-          break;
+      if (filter.classificationFilter !== ALL) {
+        query = query.where("classification", "==", filter.classificationFilter);
+      } else {
+        query = query.where("classification", "in", CLASSIFICATIONS);
       }
-    }
 
-    if (filter && filter.statusFilter !== "all") {
-      query = query.where("status", "==", filter.statusFilter);
+      if (filter.totalFundFilter !== ALL) {
+        switch (filter.totalFundFilter) {
+          case "less-than-100":
+            query = query.where("totalFund", "<", 100000000);
+            break;
+          case "100-to-200":
+            query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
+            break;
+          case "200-to-300":
+            query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
+            break;
+          case "300-to-400":
+            query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
+            break;
+          case "more-than-400":
+            query = query.where("totalFund", ">=", 400000000);
+            break;
+          default:
+            break;
+        }
+      } else {
+        query = query;
+      }
+
+      if (filter.statusFilter !== ALL) {
+        query = query.where("status", "==", filter.statusFilter);
+      } else {
+        query = query.where("status", "in", STATUSES);
+      }
+
+      totalFilterCount = await query.get().then((snap) => snap.size);
     }
 
     if (_end !== undefined) {
@@ -64,7 +80,11 @@ postRouter.get("/", async (req, res) => {
       return data;
     });
 
-    res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
+    res.set({
+      "X-Total-Count": totalCount?.toString(),
+      "X-Total-Filter-Count": totalFilterCount?.toString() ?? "0",
+      "Access-Control-Expose-Headers": "X-Total-Count, X-Total-Filter-Count",
+    });
     res.status(200).send(postCollectionData);
   } catch (error) {
     console.log({ error });
