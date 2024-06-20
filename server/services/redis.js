@@ -1,96 +1,72 @@
-// const Redis = require("ioredis");
-// const { modifyNameForSearch } = require("../utils/search");
+const Redis = require("ioredis");
+const { convertToCleanedName } = require("../utils/search");
+require("dotenv").config();
 
-// const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL);
 
-// console.log({ REDIS_URL: process.env.REDIS_URL });
-// const INDEX_NAME = "cleanName";
-// const INDEX_KEY = "cleanName";
-// const INDEX_SCHEMA = ["SCHEMA", "name", "TEXT", "id", "TEXT", "thumbnail", "TEXT", "collection", "TEXT", `${INDEX_KEY}`, "TEXT"];
+const INDEX_NAME = "post_index";
+const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleaned_name", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT"];
+const SEARCH_FIELD = ["name", "cleaned_name"];
 
-// const redisSearchByName = async (keyword, limit) => {
-//   console.log({ keyword, limit });
-//   const result = await redis.call("FT.SEARCH", INDEX_NAME, `@${INDEX_KEY}:${keyword}*`, "LIMIT", 0, limit ?? 20);
-//   const { totalCount, documents } = transformRedisSearchResult(result);
-//   return documents;
-// };
+// https://d128ysc22mu7qe.cloudfront.net/Commands/#ftcreate
+async function createSearchIndex() {
+  try {
+    await redis.call("FT.INFO", INDEX_NAME);
+    console.log(`Index '${INDEX_NAME}' already exists`);
+  } catch (error) {
+    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
+    console.log(`Index '${INDEX_NAME}' created successfully`);
+  }
+}
 
-// const removeRedisIndex = async (indexName) => {
-//   try {
-//     const exists = await redis.exists(indexName);
-//     if (exists) {
-//       await redis.call("FT.DROPINDEX", indexName);
-//       console.log(`Index '${indexName}' dropped successfully`);
-//     } else {
-//       console.log(`Index '${indexName}' does not exist`);
-//     }
-//   } catch (error) {
-//     console.error(`Error dropping index '${indexName}':`, error);
-//   }
-// };
+// https://d128ysc22mu7qe.cloudfront.net/Commands/#ftadd
+async function addDocumentToIndex(data) {
+  await redis.call(
+    "FT.ADD",
+    INDEX_NAME,
+    `post:${data.collection_id}:${data.doc_id}`,
+    1.0,
+    "REPLACE",
+    "FIELDS",
+    "id",
+    data.id,
+    "slug",
+    data.slug,
+    "name",
+    data.name,
+    "cleaned_name",
+    convertToCleanedName(data.name),
+    "thumbnail",
+    data.thumbnail,
+    "category",
+    data.category,
+    "classification",
+    data.classification
+  );
+  console.log(`Document '${data.id}' added to index '${INDEX_NAME}' successfully`);
+}
 
-// const indexingDataforSearch = async (data) => {
-//   await redis.call(
-//     "FT.ADD",
-//     INDEX_NAME,
-//     `doc:${data.collection}:${data.id}`,
-//     1.0,
-//     "REPLACE",
-//     "FIELDS",
-//     "name",
-//     data.name,
-//     "cleanName",
-//     modifyNameForSearch(data.name),
-//     "id",
-//     data.id,
-//     "collection",
-//     data.collection,
-//     "thumbnail",
-//     data.thumbnail || ""
-//   );
-// };
+// https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
+const redisSearchByName = async (searchKey) => {
+  const results = await redis.call("FT.SEARCH", INDEX_NAME, `@${SEARCH_FIELD[0]}:${searchKey}*`, "LIMIT", 0, 10);
+  const transformedResults = [];
+  // const totalCount = results[0];
 
-// async function createRedisIndex(indexName, schema) {
-//   try {
-//     const isExist = await redis.exists(indexName);
-//     console.log({ isExist });
-//     if (isExist) {
-//       await removeRedisIndex(indexName);
-//     }
-//     await redis.call("FT.CREATE", indexName, "ON", "HASH", "PREFIX", "1", "doc:", ...(schema ?? INDEX_SCHEMA));
-//     console.log(`Index '${indexName}' created successfully`);
-//   } catch (error) {
-//     console.error(`Error creating index '${indexName}':`, error);
-//   }
-// }
+  for (let i = 1; i < results.length; i += 2) {
+    const redisKey = results[i];
+    const fields = results[i + 1];
+    const obj = { redisKey };
 
-// function transformRedisSearchResult(data) {
-//   const result = [];
-//   const totalCount = data[0];
+    for (let j = 0; j < fields.length; j += 2) {
+      const key = fields[j];
+      const value = fields[j + 1];
+      obj[key] = value;
+    }
 
-//   for (let i = 1; i < data.length; i += 2) {
-//     const redisKey = data[i];
-//     const fields = data[i + 1];
-//     const obj = { redisKey };
+    transformedResults.push(obj);
+  }
 
-//     for (let j = 0; j < fields.length; j += 2) {
-//       const key = fields[j];
-//       const value = fields[j + 1];
-//       obj[key] = value;
-//     }
+  return transformedResults;
+};
 
-//     result.push(obj);
-//   }
-
-//   return { totalCount, documents: result };
-// }
-
-// module.exports = {
-//   redisSearchByName,
-//   removeRedisIndex,
-//   createRedisIndex,
-//   indexingDataforSearch,
-//   INDEX_SCHEMA,
-//   INDEX_NAME,
-//   INDEX_KEY,
-// };
+module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex };

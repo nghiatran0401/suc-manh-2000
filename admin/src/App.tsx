@@ -26,7 +26,7 @@ const resources = Object.keys(categoryMapping).map((key, idx) => {
     edit: `/${key}/edit/:id`,
     meta: {
       icon: <Icon />,
-      label: categoryMapping[key as keyof typeof categoryMapping],
+      label: `${categoryMapping[key as keyof typeof categoryMapping]} ()`,
     },
   };
 });

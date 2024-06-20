@@ -3,7 +3,7 @@ import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
+import InfiniteScroll from "react-infinite-scroller";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping } from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
@@ -48,6 +48,7 @@ export default function PostList() {
 
   const fetchMoreData = () => {
     const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
+    console.log("here", { nextPage, _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE });
 
     axios
       .get(SERVER_URL + "/" + category, { params: { _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE, filter: { classificationFilter, totalFundFilter, statusFilter } } })
@@ -146,8 +147,8 @@ export default function PostList() {
                 dataLength={isProject ? totalFilterPosts : posts.length}
                 hasMore={hasMore}
                 loader={<LinearProgress sx={{ mt: "100px" }} />}
-                next={fetchMoreData}
-                scrollThreshold={0.6}
+                loadMore={fetchMoreData}
+                scrollThreshold={0.5}
                 style={{ overflow: "hidden" }}
               >
                 <Grid container spacing={3} p={"16px"}>

@@ -36,7 +36,7 @@ export const categoryMapping = {
   "du-an-2018": "Dự án 2018",
   "du-an-2017": "Dự án 2017",
   "du-an-2016": "Dự án 2016",
-  "du-an-2024-2015": "Dự án 2014 - 2015",
+  "du-an-2014-2015": "Dự án 2014 - 2015",
   "du-an-2012": "Dự án 2012",
   "thong-bao": "Tiến độ xây dựng",
   // "tien-do-xay-dung": "Tiến độ xây dựng",

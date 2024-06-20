@@ -1,5 +1,5 @@
-const { firestore } = require("../server/firebase");
-const projectsData = require("../transformed_pages.json");
+const { firestore } = require("./firebase");
+const projectsData = require("../transformed_.json");
 const newsData = require("../transformed_posts.json");
 
 async function updateSlugForAllDocuments(original_data) {

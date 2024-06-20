@@ -204,7 +204,7 @@ export default function Home() {
 
         <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={12} sm={6} sx={{ textAlign: { xs: "center", sm: "right" } }}>
+            <Grid item xs={12} sm={6} sx={{ textAlign: isMobile ? "center" : "right" }} p={isMobile ? "0 8px" : 0}>
               <Typography variant="h6">
                 Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
               </Typography>

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import { Box, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Box, IconButton, MenuItem, Select, Stack, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 

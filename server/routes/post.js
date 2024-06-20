@@ -1,6 +1,7 @@
 const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
+const { POSTS_PER_PAGE } = require("../constants");
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -22,7 +23,7 @@ postRouter.get("/", async (req, res) => {
     let query = postCollectionRef.orderBy("publish_date", "desc");
     let totalFilterCount;
 
-    if (filter && isProject) {
+    if (filter && isProject && totalCount > POSTS_PER_PAGE) {
       const ALL = "all";
       const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
       const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
@@ -87,7 +88,6 @@ postRouter.get("/", async (req, res) => {
     });
     res.status(200).send(postCollectionData);
   } catch (error) {
-    console.log({ error });
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }
 });
