@@ -6,23 +6,55 @@ const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
-  const { _start, _end } = req.query;
+  const { _start, _end, filter } = req.query;
   const { category } = req.params;
 
   try {
     const postCollectionRef = firestore.collection(category);
-    const categoryDoc = await firestore.collection("counts").doc("category").get();
 
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
     let totalCount = categoryDoc.data()[category];
     if (!totalCount) {
       totalCount = await postCollectionRef.get().then((snap) => snap.size);
     }
 
-    const query = postCollectionRef.orderBy("publish_date", "desc");
-    const postCollectionSnapshot = await query
-      .offset(Number(_start))
-      .limit(Number(_end - _start))
-      .get();
+    let query = postCollectionRef.orderBy("publish_date", "desc");
+
+    if (filter && filter.classificationFilter !== "all") {
+      query = query.where("classification", "==", filter.classificationFilter);
+    }
+
+    if (filter && filter.totalFundFilter !== "all") {
+      switch (filter.totalFundFilter) {
+        case "less-than-100":
+          query = query.where("totalFund", "<", 100000000);
+          break;
+        case "100-to-200":
+          query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
+          break;
+        case "200-to-300":
+          query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
+          break;
+        case "300-to-400":
+          query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
+          break;
+        case "more-than-400":
+          query = query.where("totalFund", ">=", 400000000);
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (filter && filter.statusFilter !== "all") {
+      query = query.where("status", "==", filter.statusFilter);
+    }
+
+    if (_end !== undefined) {
+      query = query.offset(Number(_start)).limit(Number(_end - _start));
+    }
+
+    const postCollectionSnapshot = await query.get();
 
     const postCollectionData = postCollectionSnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -32,12 +64,8 @@ postRouter.get("/", async (req, res) => {
       return data;
     });
 
-    if (postCollectionData.length > 0) {
-      res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
-      res.status(200).send(postCollectionData);
-    } else {
-      res.status(404).send({ error: "No posts found for this page" });
-    }
+    res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
+    res.status(200).send(postCollectionData);
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }
@@ -51,21 +79,23 @@ postRouter.post("/", async (req, res) => {
   const transformedProjectPost = {
     id: createdPost.id,
     name: createdPost.name,
-    thumbnail: createdPost.thumbnail,
     author: "Admin",
     publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
     description: createdPost.description ?? null,
-    metadata: {
-      totalStudents:
-        updatedPost["metadata.totalStudents"] ?? null,
-      totalMoney:
-        updatedPost["metadata.totalMoney"] ?? null,
-      totalRooms:
-        updatedPost["metadata.totalRooms"] ?? null,
-    },
+    thumbnail: createdPost.thumbnail,
+    // metadata: {
+    //   totalStudents:
+    //     updatedPost["metadata.totalStudents"] ?? null,
+    //   totalMoney:
+    //     updatedPost["metadata.totalMoney"] ?? null,
+    //   totalRooms:
+    //     updatedPost["metadata.totalRooms"] ?? null,
+    // },
+    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
     category: createdPost.category,
-    classification: createdPost.classification ?? null,
+    classification: createdPost.classification,
+    status: createdPost.status,
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -216,21 +246,24 @@ postRouter.patch("/:id", async (req, res) => {
 
       let mergedData;
       if (isProject) {
+        // This is a project post
         mergedData = {
           name: updatedPost.name ?? docData.name,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
           description: updatedPost.description ?? docData.description,
+          totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund,
           category: updatedPost.category ?? docData.category,
           classification: updatedPost.classification ?? docData.classification,
+          status: updatedPost.status ?? docData.status,
           donor: {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
           },
-          metadata: {
-            totalStudents: updatedPost["metadata.totalStudents"] ?? docData.metadata.totalStudents,
-            totalMoney: updatedPost["metadata.totalMoney"] ?? docData.metadata.totalMoney,
-            totalRooms: updatedPost["metadata.totalRooms"] ?? docData.metadata.totalRooms,
-          },
+          // metadata: {
+          //   totalStudents: updatedPost["metadata.totalStudents"] ?? docData.metadata.totalStudents,
+          //   totalMoney: updatedPost["metadata.totalMoney"] ?? docData.metadata.totalMoney,
+          //   totalRooms: updatedPost["metadata.totalRooms"] ?? docData.metadata.totalRooms,
+          // },
           progress: [
             {
               name: "Ảnh hiện trạng",
@@ -278,6 +311,7 @@ postRouter.patch("/:id", async (req, res) => {
           }
         }
       } else {
+        // This is an news post
         mergedData = {
           name: updatedPost.name ?? docData.name,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
+import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import { convertToYoutubeUrl } from "../helpers";
 import EventIcon from "@mui/icons-material/Event";
@@ -7,21 +7,20 @@ import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { HEADER_DROPDOWN_LIST } from "../constants";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
   const [isIframeLoading, setIsIframeLoading] = useState(true);
+
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Box  maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"} 
-     sx={{ mt: { xs: "0", md: "64px" } }}>
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mt: "32px" }}>
+    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
+      <Breadcrumbs aria-label="breadcrumb">
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
         </Link>
@@ -55,36 +54,40 @@ export default function CardDetails(props) {
 
       {post?.donor && Object.keys(post?.donor).length > 0 && (
         <Box bgcolor={"#f1f1f1"}>
-          <Box p={"24px"} display={"flex"} gap={"40px"}>
+          <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
             <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
 
-            {post.donor.images.length === 1 && <img src={post.donor.images[0].image} alt={post.donor.name} style={{ width: "25%", objectFit: "contain" }} />}
+            {post.donor.images.length === 1 && <img src={post.donor.images[0].image} alt={post.donor.name} style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }} />}
 
             {post.donor.images.length > 1 && (
-              <img src={post.donor.images.find((i) => i.image.toLowerCase().includes("logo"))?.image ?? post.donor.images[0].image} alt={post.donor.name} style={{ width: "20%", objectFit: "contain" }} />
+              <img
+                src={post.donor.images.find((i) => i.image.toLowerCase().includes("logo"))?.image ?? post.donor.images[0].image}
+                alt={post.donor.name}
+                style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }}
+              />
             )}
           </Box>
         </Box>
       )}
 
       {post?.progress && post?.progress?.length > 0 && (
-        <Grid container spacing={3} sx={{ m: "16px 0px" }}>
+        <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {post?.progress?.map((progress, index) => (
-            <Grid item xs={4} p={"0px !important"}>
+            <Grid item xs={4} p={"0px !important"} maxWidth={"100%"}>
               <CarouselSlide key={index} title={progress.name} items={progress.images} position="progress" />
             </Grid>
           ))}
         </Grid>
       )}
 
-      <Grid item xs={12} md={6} sx={{ m: "16px 0px" }}>   
-        <Grid item xs={9} p={"0px !important"}>
-          <Box sx={{ wordWrap: "break-word" }}>
+      <Grid container xs={12} sx={{ m: "16px 0px", flexDirection: { xs: "column-reverse", sm: "row" } }}>
+        <Grid item xs={12} sm={9} p={"0px !important"}>
+          <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
                 post.content.tabs.map((tab, index) => (
                   <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                    <Typography key={index} variant="body1" maxWidth={"720px"} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
+                    <Typography key={index} variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
 
                     {tab.embedded_url?.length > 0 && (
                       <Box>
@@ -124,9 +127,9 @@ export default function CardDetails(props) {
                       <Box maxWidth={"720px"}>
                         {tab.slide_show.map((img, idx) => (
                           <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                            <img key={idx} src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", objectFit: "contain" }} />
+                            <img key={idx} src={img.image} alt={img.caption ? img.caption.split(".")[0] : "Image"} style={{ width: "100%", objectFit: "contain" }} />
                             <Typography variant="body2" color={"#77777"}>
-                              {img.caption.split(".")[0]}
+                              {img.caption ? img.caption.split(".")[0] : "Image"}
                             </Typography>
                           </Box>
                         ))}
@@ -144,11 +147,9 @@ export default function CardDetails(props) {
                   </TabList>
 
                   {post.content.tabs.map((tab, index) => (
-                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "800px", width: "100%" }}>
+                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "720px", width: "100%" }}>
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        <Box key={index} maxWidth={"720px"} style={{ wordWrap: "break-word" }}>
-                          <Typography variant="body1" dangerouslySetInnerHTML={{ __html: tab.description }} />
-                        </Box>
+                        <Typography variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description }} />
 
                         {tab.embedded_url?.length > 0 && (
                           <Box>
@@ -185,7 +186,7 @@ export default function CardDetails(props) {
                         )}
 
                         {tab.slide_show?.length > 0 && (
-                          <Box width={"720px"}>
+                          <Box width={isMobile ? "auto" : "720px"}>
                             {/* <CarouselSlide items={tab.slide_show} /> */}
                             {tab.slide_show.map((img, idx) => (
                               <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
@@ -199,7 +200,7 @@ export default function CardDetails(props) {
                         )}
                       </Box>
 
-                      {tab.name === "Nhà hảo tâm" && !tab.description && tab.embedded_url?.length === 0 && post?.donor && Object.keys(post?.donor).length > 0 && (
+                      {tab.name === "Nhà hảo tâm" && !tab.description && (!tab.embedded_url || tab.embedded_url?.length === 0) && post?.donor && Object.keys(post?.donor).length > 0 && (
                         <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                           <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
                         </Box>
@@ -212,7 +213,7 @@ export default function CardDetails(props) {
           </Box>
         </Grid>
 
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={3}>
           {post.description && (
             <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
               <img
@@ -225,26 +226,28 @@ export default function CardDetails(props) {
           )}
 
           {/* TODO: Refactor this as a reused component */}
-          <Box display={"flex"} flexDirection={"column"} gap={isMobile ? "8px" : "16px"}>
-            <Typography variant="h6" fontWeight={"bold"}>
-              BÀI VIẾT MỚI NHẤT
-            </Typography>
-            <Typography variant="h6">-----</Typography>
-            {latestPosts.map((latestPost, index) => (
-              <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
-                <Box display={"flex"} gap={"8px"} alignItems={"center"} minHeight={isMobile ? "40px" : "56px"}>
-                  <Avatar variant="rounded" src={latestPost.image} style={{ width: isMobile ? 30 : 50, height: isMobile ? 30 : 50 }} />
-                  <Typography variant="body2" color="#334862" style={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
-                    {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
-                  </Typography>
-                </Box>
-              </Link>
-            ))}
-          </Box>
+          {!isMobile && (
+            <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+              <Typography variant="h6" fontWeight={"bold"}>
+                BÀI VIẾT MỚI NHẤT
+              </Typography>
+              <Typography variant="h6">-----</Typography>
+              {latestPosts.map((latestPost, index) => (
+                <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                  <Box display={"flex"} gap={"8px"} alignItems={"center"} minHeight={"56px"}>
+                    <Avatar variant="rounded" src={latestPost.image} style={{ width: isMobile ? 30 : 50, height: 50 }} />
+                    <Typography variant="body2" color="#334862" style={{ fontSize: "1rem" }}>
+                      {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
+                    </Typography>
+                  </Box>
+                </Link>
+              ))}
+            </Box>
+          )}
         </Grid>
       </Grid>
 
-      <Box display={"flex"} gap={"40px"} justifyContent={"center"} width={"100%"}>
+      <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
         <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           Trở lại đầu trang
         </Button>

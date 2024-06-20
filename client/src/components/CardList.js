@@ -1,8 +1,13 @@
-import { Box, Typography, Grid, CardContent, Card as MuiCard, Button } from "@mui/material";
+import React from "react";
+import { Box, Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import BeenhereIcon from "@mui/icons-material/Beenhere";
+import PaidIcon from "@mui/icons-material/Paid";
 import { truncate } from "../helpers";
-
+import { classificationMapping, statusMapping } from "../constants";
 
 const Card = styled(MuiCard)({
   minHeight: "500px",
@@ -15,27 +20,42 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
-  console.log(props.tabName  )
+
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-      {props.title && (
-        <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"24px auto"}>
-          <Typography variant="h6" fontWeight={"bold"}>
-            {props.title}
-          </Typography>
-        </Box>
-      )}
-
       <Grid container spacing={3}>
         {props.posts?.map((post, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-              <Card style={{ overflow: "visible", minHeight: "fit-content", minHeight: props.showDescription ? "500px" : "400px" }}>
+              <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
                 <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                   <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+                  {post.status && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        color: "#000",
+                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                        padding: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {post.status === "can-quyen-gop" && <PaidIcon />}
+                      {post.status === "dang-xay-dung" && <EngineeringIcon />}
+                      {post.status === "da-hoan-thanh" && <BeenhereIcon />}
+                      {statusMapping[post.status]}
+                    </div>
+                  )}
                 </div>
+
                 <CardContent>
-                  <Typography variant="body1" fontWeight={"bold"}>
+                  {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
+
+                  <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
                     {post.name}
                   </Typography>
 
@@ -55,9 +75,11 @@ export default function CardList(props) {
                     </>
                   )}
 
-                  <Typography variant="body2" mt={"16px"}>
-                    {new Date(post.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
-                  </Typography>
+                  {post.classification && (
+                    <Typography variant="body2" mt={"16px"} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                      {classificationMapping[post.classification]}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Link>

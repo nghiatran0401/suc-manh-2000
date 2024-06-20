@@ -56,6 +56,12 @@ export const classificationMapping = {
   "loai-khac": "Loại khác",
 };
 
+export const statusMapping = {
+  "can-quyen-gop": "Cần quyên góp",
+  "dang-xay-dung": "Đang xây dựng",
+  "da-hoan-thanh": "Đã hoàn thành",
+};
+
 export const icons = [
   UserOutlined,
   LockOutlined,
