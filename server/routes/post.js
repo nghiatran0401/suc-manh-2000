@@ -2,6 +2,11 @@ const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
+const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex } = require("../services/redis");
+
+// TODO: combine: get full list and get a list of 5 posts
+// TODO: save to Redis for caching
+// TODO: reduce the number of requests to Backend
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -105,6 +110,56 @@ postRouter.get("/", async (req, res) => {
   }
 });
 
+// Get a list of 5 latest posts
+postRouter.get("/getLatestPosts", async (req, res) => {
+  const { category } = req.params;
+
+  try {
+    const postCollectionRef = firestore.collection(category);
+    const query = postCollectionRef.orderBy("publish_date", "desc");
+    const postCollectionSnapshot = await query.offset(0).limit(5).get();
+    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
+    const latestPosts = postCollectionData.map((post) => ({
+      name: post.name,
+      author: post.author,
+      publish_date: post.publish_date.toDate(),
+      slug: post.slug,
+      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
+    }));
+
+    if (latestPosts.length > 0) {
+      res.status(200).send(latestPosts);
+    } else {
+      res.status(404).send({ error: "No posts found for this page" });
+    }
+  } catch (error) {
+    res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
+  }
+});
+
+// Get a post
+postRouter.get("/:id", async (req, res) => {
+  const { category, id } = req.params;
+
+  try {
+    const postDocRef = firestore.collection(category).where("slug", "==", id);
+    const postDocRefSnapshot = await postDocRef.get();
+
+    if (!postDocRefSnapshot.empty) {
+      const postDocData = postDocRefSnapshot.docs[0].data();
+      if (postDocData.publish_date) {
+        postDocData.publish_date = postDocData.publish_date.toDate();
+      }
+
+      res.status(200).json(postDocData);
+    } else {
+      res.status(404).json({ error: "Post not found" });
+    }
+  } catch (error) {
+    res.status(404).send({ error: `Error getting a document: ${error.message}` });
+  }
+});
+
 // Create a post
 postRouter.post("/", async (req, res) => {
   const { category } = req.params;
@@ -189,7 +244,9 @@ postRouter.post("/", async (req, res) => {
 
   try {
     const postDocRef = firestore.collection(category).doc(createdPost.id);
+
     await postDocRef.set(isProject ? transformedProjectPost : transformedOriginalPost);
+    await addDocumentToIndex({ ...(isProject ? transformedProjectPost : transformedOriginalPost), collection_id: category, doc_id: createdPost.id });
 
     if (isProject) {
       // Increase the count of the post's category and classification
@@ -212,56 +269,6 @@ postRouter.post("/", async (req, res) => {
     res.status(200).json(isProject ? transformedProjectPost : transformedOriginalPost);
   } catch (error) {
     res.status(404).send({ error: `Error creating a document: ${error.message}` });
-  }
-});
-
-// Get a list of 5 latest posts
-postRouter.get("/getLatestPosts", async (req, res) => {
-  const { category } = req.params;
-
-  try {
-    const postCollectionRef = firestore.collection(category);
-    const query = postCollectionRef.orderBy("publish_date", "desc");
-    const postCollectionSnapshot = await query.offset(0).limit(5).get();
-    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-    const latestPosts = postCollectionData.map((post) => ({
-      name: post.name,
-      author: post.author,
-      publish_date: post.publish_date.toDate(),
-      slug: post.slug,
-      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-    }));
-
-    if (latestPosts.length > 0) {
-      res.status(200).send(latestPosts);
-    } else {
-      res.status(404).send({ error: "No posts found for this page" });
-    }
-  } catch (error) {
-    res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
-  }
-});
-
-// Get a post
-postRouter.get("/:id", async (req, res) => {
-  const { category, id } = req.params;
-
-  try {
-    const postDocRef = firestore.collection(category).where("slug", "==", id);
-    const postDocRefSnapshot = await postDocRef.get();
-
-    if (!postDocRefSnapshot.empty) {
-      const postDocData = postDocRefSnapshot.docs[0].data();
-      if (postDocData.publish_date) {
-        postDocData.publish_date = postDocData.publish_date.toDate();
-      }
-
-      res.status(200).json(postDocData);
-    } else {
-      res.status(404).json({ error: "Post not found" });
-    }
-  } catch (error) {
-    res.status(404).send({ error: `Error getting a document: ${error.message}` });
   }
 });
 
@@ -363,6 +370,7 @@ postRouter.patch("/:id", async (req, res) => {
       }
 
       await docRef.update(mergedData);
+      await updateDocumentInIndex({ ...mergedData, collection_id: category, doc_id: querySnapshot.docs[0].id });
       res.status(200).json(mergedData);
     } else {
       res.status(404).send({ error: "No document found" });
@@ -384,6 +392,9 @@ postRouter.delete("/:id", async (req, res) => {
       const docRef = querySnapshot.docs[0].ref;
       const docData = querySnapshot.docs[0].data();
 
+      await docRef.delete();
+      await removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id });
+
       if (isProject) {
         // Decrease the count of the post's category and classification
         const classificationDoc = await firestore.collection("counts").doc("classification").get();
@@ -402,7 +413,6 @@ postRouter.delete("/:id", async (req, res) => {
         }
       }
 
-      await docRef.delete();
       res.status(200).json({ message: "Post deleted successfully" });
     } else {
       res.status(404).send({ error: "No document found" });

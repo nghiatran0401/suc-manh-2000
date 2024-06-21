@@ -57,12 +57,43 @@ async function addDocumentToIndex(data) {
     "classification",
     data.classification
   );
-  console.log(`Document '${data.id}' added to index '${INDEX_NAME}' successfully`);
+  console.log(`Document '${data.doc_id}' added to index '${INDEX_NAME}' successfully`);
+}
+
+async function removeDocumentFromIndex(data) {
+  await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
+  console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
+}
+
+async function updateDocumentInIndex(data) {
+  await redis.call(
+    "FT.ADD",
+    INDEX_NAME,
+    `post:${data.collection_id}:${data.doc_id}`,
+    1.0,
+    "REPLACE",
+    "FIELDS",
+    "id",
+    data.id,
+    "slug",
+    data.slug,
+    "name",
+    data.name,
+    "cleanedName",
+    convertToCleanedName(data.name),
+    "thumbnail",
+    data.thumbnail,
+    "category",
+    data.category,
+    "classification",
+    data.classification
+  );
+  console.log(`Document '${data.doc_id}' updated in index '${INDEX_NAME}' successfully`);
 }
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
 async function redisSearchByName(searchKey) {
-  const results = await redis.call("FT.SEARCH", INDEX_NAME, `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`, "LIMIT", 0, 10);
+  const results = await redis.call("FT.SEARCH", INDEX_NAME, `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`, "SORTBY", "category", "DESC", "LIMIT", 0, 30);
   const transformedResults = [];
   // const totalCount = results[0];
 
@@ -83,4 +114,4 @@ async function redisSearchByName(searchKey) {
   return transformedResults;
 }
 
-module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex, removeSearchIndexAndDocuments };
+module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex, removeSearchIndexAndDocuments };

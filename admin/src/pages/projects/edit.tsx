@@ -106,7 +106,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         {/* Description */}
         {isProject && (
-          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"} rules={[{ required: true }]}>
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"}>
             <RichTextEditor initialContent={projectData.description} onChange={() => {}} />
           </Form.Item>
         )}

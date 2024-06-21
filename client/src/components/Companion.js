@@ -1,26 +1,32 @@
-import { Box, Grid, Typography } from "@mui/material";
 import React from "react";
+import { Box, Grid, Typography } from "@mui/material";
+
+import SucManh2000 from "../assets/companions/Suc_manh_2000.png";
+import TrungTamTinhNguyenQuocGia from "../assets/companions/Trung_tam_tinh_nguyen_quoc_gia.jpeg";
+import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.jpeg";
+import NuoiEm from "../assets/companions/Nuoi_em.png";
+import Dentsu from "../assets/companions/Dentsu.png";
 
 const COMPANIONS = [
   {
     name: "Sức mạnh 2000",
-    url: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/companions%2FSuc_manh_2000.png?alt=media&token=b3f38230-0295-4165-ba55-64f7f035c4e5",
+    url: SucManh2000,
   },
   {
     name: "Trung tâm tình nguyện quốc gia",
-    url: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/companions%2FTrung_tam_tinh_nguyen_quoc_gia.jpeg?alt=media&token=ac1b680e-8a33-430b-92f9-bf2069d5a02c",
+    url: TrungTamTinhNguyenQuocGia,
   },
   {
     name: "Tình nguyện Niềm Tin",
-    url: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/companions%2FTinh_nguyen_niem_tin.jpeg?alt=media&token=c588e235-2403-4e52-94f9-11184c4b01bb",
+    url: TinhNguyenNiemTin,
   },
   {
     name: "Nuôi em",
-    url: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/companions%2FNuoi_em.png?alt=media&token=ca609971-fcf5-4a54-b392-75b551f8ce83",
+    url: NuoiEm,
   },
   {
     name: "Dentsu",
-    url: "https://firebasestorage.googleapis.com/v0/b/savvy-serenity-424116-g1.appspot.com/o/companions%2FDentsu.png?alt=media&token=c50605de-d778-4c18-93eb-69b35139f4a4",
+    url: Dentsu,
   },
 ];
 

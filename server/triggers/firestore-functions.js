@@ -1,14 +1,18 @@
-const { onDocumentWritten } = require("firebase-functions/v2/firestore");
-const { addDocumentToIndex } = require("../services/redis");
+// const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+// const { addDocumentToIndex } = require("../services/redis");
 
-const indexNewDocument = onDocumentWritten("{collectionId}/{docId}", async (change, context) => {
-  const subject = change.subject;
-  const [_, collectionId, docId] = subject.split("/");
-  const data = change.data.after.data();
+// const indexNewDocumentToRedis = onDocumentWritten("{collectionId}/{docId}", async (snap, context) => {
+//   console.log("here", { change, context });
 
-  console.log("here", { collectionId, docId, data });
+//   const data = snap.data();
+//   const { collectionId, docId } = context.params;
 
-  await addDocumentToIndex({ ...data, collection_id: collectionId, doc_id: docId });
-});
+//   console.log("here", { collectionId, docId, data });
+//   // const subject = snap.subject;
+//   // const [_, collectionId, docId] = subject.split("/");
+//   // const data = snap.data.after.data();
 
-module.exports = { indexNewDocument };
+//   await addDocumentToIndex({ ...data, collection_id: collectionId, doc_id: docId });
+// });
+
+// module.exports = { indexNewDocumentToRedis };
