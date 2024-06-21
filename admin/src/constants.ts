@@ -18,7 +18,9 @@ import {
   InboxOutlined,
 } from "@ant-design/icons";
 
+// @ts-ignore
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+// @ts-ignore
 export const CLIENT_URL = import.meta.env.VITE_CLIENT_URL;
 
 export const POSTS_PER_PAGE = 12;

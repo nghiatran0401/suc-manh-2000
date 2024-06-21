@@ -16,6 +16,7 @@ import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
 import { SERVER_URL, categoryMapping, icons } from "./constants";
 import axios from "axios";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const [general, setGeneral] = useState<any>({});
@@ -53,7 +54,7 @@ function App() {
   const resources = Object.keys(categoryMapping).map((key, idx) => {
     const Icon = icons[idx];
 
-    if (loading) return;
+    if (loading) return { name: "" };
     return {
       name: key,
       list: `/${key}`,
@@ -72,10 +73,7 @@ function App() {
     getLocale: () => i18n.language,
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
+  if (loading) return <LoadingScreen />;
   return (
     <BrowserRouter>
       <RefineKbarProvider>
@@ -102,8 +100,8 @@ function App() {
               }
             >
               <Route index element={<NavigateToResource resource={"du-an-2024"} />} />
-              {resources.map((resource) => (
-                <Route key={resource.name} path={resource.name}>
+              {resources.map((resource: any) => (
+                <Route key={resource?.name} path={resource?.name}>
                   <Route index element={<ProjectList />} />
                   <Route path="create" element={<ProjectCreate />} />
                   <Route path="edit/:id" element={<ProjectEdit />} />

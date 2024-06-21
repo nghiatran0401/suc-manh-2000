@@ -3,7 +3,7 @@ import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters, HttpEr
 import { useTable, List, EditButton, ShowButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form } from "antd";
 import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../constants";
-import { debounce } from "lodash";
+// import { debounce } from "lodash";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -42,10 +42,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  const debouncedSearch = debounce((value: any) => {
-    searchFormProps.form?.setFieldsValue({ name: value });
-    searchFormProps.form?.submit();
-  }, 1000);
+  // const debouncedSearch = debounce((value: any) => {
+  //   searchFormProps.form?.setFieldsValue({ name: value });
+  //   searchFormProps.form?.submit();
+  // }, 1000);
 
   return (
     <List>
