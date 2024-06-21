@@ -7,7 +7,7 @@ searchRouter.get("/", async (req, res) => {
   try {
     const searchKey = req.query.q;
     if (!searchKey) {
-      return res.status(400).json({ error: "Missing search query parameter q" });
+      return res.status(200).send([]);
     }
 
     const searchResult = await redisSearchByName(searchKey);

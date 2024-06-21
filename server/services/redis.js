@@ -5,8 +5,8 @@ require("dotenv").config();
 const redis = new Redis(process.env.REDIS_URL);
 
 const INDEX_NAME = "post_index";
-const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleaned_name", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT"];
-const SEARCH_FIELD = ["name", "cleaned_name"];
+const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleanedName", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT"];
+const SEARCH_FIELD = ["name", "cleanedName"];
 
 // https://d128ysc22mu7qe.cloudfront.net/Commands/#ftcreate
 async function createSearchIndex() {
@@ -16,6 +16,20 @@ async function createSearchIndex() {
   } catch (error) {
     await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
     console.log(`Index '${INDEX_NAME}' created successfully`);
+  }
+}
+
+async function removeSearchIndexAndDocuments() {
+  while (results[0] > 0) {
+    console.log(`Deleting ${results[0]} documents`);
+    for (let i = 1; i < results.length; i += 2) {
+      const docId = results[i];
+
+      await redis.call("FT.DEL", INDEX_NAME, docId);
+      console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
+    }
+
+    results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
   }
 }
 
@@ -34,7 +48,7 @@ async function addDocumentToIndex(data) {
     data.slug,
     "name",
     data.name,
-    "cleaned_name",
+    "cleanedName",
     convertToCleanedName(data.name),
     "thumbnail",
     data.thumbnail,
@@ -47,8 +61,8 @@ async function addDocumentToIndex(data) {
 }
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
-const redisSearchByName = async (searchKey) => {
-  const results = await redis.call("FT.SEARCH", INDEX_NAME, `@${SEARCH_FIELD[0]}:${searchKey}*`, "LIMIT", 0, 10);
+async function redisSearchByName(searchKey) {
+  const results = await redis.call("FT.SEARCH", INDEX_NAME, `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`, "LIMIT", 0, 10);
   const transformedResults = [];
   // const totalCount = results[0];
 
@@ -67,6 +81,6 @@ const redisSearchByName = async (searchKey) => {
   }
 
   return transformedResults;
-};
+}
 
-module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex };
+module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex, removeSearchIndexAndDocuments };

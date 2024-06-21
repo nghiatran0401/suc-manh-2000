@@ -12,7 +12,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an");
+  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",

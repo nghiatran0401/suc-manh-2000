@@ -12,7 +12,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an");
+  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
   const { formProps, saveButtonProps, queryResult } = useForm({
     errorNotification(error, values, resource) {
       console.log({ error, values, resource });

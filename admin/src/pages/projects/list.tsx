@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters, HttpError } from "@refinedev/core";
 import { useTable, List, EditButton, ShowButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form } from "antd";
-import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { debounce } from "lodash";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -19,7 +20,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
     syncWithLocation: true,
     pagination: {
       mode: "server",
-      pageSize: 12,
+      pageSize: POSTS_PER_PAGE,
       current: 1,
     },
     errorNotification: (data, values, resource) => {
@@ -41,10 +42,16 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
+  const debouncedSearch = debounce((value: any) => {
+    searchFormProps.form?.setFieldsValue({ name: value });
+    searchFormProps.form?.submit();
+  }, 1000);
+
   return (
     <List>
       <Form {...searchFormProps} layout="inline">
         <Form.Item name="name">
+          {/* onChange={(e) => debouncedSearch(e.target.value)} */}
           <Input placeholder="Search by name" />
         </Form.Item>
         <SaveButton onClick={searchFormProps.form?.submit} />

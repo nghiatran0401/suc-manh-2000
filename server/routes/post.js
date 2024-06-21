@@ -7,9 +7,9 @@ const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
-  const { _start, _end, filter } = req.query;
+  const { _start, _end, filter, name_like } = req.query;
   const { category } = req.params;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const postCollectionRef = firestore.collection(category);
@@ -67,19 +67,32 @@ postRouter.get("/", async (req, res) => {
       totalFilterCount = await query.get().then((snap) => snap.size);
     }
 
-    if (_end !== undefined) {
+    if (_end !== undefined && !name_like) {
       query = query.offset(Number(_start)).limit(Number(_end - _start));
     }
 
     const postCollectionSnapshot = await query.get();
 
-    const postCollectionData = postCollectionSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      if (data.publish_date) {
-        data.publish_date = data.publish_date.toDate();
-      }
-      return data;
-    });
+    let postCollectionData;
+    if (name_like) {
+      postCollectionData = postCollectionSnapshot.docs
+        .filter((doc) => doc.data().name.toLowerCase().includes(name_like.toLowerCase()))
+        .map((doc) => {
+          const data = doc.data();
+          if (data.publish_date) {
+            data.publish_date = data.publish_date.toDate();
+          }
+          return data;
+        });
+    } else {
+      postCollectionData = postCollectionSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.publish_date) {
+          data.publish_date = data.publish_date.toDate();
+        }
+        return data;
+      });
+    }
 
     res.set({
       "X-Total-Count": totalCount?.toString(),
@@ -96,7 +109,7 @@ postRouter.get("/", async (req, res) => {
 postRouter.post("/", async (req, res) => {
   const { category } = req.params;
   const createdPost = req.body;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
   const transformedProjectPost = {
     id: createdPost.id,
     name: createdPost.name,
@@ -256,7 +269,7 @@ postRouter.get("/:id", async (req, res) => {
 postRouter.patch("/:id", async (req, res) => {
   const { category, id } = req.params;
   const updatedPost = req.body;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
@@ -362,7 +375,7 @@ postRouter.patch("/:id", async (req, res) => {
 // Delete a post
 postRouter.delete("/:id", async (req, res) => {
   const { category, id } = req.params;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();

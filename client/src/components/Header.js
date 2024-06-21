@@ -13,7 +13,7 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
 
-export default function HeaderBar() {
+export default function HeaderBar(props) {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
   const theme = useTheme();
@@ -58,9 +58,14 @@ export default function HeaderBar() {
           {isMobile ? (
             <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
               <img src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />
-              <IconButton edge="end" color="inherit" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)}>
-                <Menu />
-              </IconButton>
+              <Box display={"flex"} gap={"24px"}>
+                <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)} sx={{ border: "1px solid red" }}>
+                  <Search />
+                </IconButton>
+                <IconButton edge="end" color="inherit" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)} sx={{ border: "1px solid red" }}>
+                  <Menu />
+                </IconButton>
+              </Box>
             </Box>
           ) : (
             <Box display="flex" width={"100%"} justifyContent={"space-between"}>
@@ -74,7 +79,7 @@ export default function HeaderBar() {
                         {item.children.length > 0 ? (
                           <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
                             <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
-                              {item.title}
+                              {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
                               <ArrowDropDown />
                             </Typography>
                             <CDropdownMenu color="secondary">
@@ -102,29 +107,30 @@ export default function HeaderBar() {
               <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
                 <Search />
               </IconButton>
-              <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
-                <DialogContent>
-                  <Autocomplete
-                    ref={autocompleteRef}
-                    options={searchOptions}
-                    onInputChange={onSearch}
-                    getOptionLabel={(option) => option.name}
-                    renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
-                    renderOption={(props, option) => (
-                      <Link to={`${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
-                        <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
-                          <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
-                          <Typography variant="body1" color="#000">
-                            [{categoryMapping[option.category]}] {option.classification && `${classificationMapping[option.classification]} - `} {option.name}
-                          </Typography>
-                        </Box>
-                      </Link>
-                    )}
-                  />
-                </DialogContent>
-              </Dialog>
             </Box>
           )}
+
+          <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
+            <DialogContent>
+              <Autocomplete
+                ref={autocompleteRef}
+                options={searchOptions}
+                onInputChange={onSearch}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
+                renderOption={(props, option) => (
+                  <Link to={`${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
+                    <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
+                      <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
+                      <Typography variant="body1" color="#000">
+                        [{categoryMapping[option.category]}] {option.classification && `${classificationMapping[option.classification]} - `} {option.name}
+                      </Typography>
+                    </Box>
+                  </Link>
+                )}
+              />
+            </DialogContent>
+          </Dialog>
         </Toolbar>
       </Container>
 

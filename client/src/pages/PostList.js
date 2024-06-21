@@ -28,7 +28,7 @@ export default function PostList() {
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });

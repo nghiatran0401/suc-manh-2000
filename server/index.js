@@ -1,11 +1,10 @@
-const { postTriggerToUpdateRedisDb } = require("./triggers/postWrite");
-
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { onRequest } = require("firebase-functions/v2/https");
+const { indexNewDocumentToRedis } = require("./triggers/firestore-functions");
 const routes = require("./routes");
 
 const app = express();
@@ -18,5 +17,5 @@ if (process.env.CURRENT_ENV === "Development") {
 } else if (process.env.CURRENT_ENV === "Production") {
   setGlobalOptions({ region: "asia-southeast1" });
   exports.app = onRequest({ timeoutSeconds: 240, minInstances: 1 }, app);
-  // exports.postTriggerToUpdateRedisDb = postTriggerToUpdateRedisDb;
+  exports.indexNewDocumentToRedis = indexNewDocumentToRedis;
 }

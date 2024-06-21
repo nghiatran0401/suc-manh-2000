@@ -2,9 +2,9 @@ const { firestore } = require("./firebase");
 const { addDocumentToIndex, createSearchIndex } = require("../server/services/redis");
 
 async function indexFirestoreData() {
-  const collections = await firestore.listCollections();
   await createSearchIndex();
 
+  const collections = await firestore.listCollections();
   for (const collection of collections) {
     const snapshot = await collection.get();
 
@@ -14,6 +14,7 @@ async function indexFirestoreData() {
 
     try {
       await Promise.all(promises);
+      console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     } catch (error) {
       console.error(`Error indexing Firestore data:`, error.message);
     }

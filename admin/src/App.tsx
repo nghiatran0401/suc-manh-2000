@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { ErrorComponent, notificationProvider, ThemedLayoutV2, ThemedSiderV2, ThemedTitleV2 } from "@refinedev/antd";
@@ -11,27 +12,15 @@ import { authProvider } from "./authProvider";
 import Header from "./components/Header";
 import { Login } from "./pages/auth";
 import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/projects";
-import { useEffect } from "react";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
 import { SERVER_URL, categoryMapping, icons } from "./constants";
-
-const resources = Object.keys(categoryMapping).map((key, idx) => {
-  const Icon = icons[idx];
-
-  return {
-    name: key,
-    list: `/${key}`,
-    create: `/${key}/create`,
-    edit: `/${key}/edit/:id`,
-    meta: {
-      icon: <Icon />,
-      label: `${categoryMapping[key as keyof typeof categoryMapping]} ()`,
-    },
-  };
-});
+import axios from "axios";
 
 function App() {
+  const [general, setGeneral] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+
   const onUserChanged = async (user?: User | null) => {
     if (user) {
       const user_token = await user.getIdToken();
@@ -45,14 +34,47 @@ function App() {
   const [user] = useAuthState(auth);
 
   useEffect(() => {
+    axios
+      .get(SERVER_URL + "/getGeneralData")
+      .then((general) => {
+        setGeneral(general.data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
     onUserChanged(user);
   }, [user]);
+
+  const resources = Object.keys(categoryMapping).map((key, idx) => {
+    const Icon = icons[idx];
+
+    if (loading) return;
+    return {
+      name: key,
+      list: `/${key}`,
+      create: `/${key}/create`,
+      edit: `/${key}/edit/:id`,
+      meta: {
+        icon: <Icon />,
+        label: `${categoryMapping[key as keyof typeof categoryMapping]} (${general?.category[key] ?? 0})`,
+      },
+    };
+  });
 
   const i18nProvider = {
     translate: (key: string, params: object) => t(key, params),
     changeLocale: (lang: string) => i18n.changeLanguage(lang),
     getLocale: () => i18n.language,
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <BrowserRouter>
