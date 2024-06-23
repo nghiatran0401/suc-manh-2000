@@ -11,6 +11,8 @@ import { classificationMapping, statusMapping } from "../constants";
 import logoFinsh from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
+import CarouselListCard from "./CarouselListCard";
+
 const Card = styled(MuiCard)({
   minHeight: "500px",
   cursor: "pointer",
@@ -22,7 +24,6 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
-
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={12} sm={6} md={3}>
       <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
@@ -44,7 +45,7 @@ export default function CardList(props) {
                 }}
               >
                 {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
-                {post.status === "dang-xay-dung" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "35px", height: "35px" }} />}
                 {post.status === "da-hoan-thanh" && <img src={logoFinsh} alt="logo" style={{ width: "35px", height: "35px" }} />}
                 {statusMapping[post.status]}
               </div>

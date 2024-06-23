@@ -14,6 +14,7 @@ import Companion from "../components/Companion";
 import CarouselMembers from "../components/CarouselMembers";
 import CardList from "../components/CardList";
 import LoadingScreen from "../components/LoadingScreen";
+import CarouselListCard from "../components/CarouselListCard";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -178,14 +179,15 @@ export default function Home() {
             <>
               {PROJECT_LIST.children.map((child) => (
                 <Box key={child.path} display={"flex"} flexDirection={"column"} gap="">
-                  <TabPanel style={{ marginTop: "24px" }}>
-                    <Grid container spacing={3} p={"16px"}>
-                      <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
-                    </Grid>
+                  <TabPanel >
+                    {/* <Grid container spacing={3} p={"16px"}> */}
+                      {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
+                      <CarouselListCard posts={projects} category={projectTab} />
+                    {/* </Grid> */}
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button variant="contained" onClick={() => navigate(child.path)}>
+                    <Button style={{marginTop:'10px'}} variant="contained" onClick={() => navigate(child.path)}>
                       Xem các {child.title}
                     </Button>
                   )}
