@@ -50,7 +50,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: isMobile ? 6 : 8 } })
+      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);
@@ -61,7 +61,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
-      <HeaderBar />
+      <HeaderBar totalProjects={totalProjects} />
 
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
@@ -107,9 +107,8 @@ export default function Home() {
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
                   return (
-                    <Link component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                    <Link key={latestPost.slug} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
-                        key={index}
                         display={"flex"}
                         gap={"8px"}
                         alignItems={"center"}
@@ -159,15 +158,17 @@ export default function Home() {
         </Typography>
 
         <Tabs>
-          <TabList>
-            {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
-              <Tab key={index} onClick={() => setProjectTab(child.path)}>
-                <Typography variant="body1">
-                  {child.title} ({general?.category[child.path.replace("/", "")]})
-                </Typography>
-              </Tab>
-            ))}
-          </TabList>
+          <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+            <TabList>
+              {PROJECT_LIST.children.map((child) => (
+                <Tab key={child.path} onClick={() => setProjectTab(child.path)}>
+                  <Typography variant="body1">
+                    {child.title} ({general?.category[child.path.replace("/", "")]})
+                  </Typography>
+                </Tab>
+              ))}
+            </TabList>
+          </div>
 
           {loading ? (
             <Box minHeight={"500px"} mt={"200px"}>
@@ -175,10 +176,12 @@ export default function Home() {
             </Box>
           ) : (
             <>
-              {PROJECT_LIST.children.slice(0, 5).map((child, index) => (
-                <Box display={"flex"} flexDirection={"column"} gap="24px">
-                  <TabPanel key={index} style={{ marginTop: "24px" }}>
-                    <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+              {PROJECT_LIST.children.map((child) => (
+                <Box key={child.path} display={"flex"} flexDirection={"column"} gap="">
+                  <TabPanel style={{ marginTop: "24px" }}>
+                    <Grid container spacing={3} p={"16px"}>
+                      <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} />
+                    </Grid>
                   </TabPanel>
 
                   {projectTab === child.path && (
@@ -193,7 +196,7 @@ export default function Home() {
         </Tabs>
       </Box>
 
-      <Box bgcolor={"#f2f2f2"} height={"100%"} p={"8px 0"}>
+      <Box bgcolor={"#f2f2f2"} height={"100%"} p={"32px 0"}>
         <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
           <Typography variant="h3" color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
@@ -202,7 +205,7 @@ export default function Home() {
 
         <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={12} sm={6} sx={{ textAlign: { xs: "center", sm: "right" } }}>
+            <Grid item xs={12} sm={6} sx={{ textAlign: isMobile ? "center" : "right" }} p={isMobile ? "0 8px" : 0}>
               <Typography variant="h6">
                 Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
               </Typography>

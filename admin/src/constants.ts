@@ -1,9 +1,7 @@
 import {
-  UserOutlined,
   LockOutlined,
   MailOutlined,
   AppstoreOutlined,
-  TeamOutlined,
   ShopOutlined,
   GiftOutlined,
   IdcardOutlined,
@@ -16,35 +14,37 @@ import {
   DatabaseOutlined,
   EnvironmentOutlined,
   GlobalOutlined,
-  HomeOutlined,
   HourglassOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
 
+// @ts-ignore
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+// @ts-ignore
 export const CLIENT_URL = import.meta.env.VITE_CLIENT_URL;
 
 export const POSTS_PER_PAGE = 12;
 
 export const categoryMapping = {
-  "du-an-2024": "Dự án 2024",
-  "du-an-2023": "Dự án 2023",
-  "du-an-2022": "Dự án 2022",
-  "du-an-2021": "Dự án 2021",
-  "du-an-2020": "Dự án 2020",
-  "du-an-2019": "Dự án 2019",
-  "du-an-2018": "Dự án 2018",
-  "du-an-2017": "Dự án 2017",
-  "du-an-2016": "Dự án 2016",
-  "du-an-2024-2015": "Dự án 2014 - 2015",
-  "du-an-2012": "Dự án 2012",
-  "thong-bao": "Tiến độ xây dựng",
+  "thong-bao": "Tiến độ",
+  "bao-cao-tai-chinh": "BCTC",
+  "du-an-2024": "DA 24",
+  "du-an-2023": "DA 23",
+  "du-an-2022": "DA 22",
+  "du-an-2021": "DA 21",
+  "du-an-2020": "DA 20",
+  "du-an-2019": "DA 19",
+  "du-an-2018": "DA 18",
+  "du-an-2017": "DA 17",
+  "du-an-2016": "DA 16",
+  "du-an-2014-2015": "DA 14-15",
+  "du-an-2012": "DA 12",
   // "tien-do-xay-dung": "Tiến độ xây dựng",
-  "bao-cao-tai-chinh": "Báo cáo tài chính",
-  "bao-chi-truyen-hinh": "Báo chí – truyền hình đưa tin",
+  "bao-chi-truyen-hinh": "Truyền thông",
   "cau-chuyen": "Câu chuyện",
   // "gay-quy": "Gây quỹ",
   "tai-tro": "Tài trợ",
+  "phong-tin-hoc-2023": "PTH-23",
 };
 
 export const classificationMapping = {
@@ -54,20 +54,19 @@ export const classificationMapping = {
   "cau-hanh-phuc": "Cầu hạnh phúc",
   wc: "WC",
   "loai-khac": "Loại khác",
+  "phong-tin-hoc": "Phòng tin học",
 };
 
 export const statusMapping = {
   "can-quyen-gop": "Cần quyên góp",
   "dang-xay-dung": "Đang xây dựng",
-  "da-hoan-thanh": "Đã hoàn thành",
+  "DA hoan-thanh": "Đã hoàn thành",
 };
 
 export const icons = [
-  UserOutlined,
   LockOutlined,
   MailOutlined,
   AppstoreOutlined,
-  TeamOutlined,
   ShopOutlined,
   GiftOutlined,
   IdcardOutlined,
@@ -80,7 +79,6 @@ export const icons = [
   DatabaseOutlined,
   EnvironmentOutlined,
   GlobalOutlined,
-  HomeOutlined,
   HourglassOutlined,
   InboxOutlined,
 ];

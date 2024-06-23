@@ -12,7 +12,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an");
+  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
   const { formProps, saveButtonProps, queryResult } = useForm({
     errorNotification(error, values, resource) {
       console.log({ error, values, resource });
@@ -106,7 +106,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         {/* Description */}
         {isProject && (
-          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"} rules={[{ required: true }]}>
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"}>
             <RichTextEditor initialContent={projectData.description} onChange={() => {}} />
           </Form.Item>
         )}

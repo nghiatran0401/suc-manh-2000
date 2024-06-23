@@ -68,7 +68,7 @@ export default function Footer() {
           </Grid>
         </Grid>
 
-        <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"center"} pb={isMobile ? "140px" : "20px"}>
+        <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"center"} pb={"20px"}>
           <Typography color={"white"}>Copyright 2024 © Phát triển bởi đội ngũ điều hành Ánh Sáng Núi Rừng và Dự án Nuôi Em.</Typography>
         </Box>
       </Box>

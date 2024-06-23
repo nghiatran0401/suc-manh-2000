@@ -1,73 +1,162 @@
 const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
+const { POSTS_PER_PAGE } = require("../constants");
+const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex } = require("../services/redis");
+
+// TODO: combine: get full list and get a list of 5 posts
+// TODO: save to Redis for caching
+// TODO: reduce the number of requests to Backend
 
 const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
-  const { _start, _end, filter } = req.query;
+  const { _start, _end, filter, name_like } = req.query;
   const { category } = req.params;
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const postCollectionRef = firestore.collection(category);
-
     const categoryDoc = await firestore.collection("counts").doc("category").get();
+
     let totalCount = categoryDoc.data()[category];
     if (!totalCount) {
       totalCount = await postCollectionRef.get().then((snap) => snap.size);
     }
 
     let query = postCollectionRef.orderBy("publish_date", "desc");
+    let totalFilterCount;
 
-    if (filter && filter.classificationFilter !== "all") {
-      query = query.where("classification", "==", filter.classificationFilter);
-    }
+    if (filter && isProject && totalCount > POSTS_PER_PAGE) {
+      const ALL = "all";
+      const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
+      const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
 
-    if (filter && filter.totalFundFilter !== "all") {
-      switch (filter.totalFundFilter) {
-        case "less-than-100":
-          query = query.where("totalFund", "<", 100000000);
-          break;
-        case "100-to-200":
-          query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
-          break;
-        case "200-to-300":
-          query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
-          break;
-        case "300-to-400":
-          query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
-          break;
-        case "more-than-400":
-          query = query.where("totalFund", ">=", 400000000);
-          break;
-        default:
-          break;
+      if (filter.classificationFilter !== ALL) {
+        query = query.where("classification", "==", filter.classificationFilter);
+      } else {
+        query = query.where("classification", "in", CLASSIFICATIONS);
       }
+
+      if (filter.totalFundFilter !== ALL) {
+        switch (filter.totalFundFilter) {
+          case "less-than-100":
+            query = query.where("totalFund", "<", 100000000);
+            break;
+          case "100-to-200":
+            query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
+            break;
+          case "200-to-300":
+            query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
+            break;
+          case "300-to-400":
+            query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
+            break;
+          case "more-than-400":
+            query = query.where("totalFund", ">=", 400000000);
+            break;
+          default:
+            break;
+        }
+      } else {
+        query = query;
+      }
+
+      if (filter.statusFilter !== ALL) {
+        query = query.where("status", "==", filter.statusFilter);
+      } else {
+        query = query.where("status", "in", STATUSES);
+      }
+
+      totalFilterCount = await query.get().then((snap) => snap.size);
     }
 
-    if (filter && filter.statusFilter !== "all") {
-      query = query.where("status", "==", filter.statusFilter);
-    }
-
-    if (_end !== undefined) {
+    if (_end !== undefined && !name_like) {
       query = query.offset(Number(_start)).limit(Number(_end - _start));
     }
 
     const postCollectionSnapshot = await query.get();
 
-    const postCollectionData = postCollectionSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      if (data.publish_date) {
-        data.publish_date = data.publish_date.toDate();
-      }
-      return data;
-    });
+    let postCollectionData;
+    if (name_like) {
+      postCollectionData = postCollectionSnapshot.docs
+        .filter((doc) => doc.data().name.toLowerCase().includes(name_like.toLowerCase()))
+        .map((doc) => {
+          const data = doc.data();
+          if (data.publish_date) {
+            data.publish_date = data.publish_date.toDate();
+          }
+          return data;
+        });
+    } else {
+      postCollectionData = postCollectionSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.publish_date) {
+          data.publish_date = data.publish_date.toDate();
+        }
+        return data;
+      });
+    }
 
-    res.set({ "X-Total-Count": totalCount.toString(), "Access-Control-Expose-Headers": "X-Total-Count" });
+    res.set({
+      "X-Total-Count": totalCount?.toString(),
+      "X-Total-Filter-Count": totalFilterCount?.toString() ?? "0",
+      "Access-Control-Expose-Headers": "X-Total-Count, X-Total-Filter-Count",
+    });
     res.status(200).send(postCollectionData);
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
+  }
+});
+
+// Get a list of 5 latest posts
+postRouter.get("/getLatestPosts", async (req, res) => {
+  const { category } = req.params;
+
+  try {
+    const postCollectionRef = firestore.collection(category);
+    const query = postCollectionRef.orderBy("publish_date", "desc");
+    const postCollectionSnapshot = await query.offset(0).limit(5).get();
+    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
+    const latestPosts = postCollectionData.map((post) => ({
+      name: post.name,
+      author: post.author,
+      publish_date: post.publish_date.toDate(),
+      slug: post.slug,
+      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
+    }));
+
+    if (latestPosts.length > 0) {
+      res.status(200).send(latestPosts);
+    } else {
+      res.status(404).send({ error: "No posts found for this page" });
+    }
+  } catch (error) {
+    res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
+  }
+});
+
+// Get a post
+postRouter.get("/:id", async (req, res) => {
+  const { category, id } = req.params;
+
+  try {
+    const postDocRef = firestore.collection(category).where("slug", "==", id);
+    const postDocRefSnapshot = await postDocRef.get();
+
+    if (!postDocRefSnapshot.empty) {
+      const postDocData = postDocRefSnapshot.docs[0].data();
+      if (postDocData.publish_date) {
+        postDocData.publish_date = postDocData.publish_date.toDate();
+      }
+
+      res.status(200).json(postDocData);
+    } else {
+      res.status(404).json({ error: "Post not found" });
+    }
+  } catch (error) {
+    res.status(404).send({ error: `Error getting a document: ${error.message}` });
   }
 });
 
@@ -75,7 +164,7 @@ postRouter.get("/", async (req, res) => {
 postRouter.post("/", async (req, res) => {
   const { category } = req.params;
   const createdPost = req.body;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
   const transformedProjectPost = {
     id: createdPost.id,
     name: createdPost.name,
@@ -155,7 +244,9 @@ postRouter.post("/", async (req, res) => {
 
   try {
     const postDocRef = firestore.collection(category).doc(createdPost.id);
+
     await postDocRef.set(isProject ? transformedProjectPost : transformedOriginalPost);
+    await addDocumentToIndex({ ...(isProject ? transformedProjectPost : transformedOriginalPost), collection_id: category, doc_id: createdPost.id });
 
     if (isProject) {
       // Increase the count of the post's category and classification
@@ -181,61 +272,11 @@ postRouter.post("/", async (req, res) => {
   }
 });
 
-// Get a list of 5 latest posts
-postRouter.get("/getLatestPosts", async (req, res) => {
-  const { category } = req.params;
-
-  try {
-    const postCollectionRef = firestore.collection(category);
-    const query = postCollectionRef.orderBy("publish_date", "desc");
-    const postCollectionSnapshot = await query.offset(0).limit(5).get();
-    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-    const latestPosts = postCollectionData.map((post) => ({
-      name: post.name,
-      author: post.author,
-      publish_date: post.publish_date.toDate(),
-      slug: post.slug,
-      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-    }));
-
-    if (latestPosts.length > 0) {
-      res.status(200).send(latestPosts);
-    } else {
-      res.status(404).send({ error: "No posts found for this page" });
-    }
-  } catch (error) {
-    res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
-  }
-});
-
-// Get a post
-postRouter.get("/:id", async (req, res) => {
-  const { category, id } = req.params;
-
-  try {
-    const postDocRef = firestore.collection(category).where("slug", "==", id);
-    const postDocRefSnapshot = await postDocRef.get();
-
-    if (!postDocRefSnapshot.empty) {
-      const postDocData = postDocRefSnapshot.docs[0].data();
-      if (postDocData.publish_date) {
-        postDocData.publish_date = postDocData.publish_date.toDate();
-      }
-
-      res.status(200).json(postDocData);
-    } else {
-      res.status(404).json({ error: "Post not found" });
-    }
-  } catch (error) {
-    res.status(404).send({ error: `Error getting a document: ${error.message}` });
-  }
-});
-
 // Edit a post
 postRouter.patch("/:id", async (req, res) => {
   const { category, id } = req.params;
   const updatedPost = req.body;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
@@ -329,6 +370,7 @@ postRouter.patch("/:id", async (req, res) => {
       }
 
       await docRef.update(mergedData);
+      await updateDocumentInIndex({ ...mergedData, collection_id: category, doc_id: querySnapshot.docs[0].id });
       res.status(200).json(mergedData);
     } else {
       res.status(404).send({ error: "No document found" });
@@ -341,7 +383,7 @@ postRouter.patch("/:id", async (req, res) => {
 // Delete a post
 postRouter.delete("/:id", async (req, res) => {
   const { category, id } = req.params;
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   try {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
@@ -349,6 +391,9 @@ postRouter.delete("/:id", async (req, res) => {
     if (!querySnapshot.empty) {
       const docRef = querySnapshot.docs[0].ref;
       const docData = querySnapshot.docs[0].data();
+
+      await docRef.delete();
+      await removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id });
 
       if (isProject) {
         // Decrease the count of the post's category and classification
@@ -368,7 +413,6 @@ postRouter.delete("/:id", async (req, res) => {
         }
       }
 
-      await docRef.delete();
       res.status(200).json({ message: "Post deleted successfully" });
     } else {
       res.status(404).send({ error: "No document found" });

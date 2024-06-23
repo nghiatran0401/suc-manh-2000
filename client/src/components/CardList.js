@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
+import { Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -21,71 +21,65 @@ const Card = styled(MuiCard)({
 export default function CardList(props) {
   const { category } = useParams();
 
-  return (
-    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-      <Grid container spacing={3}>
-        {props.posts?.map((post, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-              <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
-                <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-                  <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
-                  {post.status && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        color: "#000",
-                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
-                        padding: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      {post.status === "can-quyen-gop" && <PaidIcon />}
-                      {post.status === "dang-xay-dung" && <EngineeringIcon />}
-                      {post.status === "da-hoan-thanh" && <BeenhereIcon />}
-                      {statusMapping[post.status]}
-                    </div>
-                  )}
-                </div>
+  return props.posts?.map((post) => (
+    <Grid key={post.id} item xs={12} sm={6} md={3}>
+      <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
+        <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
+          <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
+            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+            {post.status && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  color: "#000",
+                  backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                  padding: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                {post.status === "can-quyen-gop" && <PaidIcon />}
+                {post.status === "dang-xay-dung" && <EngineeringIcon />}
+                {post.status === "da-hoan-thanh" && <BeenhereIcon />}
+                {statusMapping[post.status]}
+              </div>
+            )}
+          </div>
 
-                <CardContent>
-                  {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
+          <CardContent>
+            {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
 
-                  <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
-                    {post.name}
-                  </Typography>
+            <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
+              {post.name}
+            </Typography>
 
-                  {props.showDescription && post.description && (
-                    <>
-                      <div
-                        style={{
-                          backgroundColor: "rgba(0, 0, 0, .1)",
-                          display: "block",
-                          height: "2px",
-                          margin: "0.5em 0",
-                          maxWidth: "30px",
-                          width: "100%",
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
-                    </>
-                  )}
+            {props.showDescription && post.description && (
+              <>
+                <div
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, .1)",
+                    display: "block",
+                    height: "2px",
+                    margin: "0.5em 0",
+                    maxWidth: "30px",
+                    width: "100%",
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
+              </>
+            )}
 
-                  {post.classification && (
-                    <Typography variant="body2" mt={"16px"} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                      {classificationMapping[post.classification]}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
+            {post.classification && (
+              <Typography variant="body2" mt={"16px"} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                {classificationMapping[post.classification]}
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+      </Link>
+    </Grid>
+  ));
 }

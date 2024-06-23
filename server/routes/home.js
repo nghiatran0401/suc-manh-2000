@@ -1,5 +1,6 @@
 const express = require("express");
 const { firestore } = require("../firebase");
+
 const homeRouter = express.Router();
 
 homeRouter.get("/getGeneralData", async (req, res) => {

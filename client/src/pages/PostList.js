@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, Pagination, LinearProgress, Typography, Button } from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroller";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping } from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
@@ -17,35 +18,50 @@ export default function PostList() {
   const { category } = useParams();
   const [posts, setPosts] = useState(undefined);
   const [totalPosts, setTotalPosts] = useState(0);
-  const [page, setPage] = useState(1);
+  const [totalFilterPosts, setTotalFilterPosts] = useState(0);
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [totalFundFilter, setTotalFundFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isProject = category.includes("du-an");
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   useEffect(() => {
-    setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
-
-    const startData = (page - 1) * POSTS_PER_PAGE;
-    const endData = startData + POSTS_PER_PAGE;
+    setLoading(true);
 
     axios
-      .get(SERVER_URL + "/" + category, { params: { _start: startData, _end: endData, filter: { classificationFilter, totalFundFilter, statusFilter } } })
+      .get(SERVER_URL + "/" + category, { params: { _start: 0, _end: POSTS_PER_PAGE, filter: { classificationFilter, totalFundFilter, statusFilter } } })
       .then((posts) => {
-        setTotalPosts(posts.headers["x-total-count"]);
+        setTotalPosts(Number(posts.headers["x-total-count"]));
+        setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
         setPosts(posts.data);
+        setHasMore(posts.data.length >= POSTS_PER_PAGE);
         setLoading(false);
       })
       .catch((e) => console.error(e));
-  }, [page, category, classificationFilter, totalFundFilter, statusFilter]);
+  }, [category, classificationFilter, totalFundFilter, statusFilter]);
 
-  if (!posts) return <LoadingScreen />;
+  const fetchMoreData = () => {
+    const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
+    console.log("here", { nextPage, _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE });
+
+    axios
+      .get(SERVER_URL + "/" + category, { params: { _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE, filter: { classificationFilter, totalFundFilter, statusFilter } } })
+      .then((newPosts) => {
+        setPosts([...posts, ...newPosts.data]);
+        if (newPosts.data.length === 0 || newPosts.data.length < POSTS_PER_PAGE) {
+          setHasMore(false);
+        }
+      })
+      .catch((e) => console.error(e));
+  };
+
+  if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
     <Box>
       <HeaderBar />
@@ -57,7 +73,7 @@ export default function PostList() {
           </Typography>
         )}
 
-        {isProject && (
+        {isProject && totalPosts > POSTS_PER_PAGE && (
           <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={"flex-end"} gap={"16px"}>
             <StyledSelectComponent
               label="Loại dự án"
@@ -112,20 +128,35 @@ export default function PostList() {
           </Box>
         )}
 
-        {posts.length === 0 ? (
+        {loading ? (
+          <LinearProgress />
+        ) : posts.length === 0 ? (
           <Typography variant="h6" textAlign={"center"}>
             Không tìm thấy dự án nào
           </Typography>
-        ) : loading ? (
-          <LinearProgress />
         ) : (
-          <CardList posts={posts} showDescription={false} />
-        )}
+          <>
+            {isProject && totalPosts > POSTS_PER_PAGE && (
+              <Typography variant="body1" textAlign={"right"}>
+                Số dự án: {totalFilterPosts}/{totalPosts}
+              </Typography>
+            )}
 
-        {totalPosts > POSTS_PER_PAGE && posts.length >= POSTS_PER_PAGE && (
-          <Box display={"flex"} justifyContent={"center"} mt={"64px"}>
-            <Pagination count={Math.ceil(totalPosts / POSTS_PER_PAGE)} page={page} onChange={(event, value) => setPage(value)} variant="outlined" shape="rounded" />
-          </Box>
+            <Box maxWidth={"1080px"} width={"100%"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+              <InfiniteScroll
+                dataLength={isProject ? totalFilterPosts : posts.length}
+                hasMore={hasMore}
+                loader={<LinearProgress sx={{ mt: "100px" }} />}
+                loadMore={fetchMoreData}
+                scrollThreshold={0.5}
+                style={{ overflow: "hidden" }}
+              >
+                <Grid container spacing={3} p={"16px"}>
+                  <CardList posts={posts} showDescription={false} />
+                </Grid>
+              </InfiniteScroll>
+            </Box>
+          </>
         )}
       </Box>
 

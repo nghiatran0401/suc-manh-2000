@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton } from "@mui/material";
+import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
-import { Menu, ExpandLess, ExpandMore, ArrowDropDown } from "@mui/icons-material";
+import { Menu, ExpandLess, ExpandMore, ArrowDropDown, Search } from "@mui/icons-material";
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
-import { HEADER_DROPDOWN_LIST } from "../constants";
+import { HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping } from "../constants";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
+import { Link } from "react-router-dom";
 
-export default function HeaderBar() {
+export default function HeaderBar(props) {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
+  const [openSearch, setOpenSearch] = useState(false);
+  const [searchOptions, setSearchOptions] = useState([]);
+  const autocompleteRef = useRef();
 
   useEffect(() => {
     axios
@@ -26,6 +30,25 @@ export default function HeaderBar() {
       .then((res) => setGeneral(res.data))
       .catch((e) => console.error(e));
   }, []);
+
+  useEffect(() => {
+    if (openSearch) {
+      const timer = setTimeout(() => {
+        const input = autocompleteRef.current.querySelector("input");
+        if (input) input.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [openSearch]);
+
+  const onSearch = (event, value) => {
+    axios
+      .get(SERVER_URL + "/search?q=" + value)
+      .then((res) => {
+        setSearchOptions(res.data);
+      })
+      .catch((e) => console.error(e));
+  };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
@@ -35,46 +58,79 @@ export default function HeaderBar() {
           {isMobile ? (
             <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
               <img src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />
-              <IconButton edge="end" color="inherit" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)}>
-                <Menu />
-              </IconButton>
+              <Box display={"flex"} gap={"24px"}>
+                <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)} sx={{ border: "1px solid red" }}>
+                  <Search />
+                </IconButton>
+                <IconButton edge="end" color="inherit" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)} sx={{ border: "1px solid red" }}>
+                  <Menu />
+                </IconButton>
+              </Box>
             </Box>
           ) : (
-            <Box display="flex" width={"100%"} gap={"24px"}>
-              {HEADER_DROPDOWN_LIST.map((item, index) => (
-                <Box key={index} display="flex" sx={{ cursor: "pointer" }}>
-                  {item.title === "Home" && <img key={index} src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />}
+            <Box display="flex" width={"100%"} justifyContent={"space-between"}>
+              <Box display="flex" gap={"24px"}>
+                {HEADER_DROPDOWN_LIST.map((item, index) => (
+                  <Box key={index} display="flex" sx={{ cursor: "pointer" }} gap={"8px"}>
+                    {item.title === "Home" && <img key={index} src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />}
 
-                  {item.title !== "Home" && (
-                    <Box display="flex">
-                      {item.children.length > 0 ? (
-                        <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
-                          <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
+                    {item.title !== "Home" && (
+                      <Box display="flex">
+                        {item.children.length > 0 ? (
+                          <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
+                            <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
+                              {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
+                              <ArrowDropDown />
+                            </Typography>
+                            <CDropdownMenu color="secondary">
+                              {item.children.map((child, childIndex) => (
+                                <CDropdownItem key={childIndex} href={child.path}>
+                                  <Typography variant="body1">
+                                    {child.title}
+                                    {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
+                                  </Typography>
+                                </CDropdownItem>
+                              ))}
+                            </CDropdownMenu>
+                          </CDropdown>
+                        ) : (
+                          <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" onClick={() => navigate(item.path)} style={{ fontSize: "1rem" }}>
                             {item.title}
-                            <ArrowDropDown />
                           </Typography>
-                          <CDropdownMenu color="secondary">
-                            {item.children.map((child, childIndex) => (
-                              <CDropdownItem key={childIndex} href={child.path}>
-                                <Typography variant="body1">
-                                  {child.title}
-                                  {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
-                                </Typography>
-                              </CDropdownItem>
-                            ))}
-                          </CDropdownMenu>
-                        </CDropdown>
-                      ) : (
-                        <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" onClick={() => navigate(item.path)} style={{ fontSize: "1rem" }}>
-                          {item.title}
-                        </Typography>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-              ))}
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+
+              <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
+                <Search />
+              </IconButton>
             </Box>
           )}
+
+          <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
+            <DialogContent>
+              <Autocomplete
+                ref={autocompleteRef}
+                options={searchOptions}
+                onInputChange={onSearch}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
+                renderOption={(props, option) => (
+                  <Link to={`${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
+                    <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
+                      <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
+                      <Typography variant="body1" color="#000">
+                        [{categoryMapping[option.category]}] {option.classification && `${classificationMapping[option.classification]} - `} {option.name}
+                      </Typography>
+                    </Box>
+                  </Link>
+                )}
+              />
+            </DialogContent>
+          </Dialog>
         </Toolbar>
       </Container>
 
