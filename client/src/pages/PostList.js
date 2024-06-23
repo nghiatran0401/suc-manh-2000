@@ -48,7 +48,6 @@ export default function PostList() {
 
   const fetchMoreData = () => {
     const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
-    console.log("here", { nextPage, _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE });
 
     axios
       .get(SERVER_URL + "/" + category, { params: { _start: nextPage * POSTS_PER_PAGE, _end: (nextPage + 1) * POSTS_PER_PAGE, filter: { classificationFilter, totalFundFilter, statusFilter } } })
@@ -74,58 +73,63 @@ export default function PostList() {
         )}
 
         {isProject && totalPosts > POSTS_PER_PAGE && (
-          <Box display={"flex"}  flexDirection={isMobile ? "column" : "row"} justifyContent={"center"} alignItems={"center"} gap={"16px"}>
-            <StyledSelectComponent
-              label="Loại dự án"
-              inputWidth={200}
-              value={classificationFilter}
-              onChange={(e) => setClassificationFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(classificationMapping).map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-              ]}
-            />
+          <>
+            <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={"center"} alignItems={"center"} gap={"16px"}>
+              <StyledSelectComponent
+                label="Loại dự án"
+                inputWidth={200}
+                isMobile={isMobile}
+                value={classificationFilter}
+                onChange={(e) => setClassificationFilter(e.target.value)}
+                options={[
+                  {
+                    label: "Tất cả",
+                    value: "all",
+                  },
+                  ...Object.entries(classificationMapping).map(([value, label]) => ({
+                    label,
+                    value,
+                  })),
+                ]}
+              />
 
-            <StyledSelectComponent
-              label="Khoảng tiền"
-              inputWidth={200}
-              value={totalFundFilter}
-              onChange={(e) => setTotalFundFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-              ]}
-            />
+              <StyledSelectComponent
+                label="Khoảng tiền"
+                inputWidth={200}
+                isMobile={isMobile}
+                value={totalFundFilter}
+                onChange={(e) => setTotalFundFilter(e.target.value)}
+                options={[
+                  {
+                    label: "Tất cả",
+                    value: "all",
+                  },
+                  ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                    label,
+                    value,
+                  })),
+                ]}
+              />
 
-            <StyledSelectComponent
-              label="Tiến độ"
-              inputWidth={200}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(statusMapping).map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-              ]}
-            />
-          </Box>
+              <StyledSelectComponent
+                label="Tiến độ"
+                inputWidth={200}
+                isMobile={isMobile}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  {
+                    label: "Tất cả",
+                    value: "all",
+                  },
+                  ...Object.entries(statusMapping).map(([value, label]) => ({
+                    label,
+                    value,
+                  })),
+                ]}
+              />
+            </Box>
+          </>
         )}
 
         {loading ? (

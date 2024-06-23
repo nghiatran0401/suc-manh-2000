@@ -8,6 +8,7 @@ const RichTextEditor = (props: { initialContent?: string; hideButtonList?: boole
         width="100%"
         height="250px"
         setOptions={{
+          defaultStyle: "font-family: Arial; font-size: 14px",
           buttonList: props.hideButtonList
             ? []
             : [

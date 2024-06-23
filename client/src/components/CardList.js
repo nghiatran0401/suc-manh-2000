@@ -3,14 +3,12 @@ import { Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/mater
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import EngineeringIcon from "@mui/icons-material/Engineering";
-import BeenhereIcon from "@mui/icons-material/Beenhere";
-import PaidIcon from "@mui/icons-material/Paid";
 import { truncate } from "../helpers";
 import { classificationMapping, statusMapping } from "../constants";
-import logoFinsh from "../assets/finish.png";
+import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
+
 const Card = styled(MuiCard)({
   minHeight: "500px",
   cursor: "pointer",
@@ -26,10 +24,10 @@ export default function CardList(props) {
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={12} sm={6} md={3}>
       <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card style={{ overflow: "visible", minHeight: props.showDescription ? "500px" : "400px" }}>
+        <Card style={{ overflow: "visible", minHeight: "500px", position: "relative" }}>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
             <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
-            {post.status && (
+            {post.status !== undefined && (
               <div
                 style={{
                   position: "absolute",
@@ -44,8 +42,8 @@ export default function CardList(props) {
                 }}
               >
                 {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
-                {post.status === "dang-xay-dung" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
-                {post.status === "da-hoan-thanh" && <img src={logoFinsh} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "35px", height: "35px" }} />}
                 {statusMapping[post.status]}
               </div>
             )}
@@ -73,13 +71,13 @@ export default function CardList(props) {
                 <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
               </>
             )}
-
-            {post.classification && (
-              <Typography variant="body2" mt={"16px"} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                {classificationMapping[post.classification]}
-              </Typography>
-            )}
           </CardContent>
+
+          {post.classification !== undefined && (
+            <Typography position={"absolute"} bottom={"24px"} left={"16px"} variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {classificationMapping[post.classification]}
+            </Typography>
+          )}
         </Card>
       </Link>
     </Grid>

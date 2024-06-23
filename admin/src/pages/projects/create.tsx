@@ -17,17 +17,22 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",
     errorNotification(error, values, resource) {
-      console.log({ error, values, resource });
       return {
-        message: error?.message ?? "Error code: " + error?.statusCode,
-        description: "Có lỗi xảy ra khi tạo dữ liệu",
+        description: error?.message ?? "Lỗi ở server",
+        message: "Error code: " + error?.statusCode,
         type: "error",
       };
     },
-
-    onMutationSuccess: (data) => {
-      window.location.href = `/${collectionName}/edit/${data.data.slug}`;
+    successNotification: (data, values: any) => {
+      return {
+        description: "Bài viết đã được tạo thành công",
+        message: values?.name,
+        type: "success",
+      };
     },
+    // onMutationSuccess: (data) => {
+    //   window.location.href = `/${collectionName}/edit/${data.data.slug}`;
+    // },
   });
 
   useEffect(() => {
@@ -96,25 +101,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           </Form.Item>
         </div>
 
-        {/* TotalFund */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.totalFund")}
-            </div>
-            <Form.Item name={"totalFund"} rules={[{ required: true }]} style={{ width: "80%" }}>
-              <InputNumber defaultValue={0} style={{ width: "100%" }} addonAfter={".000.000"} />
-            </Form.Item>
-          </div>
-        )}
-
         {/* Category */}
         <div style={{ display: "flex" }}>
           <div
@@ -127,7 +113,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           >
             <span style={{ color: "red" }}>*</span> {translate("post.fields.category")}
           </div>
-          <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "80%" }}>
+          <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
             <Select disabled onChange={(value) => formProps.form?.setFieldValue("category", value)}>
               {Object.entries(categoryMapping).map(([value, label]) => (
                 <Select.Option key={value} value={value}>
@@ -151,7 +137,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             >
               <span style={{ color: "red" }}>*</span> {translate("post.fields.classification")}
             </div>
-            <Form.Item name={"classification"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Form.Item name={"classification"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select>
                 {Object.entries(classificationMapping).map(([value, label]) => (
                   <Select.Option key={value} value={value}>
@@ -176,7 +162,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             >
               <span style={{ color: "red" }}>*</span> {translate("post.fields.status")}
             </div>
-            <Form.Item name={"status"} rules={[{ required: true }]} style={{ width: "80%" }}>
+            <Form.Item name={"status"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select>
                 {Object.entries(statusMapping).map(([value, label]) => (
                   <Select.Option key={value} value={value}>
@@ -184,6 +170,63 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                   </Select.Option>
                 ))}
               </Select>
+            </Form.Item>
+          </div>
+        )}
+
+        {/* TotalFund */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              <span style={{ color: "red" }}>*</span> {translate("post.fields.totalFund")}
+            </div>
+            <Form.Item name={"totalFund"} rules={[{ required: true }]} style={{ width: "40%" }}>
+              <InputNumber defaultValue={0} style={{ width: "100%" }} addonAfter={".000.000"} />
+            </Form.Item>
+          </div>
+        )}
+
+        {/* Start Date */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              {translate("post.fields.start_date")}
+            </div>
+            <Form.Item name={"start_date"} style={{ width: "40%" }}>
+              <Input type="date" />
+            </Form.Item>
+          </div>
+        )}
+
+        {/* End Date */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              {translate("post.fields.end_date")}
+            </div>
+            <Form.Item name={"end_date"} style={{ width: "40%" }}>
+              <Input type="date" />
             </Form.Item>
           </div>
         )}

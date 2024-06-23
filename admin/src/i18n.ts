@@ -26,6 +26,8 @@ const resources = {
           classification: "Phân loại",
           status: "Trạng thái",
           totalFund: "Tổng tiền",
+          start_date: "Ngày khởi công",
+          end_date: "Ngày khánh thành",
           donor: {
             name: "Nhà tài trợ",
             description: "Mô tả",

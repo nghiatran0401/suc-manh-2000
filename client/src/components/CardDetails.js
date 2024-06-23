@@ -6,7 +6,7 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { HEADER_DROPDOWN_LIST } from "../constants";
+import { HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 
 export default function CardDetails(props) {
@@ -17,6 +17,15 @@ export default function CardDetails(props) {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  function formatDate(date) {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0"); //Months are zero based
+    const year = d.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  }
 
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
@@ -40,7 +49,7 @@ export default function CardDetails(props) {
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
-        <Box display={"flex"} gap={"24px"}>
+        <Box display={"flex"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.author }} />
@@ -49,6 +58,29 @@ export default function CardDetails(props) {
             <EventIcon sx={{ width: 32, height: 32 }} />
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
           </Box>
+          {post.classification !== undefined && (
+            <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {classificationMapping[post.classification]}
+            </Typography>
+          )}
+          {post.status !== undefined && (
+            <Typography
+              variant="body2"
+              sx={{
+                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
+              {statusMapping[post.status]}
+            </Typography>
+          )}
+          {post.totalFund !== undefined && (
+            <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+            </Typography>
+          )}
         </Box>
       </Box>
 
@@ -214,79 +246,84 @@ export default function CardDetails(props) {
         </Grid>
 
         <Grid item xs={12} sm={3}>
-          {post.description && (
-            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"}>
+          {post.description !== undefined && (
+            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"}>
               <img
-                style={{ width: "100%", height: "225px", objectFit: "contain", borderRadius: "16px 16px 0 0" }}
+                style={{ width: "100%", height: "225px", objectFit: "fill", borderRadius: "16px 16px 0 0" }}
                 alt={post.name}
                 src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
               />
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+              {post.totalFund !== undefined && (
+                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
+                  <strong>Tổng tiền:</strong> {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+                  {/* <span style={{ float: "right" }}>{post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}</span> */}
+                </Typography>
+              )}
+              {post.start_date !== undefined && (
+                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
+                  <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
+                  {/* <span style={{ float: "right" }}>{formatDate(post.start_date)}</span> */}
+                </Typography>
+              )}
+              {post.end_date !== undefined && (
+                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
+                  <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
+                  {/* <span style={{ float: "right" }}>{formatDate(post.end_date)}</span> */}
+                </Typography>
+              )}
             </Box>
           )}
 
           {/* TODO: Refactor this as a reused component */}
-          <Box position="sticky" top={0} zIndex={1} bgcolor="#fff" boxShadow={1} p={2} borderRadius={8}>
-            <Typography variant="h6" fontWeight="bold" align="center">
-              BÀI VIẾT MỚI NHẤT
-            </Typography>
-
-            {!isMobile && (
-              <Box display="flex" flexDirection="column" gap={2}>
-              {latestPosts.map((latestPost, index) => (
-                <Link
-                  key={index}
-                  component={RouterLink}
-                  to={`/thong-bao/${latestPost.slug}`}
-                  sx={{
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    color: '#334862',
-                    ':hover': {
-                      textDecoration: "underline", // Example hover effect
-                      color: '#000', // Change text color on hover
-                    }
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1} bgcolor="#f0f0f0">
-                    <Avatar
-                      variant="rounded"
-                      src={latestPost.image}
-                      sx={{ width: isMobile ? 30 : 50, height: 50 }}
-                    />
-                    <Typography variant="body2" sx={{ flex: 1, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
-                    </Typography>
-                  </Box>
-                </Link>
-              ))}
-            </Box>
-            )}
-
-            {isMobile && (
-              <Box display="flex" flexDirection="column" gap={2}>
+          {!isMobile && (
+            <Box position="sticky" top={80} zIndex={1} bgcolor="#fff" boxShadow={1} p={"16px 8px"} borderRadius={4}>
+              <Typography variant="h6" fontWeight="bold" align="center">
+                BÀI VIẾT MỚI NHẤT
+              </Typography>
+              <Box textAlign={"center"}>------</Box>
+              <Box display="flex" flexDirection="column" gap={1}>
                 {latestPosts.map((latestPost, index) => (
                   <Link
                     key={index}
                     component={RouterLink}
                     to={`/thong-bao/${latestPost.slug}`}
-                    style={{ textDecoration: "none", cursor: "pointer", color: '#334862' }}
+                    sx={{
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      color: "#334862",
+                      ":hover": {
+                        // textDecoration: "underline",
+                        color: "#000",
+                      },
+                    }}
                   >
-                    <Box display="flex" alignItems="center" gap={2} minHeight="72px" borderRadius={8} p={1} bgcolor="#f0f0f0">
-                      <Avatar
-                        variant="rounded"
-                        src={latestPost.image}
-                        style={{ width: 50, height: 50 }}
-                      />
-                      <Typography variant="body2" style={{ flex: 1, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {latestPost.name.length > 60 ? `${latestPost.name.substring(0, 60)}...` : latestPost.name}
+                    <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
+                      <Avatar variant="rounded" src={latestPost.image} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
+                      <Typography variant="body2" sx={{ flex: 1, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
                       </Typography>
                     </Box>
                   </Link>
                 ))}
               </Box>
-            )}
-          </Box>
+
+              {/* {isMobile && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {latestPosts.map((latestPost, index) => (
+                  <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer", color: "#334862" }}>
+                    <Box display="flex" alignItems="center" gap={2} minHeight="72px" borderRadius={8} p={1} bgcolor="#f0f0f0">
+                      <Avatar variant="rounded" src={latestPost.image} style={{ width: 50, height: 50 }} />
+                      <Typography variant="body2" style={{ flex: 1, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
+                      </Typography>
+                    </Box>
+                  </Link>
+                ))}
+              </Box>
+            )} */}
+            </Box>
+          )}
         </Grid>
       </Grid>
 
