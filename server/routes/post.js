@@ -4,7 +4,7 @@ const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
 const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex } = require("../services/redis");
 
-// TODO: combine: get full list and get a list of 5 posts
+// TODO: combine get full list & get a list of 5 posts
 // TODO: save to Redis for caching
 // TODO: reduce the number of requests to Backend
 
@@ -185,6 +185,8 @@ postRouter.post("/", async (req, res) => {
     category: createdPost.category,
     classification: createdPost.classification,
     status: createdPost.status,
+    start_date: createdPost.start_date,
+    end_date: createdPost.end_date,
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -296,6 +298,8 @@ postRouter.patch("/:id", async (req, res) => {
           category: updatedPost.category ?? docData.category,
           classification: updatedPost.classification ?? docData.classification,
           status: updatedPost.status ?? docData.status,
+          start_date: updatedPost.start_date ?? docData.start_date,
+          end_date: updatedPost.end_date ?? docData.end_date,
           donor: {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
@@ -370,7 +374,7 @@ postRouter.patch("/:id", async (req, res) => {
       }
 
       await docRef.update(mergedData);
-      await updateDocumentInIndex({ ...mergedData, collection_id: category, doc_id: querySnapshot.docs[0].id });
+      await updateDocumentInIndex({ ...(isProject ? mergedData : docData), collection_id: category, doc_id: querySnapshot.docs[0].id });
       res.status(200).json(mergedData);
     } else {
       res.status(404).send({ error: "No document found" });

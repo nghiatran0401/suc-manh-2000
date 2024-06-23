@@ -5,12 +5,14 @@ declare namespace Sucmanh2000 {
     author: string;
     publish_date: string;
     slug: string;
-    description?: string;
     thumbnail: string;
     category?: string;
     classification?: string;
-    totalFund?: number;
     status?: string;
+    totalFund?: number;
+    start_date?: string;
+    end_date?: string;
+    description?: string;
     donor?: Donor;
     progress?: Progress;
     content: {

@@ -64,7 +64,7 @@ export default function Home() {
     <Box>
       <HeaderBar totalProjects={totalProjects} />
 
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto"}>
+      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -146,7 +146,7 @@ export default function Home() {
         display={"flex"}
         flexDirection={"column"}
         gap={"24px"}
-        m={"64px auto"}
+        m={"40px auto"}
         sx={{
           "@media (max-width: 600px)": {
             m: "16px auto",

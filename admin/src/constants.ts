@@ -60,7 +60,7 @@ export const classificationMapping = {
 export const statusMapping = {
   "can-quyen-gop": "Cần quyên góp",
   "dang-xay-dung": "Đang xây dựng",
-  "DA hoan-thanh": "Đã hoàn thành",
+  "da-hoan-thanh": "Đã hoàn thành",
 };
 
 export const icons = [
