@@ -12,6 +12,7 @@ import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
+import DragHandleSharpIcon from '@mui/icons-material/DragHandleSharp';
 
 export default function HeaderBar(props) {
   const navigate = useNavigate();
@@ -59,57 +60,61 @@ export default function HeaderBar(props) {
             <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
               <img src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />
               <Box display={"flex"} gap={"24px"}>
-                <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)} sx={{ border: "1px solid red" }}>
+                <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)} >
                   <Search />
                 </IconButton>
-                <IconButton edge="end" color="inherit" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)} sx={{ border: "1px solid red" }}>
-                  <Menu />
+                <IconButton edge="end" color="primary" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)} >
+                  <DragHandleSharpIcon />
                 </IconButton>
               </Box>
             </Box>
           ) : (
-            <Box display="flex" width={"100%"} justifyContent={"space-between"}>
-              <Box display="flex" gap={"24px"}>
-                {HEADER_DROPDOWN_LIST.map((item, index) => (
-                  <Box key={index} display="flex" sx={{ cursor: "pointer" }} gap={"8px"}>
-                    {item.title === "Home" && <img key={index} src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />}
+              <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+                {/* Left section (logo) */}
+                <Box display="flex" alignItems="center">
+                  <img src={logo} alt="logo" style={{ maxWidth: "60px", cursor: "pointer" }} onClick={() => (window.location.href = "/")} />
+                </Box>
 
-                    {item.title !== "Home" && (
-                      <Box display="flex">
-                        {item.children.length > 0 ? (
-                          <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
-                            <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
-                              {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
-                              <ArrowDropDown />
+                {/* Center section (menu items) */}
+                <Box display="flex" gap="24px" flexGrow={1} justifyContent="center">
+                  {HEADER_DROPDOWN_LIST.map((item, index) => (
+                    <Box key={index} display="flex" alignItems="center" gap="8px" sx={{ cursor: "pointer" }}>
+                      {item.title !== "Home" ? (
+                        <Box display="flex">
+                          {item.children.length > 0 ? (
+                            <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
+                              <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
+                                {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
+                                <ArrowDropDown />
+                              </Typography>
+                              <CDropdownMenu color="secondary">
+                                {item.children.map((child, childIndex) => (
+                                  <CDropdownItem key={childIndex} href={child.path}>
+                                    <Typography variant="body1">
+                                      {child.title}
+                                      {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
+                                    </Typography>
+                                  </CDropdownItem>
+                                ))}
+                              </CDropdownMenu>
+                            </CDropdown>
+                          ) : (
+                            <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" onClick={() => navigate(item.path)} style={{ fontSize: "1rem" }}>
+                              {item.title}
                             </Typography>
-                            <CDropdownMenu color="secondary">
-                              {item.children.map((child, childIndex) => (
-                                <CDropdownItem key={childIndex} href={child.path}>
-                                  <Typography variant="body1">
-                                    {child.title}
-                                    {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
-                                  </Typography>
-                                </CDropdownItem>
-                              ))}
-                            </CDropdownMenu>
-                          </CDropdown>
-                        ) : (
-                          <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" onClick={() => navigate(item.path)} style={{ fontSize: "1rem" }}>
-                            {item.title}
-                          </Typography>
-                        )}
-                      </Box>
-                    )}
-                  </Box>
-                ))}
+                          )}
+                        </Box>
+                      ) : null}
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* Right section (search icon) */}
+                <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
+                  <Search />
+                </IconButton>
               </Box>
-
-              <IconButton edge="end" color="inherit" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
-                <Search />
-              </IconButton>
-            </Box>
           )}
-
           <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
             <DialogContent>
               <Autocomplete

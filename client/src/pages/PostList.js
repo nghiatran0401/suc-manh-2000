@@ -74,7 +74,7 @@ export default function PostList() {
         )}
 
         {isProject && totalPosts > POSTS_PER_PAGE && (
-          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={"flex-end"} gap={"16px"}>
+          <Box display={"flex"}  flexDirection={isMobile ? "column" : "row"} justifyContent={"center"} alignItems={"center"} gap={"16px"}>
             <StyledSelectComponent
               label="Loại dự án"
               inputWidth={200}

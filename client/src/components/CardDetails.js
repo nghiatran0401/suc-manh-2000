@@ -226,24 +226,67 @@ export default function CardDetails(props) {
           )}
 
           {/* TODO: Refactor this as a reused component */}
-          {!isMobile && (
-            <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-              <Typography variant="h6" fontWeight={"bold"}>
-                BÀI VIẾT MỚI NHẤT
-              </Typography>
-              <Typography variant="h6">-----</Typography>
+          <Box position="sticky" top={0} zIndex={1} bgcolor="#fff" boxShadow={1} p={2} borderRadius={8}>
+            <Typography variant="h6" fontWeight="bold" align="center">
+              BÀI VIẾT MỚI NHẤT
+            </Typography>
+
+            {!isMobile && (
+              <Box display="flex" flexDirection="column" gap={2}>
               {latestPosts.map((latestPost, index) => (
-                <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
-                  <Box display={"flex"} gap={"8px"} alignItems={"center"} minHeight={"56px"}>
-                    <Avatar variant="rounded" src={latestPost.image} style={{ width: isMobile ? 30 : 50, height: 50 }} />
-                    <Typography variant="body2" color="#334862" style={{ fontSize: "1rem" }}>
+                <Link
+                  key={index}
+                  component={RouterLink}
+                  to={`/thong-bao/${latestPost.slug}`}
+                  sx={{
+                    textDecoration: "none",
+                    cursor: "pointer",
+                    color: '#334862',
+                    ':hover': {
+                      textDecoration: "underline", // Example hover effect
+                      color: '#000', // Change text color on hover
+                    }
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1} bgcolor="#f0f0f0">
+                    <Avatar
+                      variant="rounded"
+                      src={latestPost.image}
+                      sx={{ width: isMobile ? 30 : 50, height: 50 }}
+                    />
+                    <Typography variant="body2" sx={{ flex: 1, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
                     </Typography>
                   </Box>
                 </Link>
               ))}
             </Box>
-          )}
+            )}
+
+            {isMobile && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {latestPosts.map((latestPost, index) => (
+                  <Link
+                    key={index}
+                    component={RouterLink}
+                    to={`/thong-bao/${latestPost.slug}`}
+                    style={{ textDecoration: "none", cursor: "pointer", color: '#334862' }}
+                  >
+                    <Box display="flex" alignItems="center" gap={2} minHeight="72px" borderRadius={8} p={1} bgcolor="#f0f0f0">
+                      <Avatar
+                        variant="rounded"
+                        src={latestPost.image}
+                        style={{ width: 50, height: 50 }}
+                      />
+                      <Typography variant="body2" style={{ flex: 1, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {latestPost.name.length > 60 ? `${latestPost.name.substring(0, 60)}...` : latestPost.name}
+                      </Typography>
+                    </Box>
+                  </Link>
+                ))}
+              </Box>
+            )}
+          </Box>
         </Grid>
       </Grid>
 

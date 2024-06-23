@@ -8,7 +8,9 @@ import BeenhereIcon from "@mui/icons-material/Beenhere";
 import PaidIcon from "@mui/icons-material/Paid";
 import { truncate } from "../helpers";
 import { classificationMapping, statusMapping } from "../constants";
-
+import logoFinsh from "../assets/finish.png";
+import logoDonate from "../assets/donate.png";
+import logoWorking from "../assets/working.png";
 const Card = styled(MuiCard)({
   minHeight: "500px",
   cursor: "pointer",
@@ -41,9 +43,9 @@ export default function CardList(props) {
                   gap: "8px",
                 }}
               >
-                {post.status === "can-quyen-gop" && <PaidIcon />}
-                {post.status === "dang-xay-dung" && <EngineeringIcon />}
-                {post.status === "da-hoan-thanh" && <BeenhereIcon />}
+                {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "dang-xay-dung" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "da-hoan-thanh" && <img src={logoFinsh} alt="logo" style={{ width: "35px", height: "35px" }} />}
                 {statusMapping[post.status]}
               </div>
             )}
