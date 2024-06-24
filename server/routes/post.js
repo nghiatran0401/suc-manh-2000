@@ -10,6 +10,12 @@ const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex } = r
 
 const postRouter = express.Router({ mergeParams: true });
 
+function convertToDate(prop) {
+  if (prop) {
+    return prop.toDate();
+  }
+}
+
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
   const { _start, _end, filter, name_like } = req.query;
@@ -84,17 +90,19 @@ postRouter.get("/", async (req, res) => {
         .filter((doc) => doc.data().name.toLowerCase().includes(name_like.toLowerCase()))
         .map((doc) => {
           const data = doc.data();
-          if (data.publish_date) {
-            data.publish_date = data.publish_date.toDate();
-          }
+          data.publish_date = convertToDate(data.publish_date);
+          data.start_date = convertToDate(data.start_date);
+          data.end_date = convertToDate(data.end_date);
+
           return data;
         });
     } else {
       postCollectionData = postCollectionSnapshot.docs.map((doc) => {
         const data = doc.data();
-        if (data.publish_date) {
-          data.publish_date = data.publish_date.toDate();
-        }
+        data.publish_date = convertToDate(data.publish_date);
+        data.start_date = convertToDate(data.start_date);
+        data.end_date = convertToDate(data.end_date);
+
         return data;
       });
     }
@@ -147,9 +155,9 @@ postRouter.get("/:id", async (req, res) => {
 
     if (!postDocRefSnapshot.empty) {
       const postDocData = postDocRefSnapshot.docs[0].data();
-      if (postDocData.publish_date) {
-        postDocData.publish_date = postDocData.publish_date.toDate();
-      }
+      postDocData.publish_date = convertToDate(postDocData.publish_date);
+      postDocData.start_date = convertToDate(postDocData.start_date);
+      postDocData.end_date = convertToDate(postDocData.end_date);
 
       res.status(200).json(postDocData);
     } else {
@@ -169,7 +177,7 @@ postRouter.post("/", async (req, res) => {
     id: createdPost.id,
     name: createdPost.name,
     author: "Admin",
-    publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
+    publish_date: createdPost.publish_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.publish_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
     description: createdPost.description ?? null,
     thumbnail: createdPost.thumbnail,
@@ -185,8 +193,8 @@ postRouter.post("/", async (req, res) => {
     category: createdPost.category,
     classification: createdPost.classification,
     status: createdPost.status,
-    start_date: createdPost.start_date,
-    end_date: createdPost.end_date,
+    start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
+    end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -292,14 +300,15 @@ postRouter.patch("/:id", async (req, res) => {
         // This is a project post
         mergedData = {
           name: updatedPost.name ?? docData.name,
+          publish_date: updatedPost.publish_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.publish_date)) : docData.publish_date,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
           description: updatedPost.description ?? docData.description,
           totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund,
           category: updatedPost.category ?? docData.category,
           classification: updatedPost.classification ?? docData.classification,
           status: updatedPost.status ?? docData.status,
-          start_date: updatedPost.start_date ?? docData.start_date,
-          end_date: updatedPost.end_date ?? docData.end_date,
+          start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date,
+          end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date,
           donor: {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,

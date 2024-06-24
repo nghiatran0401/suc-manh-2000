@@ -8,7 +8,6 @@ import { classificationMapping, statusMapping } from "../constants";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
-import CarouselListCard from "./CarouselListCard";
 
 const Card = styled(MuiCard)({
   minHeight: "500px",
@@ -21,10 +20,12 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
+
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={12} sm={6} md={3}>
       <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card style={{ overflow: "visible", minHeight: "500px", position: "relative" }}>
+        <Card style={{ overflow: "visible", minHeight: isProject ? "500px" : "400px", position: "relative" }}>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
             <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
             {post.status !== undefined && (
@@ -35,15 +36,15 @@ export default function CardList(props) {
                   right: 0,
                   color: "#000",
                   backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
-                  padding: "10px",
+                  padding: "5px",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "4px",
                 }}
               >
-                {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "35px", height: "35px" }} />}
-                {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "35px", height: "35px" }} />}
-                {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "35px", height: "35px" }} />}
+                {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
                 {statusMapping[post.status]}
               </div>
             )}

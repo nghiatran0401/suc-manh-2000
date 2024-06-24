@@ -5,7 +5,7 @@
     "node": "20"
   },
   "scripts": {
-    "server": "copy .env.local .env && nodemon index.js",
+    "server": "cp .env.local .env && nodemon index.js",
     "server:windows": "copy .env.local .env && nodemon index.js",
     "deploy:server": "cp .env.prod .env && firebase deploy --only functions"
   },

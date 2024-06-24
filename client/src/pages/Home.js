@@ -70,7 +70,7 @@ export default function Home() {
         </Typography>
 
         <Box>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{ alignItems: "center" }}>
             <Grid item xs={12} sm={8}>
               <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`}>
                 <Card
@@ -179,15 +179,15 @@ export default function Home() {
             <>
               {PROJECT_LIST.children.map((child) => (
                 <Box key={child.path} display={"flex"} flexDirection={"column"} gap="">
-                  <TabPanel >
+                  <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
-                      {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
-                      <CarouselListCard posts={projects} category={projectTab} />
+                    {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
+                    <CarouselListCard posts={projects} category={projectTab} />
                     {/* </Grid> */}
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button style={{marginTop:'10px'}} variant="contained" onClick={() => navigate(child.path)}>
+                    <Button style={{ marginTop: "10px" }} variant="contained" onClick={() => navigate(child.path)}>
                       Xem các {child.title}
                     </Button>
                   )}

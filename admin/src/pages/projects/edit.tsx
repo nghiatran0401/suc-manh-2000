@@ -36,6 +36,10 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   useEffect(() => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
+      formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
+      formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
+      formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
+      console.log("here", projectData);
     }
   }, [projectData]);
 
@@ -67,6 +71,13 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             }}
           />
         </Form.Item>
+
+        {/* Publish date */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>} name={"publish_date"} rules={[{ required: true }]} style={{ width: "40%" }}>
+            <Input type="date" />
+          </Form.Item>
+        )}
 
         {/* Category */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>} name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
