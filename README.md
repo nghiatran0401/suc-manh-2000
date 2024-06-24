@@ -12,6 +12,7 @@
 
 - Go to `server`
 - Install package dependency `npm install`
+- Setup redis `docker-compose -f docker-compose.redis.yaml up -d`
 - Start backend `npm run server`
 
 3. Admin
