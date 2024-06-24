@@ -193,8 +193,8 @@ postRouter.post("/", async (req, res) => {
     category: createdPost.category,
     classification: createdPost.classification,
     status: createdPost.status,
-    start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
-    end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
+    start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : null,
+    end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : null,
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -307,8 +307,8 @@ postRouter.patch("/:id", async (req, res) => {
           category: updatedPost.category ?? docData.category,
           classification: updatedPost.classification ?? docData.classification,
           status: updatedPost.status ?? docData.status,
-          start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date,
-          end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date,
+          start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
+          end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
           donor: {
             description: updatedPost["donor.description"] ?? docData.donor.description,
             images: updatedPost["donor.images"] ?? docData.donor.images,
