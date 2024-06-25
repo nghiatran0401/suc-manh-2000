@@ -102,23 +102,21 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         </div>
 
         {/* Publish Date */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.publish_date")}
-            </div>
-            <Form.Item name={"publish_date"} style={{ width: "40%" }} rules={[{ required: true }]}>
-              <Input type="date" />
-            </Form.Item>
+        <div style={{ display: "flex" }}>
+          <div
+            style={{
+              width: "20%",
+              fontWeight: "bold",
+              fontSize: "16px",
+              paddingRight: "10px",
+            }}
+          >
+            <span style={{ color: "red" }}>*</span> {translate("post.fields.publish_date")}
           </div>
-        )}
+          <Form.Item name={"publish_date"} style={{ width: "40%" }} rules={[{ required: true }]}>
+            <Input type="date" />
+          </Form.Item>
+        </div>
 
         {/* Category */}
         <div style={{ display: "flex" }}>

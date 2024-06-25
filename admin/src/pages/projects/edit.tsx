@@ -73,11 +73,9 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         </Form.Item>
 
         {/* Publish date */}
-        {isProject && (
-          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>} name={"publish_date"} rules={[{ required: true }]} style={{ width: "40%" }}>
-            <Input type="date" />
-          </Form.Item>
-        )}
+        <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>} name={"publish_date"} rules={[{ required: true }]} style={{ width: "40%" }}>
+          <Input type="date" />
+        </Form.Item>
 
         {/* Category */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>} name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
