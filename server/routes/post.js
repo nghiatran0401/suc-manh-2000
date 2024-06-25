@@ -189,10 +189,10 @@ postRouter.post("/", async (req, res) => {
     //   totalRooms:
     //     updatedPost["metadata.totalRooms"] ?? null,
     // },
-    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
     category: createdPost.category,
     classification: createdPost.classification,
     status: createdPost.status,
+    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
     start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : null,
     end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : null,
     donor: {
@@ -236,10 +236,10 @@ postRouter.post("/", async (req, res) => {
   const transformedOriginalPost = {
     id: createdPost.id,
     name: createdPost.name,
-    thumbnail: createdPost.thumbnail,
     author: "Admin",
-    publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
+    publish_date: createdPost.publish_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.publish_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
     slug: slugify(createdPost.name, { lower: true, strict: true }),
+    thumbnail: createdPost.thumbnail,
     category: createdPost.category,
     content: {
       tabs: [
@@ -369,6 +369,7 @@ postRouter.patch("/:id", async (req, res) => {
         mergedData = {
           name: updatedPost.name ?? docData.name,
           thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
+          publish_date: updatedPost.publish_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.publish_date)) : docData.publish_date,
           category: updatedPost.category ?? docData.category,
           content: {
             tabs: [
