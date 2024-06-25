@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete } from "@mui/material";
+import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete, Grid, Card } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -134,6 +134,11 @@ export default function HeaderBar(props) {
                   </Link>
                 )}
               />
+              <Box bgcolor={'red'} mt={2}>
+                <Typography variant="h6" >
+                  Gần đây
+                </Typography>
+              </Box>
             </DialogContent>
           </Dialog>
         </Toolbar>
