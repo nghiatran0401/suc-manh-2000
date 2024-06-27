@@ -8,6 +8,7 @@ const {
   updateDocumentInIndex,
   getValue,
   setValue,
+  delValue,
 } = require("../services/redis");
 const { convertToDate } = require('../utils');
 
@@ -406,7 +407,10 @@ postRouter.patch("/:id", async (req, res) => {
       }
 
       await docRef.update(mergedData);
-      await updateDocumentInIndex({ ...(isProject ? mergedData : docData), collection_id: category, doc_id: querySnapshot.docs[0].id });
+      await Promise.all([
+        updateDocumentInIndex({ ...(isProject ? mergedData : docData), collection_id: category, doc_id: querySnapshot.docs[0].id }),
+        delValue(`post:${category}:${id}`)
+      ]) ;
       res.status(200).json(mergedData);
     } else {
       res.status(404).send({ error: "No document found" });
@@ -429,7 +433,10 @@ postRouter.delete("/:id", async (req, res) => {
       const docData = querySnapshot.docs[0].data();
 
       await docRef.delete();
-      await removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id });
+      await Promise.all([
+        removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id }),
+        delValue(`post:${category}:${id}`)
+      ]);
 
       if (isProject) {
         // Decrease the count of the post's category and classification

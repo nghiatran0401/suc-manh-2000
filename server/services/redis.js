@@ -133,6 +133,15 @@ async function setValue(key, value) {
   }
 }
 
+async function delValue(key) {
+  try {
+    await redis.del(key);
+  } catch (error) {
+    console.error('Error deleting value from Redis:', error);
+    throw error;
+  }
+}
+
 module.exports = { 
   redisSearchByName, 
   createSearchIndex, 
@@ -142,4 +151,5 @@ module.exports = {
   removeSearchIndexAndDocuments,
   getValue,
   setValue,
+  delValue,
 };
