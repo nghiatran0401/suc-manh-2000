@@ -158,21 +158,33 @@ postRouter.get("/getLatestPosts", async (req, res) => {
 // Get a post
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
+  const cachedKey = `post:${category}:${id}`
 
   try {
-    const postDocRef = firestore.collection(category).where("slug", "==", id);
-    const postDocRefSnapshot = await postDocRef.get();
+    const cachedPost = await getValue(cachedKey);
 
-    if (!postDocRefSnapshot.empty) {
-      const postDocData = postDocRefSnapshot.docs[0].data();
-      postDocData.publish_date = convertToDate(postDocData.publish_date);
-      postDocData.start_date = convertToDate(postDocData.start_date);
-      postDocData.end_date = convertToDate(postDocData.end_date);
-
-      res.status(200).json(postDocData);
+    if (cachedPost) {
+      console.log('Cache hit! Returning cached for post');
+      res.status(200).send(cachedPost);
     } else {
-      res.status(404).json({ error: "Post not found" });
+      const postDocRef = firestore.collection(category).where("slug", "==", id);
+      const postDocRefSnapshot = await postDocRef.get();
+
+      if (!postDocRefSnapshot.empty) {
+        const postDocData = postDocRefSnapshot.docs[0].data();
+        postDocData.publish_date = convertToDate(postDocData.publish_date);
+        postDocData.start_date = convertToDate(postDocData.start_date);
+        postDocData.end_date = convertToDate(postDocData.end_date);
+
+        await setValue(cachedKey, postDocData);
+        console.log('Cached post successfully.');
+
+        res.status(200).json(postDocData);
+      } else {
+        res.status(404).json({ error: "Post not found" });
+      }
     }
+    
   } catch (error) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });
   }
