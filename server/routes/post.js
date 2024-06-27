@@ -2,19 +2,20 @@ const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
-const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex } = require("../services/redis");
+const { 
+  addDocumentToIndex, 
+  removeDocumentFromIndex, 
+  updateDocumentInIndex,
+  getValue,
+  setValue,
+} = require("../services/redis");
+const { convertToDate } = require('../utils');
 
 // TODO: combine get full list & get a list of 5 posts
 // TODO: save to Redis for caching
 // TODO: reduce the number of requests to Backend
 
 const postRouter = express.Router({ mergeParams: true });
-
-function convertToDate(prop) {
-  if (prop) {
-    return prop.toDate();
-  }
-}
 
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
@@ -121,24 +122,33 @@ postRouter.get("/", async (req, res) => {
 // Get a list of 5 latest posts
 postRouter.get("/getLatestPosts", async (req, res) => {
   const { category } = req.params;
+  const cachedKey = `latestPosts:${category}`
 
   try {
-    const postCollectionRef = firestore.collection(category);
-    const query = postCollectionRef.orderBy("publish_date", "desc");
-    const postCollectionSnapshot = await query.offset(0).limit(5).get();
-    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-    const latestPosts = postCollectionData.map((post) => ({
-      name: post.name,
-      author: post.author,
-      publish_date: post.publish_date.toDate(),
-      slug: post.slug,
-      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-    }));
-
-    if (latestPosts.length > 0) {
-      res.status(200).send(latestPosts);
+    const cachedLatestPosts = await getValue(cachedKey);
+    if (cachedLatestPosts) {
+      console.log('Cache hit! Returning cached for 5 latest posts');
+      res.status(200).send(cachedLatestPosts);
     } else {
-      res.status(404).send({ error: "No posts found for this page" });
+      const postCollectionRef = firestore.collection(category);
+      const query = postCollectionRef.orderBy("publish_date", "desc");
+      const postCollectionSnapshot = await query.offset(0).limit(5).get();
+      const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
+      const latestPosts = postCollectionData.map((post) => ({
+        name: post.name,
+        author: post.author,
+        publish_date: post.publish_date.toDate(),
+        slug: post.slug,
+        image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
+      }));
+
+      if (latestPosts.length > 0) {
+        await setValue(cachedKey, latestPosts);
+        console.log('Cached 5 latest post successfully.');
+        res.status(200).send(latestPosts);
+      } else {
+        res.status(404).send({ error: "No posts found for this page" });
+      }
     }
   } catch (error) {
     res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
