@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
-import { Edit, useForm } from "@refinedev/antd";
+import { Edit, SaveButton, useForm } from "@refinedev/antd";
 import { Form, Input, InputNumber, Row, Select } from "antd";
 import { useLocation } from "react-router-dom";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -46,7 +46,10 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   if (isLoading || !projectData) return <LoadingScreen />;
   return (
     <Edit saveButtonProps={saveButtonProps}>
-      <Form {...formProps} initialValues={projectData ?? { thumbnailUrl: "14" }} layout="vertical">
+      <Form {...formProps} initialValues={projectData ?? { thumbnailUrl: "14" }} layout="vertical" style={{ position: 'relative'}}>
+        {/* Above save button */}
+        <SaveButton onClick={formProps.form?.submit} style={{ position: 'absolute', right: 0, top: '-10px', zIndex: 1 }}/>
+
         {/* Name */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.name")}</span>} name={"name"} rules={[{ required: true }]}>
           <Input />
