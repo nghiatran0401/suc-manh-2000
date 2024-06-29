@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Upload, UploadFile, UploadProps } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage, getMetadata } from "firebase/storage";
 import Compressor from "compressorjs";
 import { useLocation } from "react-router-dom";
 import { storage } from "../firebase/client";
@@ -99,12 +99,21 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
   );
 };
 
-export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
+export const uploadFileToFirebaseStorage = async ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any)
+: Promise<void> => {
   const storageRef: StorageReference = ref(storage, filePath);
   const FILE_MAX_SIZE = 512000;
 
   const fileSize = file.size;
   const quality = fileSize > FILE_MAX_SIZE ? FILE_MAX_SIZE / fileSize : 1;
+
+  /**
+   * Check existed file before upload
+   */
+  const isExisted = await isExistedFileOnFirebase(filePath);
+  if (isExisted) {
+    console.log(`File ${filePath} already existed on Firebase`)
+  }
 
   const uploadFile = (fileToUpload: File | Blob) => {
     const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
@@ -150,5 +159,21 @@ export const deleteFileOnFirebase = async (url: string): Promise<void> => {
     console.error("Error deleting file:", error);
   }
 };
+
+export const isExistedFileOnFirebase = async (filePath: string): Promise<boolean> => {
+  const storage = getStorage();
+  try {
+    const fileRef = ref(storage, filePath);
+    await getMetadata(fileRef);
+    return true;
+  } catch (error) {
+    if ((error as any).code === 'storage/object-not-found') {
+      return false;
+    } else {
+      console.error('Error checking file existence:', error);
+      return true; // Not break current logic
+    }
+  }
+}
 
 export default ImageUploader;
