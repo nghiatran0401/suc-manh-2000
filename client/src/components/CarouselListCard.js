@@ -16,6 +16,7 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 
 export default function CarouselListCard(props) {
+  // console.log(props.posts);
   const { category } = useParams();
 
   const Card = styled(MuiCard)({
@@ -107,7 +108,7 @@ export default function CarouselListCard(props) {
       }}
     >
       <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
-        {props.posts.map((post, index) => (
+        {props.posts.slice(0, 8).map((post, index) => (
           <Grid key={post.id}>
             <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
               <Card style={{ overflow: "visible", minHeight: "500px", margin: "10px", position: "relative" }}>
@@ -116,21 +117,25 @@ export default function CarouselListCard(props) {
                   {post.status && (
                     <div
                       style={{
+                        margin: "5px",
                         position: "absolute",
                         top: 0,
                         right: 0,
-                        color: "#000",
-                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                        color: "white",
+                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 0, 1)" : "rgba(210, 238, 130, 1)",
                         padding: "5px",
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
+                        borderRadius: "10px",
                       }}
                     >
                       {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
                       {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
                       {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                      {statusMapping[post.status]}
+                      <Typography color={'black'} variant="body2" fontWeight={"bold"}>
+                        {statusMapping[post.status]}
+                      </Typography>
                     </div>
                   )}
                 </div>
@@ -169,6 +174,74 @@ export default function CarouselListCard(props) {
           </Grid>
         ))}
       </Carousel>
+      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
+        {props.posts.slice(8, 16).map((post, index) => (
+          <Grid key={post.id}>
+            <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
+              <Card style={{ overflow: "visible", minHeight: "500px", margin: "10px", position: "relative" }}>
+                <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
+                  <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+                  {post.status && (
+                    <div
+                      style={{
+                        margin: "5px",
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        color: "white",
+                        backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 0, 1)" : "rgba(210, 238, 130, 1)",
+                        padding: "5px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                      {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                      {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                      <Typography color={'black'} variant="body2" fontWeight={"bold"}>
+                        {statusMapping[post.status]}
+                      </Typography>
+                    </div>
+                  )}
+                </div>
+
+                <CardContent>
+                  {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
+
+                  <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
+                    {post.name}
+                  </Typography>
+
+                  {props.showDescription && post.description && (
+                    <>
+                      <div
+                        style={{
+                          backgroundColor: "rgba(0, 0, 0, .1)",
+                          display: "block",
+                          height: "2px",
+                          margin: "0.5em 0",
+                          maxWidth: "30px",
+                          width: "100%",
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
+                    </>
+                  )}
+                </CardContent>
+
+                {post.classification !== undefined && (
+                  <Typography position={"absolute"} bottom={"24px"} left={"16px"} variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                    {classificationMapping[post.classification]}
+                  </Typography>
+                )}
+              </Card>
+            </Link>
+          </Grid>
+        ))}
+      </Carousel>
+      
     </Box>
   );
 }

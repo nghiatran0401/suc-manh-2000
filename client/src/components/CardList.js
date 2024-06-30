@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Typography, Grid, CardContent, Card as MuiCard, Chip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
@@ -20,32 +20,50 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
+  const [hoverThumbnail, setHoverThumbnail] = useState(false);
   const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
+  const handleMouseEnter = (id) => setHoverThumbnail(id);
+  const handleMouseLeave = () => setHoverThumbnail(null); 
+
   return props.posts?.map((post) => (
-    <Grid key={post.id} item xs={12} sm={6} md={3}>
+    <Grid key={post.id} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card style={{ overflow: "visible", minHeight: isProject ? "500px" : "400px", position: "relative" }}>
+        <Card style={{ overflow: "visible", minHeight: isProject ? "500px" : "400px", position: "relative" }}
+          onMouseEnter={() => handleMouseEnter(post.id)}
+          onMouseLeave={handleMouseLeave}
+        >
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+            {!isProject && (
+              <img style={{ width: "100%", height: "225px", objectFit: "cover" }} alt={post.name} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+            )}
+            {isProject && (hoverThumbnail === post.id ? (
+              <img id='img-trans' style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.progress[0].images[0].image} alt="Hovered" />
+            ) : (
+              <img id='img-trans' style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt="Default" />
+            ))}
             {post.status !== undefined && (
               <div
                 style={{
+                  margin: "5px",
                   position: "absolute",
                   top: 0,
                   right: 0,
-                  color: "#000",
-                  backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                  color: "white",
+                  backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 0, 1)" : "rgba(210, 238, 130, 1)",
                   padding: "5px",
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
+                  borderRadius: "10px",
                 }}
               >
                 {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
                 {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
                 {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {statusMapping[post.status]}
+                <Typography color={'black'} variant="body2" fontWeight={"bold"}>
+                  {statusMapping[post.status]}
+                </Typography>
               </div>
             )}
           </div>
