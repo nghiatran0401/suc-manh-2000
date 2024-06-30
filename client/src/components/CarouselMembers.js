@@ -7,8 +7,13 @@ import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/Twitter";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 
 import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.jpg";
+import DoThiKimHoa from "../assets/team/Do_Thi_Kim_Hoa.png";
+import HungVo from "../assets/team/Hung_Vo.png";
+import HungVu from "../assets/team/Hung_Vu.png";
 import NguyenThiHien from "../assets/team/Nguyen_Thi_Hien.jpg";
 import LeHoangYen from "../assets/team/Le_Hoang_Yen.jpg";
 import TranThuyTrang from "../assets/team/Tran_Thuy_Trang.jpg";
@@ -16,55 +21,134 @@ import LyPhuongThao from "../assets/team/Ly_Phuong_Thao.jpg";
 import VoThiTuyetMinh from "../assets/team/Vo_Thi_Tuyet_Minh.jpg";
 import PhamNgocCham from "../assets/team/Pham_Ngoc_Cham.jpg";
 import NguyenThiAnhDao from "../assets/team/Nguyen_Thi_Anh_Dao.jpg";
+import TranHuuNghia from "../assets/team/Tran_Huu_Nghia.jpg";
 
 export const MEMBERS = [
   {
     name: "HOÀNG HOA TRUNG",
-    role: "Điều hành dự án",
-    description: "Chỉ tốt nghiệp cấp 3. Với 14 năm gắn bó với các HĐXH vùng cao. Forbes 30Under30 Việt Nam - Gương mặt trẻ Việt Nam tiêu biểu.",
+    role: "Sáng Lập Dự Án SM2000 và Hệ Sinh Thái Nuôi Em",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>Forbes Under 30 Việt Nam 2020</li>
+        <li>Gương mặt trẻ tiêu biểu Việt Nam</li>
+        <li >Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
+        <li>Trưởng nhóm tình nguyện Niềm tin</li><li>14 năm gắn bó với các HĐXH vùng cao</li>
+      </ul>`,
     image: HoangHoaTrung,
   },
   {
+    name: "ĐỖ THỊ KIM HOA",
+    role: "Giám Đốc Trung Tâm Tình Nguyện Quốc Gia",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>7 năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam” do Liên Hợp Quốc tài trợ</li>
+        <li>9 năm làm công tác quản lý, điều hành Trung tâm Tình nguyện Quốc gia</li>
+      </ul>`,
+    image: DoThiKimHoa,
+  },
+  {
+    name: "HÙNG VÕ",
+    role: "Cố Vấn Chiến Lược và Truyền Thông Bền Vững",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>Phó Tổng Marketing của Biti's</li>
+        <li>Cố Vấn của Thiên Long</li>
+        <li>Tổng Giám Đốc điều hành của Dentsu Redder</li>
+        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - ĐH Fulbright Việt Nam</li>
+        <li>Nhà sáng lập Young Marketers</li>
+      </ul>`,
+    image: HungVo,
+  },
+  {
+    name: "HÙNG VŨ",
+    role: "Cố Vấn Tài Chính và Nhà Tài Trợ Thiên Thần",
+    description: "Công ty Ocean Brand",
+    image: HungVu,
+  },
+
+  {
     name: "NGUYỄN THỊ HIỀN",
-    role: "Phó chủ nhiệm dự án sức mạnh 2000",
-    description: "12 năm hoạt động công tác xã hội và tình nguyện từ các CLB sinh viên, các tổ chức tại Việt Nam, Thái Lan. Tiến Sỹ Thủy Văn và Môi Trường tại Ý.",
+    role: "Phó Chủ Nhiệm Dự Án SM2000",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>12 năm hoạt động công tác xã hội và tình nguyện từ các CLB sinh viên, tổ chức tại Việt Nam & Thái Lan</li> 
+        <li>Tiến Sỹ Thủy Văn và Môi Trường tại Ý</li>
+      </ul>`,
     image: NguyenThiHien,
   },
   {
     name: "LÊ HOÀNG YẾN",
-    role: "Phụ trách tiến độ dự án",
-    description: "Hơn 4 năm tham gia các HĐXH và đồng thời làm TNV của dự án. Cử nhân ĐH Kinh tế Quốc dân, hiện tại đang làm việc trong lĩnh vực Tài chính - Kế toán.",
+    role: "Phụ Trách Tiến Độ Dự Án SM2000",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>4+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>Cử nhân ĐH Kinh tế Quốc dân</li>
+        <li>Hiện tại đang làm việc trong lĩnh vực Tài chính - Kế toán</li>
+      </ul>`,
     image: LeHoangYen,
   },
   {
+    name: "VÕ THỊ TUYẾT MINH",
+    role: "Phụ Trách Sao Kê và Góp Lẻ SM2000",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>Cử nhân tài chính kế toán</li>
+      </ul>
+    `,
+    image: VoThiTuyetMinh,
+  },
+  {
+    name: "PHẠM NGỌC CHÂM",
+    role: "Phụ Trách Góp Lẻ SM2000 và Nuôi Em Campuchia - Kenya",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+      </ul>
+    `,
+    image: PhamNgocCham,
+  },
+  {
     name: "TRẦN THÙY TRANG",
-    role: "Vận hành trường, nội trú",
-    description: "Nhân sự từ Trung tâm Tình nguyện Quốc Gia, phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và vận hành, báo cáo, chứng từ.",
+    role: "Vận Hành Trường và Khu Nội Trú",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>Nhân sự từ Trung tâm Tình Nguyện Quốc Gia</li>
+        <li>Phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và vận hành, báo cáo, chứng từ</li>
+      </ul>
+    `,
     image: TranThuyTrang,
   },
   {
     name: "LÝ PHƯƠNG THẢO",
     role: "Partnership",
-    description: "Một sinh viên năng nổ của Đại Học Thương Mại, sinh viên năm 3 và 2 năm HĐXH.",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>Sinh viên năm 3 - Đại Học Thương Mại</li>
+      </ul>
+    `,
     image: LyPhuongThao,
   },
   {
-    name: "VÕ THỊ TUYẾT MINH",
-    role: "Phụ trách sao kê, góp lẻ",
-    description: "",
-    image: VoThiTuyetMinh,
-  },
-  {
-    name: "PHẠM NGỌC CHÂM",
-    role: "Phụ trách Góp lẻ SM2000 & Nuôi Em Campuchia-Kenya",
-    description: "",
-    image: PhamNgocCham,
-  },
-  {
     name: "NGUYỄN THỊ ANH ĐÀO",
-    role: "Vận hành dự án Nuôi em 500 thuộc Nhà hạnh phúc",
-    description: "Hơn 5 năm hoạt động công tác xã hội, phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi.",
+    role: "Vận Hành Dự án Nuôi Em 500 thuộc Nhà Hạnh Phúc",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>5+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>Phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi</li>
+      </ul>`,
     image: NguyenThiAnhDao,
+  },
+  {
+    name: "TRẦN HỮU NGHĨA",
+    role: "Phụ Trách Kĩ Thuật Web SM2000",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>1+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>Hiện đang là Software Engineer cho công ty Startup tại Singapore<Eli>
+      </ul>`,
+    image: TranHuuNghia,
   },
 ];
 
@@ -87,13 +171,61 @@ export default function CarouselMembers() {
     },
   };
 
+  const CustomLeftArrow = ({ onClick, ...rest }) => {
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          position: "absolute",
+          left: "0px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 2,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          borderRadius: "50%",
+          width: "40px",
+          height: "40px",
+          color: "white",
+          border: "none",
+        }}
+        {...rest}
+      >
+        <KeyboardArrowLeftIcon />
+      </button>
+    );
+  };
+
+  const CustomRightArrow = ({ onClick, ...rest }) => {
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          position: "absolute",
+          right: "0px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 2,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          borderRadius: "50%",
+          width: "40px",
+          height: "40px",
+          color: "white",
+          border: "none",
+        }}
+        {...rest}
+      >
+        <KeyboardArrowRightIcon />
+      </button>
+    );
+  };
+
   return (
     <Box
       maxWidth={"1080px"}
       display={"flex"}
       flexDirection={"column"}
-      gap={"24px"}
-      m={"64px auto"}
+      gap={"16px"}
+      m={"32px auto"}
       sx={{
         "@media (max-width: 600px)": {
           m: "16px auto",
@@ -105,27 +237,27 @@ export default function CarouselMembers() {
         Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
 
-      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000}>
+      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
         {MEMBERS.map((item, index) => (
           <Card
             key={index}
             className="card-contanier"
             sx={{
-              m: "16px",
+              m: "8px",
               "@media (max-width: 600px)": {
                 m: 0,
               },
             }}
           >
-            <CardMedia component="img" alt={item.caption} height="300" image={item.image} />
-            <CardContent sx={{ minHeight: "300px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+            <CardContent sx={{ minHeight: "340px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", p: "12px" }}>
               {item.name && item.role && (
                 <>
                   <Typography align="center" variant="h6" fontWeight={"bold"}>
                     {item.name}
                   </Typography>
 
-                  <Typography align="center" variant="body1" fontWeight={"bold"}>
+                  <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
                     {item.role}
                   </Typography>
 
@@ -136,8 +268,8 @@ export default function CarouselMembers() {
                     <TwitterIcon />
                   </CardActions>
 
-                  <Typography align="center" variant="body2">
-                    {item.description}
+                  <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}>
+                    {}
                   </Typography>
                 </>
               )}

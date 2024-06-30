@@ -51,6 +51,8 @@ export default function HeaderBar(props) {
       .catch((e) => console.error(e));
   };
 
+  console.log(HEADER_DROPDOWN_LIST)
+
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <AppBar color="inherit" className="bar" position="fixed" sx={{ top: 0, zIndex: 10000, ...(isMobile && { position: "static" }) }}>
@@ -134,10 +136,23 @@ export default function HeaderBar(props) {
                   </Link>
                 )}
               />
-              <Box bgcolor={'red'} mt={2}>
-                <Typography variant="h6" >
+              <Box  mt={2}>
+                <Typography>
                   Gần đây
                 </Typography>
+                {
+                  HEADER_DROPDOWN_LIST.map((item, index) => (
+                    <Box key={index} display="flex" flexDirection="column" gap="8px" sx={{ cursor: "pointer" }}>
+                      {item.children.filter(child => child.name === "du-an").map((child, childIndex) => (
+                        <Box key={childIndex} display="flex" alignItems="center" gap="8px" sx={{ cursor: "pointer" }}>
+                          <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" onClick={() => navigate(child.path)} style={{ fontSize: "1rem" }}>
+                            {child.title}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  ))
+                }
               </Box>
             </DialogContent>
           </Dialog>

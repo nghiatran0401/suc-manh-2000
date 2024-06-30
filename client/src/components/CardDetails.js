@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import { convertToYoutubeUrl } from "../helpers";
@@ -8,25 +8,44 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
+import CarouselListCard from "./CarouselListCard";
+import axios from "axios";
+import { SERVER_URL } from "../constants";
+import LoadingScreen from "./LoadingScreen";
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
   const [isIframeLoading, setIsIframeLoading] = useState(true);
+  // const [projects, setProjects] = useState([]);
+  // const [loading, setLoading] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  function formatDate(date) {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0"); //Months are zero based
-    const year = d.getFullYear();
+  // useEffect(() => {
+  //   setLoading(true);
+  //   console.log("here", SERVER_URL + `/${category}`);
 
-    return `${day}/${month}/${year}`;
-  }
+  //   axios
+  //     .get(SERVER_URL + `/${category}`, { params: { _start: 0, _end: 8 } })
+  //     .then((projects) => {
+  //       setProjects(projects.data);
+  //       setLoading(true);
+  //     })
+  //     .catch((e) => console.error(e));
+  // }, [category]);
 
+  // function formatDate(date) {
+  //   const d = new Date(date);
+  //   const day = String(d.getDate()).padStart(2, "0");
+  //   const month = String(d.getMonth() + 1).padStart(2, "0");
+  //   const year = d.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
+
+  // if (loading) return <LoadingScreen />;
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb">
@@ -49,7 +68,7 @@ export default function CardDetails(props) {
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
-        <Box display={"flex"} gap={"16px"} alignContent={"center"}>
+        <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.author }} />
@@ -255,23 +274,21 @@ export default function CardDetails(props) {
               />
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
               {post.totalFund !== undefined && (
-                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
+                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px", width: "fit-content" }}>
                   <strong>Tổng tiền:</strong> {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
-                  {/* <span style={{ float: "right" }}>{post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}</span> */}
                 </Typography>
               )}
-              {post.start_date !== undefined && (
+
+              {/* {post.start_date !== undefined && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
-                  {/* <span style={{ float: "right" }}>{formatDate(post.start_date)}</span> */}
                 </Typography>
               )}
               {post.end_date !== undefined && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
-                  {/* <span style={{ float: "right" }}>{formatDate(post.end_date)}</span> */}
                 </Typography>
-              )}
+              )} */}
             </Box>
           )}
 
@@ -326,6 +343,8 @@ export default function CardDetails(props) {
           )}
         </Grid>
       </Grid>
+
+      {/* <CarouselListCard posts={projects} category={category} /> */}
 
       <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
         <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
