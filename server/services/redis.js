@@ -114,4 +114,42 @@ async function redisSearchByName(searchKey) {
   return transformedResults;
 }
 
-module.exports = { redisSearchByName, createSearchIndex, addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex, removeSearchIndexAndDocuments };
+async function getValue(key) {
+  try {
+    const value = await redis.get(key);
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    console.error('Error getting value from Redis:', error);
+    throw error;
+  }
+}
+
+async function setValue(key, value) {
+  try {
+    await redis.set(key, JSON.stringify(value));
+  } catch (error) {
+    console.error('Error setting value in Redis:', error);
+    throw error;
+  }
+}
+
+async function delValue(key) {
+  try {
+    await redis.del(key);
+  } catch (error) {
+    console.error('Error deleting value from Redis:', error);
+    throw error;
+  }
+}
+
+module.exports = { 
+  redisSearchByName, 
+  createSearchIndex, 
+  addDocumentToIndex, 
+  removeDocumentFromIndex, 
+  updateDocumentInIndex, 
+  removeSearchIndexAndDocuments,
+  getValue,
+  setValue,
+  delValue,
+};
