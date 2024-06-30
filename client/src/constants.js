@@ -176,7 +176,13 @@ export const totalFundMapping = {
 };
 
 export const statusMapping = {
-  "can-quyen-gop": "Cần quyên góp",
-  "dang-xay-dung": "Đang xây dựng",
   "da-hoan-thanh": "Đã hoàn thành",
+  "dang-xay-dung": "Đang xây dựng",
+  "can-quyen-gop": "Cần quyên góp",
+};
+
+export const statusColorMapping = {
+  "can-quyen-gop": "rgba(255, 76, 48, 1)",
+  "dang-xay-dung": "rgba(255, 252, 150, 1)",
+  "da-hoan-thanh": "rgba(210, 238, 130, 1)",
 };
