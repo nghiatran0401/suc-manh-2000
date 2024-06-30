@@ -70,6 +70,12 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         }
 
         try {
+          const fileExists = await isExistedFileOnFirebase(filePath);
+          if (fileExists) {
+            onError?.call(this, new Error(`Image with this path ${filePath} already exists.`));
+            return;
+          }
+
           uploadFileToFirebaseStorage({
             file: file as File,
             filePath: filePath,
@@ -99,21 +105,12 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
   );
 };
 
-export const uploadFileToFirebaseStorage = async ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any)
-: Promise<void> => {
+export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
   const storageRef: StorageReference = ref(storage, filePath);
   const FILE_MAX_SIZE = 512000;
 
   const fileSize = file.size;
   const quality = fileSize > FILE_MAX_SIZE ? FILE_MAX_SIZE / fileSize : 1;
-
-  /**
-   * Check existed file before upload
-   */
-  const isExisted = await isExistedFileOnFirebase(filePath);
-  if (isExisted) {
-    console.log(`File ${filePath} already existed on Firebase`)
-  }
 
   const uploadFile = (fileToUpload: File | Blob) => {
     const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
@@ -164,14 +161,17 @@ export const isExistedFileOnFirebase = async (filePath: string): Promise<boolean
   const storage = getStorage();
   try {
     const fileRef = ref(storage, filePath);
+    console.log(`Checking if file exists at: ${filePath}`);
     await getMetadata(fileRef);
+    console.log(`File exists at: ${filePath}`);
     return true;
   } catch (error) {
     if ((error as any).code === 'storage/object-not-found') {
+      console.log(`File does not exist at: ${filePath}`);
       return false;
     } else {
       console.error('Error checking file existence:', error);
-      return true; // Not break current logic
+      return false; // Not break current logic
     }
   }
 }
