@@ -93,9 +93,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           </div>
           <Form.Item name={"thumbnail"} rules={[{ required: true }]}>
             <ImageUploader
-              maxCount={1}
               handleChange={(urls) => {
-                formProps.form?.setFieldValue("thumbnail", urls[0].image);
+                if (urls && urls.length > 0) {
+                  console.log("here", urls);
+                  formProps.form?.setFieldValue("thumbnail", urls[0].image);
+                }
               }}
             />
           </Form.Item>
@@ -305,17 +307,23 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.description")}</div>
                 <Form.Item name={"donor.description"}>
                   <RichTextEditor initialContent={""} onChange={() => {}} />
                 </Form.Item>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.images")}</div>
                 <Form.Item name={"donor.images"}>
-                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("donor.images", urls)} />
+                  <ImageUploader
+                    handleChange={(urls) => {
+                      if (urls && urls.length > 0) {
+                        formProps.form?.setFieldValue("donor.images", urls);
+                      }
+                    }}
+                  />
                 </Form.Item>
               </div>
             </div>
@@ -337,19 +345,37 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images1")}</div>
                 <Form.Item name={"progress.images1"}>
-                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images1", urls)} />
+                  <ImageUploader
+                    handleChange={(urls) => {
+                      if (urls && urls.length > 0) {
+                        formProps.form?.setFieldValue("progress.images1", urls);
+                      }
+                    }}
+                  />
                 </Form.Item>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images2")}</div>
                 <Form.Item name={"progress.images2"}>
-                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images2", urls)} />
+                  <ImageUploader
+                    handleChange={(urls) => {
+                      if (urls && urls.length > 0) {
+                        formProps.form?.setFieldValue("progress.images2", urls);
+                      }
+                    }}
+                  />
                 </Form.Item>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images3")}</div>
                 <Form.Item name={"progress.images3"}>
-                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("progress.images3", urls)} />
+                  <ImageUploader
+                    handleChange={(urls) => {
+                      if (urls && urls.length > 0) {
+                        formProps.form?.setFieldValue("progress.images3", urls);
+                      }
+                    }}
+                  />
                 </Form.Item>
               </div>
             </div>
@@ -368,16 +394,23 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
                 <Form.Item name={"content.description1"}>
                   <RichTextEditor initialContent={""} onChange={() => {}} />
                 </Form.Item>
               </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+
+              <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
                 <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
                 <Form.Item name={"content.images1"}>
-                  <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images1", urls)} />
+                  <ImageUploader
+                    handleChange={(urls) => {
+                      if (urls && urls.length > 0) {
+                        formProps.form?.setFieldValue("content.images1", urls);
+                      }
+                    }}
+                  />
                 </Form.Item>
               </div>
             </div>
@@ -396,16 +429,23 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
                   <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
                   <Form.Item name={"content.description2"}>
                     <RichTextEditor initialContent={""} onChange={() => {}} />
                   </Form.Item>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
+
+                <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
                   <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
                   <Form.Item name={"content.images2"}>
-                    <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images2", urls)} />
+                    <ImageUploader
+                      handleChange={(urls) => {
+                        if (urls && urls.length > 0) {
+                          formProps.form?.setFieldValue("content.images2", urls);
+                        }
+                      }}
+                    />
                   </Form.Item>
                 </div>
               </div>
@@ -425,16 +465,23 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
                   <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
                   <Form.Item name={"content.description3"}>
                     <RichTextEditor initialContent={""} onChange={() => {}} />
                   </Form.Item>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
+
+                <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
                   <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
                   <Form.Item name={"content.images3"}>
-                    <ImageUploader handleChange={(urls) => formProps.form?.setFieldValue("content.images3", urls)} />
+                    <ImageUploader
+                      handleChange={(urls) => {
+                        if (urls && urls.length > 0) {
+                          formProps.form?.setFieldValue("content.images3", urls);
+                        }
+                      }}
+                    />
                   </Form.Item>
                 </div>
               </div>
