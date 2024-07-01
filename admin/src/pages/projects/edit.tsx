@@ -81,7 +81,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         {/* Category */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>} name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
-          <Select>
+          <Select disabled>
             {Object.entries(categoryMapping).map(([value, label]) => (
               <Select.Option key={value} value={value}>
                 {label}
