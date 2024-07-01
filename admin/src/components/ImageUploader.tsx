@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { Upload, UploadFile, UploadProps } from "antd";
+import { Upload, UploadFile, UploadProps, Modal, Input } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage, getMetadata } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getMetadata } from "firebase/storage";
 import Compressor from "compressorjs";
-import { useLocation } from "react-router-dom";
 import { storage } from "../firebase/client";
 
 const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: string; caption?: string }[]; handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
-  const { pathname } = useLocation();
+  const [imageCaption, setImageCaption] = useState<string>("");
   const [fileList, setFileList] = useState<UploadFile[]>(
     props.initialImages?.map((image, index) => ({
       uid: index.toString(),
@@ -26,6 +25,7 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         image: f?.response?.url,
         caption: f.name,
       }));
+      console.log("here123", { urls, newFileList });
       props.handleChange(urls);
     }
     setFileList(newFileList);
@@ -55,32 +55,24 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         props.handleChange(urls);
       }}
       customRequest={async ({ file, onSuccess, onError, onProgress }) => {
-        const collectionName = pathname.split("/")[1];
-        const year = collectionName.split("-").pop();
-
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-
-        let filePath;
-        if (String(year) === String(currentYear)) {
-          filePath = `uploads/${year}/${currentMonth}/${(file as File).name}`;
-        } else {
-          filePath = `uploads/${year}/${(file as File).name}`;
-        }
+        const filePath = `uploads/${currentYear}/${currentMonth}/${(file as File).name}`;
 
         try {
-          const fileExists = await isExistedFileOnFirebase(filePath);
-          if (fileExists) {
-            onError?.call(this, new Error(`Image with this path ${filePath} already exists.`));
+          const fileRefUrl = await isExistedFileOnFirebase(filePath);
+          if (fileRefUrl) {
+            onSuccess?.call(this, { url: fileRefUrl }, undefined);
             return;
           }
 
           uploadFileToFirebaseStorage({
             file: file as File,
             filePath: filePath,
-            handleUrlResponse(url: any) {
-              onSuccess?.call(this, { url }, undefined);
+            handleUrlResponse(imgObj: any) {
+              onSuccess?.call(this, { url: imgObj.image }, undefined);
+              setImageCaption(imgObj.caption);
             },
             handleError(error: any) {
               console.log({ error });
@@ -116,7 +108,16 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
     const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
     uploadTask.on("state_changed", handleSnapshot, handleError, () => {
       getDownloadURL(uploadTask.snapshot.ref).then((URL: string) => {
-        handleUrlResponse?.call(this, URL);
+        if (URL) {
+          let caption = "";
+          Modal.confirm({
+            title: "Enter the image caption",
+            content: <Input onChange={(e) => (caption = e.target.value)} />,
+            onOk() {
+              handleUrlResponse?.call(this, { image: URL, caption: caption });
+            },
+          });
+        }
       });
     });
   };
@@ -136,8 +137,6 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
 };
 
 export const deleteFileOnFirebase = async (url: string): Promise<void> => {
-  const storage = getStorage();
-
   let path;
   try {
     path = new URL(url).pathname.split("/o/")[1].split("?")[0];
@@ -157,23 +156,23 @@ export const deleteFileOnFirebase = async (url: string): Promise<void> => {
   }
 };
 
-export const isExistedFileOnFirebase = async (filePath: string): Promise<boolean> => {
-  const storage = getStorage();
+export const isExistedFileOnFirebase = async (filePath: string): Promise<string> => {
   try {
     const fileRef = ref(storage, filePath);
-    console.log(`Checking if file exists at: ${filePath}`);
     await getMetadata(fileRef);
-    console.log(`File exists at: ${filePath}`);
-    return true;
+    const fileRefUrl = await getDownloadURL(fileRef);
+    console.log("File already exists at:", fileRefUrl);
+
+    return fileRefUrl;
   } catch (error) {
-    if ((error as any).code === 'storage/object-not-found') {
+    if ((error as any).code === "storage/object-not-found") {
       console.log(`File does not exist at: ${filePath}`);
-      return false;
+      return "";
     } else {
-      console.error('Error checking file existence:', error);
-      return false; // Not break current logic
+      console.error("Error checking file existence:", error);
+      return ""; // Not break current logic
     }
   }
-}
+};
 
 export default ImageUploader;
