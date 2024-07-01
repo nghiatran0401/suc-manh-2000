@@ -2,19 +2,8 @@ const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
-const { 
-  addDocumentToIndex, 
-  removeDocumentFromIndex, 
-  updateDocumentInIndex,
-  getValue,
-  setValue,
-  delValue,
-} = require("../services/redis");
-const { convertToDate } = require('../utils');
-
-// TODO: combine get full list & get a list of 5 posts
-// TODO: save to Redis for caching
-// TODO: reduce the number of requests to Backend
+const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex, getValue, setValue, delValue } = require("../services/redis");
+const { convertToDate } = require("../utils");
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -123,12 +112,11 @@ postRouter.get("/", async (req, res) => {
 // Get a list of 5 latest posts
 postRouter.get("/getLatestPosts", async (req, res) => {
   const { category } = req.params;
-  const cachedKey = `latestPosts:${category}`
+  const cachedKey = `latestPosts:${category}`;
 
   try {
     const cachedLatestPosts = await getValue(cachedKey);
     if (cachedLatestPosts) {
-      console.log('Cache hit! Returning cached for 5 latest posts');
       res.status(200).send(cachedLatestPosts);
     } else {
       const postCollectionRef = firestore.collection(category);
@@ -145,7 +133,6 @@ postRouter.get("/getLatestPosts", async (req, res) => {
 
       if (latestPosts.length > 0) {
         await setValue(cachedKey, latestPosts);
-        console.log('Cached 5 latest post successfully.');
         res.status(200).send(latestPosts);
       } else {
         res.status(404).send({ error: "No posts found for this page" });
@@ -159,13 +146,12 @@ postRouter.get("/getLatestPosts", async (req, res) => {
 // Get a post
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
-  const cachedKey = `post:${category}:${id}`
+  const cachedKey = `post:${category}:${id}`;
 
   try {
     const cachedPost = await getValue(cachedKey);
 
     if (cachedPost) {
-      console.log('Cache hit! Returning cached for post');
       res.status(200).send(cachedPost);
     } else {
       const postDocRef = firestore.collection(category).where("slug", "==", id);
@@ -178,14 +164,12 @@ postRouter.get("/:id", async (req, res) => {
         postDocData.end_date = convertToDate(postDocData.end_date);
 
         await setValue(cachedKey, postDocData);
-        console.log('Cached post successfully.');
 
         res.status(200).json(postDocData);
       } else {
         res.status(404).json({ error: "Post not found" });
       }
     }
-    
   } catch (error) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });
   }
@@ -279,6 +263,7 @@ postRouter.post("/", async (req, res) => {
     const postDocRef = firestore.collection(category).doc(createdPost.id);
 
     await postDocRef.set(isProject ? transformedProjectPost : transformedOriginalPost);
+
     await addDocumentToIndex({ ...(isProject ? transformedProjectPost : transformedOriginalPost), collection_id: category, doc_id: createdPost.id });
 
     if (isProject) {
@@ -407,10 +392,7 @@ postRouter.patch("/:id", async (req, res) => {
       }
 
       await docRef.update(mergedData);
-      await Promise.all([
-        updateDocumentInIndex({ ...(isProject ? mergedData : docData), collection_id: category, doc_id: querySnapshot.docs[0].id }),
-        delValue(`post:${category}:${id}`)
-      ]) ;
+      await Promise.all([updateDocumentInIndex({ ...(isProject ? mergedData : docData), collection_id: category, doc_id: querySnapshot.docs[0].id }), delValue(`post:${category}:${id}`)]);
       res.status(200).json(mergedData);
     } else {
       res.status(404).send({ error: "No document found" });
@@ -433,10 +415,7 @@ postRouter.delete("/:id", async (req, res) => {
       const docData = querySnapshot.docs[0].data();
 
       await docRef.delete();
-      await Promise.all([
-        removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id }),
-        delValue(`post:${category}:${id}`)
-      ]);
+      await Promise.all([removeDocumentFromIndex({ collection_id: category, doc_id: querySnapshot.docs[0].id }), delValue(`post:${category}:${id}`)]);
 
       if (isProject) {
         // Decrease the count of the post's category and classification

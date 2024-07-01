@@ -1,80 +1,87 @@
 import React, { useState } from "react";
-import { Upload, UploadFile, UploadProps } from "antd";
+import { Upload, UploadFile, UploadProps, Modal, Input } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getStorage } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageReference, getMetadata } from "firebase/storage";
 import Compressor from "compressorjs";
-import { useLocation } from "react-router-dom";
 import { storage } from "../firebase/client";
+import { v4 as uuidv4 } from "uuid";
+
+interface Image {
+  image: string;
+  caption: string;
+}
 
 const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: string; caption?: string }[]; handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
-  const { pathname } = useLocation();
   const [fileList, setFileList] = useState<UploadFile[]>(
-    props.initialImages?.map((image, index) => ({
-      uid: index.toString(),
-      name: image.caption ?? "Image",
+    props.initialImages?.map((image) => ({
+      uid: uuidv4(),
+      name: image.caption ?? "No caption image",
       thumbUrl: image.image,
-      status: "done",
-      response: {
-        url: image.image,
-      },
+      response: { url: image.image },
     })) ?? []
   );
 
-  const handleChange: UploadProps["onChange"] = ({ file, fileList: newFileList }) => {
-    if (newFileList.every((f) => f.status === "done")) {
-      const urls = newFileList.map((f: any) => ({
-        image: f?.response?.url,
-        caption: f.name,
-      }));
-      props.handleChange(urls);
-    }
-    setFileList(newFileList);
-  };
-
   return (
     <Upload
-      accept="images/**"
-      maxCount={props.maxCount}
-      onPreview={async (file: UploadFile) => window.open(file.response?.url, "_blank")}
-      listType="picture-card"
-      multiple={true}
       fileList={fileList}
-      onChange={handleChange}
+      accept="images/**"
+      maxCount={1}
+      multiple={false}
+      listType="picture-card"
+      onPreview={async (file: UploadFile) => window.open(file.response?.url, "_blank")}
       onRemove={async (file) => {
-        await deleteFileOnFirebase(file.response.url);
-        const urls = fileList
-          .filter((f) => f.response?.url !== file.response.url)
-          .map((f, idx) => ({
-            uid: idx.toString(),
-            name: f.name ?? "Image",
-            image: f.response.url,
-            response: {
-              url: f.response.url,
-            },
-          }));
-        props.handleChange(urls);
+        // Don't delete file on Cloud storage directly
+        // await deleteFileOnFirebase(file.response.url);
+        const fileListObj = fileList.filter((f) => f.response?.url !== file.response.url);
+
+        setFileList(fileListObj);
+        props.handleChange(fileListObj.map((f) => ({ image: f.response.url, caption: f.name })));
       }}
       customRequest={async ({ file, onSuccess, onError, onProgress }) => {
-        const collectionName = pathname.split("/")[1];
-        const year = collectionName.split("-").pop();
-
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-
-        let filePath;
-        if (String(year) === String(currentYear)) {
-          filePath = `uploads/${year}/${currentMonth}/${(file as File).name}`;
-        } else {
-          filePath = `uploads/${year}/${(file as File).name}`;
-        }
+        const filePath = `uploads/${currentYear}/${currentMonth}/${(file as File).name}`;
 
         try {
+          const existedImage = await isExistedFileOnFirebase(filePath);
+          if (existedImage) {
+            let caption = existedImage.fileName;
+
+            Modal.confirm({
+              title: "Enter the image caption",
+              content: <Input defaultValue={caption} onChange={(e) => (caption = e.target.value)} />,
+              onOk() {
+                const fileListObj = { uid: uuidv4(), name: existedImage.fileName, thumbUrl: existedImage.url, response: { url: existedImage.url } };
+                const image: Image = { image: existedImage.url, caption: caption };
+
+                onSuccess?.call(this, { url: existedImage.url }, undefined);
+                setFileList([fileListObj]);
+                props.handleChange([image]);
+              },
+            });
+
+            return;
+          }
+
           uploadFileToFirebaseStorage({
             file: file as File,
             filePath: filePath,
-            handleUrlResponse(url: any) {
-              onSuccess?.call(this, { url }, undefined);
+            handleUrlResponse({ url, fileName }: { url: string; fileName: string }) {
+              let caption = fileName;
+
+              Modal.confirm({
+                title: "Enter the image caption",
+                content: <Input defaultValue={caption} onChange={(e) => (caption = e.target.value)} />,
+                onOk() {
+                  const fileListObj = { uid: uuidv4(), name: fileName, thumbUrl: url, response: { url: url } };
+                  const image: Image = { image: url, caption: caption };
+
+                  onSuccess?.call(this, { url: url }, undefined);
+                  setFileList([fileListObj]);
+                  props.handleChange([image]);
+                },
+              });
             },
             handleError(error: any) {
               console.log({ error });
@@ -110,7 +117,9 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
     const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
     uploadTask.on("state_changed", handleSnapshot, handleError, () => {
       getDownloadURL(uploadTask.snapshot.ref).then((URL: string) => {
-        handleUrlResponse?.call(this, URL);
+        if (URL) {
+          handleUrlResponse?.call(this, { url: URL, fileName: fileToUpload.name });
+        }
       });
     });
   };
@@ -130,8 +139,6 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
 };
 
 export const deleteFileOnFirebase = async (url: string): Promise<void> => {
-  const storage = getStorage();
-
   let path;
   try {
     path = new URL(url).pathname.split("/o/")[1].split("?")[0];
@@ -148,6 +155,25 @@ export const deleteFileOnFirebase = async (url: string): Promise<void> => {
     console.log("File deleted successfully");
   } catch (error) {
     console.error("Error deleting file:", error);
+  }
+};
+
+export const isExistedFileOnFirebase = async (filePath: string): Promise<{ url: string; fileName: string } | null> => {
+  try {
+    const fileRef = ref(storage, filePath);
+    const fileRefUrl = await getDownloadURL(fileRef);
+    const imgMetaData = await getMetadata(fileRef);
+    console.log(`File ${imgMetaData?.name} exists at: ${fileRefUrl}`);
+
+    return { url: fileRefUrl, fileName: imgMetaData?.name };
+  } catch (error) {
+    if ((error as any).code === "storage/object-not-found") {
+      console.log(`File does not exist at: ${filePath}`);
+      return null;
+    } else {
+      console.error("Error checking file existence:", error);
+      return null; // Not break current logic
+    }
   }
 };
 

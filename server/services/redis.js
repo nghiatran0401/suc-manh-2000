@@ -12,21 +12,20 @@ const SEARCH_FIELD = ["name", "cleanedName"];
 async function createSearchIndex() {
   try {
     await redis.call("FT.INFO", INDEX_NAME);
-    console.log(`Index '${INDEX_NAME}' already exists`);
+    // console.log(`Index '${INDEX_NAME}' already exists`);
   } catch (error) {
     await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
-    console.log(`Index '${INDEX_NAME}' created successfully`);
+    // console.log(`Index '${INDEX_NAME}' created successfully`);
   }
 }
 
 async function removeSearchIndexAndDocuments() {
   while (results[0] > 0) {
-    console.log(`Deleting ${results[0]} documents`);
     for (let i = 1; i < results.length; i += 2) {
       const docId = results[i];
 
       await redis.call("FT.DEL", INDEX_NAME, docId);
-      console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
+      // console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
     }
 
     results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
@@ -119,7 +118,7 @@ async function getValue(key) {
     const value = await redis.get(key);
     return value ? JSON.parse(value) : null;
   } catch (error) {
-    console.error('Error getting value from Redis:', error);
+    console.error("Error getting value from Redis:", error);
     throw error;
   }
 }
@@ -128,7 +127,7 @@ async function setValue(key, value) {
   try {
     await redis.set(key, JSON.stringify(value));
   } catch (error) {
-    console.error('Error setting value in Redis:', error);
+    console.error("Error setting value in Redis:", error);
     throw error;
   }
 }
@@ -137,17 +136,17 @@ async function delValue(key) {
   try {
     await redis.del(key);
   } catch (error) {
-    console.error('Error deleting value from Redis:', error);
+    console.error("Error deleting value from Redis:", error);
     throw error;
   }
 }
 
-module.exports = { 
-  redisSearchByName, 
-  createSearchIndex, 
-  addDocumentToIndex, 
-  removeDocumentFromIndex, 
-  updateDocumentInIndex, 
+module.exports = {
+  redisSearchByName,
+  createSearchIndex,
+  addDocumentToIndex,
+  removeDocumentFromIndex,
+  updateDocumentInIndex,
   removeSearchIndexAndDocuments,
   getValue,
   setValue,
