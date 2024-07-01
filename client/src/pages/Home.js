@@ -51,7 +51,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
+      .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data);
         setLoading(false);
@@ -178,16 +178,16 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.map((child) => (
-                <Box key={child.path} display={"flex"} flexDirection={"column"} gap="">
+                <Box key={child.path} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
-                    <CarouselListCard posts={projects} category={projectTab} />
                     {/* </Grid> */}
+                    <CarouselListCard posts={projects} category={projectTab} />
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button style={{ marginTop: "10px" }} variant="contained" onClick={() => navigate(child.path)}>
+                    <Button style={{ marginTop: "16px" }} variant="contained" onClick={() => navigate(child.path)}>
                       Xem các {child.title}
                     </Button>
                   )}
