@@ -23,4 +23,24 @@ homeRouter.get("/getGeneralData", async (req, res) => {
   }
 });
 
+homeRouter.get("/getTotalProjectsCount", async (req, res) => {
+  try {
+    const collections = await firestore.listCollections();
+    const duAnCollections = collections.filter((collection) => collection.id.includes("du-an"));
+
+    const counts = await Promise.all(
+      duAnCollections.map(async (collection) => {
+        const snapshot = await collection.where("status", "!=", "can-quyen-gop").get();
+        return snapshot.size;
+      })
+    );
+
+    const total = counts.reduce((a, b) => a + b, 0);
+
+    res.status(200).send({ length: total });
+  } catch (error) {
+    console.error("Failed to fetch counts:", error);
+    res.status(500).send({ error: "Failed to fetch data" });
+  }
+});
 module.exports = homeRouter;

@@ -31,19 +31,17 @@ export default function Home() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
+    console.time("Loading Time");
     setLoading(true);
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
-      .then(([news, general]) => {
-        const total =
-          general.data.classification["truong-hoc"] +
-          general.data.classification["khu-noi-tru"] +
-          general.data.classification["nha-hanh-phuc"] +
-          general.data.classification["cau-hanh-phuc"] +
-          general.data.classification["wc"];
+
+    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+      .then(([news, general, totalProjectsCount]) => {
         setNews(news.data);
         setGeneral(general.data);
-        setTotalProjects(total);
+        setTotalProjects(totalProjectsCount.data.length);
+
         setLoading(false);
+        console.timeEnd("Loading Time");
       })
       .catch((e) => console.error(e));
   }, []);
