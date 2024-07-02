@@ -266,22 +266,19 @@ postRouter.post("/", async (req, res) => {
 
     await addDocumentToIndex({ ...(isProject ? transformedProjectPost : transformedOriginalPost), collection_id: category, doc_id: createdPost.id });
 
-    if (isProject) {
-      // Increase the count of the post's category and classification
-      const classificationDoc = await firestore.collection("counts").doc("classification").get();
-      const categoryDoc = await firestore.collection("counts").doc("category").get();
+    // Increase the count of the post's category and classification
+    const classificationDoc = await firestore.collection("counts").doc("classification").get();
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
 
-      if (classificationDoc.exists) {
-        const classificationCounts = classificationDoc.data();
-        classificationCounts[createdPost.classification] = (classificationCounts[createdPost.classification] || 0) + 1;
-        await firestore.collection("counts").doc("classification").set(classificationCounts);
-      }
-
-      if (categoryDoc.exists) {
-        const categoryCounts = categoryDoc.data();
-        categoryCounts[createdPost.category] = (categoryCounts[createdPost.category] || 0) + 1;
-        await firestore.collection("counts").doc("category").set(categoryCounts);
-      }
+    if (classificationDoc.exists) {
+      const classificationCounts = classificationDoc.data();
+      classificationCounts[createdPost.classification] = (classificationCounts[createdPost.classification] || 0) + 1;
+      await firestore.collection("counts").doc("classification").set(classificationCounts);
+    }
+    if (categoryDoc.exists) {
+      const categoryCounts = categoryDoc.data();
+      categoryCounts[createdPost.category] = (categoryCounts[createdPost.category] || 0) + 1;
+      await firestore.collection("counts").doc("category").set(categoryCounts);
     }
 
     res.status(200).json(isProject ? transformedProjectPost : transformedOriginalPost);
