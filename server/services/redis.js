@@ -114,7 +114,7 @@ async function redisSearchByName(searchKey) {
   return transformedResults;
 }
 
-async function getValue(key) {
+async function getValueInRedis(key) {
   try {
     const value = await redis.get(key);
     return value ? JSON.parse(value) : null;
@@ -124,7 +124,7 @@ async function getValue(key) {
   }
 }
 
-async function setExValue(key, value) {
+async function setExValueInRedis(key, value) {
   try {
     await redis.set(key, JSON.stringify(value), "EX", DEFAULT_EXPIRATION);
   } catch (error) {
@@ -133,7 +133,7 @@ async function setExValue(key, value) {
   }
 }
 
-async function delValue(key) {
+async function delValueInRedis(key) {
   try {
     await redis.del(key);
   } catch (error) {
@@ -149,7 +149,7 @@ module.exports = {
   removeDocumentFromIndex,
   updateDocumentInIndex,
   removeSearchIndexAndDocuments,
-  getValue,
-  setExValue,
-  delValue,
+  getValueInRedis,
+  setExValueInRedis,
+  delValueInRedis,
 };

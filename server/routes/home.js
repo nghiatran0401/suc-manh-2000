@@ -1,6 +1,6 @@
 const express = require("express");
 const { firestore } = require("../firebase");
-const { getValue, setExValue } = require("../services/redis");
+const { getValueInRedis, setExValueInRedis } = require("../services/redis");
 
 const homeRouter = express.Router();
 
@@ -8,7 +8,7 @@ homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
   const cachedKey = `classificationAndCategoryCounts`;
 
   try {
-    const cachedResultData = await getValue(cachedKey);
+    const cachedResultData = await getValueInRedis(cachedKey);
 
     if (cachedResultData) {
       res.status(200).send(cachedResultData);
@@ -25,7 +25,7 @@ homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
       const categoryCounts = categoryDoc.data();
       const resultData = { classification: classificationCounts, category: categoryCounts };
 
-      await setExValue(cachedKey, resultData);
+      await setExValueInRedis(cachedKey, resultData);
       res.status(200).send(resultData);
     }
   } catch (error) {
@@ -38,7 +38,7 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
   const cachedKey = `totalProjectsCount`;
 
   try {
-    const cachedResultData = await getValue(cachedKey);
+    const cachedResultData = await getValueInRedis(cachedKey);
 
     if (cachedResultData) {
       res.status(200).send(String(cachedResultData));
@@ -54,7 +54,7 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
       );
       const resultData = counts.reduce((a, b) => a + b, 0);
 
-      await setExValue(cachedKey, resultData);
+      await setExValueInRedis(cachedKey, resultData);
       res.status(200).send(resultData);
     }
   } catch (error) {

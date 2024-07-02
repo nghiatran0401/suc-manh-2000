@@ -32,7 +32,7 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    console.time("Loading Time");
+    console.time("Loading Time Common data");
 
     Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
       .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
@@ -41,18 +41,22 @@ export default function Home() {
         setTotalProjects(Number(totalProjectsCount.data));
 
         setLoading(false);
-        console.timeEnd("Loading Time");
+        console.timeEnd("Loading Time Common data");
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
+    console.time("Loading Time Projects list");
+
     axios
       .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data);
+
         setLoading(false);
+        console.timeEnd("Loading Time Projects list");
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
