@@ -7,6 +7,7 @@ const redis = new Redis(process.env.REDIS_URL);
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleanedName", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT"];
 const SEARCH_FIELD = ["name", "cleanedName"];
+const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
 // https://d128ysc22mu7qe.cloudfront.net/Commands/#ftcreate
 async function createSearchIndex() {
@@ -113,30 +114,30 @@ async function redisSearchByName(searchKey) {
   return transformedResults;
 }
 
-async function getValue(key) {
+async function getValueInRedis(key) {
   try {
     const value = await redis.get(key);
     return value ? JSON.parse(value) : null;
   } catch (error) {
-    console.error("Error getting value from Redis:", error);
+    console.error("Error getting value from Redis:", error.message);
     throw error;
   }
 }
 
-async function setValue(key, value) {
+async function setExValueInRedis(key, value) {
   try {
-    await redis.set(key, JSON.stringify(value));
+    await redis.set(key, JSON.stringify(value), "EX", DEFAULT_EXPIRATION);
   } catch (error) {
-    console.error("Error setting value in Redis:", error);
+    console.error("Error setting value in Redis:", error.message);
     throw error;
   }
 }
 
-async function delValue(key) {
+async function delValueInRedis(key) {
   try {
     await redis.del(key);
   } catch (error) {
-    console.error("Error deleting value from Redis:", error);
+    console.error("Error deleting value from Redis:", error.message);
     throw error;
   }
 }
@@ -148,7 +149,7 @@ module.exports = {
   removeDocumentFromIndex,
   updateDocumentInIndex,
   removeSearchIndexAndDocuments,
-  getValue,
-  setValue,
-  delValue,
+  getValueInRedis,
+  setExValueInRedis,
+  delValueInRedis,
 };

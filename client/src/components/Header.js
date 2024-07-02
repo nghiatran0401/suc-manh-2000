@@ -27,8 +27,8 @@ export default function HeaderBar(props) {
 
   useEffect(() => {
     axios
-      .get(SERVER_URL + "/getGeneralData")
-      .then((res) => setGeneral(res.data))
+      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
+      .then((classificationAndCategoryCounts) => setGeneral(classificationAndCategoryCounts.data))
       .catch((e) => console.error(e));
   }, []);
 

@@ -32,29 +32,31 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
-      .then(([news, general]) => {
-        const total =
-          general.data.classification["truong-hoc"] +
-          general.data.classification["khu-noi-tru"] +
-          general.data.classification["nha-hanh-phuc"] +
-          general.data.classification["cau-hanh-phuc"] +
-          general.data.classification["wc"];
+    console.time("Loading Time Common data");
+
+    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+      .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
-        setGeneral(general.data);
-        setTotalProjects(total);
+        setGeneral(classificationAndCategoryCounts.data);
+        setTotalProjects(Number(totalProjectsCount.data));
+
         setLoading(false);
+        console.timeEnd("Loading Time Common data");
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
+    console.time("Loading Time Projects list");
+
     axios
       .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data);
+
         setLoading(false);
+        console.timeEnd("Loading Time Projects list");
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
@@ -162,7 +164,7 @@ export default function Home() {
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
               {PROJECT_LIST.children.map((child) => (
-                <Tab key={child.path} onClick={() => setProjectTab(child.path)}>
+                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
                   <Typography variant="body1">
                     {child.title} ({general?.category[child.path.replace("/", "")]})
                   </Typography>
@@ -178,7 +180,7 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.map((child) => (
-                <Box key={child.path} display={"flex"} flexDirection={"column"}>
+                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
