@@ -2,7 +2,7 @@ const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
-const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex, getValue, setValue, delValue } = require("../services/redis");
+const { addDocumentToIndex, removeDocumentFromIndex, updateDocumentInIndex, getValue, setExValue, delValue } = require("../services/redis");
 const { convertToDate } = require("../utils");
 
 const postRouter = express.Router({ mergeParams: true });
@@ -115,15 +115,16 @@ postRouter.get("/getLatestPosts", async (req, res) => {
   const cachedKey = `latestPosts:${category}`;
 
   try {
-    const cachedLatestPosts = await getValue(cachedKey);
-    if (cachedLatestPosts) {
-      res.status(200).send(cachedLatestPosts);
+    const cachedResultData = await getValue(cachedKey);
+
+    if (cachedResultData) {
+      res.status(200).send(cachedResultData);
     } else {
       const postCollectionRef = firestore.collection(category);
       const query = postCollectionRef.orderBy("publish_date", "desc");
       const postCollectionSnapshot = await query.offset(0).limit(5).get();
       const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-      const latestPosts = postCollectionData.map((post) => ({
+      const resultData = postCollectionData.map((post) => ({
         name: post.name,
         author: post.author,
         publish_date: post.publish_date.toDate(),
@@ -131,44 +132,31 @@ postRouter.get("/getLatestPosts", async (req, res) => {
         image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
       }));
 
-      if (latestPosts.length > 0) {
-        await setValue(cachedKey, latestPosts);
-        res.status(200).send(latestPosts);
-      } else {
-        res.status(404).send({ error: "No posts found for this page" });
-      }
+      await setExValue(cachedKey, resultData);
+      res.status(200).send(resultData);
     }
   } catch (error) {
-    res.status(404).send({ error: `Error getting a list of latest documents: ${error.message}` });
+    res.status(404).send({ error: `Error getting a list of 5 latest documents: ${error.message}` });
   }
 });
 
 // Get a post
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
-  const cachedKey = `post:${category}:${id}`;
 
   try {
-    const cachedPost = await getValue(cachedKey);
+    const postDocRef = firestore.collection(category).where("slug", "==", id);
+    const postDocRefSnapshot = await postDocRef.get();
 
-    if (cachedPost) {
-      res.status(200).send(cachedPost);
+    if (!postDocRefSnapshot.empty) {
+      const postDocData = postDocRefSnapshot.docs[0].data();
+      postDocData.publish_date = convertToDate(postDocData.publish_date);
+      postDocData.start_date = convertToDate(postDocData.start_date);
+      postDocData.end_date = convertToDate(postDocData.end_date);
+
+      res.status(200).json(postDocData);
     } else {
-      const postDocRef = firestore.collection(category).where("slug", "==", id);
-      const postDocRefSnapshot = await postDocRef.get();
-
-      if (!postDocRefSnapshot.empty) {
-        const postDocData = postDocRefSnapshot.docs[0].data();
-        postDocData.publish_date = convertToDate(postDocData.publish_date);
-        postDocData.start_date = convertToDate(postDocData.start_date);
-        postDocData.end_date = convertToDate(postDocData.end_date);
-
-        await setValue(cachedKey, postDocData);
-
-        res.status(200).json(postDocData);
-      } else {
-        res.status(404).json({ error: "Post not found" });
-      }
+      res.status(404).json({ error: "Post not found" });
     }
   } catch (error) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });

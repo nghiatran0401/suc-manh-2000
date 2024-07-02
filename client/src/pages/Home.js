@@ -31,14 +31,14 @@ export default function Home() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    console.time("Loading Time");
     setLoading(true);
+    console.time("Loading Time");
 
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
-      .then(([news, general, totalProjectsCount]) => {
+    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+      .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
-        setGeneral(general.data);
-        setTotalProjects(totalProjectsCount.data.length);
+        setGeneral(classificationAndCategoryCounts.data);
+        setTotalProjects(Number(totalProjectsCount.data));
 
         setLoading(false);
         console.timeEnd("Loading Time");
@@ -160,7 +160,7 @@ export default function Home() {
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
               {PROJECT_LIST.children.map((child) => (
-                <Tab key={child.path} onClick={() => setProjectTab(child.path)}>
+                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
                   <Typography variant="body1">
                     {child.title} ({general?.category[child.path.replace("/", "")]})
                   </Typography>
@@ -176,7 +176,7 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.map((child) => (
-                <Box key={child.path} display={"flex"} flexDirection={"column"}>
+                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}

@@ -36,9 +36,9 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(SERVER_URL + "/getGeneralData")
-      .then((general) => {
-        setGeneral(general.data);
+      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
+      .then((classificationAndCategoryCounts) => {
+        setGeneral(classificationAndCategoryCounts.data);
         setLoading(false);
       })
       .catch((e) => {
