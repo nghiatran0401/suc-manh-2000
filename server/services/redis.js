@@ -13,28 +13,33 @@ const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 async function createSearchIndex() {
   try {
     await redis.call("FT.INFO", INDEX_NAME);
-    // console.log(`Index '${INDEX_NAME}' already exists`);
+    console.log(`Index '${INDEX_NAME}' already exists`);
   } catch (error) {
     await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
-    // console.log(`Index '${INDEX_NAME}' created successfully`);
+    console.log(`Index '${INDEX_NAME}' created successfully`);
   }
 }
 
 async function removeSearchIndexAndDocuments() {
+  let results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
+
   while (results[0] > 0) {
     for (let i = 1; i < results.length; i += 2) {
       const docId = results[i];
 
       await redis.call("FT.DEL", INDEX_NAME, docId);
-      // console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
+      console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
     }
 
     results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
   }
+
+  await redis.call("FT.DROPINDEX", INDEX_NAME);
+  console.log(`Index '${INDEX_NAME}' deleted successfully`);
 }
 
 // https://d128ysc22mu7qe.cloudfront.net/Commands/#ftadd
-async function addDocumentToIndex(data) {
+async function upsertDocumentToIndex(data) {
   await redis.call(
     "FT.ADD",
     INDEX_NAME,
@@ -63,32 +68,6 @@ async function addDocumentToIndex(data) {
 async function removeDocumentFromIndex(data) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
   // console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
-}
-
-async function updateDocumentInIndex(data) {
-  await redis.call(
-    "FT.ADD",
-    INDEX_NAME,
-    `post:${data.collection_id}:${data.doc_id}`,
-    1.0,
-    "REPLACE",
-    "FIELDS",
-    "id",
-    data.id,
-    "slug",
-    data.slug,
-    "name",
-    data.name,
-    "cleanedName",
-    convertToCleanedName(data.name),
-    "thumbnail",
-    data.thumbnail,
-    "category",
-    data.category,
-    "classification",
-    data.classification
-  );
-  // console.log(`Document '${data.doc_id}' updated in index '${INDEX_NAME}' successfully`);
 }
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
@@ -145,10 +124,9 @@ async function delValueInRedis(key) {
 module.exports = {
   redisSearchByName,
   createSearchIndex,
-  addDocumentToIndex,
-  removeDocumentFromIndex,
-  updateDocumentInIndex,
   removeSearchIndexAndDocuments,
+  upsertDocumentToIndex,
+  removeDocumentFromIndex,
   getValueInRedis,
   setExValueInRedis,
   delValueInRedis,
