@@ -124,9 +124,10 @@ export default function HeaderBar(props) {
                 options={searchOptions}
                 onInputChange={onSearch}
                 getOptionLabel={(option) => option.name}
+                onClose={() => setOpenSearch(false)}
                 renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
                 renderOption={(props, option) => (
-                  <Link to={`${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
+                  <Link to={`/${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
                     <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
                       <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
                       <Typography variant="body1" color="#000">
