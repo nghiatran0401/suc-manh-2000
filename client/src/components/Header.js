@@ -14,6 +14,8 @@ import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 
+// TODO: extract Search into a separated reusable component
+
 export default function HeaderBar(props) {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});

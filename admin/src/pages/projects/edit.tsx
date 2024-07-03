@@ -39,7 +39,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
       formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
       formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
-      console.log("here", projectData);
     }
   }, [projectData]);
 

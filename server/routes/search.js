@@ -11,6 +11,7 @@ searchRouter.get("/", async (req, res) => {
     }
 
     const searchResult = await redisSearchByName(searchKey);
+
     res.status(200).send(searchResult);
   } catch (error) {
     res.status(404).send({ error: `Failed to search data: ${error.message}` });

@@ -95,7 +95,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <ImageUploader
               handleChange={(urls) => {
                 if (urls && urls.length > 0) {
-                  console.log("here", urls);
                   formProps.form?.setFieldValue("thumbnail", urls[0].image);
                 }
               }}
