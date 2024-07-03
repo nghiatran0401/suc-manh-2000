@@ -2,7 +2,7 @@ const Redis = require("ioredis");
 const { convertToCleanedName } = require("../utils/search");
 require("dotenv").config();
 
-const redis = new Redis("redis://:AEvCEZljDOEk3X6UWh12ygMKhlyliPss@redis-17210.c330.asia-south1-1.gce.redns.redis-cloud.com:17210");
+const redis = new Redis(process.env.REDIS_URL);
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleanedName", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT"];
