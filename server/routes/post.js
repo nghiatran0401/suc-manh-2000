@@ -243,7 +243,7 @@ postRouter.post("/", async (req, res) => {
     // Increase the count of the post's category and classification
     await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
 
-    res.status(200).json({ message: "Post created successfully" });
+    res.status(200).json(postToSave);
   } catch (error) {
     res.status(404).send({ error: `Error creating a document: ${error.message}` });
   }
@@ -350,7 +350,7 @@ postRouter.patch("/:id", async (req, res) => {
         }
       }
 
-      res.status(200).json({ message: "Post updated successfully" });
+      res.status(200).json(postToSave);
     }
   } catch (error) {
     res.status(500).send({ error: `Error updating a document: ${error.message}` });
