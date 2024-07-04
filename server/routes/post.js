@@ -259,6 +259,7 @@ postRouter.patch("/:id", async (req, res) => {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
     const docData = querySnapshot.docs[0].data();
 
+    let postToSave;
     const commonPostFields = {
       id: updatedPost.id ?? docData.id,
       name: updatedPost.name ?? docData.name,
@@ -268,66 +269,67 @@ postRouter.patch("/:id", async (req, res) => {
       thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
       category: updatedPost.category ?? docData.category,
     };
-    const transformedProjectPost = {
-      ...commonPostFields,
-      description: updatedPost.description ?? docData.description ?? null,
-      totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
-      classification: updatedPost.classification ?? docData.classification ?? null,
-      status: updatedPost.status ?? docData.status ?? null,
-      start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
-      end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
-      donor: {
-        description: updatedPost["donor.description"] ?? docData.donor.description ?? null,
-        images: updatedPost["donor.images"] ?? docData.donor.images ?? null,
-      },
-      progress: [
-        {
-          name: "Ảnh hiện trạng",
-          images: updatedPost["progress.images1"] ?? docData.progress.find((p) => p.name === "Ảnh hiện trạng")?.images ?? [],
+    if (isProject) {
+      postToSave = {
+        ...commonPostFields,
+        description: updatedPost.description ?? docData.description ?? null,
+        totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
+        classification: updatedPost.classification ?? docData.classification ?? null,
+        status: updatedPost.status ?? docData.status ?? null,
+        start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
+        end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
+        donor: {
+          description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
+          images: updatedPost["donor.images"] ?? docData.donor.images ?? null,
         },
-        {
-          name: "Ảnh tiến độ",
-          images: updatedPost["progress.images2"] ?? docData.progress.find((p) => p.name === "Ảnh tiến độ")?.images ?? [],
-        },
-        {
-          name: "Ảnh hoàn thiện",
-          images: updatedPost["progress.images3"] ?? docData.progress.find((p) => p.name === "Ảnh hoàn thiện")?.images ?? [],
-        },
-      ],
-      content: {
-        tabs: [
+        progress: [
           {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            name: "Ảnh hiện trạng",
+            images: updatedPost["progress.images1"] ?? docData.progress.find((p) => p.name === "Ảnh hiện trạng")?.images ?? [],
           },
           {
-            name: "Nhà hảo tâm",
-            description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.description ?? null,
-            slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            name: "Ảnh tiến độ",
+            images: updatedPost["progress.images2"] ?? docData.progress.find((p) => p.name === "Ảnh tiến độ")?.images ?? [],
           },
           {
-            name: "Mô hình xây",
-            description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.description ?? null,
-            slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.slide_show ?? [],
+            name: "Ảnh hoàn thiện",
+            images: updatedPost["progress.images3"] ?? docData.progress.find((p) => p.name === "Ảnh hoàn thiện")?.images ?? [],
           },
         ],
-      },
-    };
-    const transformedOriginalPost = {
-      ...commonPostFields,
-      content: {
-        tabs: [
-          {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
-          },
-        ],
-      },
-    };
-
-    const postToSave = isProject ? transformedProjectPost : transformedOriginalPost;
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+            {
+              name: "Nhà hảo tâm",
+              description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.description ?? null,
+              slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            },
+            {
+              name: "Mô hình xây",
+              description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.description ?? null,
+              slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    } else {
+      postToSave = {
+        ...commonPostFields,
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    }
 
     if (!querySnapshot.empty) {
       // Update the post in Firestore
