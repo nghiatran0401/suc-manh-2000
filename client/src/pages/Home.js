@@ -24,6 +24,7 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
+  const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
   const [totalProjects, setTotalProjects] = useState(0);
 
   const navigate = useNavigate();
@@ -38,7 +39,16 @@ export default function Home() {
       .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
         setGeneral(classificationAndCategoryCounts.data);
-        setTotalProjects(Number(totalProjectsCount.data));
+        setTotalFinishedProjects(Number(totalProjectsCount.data));
+
+        const total =
+          classificationAndCategoryCounts.data.classification["truong-hoc"] +
+          classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
+          classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["wc"];
+
+        setTotalProjects(total);
 
         setLoading(false);
         console.timeEnd("Loading Time Common data");
@@ -216,7 +226,7 @@ export default function Home() {
             </Grid>
             <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
               <Typography variant="h1" fontWeight={"bold"} color={"red"}>
-                <CountUp start={0} end={totalProjects} duration={10} />
+                <CountUp start={0} end={totalFinishedProjects} duration={10} />
               </Typography>
               <Typography variant="h6" fontWeight={"bold"}>
                 TỔNG DỰ ÁN ĐÃ THỰC HIỆN
@@ -232,7 +242,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Dự án xây trường
+                Trường học
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
