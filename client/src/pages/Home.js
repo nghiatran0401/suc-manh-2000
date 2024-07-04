@@ -25,7 +25,6 @@ export default function Home() {
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
-  const [totalProjects, setTotalProjects] = useState(0);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -40,15 +39,6 @@ export default function Home() {
         setNews(news.data);
         setGeneral(classificationAndCategoryCounts.data);
         setTotalFinishedProjects(Number(totalProjectsCount.data));
-
-        const total =
-          classificationAndCategoryCounts.data.classification["truong-hoc"] +
-          classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
-          classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
-          classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
-          classificationAndCategoryCounts.data.classification["wc"];
-
-        setTotalProjects(total);
 
         setLoading(false);
         console.timeEnd("Loading Time Common data");
@@ -74,7 +64,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
-      <HeaderBar totalProjects={totalProjects} />
+      <HeaderBar />
 
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>

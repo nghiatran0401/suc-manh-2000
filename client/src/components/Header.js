@@ -16,7 +16,7 @@ import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 
 // TODO: extract Search into a separated reusable component
 
-export default function HeaderBar(props) {
+export default function HeaderBar() {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
   const theme = useTheme();
@@ -25,12 +25,25 @@ export default function HeaderBar(props) {
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchOptions, setSearchOptions] = useState([]);
+  const [totalProjects, setTotalProjects] = useState(0);
+
   const autocompleteRef = useRef();
 
   useEffect(() => {
     axios
       .get(SERVER_URL + "/getClassificationAndCategoryCounts")
-      .then((classificationAndCategoryCounts) => setGeneral(classificationAndCategoryCounts.data))
+      .then((classificationAndCategoryCounts) => {
+        setGeneral(classificationAndCategoryCounts.data);
+
+        const total =
+          classificationAndCategoryCounts.data.classification["truong-hoc"] +
+          classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
+          classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["wc"];
+
+        setTotalProjects(total);
+      })
       .catch((e) => console.error(e));
   }, []);
 
@@ -86,7 +99,7 @@ export default function HeaderBar(props) {
                         {item.children.length > 0 ? (
                           <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
                             <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
-                              {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
+                              {item.title} {item.name === "du-an" && `(${totalProjects})`}
                               <ArrowDropDown />
                             </Typography>
                             <CDropdownMenu color="secondary">
