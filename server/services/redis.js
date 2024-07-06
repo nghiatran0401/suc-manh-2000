@@ -85,18 +85,30 @@ async function removeDocumentFromIndex(data) {
 }
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
-/*
- Example of combine search and filter in Redis
-    FT.SEARCH myIndex "@title:(Redis Search) @price:[50 200] @tags:{redis}" SORTBY price ASC
- */
-async function redisSearchByName(searchKey) {
-  /**
-   * TODO: Implement search and filter
-   */
+async function redisSearchByName(searchKey, filters) {
+  const query = `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`;
+  const args = [query];
 
-  const results = await redis.call("FT.SEARCH", INDEX_NAME, 
-  `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`, 
-  "SORTBY", "category", "DESC", "LIMIT", 0, 30);
+  if (filters.year) {
+    args.push('FILTER', 'year', filters.year);
+  }
+
+  if (filters.classification) {
+    args.push('FILTER', 'year', filters.year);
+  }
+
+  if (filters.status) {
+    args.push('FILTER', 'classification', filters.classification);
+  }
+
+  if (filters.totalFunds) {
+    args.push('FILTER', 'totalFunds', filters.totalFunds.min, filters.totalFunds.max);
+  }
+
+  const results = await redis.call(
+    "FT.SEARCH", INDEX_NAME, 
+    ...args,
+    "SORTBY", "category", "DESC", "LIMIT", 0, 30);
   const transformedResults = [];
   // const totalCount = results[0];
 
