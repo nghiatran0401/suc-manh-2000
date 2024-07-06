@@ -11,11 +11,13 @@ const INDEX_SCHEMA = ["SCHEMA",
   "name", "TEXT", 
   "cleanedName", "TEXT", 
   "thumbnail", "TEXT",
-  "category", "TEXT", 
-  "classification", "TEXT",
   "year", "TEXT",
-  "status", "TEXT",
-  "totalFund", 'NUMERIC', 'SORTABLE',
+
+  "category", "TAG",
+  "classification", "TAG",
+  "status", "TAG",
+
+  "totalFund", "NUMERIC",
 ];
 const SEARCH_FIELD = ["name", "cleanedName", "year", "status", "classification", "totalFund"];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
@@ -97,30 +99,30 @@ async function removeDocumentFromIndex(data) {
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
 async function redisSearchByName(searchKey, filters) {
-  let query;
-  if (searchKey) {
-    query = `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`
-  }
-
+  let query = ''
   const args = [INDEX_NAME];
+
+  if (searchKey) {
+    query += `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`
+  }
 
   if (filters.year) {
     query += ` @${SEARCH_FIELD[2]}:${filters.year}`
   }
 
   if (filters.status) {
-    query += ` @${SEARCH_FIELD[3]}:${filters.status}`
+    query += ` @${SEARCH_FIELD[3]}:{${filters.status}}`
   }
 
   if (filters.classification) {
-    query += ` @${SEARCH_FIELD[4]}:${filters.classification}`;
+    query += ` @${SEARCH_FIELD[4]}:{${filters.classification}}`;
+  }
+  
+  if (filters.totalFund) {
+    query += ` @${SEARCH_FIELD[5]}:[${filters.totalFund.min}, ${filters.totalFund.max}]`;
   }
 
   args.push(query);
-
-  if (filters.totalFund) {
-    args.push('FILTER', SEARCH_FIELD[5], filters.totalFund.min, filters.totalFund.max);
-  }
 
   // Handle sorting
   args.push("SORTBY", "category", "DESC")

@@ -24,8 +24,17 @@ async function indexFirestoreDocsToRedis(env) {
         collection_id: collection.id, 
         doc_id: doc.id,
         year: doc.data().publish_date?.toDate()?.getFullYear(),
+        category: doc.data().category 
+          ? splitString(doc.data().category, '-').join('')
+          : 'other',
+        classification: doc.data().classification 
+          ? splitString(doc.data().classification, '-').join('')
+          : 'other',
+        status: doc.data().status 
+          ? splitString(doc.data().status, '-').join('')
+          : 'other',
+        totalFund: doc.data().totalFund ?? 0,
       }, redisEnv));
-
       await Promise.all(promises);
       console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     }
@@ -37,3 +46,8 @@ async function indexFirestoreDocsToRedis(env) {
 }
 
 indexFirestoreDocsToRedis("local").catch(console.error);
+
+function splitString(inputString, separator) {
+  return inputString.split(separator);
+}
+
