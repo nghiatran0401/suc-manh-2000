@@ -19,7 +19,12 @@ async function indexFirestoreDocsToRedis(env) {
     for (const collection of collections) {
       const snapshot = await collection.get();
 
-      const promises = snapshot.docs.map(async (doc) => await upsertDocumentToIndex({ ...doc.data(), collection_id: collection.id, doc_id: doc.id }, redisEnv));
+      const promises = snapshot.docs.map(async (doc) => await upsertDocumentToIndex({ 
+        ...doc.data(), 
+        collection_id: collection.id, 
+        doc_id: doc.id,
+        year: doc.data().publish_date?.toDate()?.getFullYear(),
+      }, redisEnv));
 
       await Promise.all(promises);
       console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);

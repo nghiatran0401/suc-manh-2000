@@ -10,7 +10,8 @@ searchRouter.get("/", async (req, res) => {
       return res.status(200).send([]);
     }
 
-    const searchResult = await redisSearchByName(searchKey);
+    const filters = req.query.filters ?? {};
+    const searchResult = await redisSearchByName(searchKey, filters);
 
     res.status(200).send(searchResult);
   } catch (error) {

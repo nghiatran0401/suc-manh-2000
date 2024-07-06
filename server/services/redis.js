@@ -5,8 +5,19 @@ require("dotenv").config();
 const redis = new Redis(process.env.REDIS_URL);
 
 const INDEX_NAME = "post_index";
-const INDEX_SCHEMA = ["SCHEMA", "id", "TEXT", "slug", "TEXT", "name", "TEXT", "cleanedName", "TEXT", "thumbnail", "TEXT", "category", "TEXT", "classification", "TEXT", "status", "TEXT", "totalFund", "NUMERIC"];
-const SEARCH_FIELD = ["name", "cleanedName"];
+const INDEX_SCHEMA = ["SCHEMA", 
+  "id", "TEXT", 
+  "slug", "TEXT", 
+  "name", "TEXT", 
+  "cleanedName", "TEXT", 
+  "thumbnail", "TEXT",
+  "category", "TEXT", 
+  "classification", "TEXT",
+  "year", "TEXT",
+  "status", "TEXT",
+  "totalFund", 'NUMERIC', 'SORTABLE',
+];
+const SEARCH_FIELD = ["name", "cleanedName", "year", "status", "classification", "totalFund"];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
 async function createSearchIndex(redisEnv = redis) {
@@ -86,29 +97,40 @@ async function removeDocumentFromIndex(data) {
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e
 async function redisSearchByName(searchKey, filters) {
-  const query = `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`;
-  const args = [query];
-
-  if (filters.year) {
-    args.push('FILTER', 'year', filters.year);
+  let query;
+  if (searchKey) {
+    query = `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`
   }
 
-  if (filters.classification) {
-    args.push('FILTER', 'year', filters.year);
+  const args = [INDEX_NAME];
+
+  if (filters.year) {
+    query += ` @${SEARCH_FIELD[2]}:${filters.year}`
   }
 
   if (filters.status) {
-    args.push('FILTER', 'classification', filters.classification);
+    query += ` @${SEARCH_FIELD[3]}:${filters.status}`
   }
 
-  if (filters.totalFunds) {
-    args.push('FILTER', 'totalFunds', filters.totalFunds.min, filters.totalFunds.max);
+  if (filters.classification) {
+    query += ` @${SEARCH_FIELD[4]}:${filters.classification}`;
   }
+
+  args.push(query);
+
+  if (filters.totalFund) {
+    args.push('FILTER', SEARCH_FIELD[5], filters.totalFund.min, filters.totalFund.max);
+  }
+
+  // Handle sorting
+  args.push("SORTBY", "category", "DESC")
+
+  // Handle limit
+  args.push("LIMIT", 0, 30);
 
   const results = await redis.call(
-    "FT.SEARCH", INDEX_NAME, 
-    ...args,
-    "SORTBY", "category", "DESC", "LIMIT", 0, 30);
+    "FT.SEARCH", 
+    ...args);
   const transformedResults = [];
   // const totalCount = results[0];
 
