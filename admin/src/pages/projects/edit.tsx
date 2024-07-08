@@ -25,7 +25,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     },
     // @ts-ignore
     successNotification(data: any, values: any) {
-      const messageHtml = `<a href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
+      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
       return {
         description: "Cập nhật thành công",
         message: <HtmlContent html={messageHtml} />,
