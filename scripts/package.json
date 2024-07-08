@@ -4,8 +4,8 @@
   "description": "",
   "main": "deleteAllFirestoreCollections.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate": "cp .env.local .env && node migrateRedisProdToLocal.js"
+    "migrateRedisProdToLocal": "node migrateRedisProdToLocal.js",
+    "indexFirestoreDocsToRedis": "node indexFirestoreDocsToRedis.js"
   },
   "keywords": [],
   "author": "",
