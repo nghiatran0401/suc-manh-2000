@@ -241,7 +241,9 @@ postRouter.post("/", async (req, res) => {
     await upsertDocumentToIndex({ ...postToSave, collection_id: category, doc_id: postToSave.id });
 
     // Increase the count of the post's category and classification
-    await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
+    const resultData = await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
+    const cachedKey = `classificationAndCategoryCounts`;
+    await setExValueInRedis(cachedKey, resultData);
 
     res.status(200).json(postToSave);
   } catch (error) {
@@ -349,6 +351,11 @@ postRouter.patch("/:id", async (req, res) => {
           classificationCounts[postToSave.classification] = (classificationCounts[postToSave.classification] || 0) + 1;
           classificationCounts[docData.classification] = (classificationCounts[docData.classification] || 0) - 1;
           await firestore.collection("counts").doc("classification").set(classificationCounts);
+
+          const cachedKey = `classificationAndCategoryCounts`;
+          const cachedResultData = await getValueInRedis(cachedKey);
+          const resultData = { classification: classificationCounts, category: cachedResultData.category };
+          await setExValueInRedis(cachedKey, resultData);
         }
       }
 
@@ -376,7 +383,9 @@ postRouter.delete("/:id", async (req, res) => {
 
       // Decrease the count of the post's category and classification
       const docData = querySnapshot.docs[0].data();
-      await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
+      const resultData = await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
+      const cachedKey = `classificationAndCategoryCounts`;
+      await setExValueInRedis(cachedKey, resultData);
 
       res.status(200).json({ message: "Post deleted successfully" });
     }
