@@ -24,7 +24,7 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
-  const [totalProjects, setTotalProjects] = useState(0);
+  const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -38,7 +38,7 @@ export default function Home() {
       .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
         setGeneral(classificationAndCategoryCounts.data);
-        setTotalProjects(Number(totalProjectsCount.data));
+        setTotalFinishedProjects(Number(totalProjectsCount.data));
 
         setLoading(false);
         console.timeEnd("Loading Time Common data");
@@ -64,7 +64,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
-      <HeaderBar totalProjects={totalProjects} />
+      <HeaderBar />
 
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
@@ -216,7 +216,7 @@ export default function Home() {
             </Grid>
             <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
               <Typography variant="h1" fontWeight={"bold"} color={"red"}>
-                <CountUp start={0} end={totalProjects} duration={10} />
+                <CountUp start={0} end={totalFinishedProjects} duration={10} />
               </Typography>
               <Typography variant="h6" fontWeight={"bold"}>
                 TỔNG DỰ ÁN ĐÃ THỰC HIỆN
@@ -232,7 +232,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Dự án xây trường
+                Trường học
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>

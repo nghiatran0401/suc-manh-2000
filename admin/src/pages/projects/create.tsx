@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from "react";
-import { IResourceComponentsProps, useTranslate, CreateResponse } from "@refinedev/core";
+import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select } from "antd";
 import { useLocation } from "react-router-dom";
-import { categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
 import { generateNewDocumentId } from "../../helpers";
@@ -14,6 +14,8 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
+  const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
+
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",
     errorNotification(error, values, resource) {
@@ -23,10 +25,12 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         type: "error",
       };
     },
-    successNotification: (data, values: any) => {
+    // @ts-ignore
+    successNotification: (data: any, values: any) => {
+      const messageHtml = `<a href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
       return {
-        description: "Bài viết đã được tạo thành công",
-        message: values?.name,
+        description: "Tạo mới thành công",
+        message: <HtmlContent html={messageHtml} />,
         type: "success",
       };
     },

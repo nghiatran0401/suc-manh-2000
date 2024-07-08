@@ -13,7 +13,7 @@
 - Go to `server`
 - Install package dependency `npm install`
 - Start backend server `npm run server`
-- Start backend local docker-redis `npm run server:local-docker-redis`
+- Initialize backend local docker redis (one time only) `npm run server:local-docker-redis`
 
 3. Admin
 
