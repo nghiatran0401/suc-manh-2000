@@ -81,7 +81,7 @@ async function upsertDocumentToIndex(data, redisEnv = redis) {
 
 async function removeDocumentFromIndex(data) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
-  // console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
+  console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
 }
 
 // https://medium.com/datadenys/full-text-search-in-redis-using-redisearch-31df0deb4f3e

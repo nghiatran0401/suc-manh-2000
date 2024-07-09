@@ -41,6 +41,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
 
   useEffect(() => {
     formProps.form?.setFieldValue("id", ref.current);
+    formProps.form?.setFieldValue("publish_date", new Date().toISOString().substr(0, 10));
     formProps.form?.setFieldValue("category", collectionName);
     formProps.form?.setFieldValue("classification", "truong-hoc");
     formProps.form?.setFieldValue("status", "can-quyen-gop");
@@ -121,7 +122,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <span style={{ color: "red" }}>*</span> {translate("post.fields.publish_date")}
           </div>
           <Form.Item name={"publish_date"} style={{ width: "40%" }} rules={[{ required: true }]}>
-            <Input type="date" defaultValue={new Date().toISOString().substr(0, 10)} />
+            <Input type="date" />
           </Form.Item>
         </div>
 
