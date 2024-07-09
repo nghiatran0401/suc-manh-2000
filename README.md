@@ -6,14 +6,14 @@
 
 - Go to `client`
 - Install package dependency `npm install`
-- Start frontend `npm run client`
+- Start frontend client `npm run client`
 
 2. Server
 
 - Go to `server`
 - Install package dependency `npm install`
-- Setup redis `docker-compose -f docker-compose.redis.yaml up -d`
-- Start backend `npm run server`
+- Start backend server `npm run server`
+- Initialize backend local docker redis (one time only) `npm run server:local-docker-redis`
 
 3. Admin
 

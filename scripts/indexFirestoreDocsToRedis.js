@@ -1,24 +1,35 @@
 const { firestore } = require("./firebase");
-const { addDocumentToIndex, createSearchIndex } = require("../server/services/redis");
+const { INDEX_NAME, upsertDocumentToIndex, createSearchIndex, removeSearchIndexAndDocuments } = require("../server/services/redis");
 
-async function indexFirestoreData() {
-  await createSearchIndex();
+//  *** ASK NGHIA BEFORE RUNNING THIS SCRIPT ***
 
-  const collections = await firestore.listCollections();
-  for (const collection of collections) {
-    const snapshot = await collection.get();
+// Create Redis clients
+const Redis = require("ioredis");
+require("dotenv").config();
+const redisProdClient = new Redis(process.env.REDIS_PROD_URL);
+const redisLocalClient = new Redis(process.env.REDIS_LOCAL_URL);
 
-    const promises = snapshot.docs.map(async (doc) => {
-      await addDocumentToIndex({ ...doc.data(), collection_id: collection.id, doc_id: doc.id });
-    });
+async function indexFirestoreDocsToRedis() {
+  try {
+    const redisEnv = redisProdClient;
+    console.log(`Indexing Firestore data to Redis at ${process.env.REDIS_LOCAL_URL}`);
 
-    try {
+    await createSearchIndex(redisEnv);
+
+    const collections = await firestore.listCollections();
+    for (const collection of collections) {
+      const snapshot = await collection.get();
+
+      const promises = snapshot.docs.map(async (doc) => await upsertDocumentToIndex({ ...doc.data(), collection_id: collection.id, doc_id: doc.id }, redisEnv));
+
       await Promise.all(promises);
       console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
-    } catch (error) {
-      console.error(`Error indexing Firestore data:`, error.message);
     }
+  } catch (error) {
+    console.error(`Error indexing Firestore data:`, error.message);
+  } finally {
+    redisEnv.disconnect();
   }
 }
 
-indexFirestoreData().catch(console.error);
+indexFirestoreDocsToRedis().catch(console.error);

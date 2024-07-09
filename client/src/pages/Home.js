@@ -24,7 +24,7 @@ export default function Home() {
   const [general, setGeneral] = useState({});
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
-  const [totalProjects, setTotalProjects] = useState(0);
+  const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -32,29 +32,31 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getGeneralData")])
-      .then(([news, general]) => {
-        const total =
-          general.data.classification["truong-hoc"] +
-          general.data.classification["khu-noi-tru"] +
-          general.data.classification["nha-hanh-phuc"] +
-          general.data.classification["cau-hanh-phuc"] +
-          general.data.classification["wc"];
+    console.time("Loading Time Common data");
+
+    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+      .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
-        setGeneral(general.data);
-        setTotalProjects(total);
+        setGeneral(classificationAndCategoryCounts.data);
+        setTotalFinishedProjects(Number(totalProjectsCount.data));
+
         setLoading(false);
+        console.timeEnd("Loading Time Common data");
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
+    console.time("Loading Time Projects list");
+
     axios
-      .get(SERVER_URL + projectTab, { params: { _start: 0, _end: 8 } })
+      .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data);
+
         setLoading(false);
+        console.timeEnd("Loading Time Projects list");
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
@@ -62,7 +64,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
-      <HeaderBar totalProjects={totalProjects} />
+      <HeaderBar />
 
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
@@ -162,7 +164,7 @@ export default function Home() {
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
               {PROJECT_LIST.children.map((child) => (
-                <Tab key={child.path} onClick={() => setProjectTab(child.path)}>
+                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
                   <Typography variant="body1">
                     {child.title} ({general?.category[child.path.replace("/", "")]})
                   </Typography>
@@ -178,16 +180,16 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.map((child) => (
-                <Box key={child.path} display={"flex"} flexDirection={"column"} gap="">
+                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
-                    <CarouselListCard posts={projects} category={projectTab} />
                     {/* </Grid> */}
+                    <CarouselListCard posts={projects} category={projectTab} />
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button style={{ marginTop: "10px" }} variant="contained" onClick={() => navigate(child.path)}>
+                    <Button style={{ marginTop: "16px" }} variant="contained" onClick={() => navigate(child.path)}>
                       Xem các {child.title}
                     </Button>
                   )}
@@ -214,7 +216,7 @@ export default function Home() {
             </Grid>
             <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
               <Typography variant="h1" fontWeight={"bold"} color={"red"}>
-                <CountUp start={0} end={totalProjects} duration={10} />
+                <CountUp start={0} end={totalFinishedProjects} duration={10} />
               </Typography>
               <Typography variant="h6" fontWeight={"bold"}>
                 TỔNG DỰ ÁN ĐÃ THỰC HIỆN
@@ -230,7 +232,7 @@ export default function Home() {
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
               <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Dự án xây trường
+                Trường học
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
