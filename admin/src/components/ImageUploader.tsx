@@ -6,36 +6,51 @@ import Compressor from "compressorjs";
 import { storage } from "../firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
-interface Image {
+interface FirestoreDbImage {
   image: string;
   caption: string;
 }
 
+interface ImageUploaderImage {
+  uid: string;
+  name: string;
+  thumbUrl: string;
+  response: { url: string; caption: string };
+}
+
 const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: string; caption?: string }[]; handleChange: (urls: { image: string; caption?: string }[]) => any }) => {
   const [fileList, setFileList] = useState<UploadFile[]>(
-    props.initialImages?.map((image) => ({
-      uid: uuidv4(),
-      name: image.caption ?? "No caption image",
-      thumbUrl: image.image,
-      response: { url: image.image },
-    })) ?? []
+    props.initialImages?.map(
+      (image): ImageUploaderImage => ({
+        uid: uuidv4(),
+        name: image.caption ?? "No caption image",
+        thumbUrl: image.image ?? "",
+        response: { url: image.image ?? "", caption: image.caption ?? "" },
+      })
+    ) ?? []
   );
 
   return (
     <Upload
       fileList={fileList}
       accept="images/**"
-      maxCount={1}
-      multiple={false}
+      maxCount={props.maxCount ?? 100}
+      multiple={props.maxCount === 1 ? false : true}
       listType="picture-card"
       onPreview={async (file: UploadFile) => window.open(file.response?.url, "_blank")}
-      onRemove={async (file) => {
-        // Don't delete file on Cloud storage directly
-        // await deleteFileOnFirebase(file.response.url);
-        const fileListObj = fileList.filter((f) => f.response?.url !== file.response.url);
+      onChange={({ file, fileList: newFileList }) => {
+        const transformedFileList = newFileList.map((f): ImageUploaderImage => ({ uid: f?.uid, name: f?.name, thumbUrl: f?.response?.url, response: f?.response }));
+        const urls = newFileList.map((f): FirestoreDbImage => ({ image: f?.response?.url, caption: f?.response?.caption }));
 
-        setFileList(fileListObj);
-        props.handleChange(fileListObj.map((f) => ({ image: f.response.url, caption: f.name })));
+        setFileList(transformedFileList);
+        props.handleChange(urls);
+      }}
+      onRemove={async (file) => {
+        const transformedFileList = fileList.filter((f) => f.response?.url !== file.response.url);
+        const urls = transformedFileList.map((f): FirestoreDbImage => ({ image: f?.response?.url, caption: f?.response?.caption }));
+
+        setFileList(transformedFileList);
+        props.handleChange(urls);
       }}
       customRequest={async ({ file, onSuccess, onError, onProgress }) => {
         const currentDate = new Date();
@@ -46,21 +61,7 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         try {
           const existedImage = await isExistedFileOnFirebase(filePath);
           if (existedImage) {
-            let caption = existedImage.fileName;
-
-            Modal.confirm({
-              title: "Enter the image caption",
-              content: <Input defaultValue={caption} onChange={(e) => (caption = e.target.value)} />,
-              onOk() {
-                const fileListObj = { uid: uuidv4(), name: existedImage.fileName, thumbUrl: existedImage.url, response: { url: existedImage.url } };
-                const image: Image = { image: existedImage.url, caption: caption };
-
-                onSuccess?.call(this, { url: existedImage.url }, undefined);
-                setFileList([fileListObj]);
-                props.handleChange([image]);
-              },
-            });
-
+            inputImageCaption({ fileName: existedImage.fileName, url: existedImage.url, onSuccess });
             return;
           }
 
@@ -68,20 +69,7 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
             file: file as File,
             filePath: filePath,
             handleUrlResponse({ url, fileName }: { url: string; fileName: string }) {
-              let caption = fileName;
-
-              Modal.confirm({
-                title: "Enter the image caption",
-                content: <Input defaultValue={caption} onChange={(e) => (caption = e.target.value)} />,
-                onOk() {
-                  const fileListObj = { uid: uuidv4(), name: fileName, thumbUrl: url, response: { url: url } };
-                  const image: Image = { image: url, caption: caption };
-
-                  onSuccess?.call(this, { url: url }, undefined);
-                  setFileList([fileListObj]);
-                  props.handleChange([image]);
-                },
-              });
+              inputImageCaption({ fileName, url, onSuccess });
             },
             handleError(error: any) {
               console.log({ error });
@@ -104,6 +92,19 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
       </div>
     </Upload>
   );
+};
+
+const inputImageCaption = ({ fileName, url, onSuccess }: { fileName: string; url: string; onSuccess: any }) => {
+  let imageCaption = fileName;
+  let imageUrl = url;
+
+  Modal.confirm({
+    title: "Enter the image caption",
+    content: <Input defaultValue={imageCaption} onChange={(e) => (imageCaption = e.target.value)} />,
+    onOk() {
+      onSuccess?.call(this, { url: imageUrl, caption: imageCaption }, undefined);
+    },
+  });
 };
 
 export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {

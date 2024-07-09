@@ -97,8 +97,10 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           </div>
           <Form.Item name={"thumbnail"} rules={[{ required: true }]}>
             <ImageUploader
+              maxCount={1}
               handleChange={(urls) => {
                 if (urls && urls.length > 0) {
+                  console.log("here4", urls[0].image);
                   formProps.form?.setFieldValue("thumbnail", urls[0].image);
                 }
               }}
@@ -119,7 +121,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             <span style={{ color: "red" }}>*</span> {translate("post.fields.publish_date")}
           </div>
           <Form.Item name={"publish_date"} style={{ width: "40%" }} rules={[{ required: true }]}>
-            <Input type="date" />
+            <Input type="date" defaultValue={new Date().toISOString().substr(0, 10)} />
           </Form.Item>
         </div>
 
@@ -271,23 +273,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             </Form.Item>
           </div>
         )}
-
-        {/* Metadata */}
-        {/* {isProject && (
-          <div>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số học sinh")}</span>} name={"metadata.totalStudents"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số tiền (VND)")}</span>} name={"metadata.totalMoney"}>
-              <InputNumber onChange={(va) => formProps.form?.setFieldValue("metadata.totalMoney", va)} style={{ width: "200px" }} type="number" />
-              <span> VD: {formProps.form?.getFieldValue("metadata.totalMoney")}</span>
-            </Form.Item>
-
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số phòng (học, công vụ, wc)")}</span>} name={"metadata.totalRooms"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-          </div>
-        )} */}
 
         {/* Donor */}
         {isProject && (

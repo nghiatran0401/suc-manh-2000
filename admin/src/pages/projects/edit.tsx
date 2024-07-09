@@ -147,23 +147,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
           </Form.Item>
         )}
 
-        {/* Metadata */}
-        {/* {isProject && (
-          <div>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số học sinh")}</span>} name={"metadata.totalStudents"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số tiền (VND)")}</span>} name={"metadata.totalMoney"}>
-              <InputNumber onChange={(va) => formProps.form?.setFieldValue("metadata.totalMoney", va)} style={{ width: "200px" }} type="number" />
-              <span> VD: {formProps.form?.getFieldValue("metadata.totalMoney")}</span>
-            </Form.Item>
-
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số phòng (học, công vụ, wc)")}</span>} name={"metadata.totalRooms"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-          </div>
-        )} */}
-
         {/* Donor */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.name")}</span>}>
