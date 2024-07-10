@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
-import { Create, useForm } from "@refinedev/antd";
+import { Create, useForm, SaveButton } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
@@ -50,6 +50,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Above save button */}
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <SaveButton onClick={formProps.form?.submit} style={{ width: "fit-content" }} />
+        </div>
+
         {/* ID */}
         <div style={{ display: "none" }}>
           <div
