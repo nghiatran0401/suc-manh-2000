@@ -13,7 +13,6 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
-import { useSearchParams } from 'react-router-dom';
 
 // TODO: extract Search into a separated reusable component
 
@@ -27,22 +26,7 @@ export default function HeaderBar() {
   const [openSearch, setOpenSearch] = useState(false);
   const [searchOptions, setSearchOptions] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
-
   const autocompleteRef = useRef();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchValue, setSearchValue] = useState(searchParams.get('search') || '');
-
-  useEffect(() => {
-    if (searchValue) {
-      axios
-        .get(SERVER_URL + "/search?q=" + searchValue)
-        .then((res) => {
-          setSearchOptions(res.data);
-        })
-        .catch((e) => console.error(e));
-      setOpenSearch(true)
-    }
-  }, [])
 
   useEffect(() => {
     axios
@@ -73,22 +57,12 @@ export default function HeaderBar() {
   }, [openSearch]);
 
   const onSearch = (event, value) => {
-    if (event && event.type === "change") {
-      setSearchValue(value)
-      if (value) {
-        searchParams.set('search', value);
-        setSearchParams(searchParams);
-      } else {
-        searchParams.delete('search');
-        setSearchParams(searchParams);
-      }
-      axios
-        .get(SERVER_URL + "/search?q=" + value)
-        .then((res) => {
-          setSearchOptions(res.data);
-        })
-        .catch((e) => console.error(e));
-    }
+    axios
+      .get(SERVER_URL + "/search?q=" + value)
+      .then((res) => {
+        setSearchOptions(res.data);
+      })
+      .catch((e) => console.error(e));
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -158,8 +132,6 @@ export default function HeaderBar() {
           <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
             <DialogContent>
               <Autocomplete
-                inputValue={searchValue}
-                open={searchValue ? true : false}
                 ref={autocompleteRef}
                 options={searchOptions}
                 onInputChange={onSearch}
