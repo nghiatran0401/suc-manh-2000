@@ -21,19 +21,7 @@ export default function Footer() {
             Phát triển bởi đội ngũ điều hành Dự án Nuôi Em, Ánh Sáng Núi Rừng, nhóm Tình nguyện Niềm Tin.
           </Typography>
         </Box>
-
         <Grid container spacing={3} pb={"20px"}>
-          <Grid item xs={6} sm={3}>
-            <Typography variant="h7" color={"#E4E4E4"}>
-              GIỚI THIỆU
-            </Typography>
-            <div className="content-footer">
-              <Typography>Sứ mệnh</Typography>
-              <Typography>Đội ngũ</Typography>
-              <Typography>Giải thưởng & ấn phẩm</Typography>
-              <Typography>Yêu cầu hình ảnh</Typography>
-            </div>
-          </Grid>
           <Grid item xs={6} sm={3}>
             <Typography variant="h7" color={"#E4E4E4"}>
               QUYÊN GÓP
@@ -43,17 +31,31 @@ export default function Footer() {
               <Typography>Đăng ký bỏ lợn đất</Typography>
               <Typography>Góp 2000đ mỗi ngày</Typography>
               <Typography>Rủ 3 người bạn</Typography>
+              <Typography>Gây quỹ</Typography>
             </div>
           </Grid>
           <Grid item xs={6} sm={3}>
             <Typography variant="h7" color={"#E4E4E4"}>
-              XEM DỰ ÁN
+              TIN TỨC
+            </Typography>
+            <div className="content-footer">
+              <Typography>Tiến độ xây dựng</Typography>
+              <Typography>Báo cáo tài chính</Typography>
+              <Typography>Báo chí - truyền hình đưa tin</Typography>
+              <Typography>Câu chuyện</Typography>
+              <Typography>Tài trợ</Typography>
+            </div>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Typography variant="h7" color={"#E4E4E4"}>
+              DỰ ÁN
             </Typography>
             <div className="content-footer">
               <Typography>Dự án 2024</Typography>
               <Typography>Dự án 2023</Typography>
               <Typography>Dự án 2022</Typography>
-              <Typography>Dự án 2021 - 2012</Typography>
+              <Typography>Dự án 2021</Typography>
+              <Typography>Dự án 2020 - 2012</Typography>
             </div>
           </Grid>
           <Grid item xs={6} sm={3}>
@@ -62,7 +64,7 @@ export default function Footer() {
             </Typography>
             <div className="content-footer">
               <Typography>P702 - 62 Bà Triệu - TW Đoàn.</Typography>
-              <Typography>Điện thoại: 0975 302 307</Typography>
+              <Typography>Điện thoại: 0975 302 307 | 0986 832 256</Typography>
               <Typography sx={{ wordWrap: "break-word" }}>Email: niemtingroup@gmail.com</Typography>{" "}
             </div>
           </Grid>
