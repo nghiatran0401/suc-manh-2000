@@ -26,7 +26,6 @@ export default function HeaderBar() {
   const [openSearch, setOpenSearch] = useState(false);
   const [searchOptions, setSearchOptions] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
-
   const autocompleteRef = useRef();
 
   useEffect(() => {
