@@ -5,6 +5,9 @@ const { POSTS_PER_PAGE } = require("../constants");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, setExValueInRedis } = require("../services/redis");
 const { convertToDate, updateClassificationAndCategoryCounts } = require("../utils");
 
+const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
+const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+
 const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
@@ -27,8 +30,6 @@ postRouter.get("/", async (req, res) => {
 
     if (filter && isProject && totalCount > POSTS_PER_PAGE) {
       const ALL = "all";
-      const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
-      const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
 
       if (filter.classificationFilter !== ALL) {
         query = query.where("classification", "==", filter.classificationFilter);
@@ -130,6 +131,36 @@ postRouter.get("/getLatestPosts", async (req, res) => {
     }
   } catch (error) {
     res.status(404).send({ error: `Error getting a list of 5 latest documents: ${error.message}` });
+  }
+});
+
+postRouter.get("/stats", async (req, res) => {
+  const { category } = req.params;
+
+  try {
+    const postCollectionRef = firestore.collection(category);
+    const posts = (await postCollectionRef.get()).docs;
+
+    const statsData = {};
+    for (const post of posts) {
+      const data = post.data();
+      if (statsData[data.classification]) {
+        statsData[data.classification].count += 1;
+        statsData[data.classification][data.status] += 1;
+      } else {
+        statsData[data.classification] = {
+          count: 1,
+          [STATUSES[0]]: 0,
+          [STATUSES[1]]: 0,
+          [STATUSES[2]]: 0,
+        };
+        statsData[data.classification][data.status] += 1;
+      }
+    }
+
+    res.set({ "X-Total-Count": posts.length.toString() }).status(200).json(statsData);
+  } catch (error) {
+    res.status(404).send({ error: `Error getting stats: ${error.message}` });
   }
 });
 
