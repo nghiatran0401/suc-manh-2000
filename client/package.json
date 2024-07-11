@@ -20,8 +20,10 @@
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.30.2",
     "react-tabs": "^6.0.2",
-    "react-typed": "^2.0.12"
+    "react-typed": "^2.0.12",
+    "slick-carousel": "^1.8.1"
   },
   "scripts": {
     "client": "cp .env.local .env && env-cmd -f .env react-scripts start",

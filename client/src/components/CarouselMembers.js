@@ -10,18 +10,18 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 
-import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.jpg";
+import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.png";
 import DoThiKimHoa from "../assets/team/Do_Thi_Kim_Hoa.png";
 import HungVo from "../assets/team/Hung_Vo.png";
 import HungVu from "../assets/team/Hung_Vu.png";
-import NguyenThiHien from "../assets/team/Nguyen_Thi_Hien.jpg";
-import LeHoangYen from "../assets/team/Le_Hoang_Yen.jpg";
-import TranThuyTrang from "../assets/team/Tran_Thuy_Trang.jpg";
-import LyPhuongThao from "../assets/team/Ly_Phuong_Thao.jpg";
-import VoThiTuyetMinh from "../assets/team/Vo_Thi_Tuyet_Minh.jpg";
-import PhamNgocCham from "../assets/team/Pham_Ngoc_Cham.jpg";
-import NguyenThiAnhDao from "../assets/team/Nguyen_Thi_Anh_Dao.jpg";
-import TranHuuNghia from "../assets/team/Tran_Huu_Nghia.jpg";
+import NguyenThiHien from "../assets/team/Nguyen_Thi_Hien.png";
+import LeHoangYen from "../assets/team/Le_Hoang_Yen.png";
+import TranThuyTrang from "../assets/team/Tran_Thuy_Trang.png";
+import LyPhuongThao from "../assets/team/Ly_Phuong_Thao.png";
+import VoThiTuyetMinh from "../assets/team/Vo_Thi_Tuyet_Minh.png";
+import PhamNgocCham from "../assets/team/Pham_Ngoc_Cham.png";
+import NguyenThiAnhDao from "../assets/team/Nguyen_Thi_Anh_Dao.png";
+import TranHuuNghia from "../assets/team/Tran_Huu_Nghia.png";
 
 export const MEMBERS = [
   {

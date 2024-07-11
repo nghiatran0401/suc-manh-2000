@@ -22,50 +22,26 @@ async function updateSlugForAllDocuments(original_data) {
   }
 }
 
-async function updateClassificationAndCategoryCounts() {
-  let classificationCounts = {};
-  let categoryCounts = {};
+async function moveDocument(sourceCollectionName, destinationCollectionName, docId) {
+  const sourceDocRef = firestore.collection(sourceCollectionName).doc(docId);
+  const destinationDocRef = firestore.collection(destinationCollectionName).doc(docId);
 
-  // Get all collections
-  const collections = await firestore.listCollections();
+  const doc = await sourceDocRef.get();
 
-  // Iterate over each collection
-  for (const collection of collections) {
-    // Get all documents in the collection
-    const documents = await collection.get();
-
-    // Iterate over each document
-    for (const doc of documents.docs) {
-      const data = doc.data();
-      const classification = data.classification;
-      const category = data.category;
-
-      if (classification) {
-        if (!classificationCounts[classification]) {
-          classificationCounts[classification] = 0;
-        }
-        classificationCounts[classification]++;
-      }
-
-      if (category) {
-        if (!categoryCounts[category]) {
-          categoryCounts[category] = 0;
-        }
-        categoryCounts[category]++;
-      }
-    }
+  if (!doc.exists) {
+    console.log(`No document found with id: ${docId}`);
+    return;
   }
 
-  // Upload the counts to Firestore
-  try {
-    await firestore.collection("counts").doc("classification").set(classificationCounts);
-    await firestore.collection("counts").doc("category").set(categoryCounts);
-    console.log("counts", { classificationCounts, categoryCounts });
-    console.log("Updated classification and category counts");
-  } catch (error) {
-    console.error("Failed to upload counts:", error);
-  }
+  const data = doc.data();
+
+  await firestore.runTransaction(async (transaction) => {
+    transaction.set(destinationDocRef, data);
+    transaction.delete(sourceDocRef);
+  });
+
+  console.log(`Moved document with id: ${docId} from ${sourceCollectionName} to ${destinationCollectionName}`);
 }
 
 // updateSlugForAllDocuments(newsData).catch(console.error);
-// updateClassificationAndCategoryCounts().catch(console.error);
+// moveDocument("du-an-2023", "du-an-2022", "18536").catch(console.error);

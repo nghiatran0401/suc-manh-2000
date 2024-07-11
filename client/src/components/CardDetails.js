@@ -18,24 +18,23 @@ export default function CardDetails(props) {
   const navigate = useNavigate();
   const { post, latestPosts } = props;
   const [isIframeLoading, setIsIframeLoading] = useState(true);
-  // const [projects, setProjects] = useState([]);
-  // const [loading, setLoading] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // useEffect(() => {
-  //   setLoading(true);
-  //   console.log("here", SERVER_URL + `/${category}`);
+  useEffect(() => {
+    setLoading(true);
 
-  //   axios
-  //     .get(SERVER_URL + `/${category}`, { params: { _start: 0, _end: 8 } })
-  //     .then((projects) => {
-  //       setProjects(projects.data);
-  //       setLoading(true);
-  //     })
-  //     .catch((e) => console.error(e));
-  // }, [category]);
+    axios
+      .get(SERVER_URL + `/${category}`, { params: { _start: 0, _end: 24 } })
+      .then((projects) => {
+        setProjects(projects.data);
+        setLoading(false);
+      })
+      .catch((e) => console.error(e));
+  }, [category]);
 
   // function formatDate(date) {
   //   const d = new Date(date);
@@ -45,7 +44,7 @@ export default function CardDetails(props) {
   //   return `${day}/${month}/${year}`;
   // }
 
-  // if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen />;
   return (
     <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb">
@@ -344,7 +343,13 @@ export default function CardDetails(props) {
         </Grid>
       </Grid>
 
-      {/* <CarouselListCard posts={projects} category={category} /> */}
+      <Box m={"16px"}>
+        <Typography variant="h5" fontWeight="bold" color={"red"}>
+          Các dự án khác của năm 2024
+        </Typography>
+
+        <CarouselListCard posts={projects} category={category} />
+      </Box>
 
       <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
         <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>

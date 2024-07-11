@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete } from "@mui/material";
+import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete, Grid, Card } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -14,7 +14,9 @@ import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 
-export default function HeaderBar(props) {
+// TODO: extract Search into a separated reusable component
+
+export default function HeaderBar() {
   const navigate = useNavigate();
   const [general, setGeneral] = useState({});
   const theme = useTheme();
@@ -23,12 +25,24 @@ export default function HeaderBar(props) {
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchOptions, setSearchOptions] = useState([]);
+  const [totalProjects, setTotalProjects] = useState(0);
   const autocompleteRef = useRef();
 
   useEffect(() => {
     axios
-      .get(SERVER_URL + "/getGeneralData")
-      .then((res) => setGeneral(res.data))
+      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
+      .then((classificationAndCategoryCounts) => {
+        setGeneral(classificationAndCategoryCounts.data);
+
+        const total =
+          classificationAndCategoryCounts.data.classification["truong-hoc"] +
+          classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
+          classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
+          classificationAndCategoryCounts.data.classification["wc"];
+
+        setTotalProjects(total);
+      })
       .catch((e) => console.error(e));
   }, []);
 
@@ -84,7 +98,7 @@ export default function HeaderBar(props) {
                         {item.children.length > 0 ? (
                           <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
                             <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
-                              {item.title} {item.name === "du-an" && props.totalProjects && `(${props.totalProjects})`}
+                              {item.title} {item.name === "du-an" && `(${totalProjects})`}
                               <ArrowDropDown />
                             </Typography>
                             <CDropdownMenu color="secondary">
@@ -122,9 +136,10 @@ export default function HeaderBar(props) {
                 options={searchOptions}
                 onInputChange={onSearch}
                 getOptionLabel={(option) => option.name}
+                onClose={() => setOpenSearch(false)}
                 renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
                 renderOption={(props, option) => (
-                  <Link to={`${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
+                  <Link to={`/${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
                     <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
                       <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
                       <Typography variant="body1" color="#000">
