@@ -13,15 +13,20 @@ import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
 import { StyledSelectComponent } from "../components/StyledComponent";
+import { useSearchParams } from "react-router-dom";
 
 export default function PostList() {
   const { category } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParams = searchParams.get("filter") || "{}";
+
+  const [filterValue, setFilterValue] = useState(() => JSON.parse(filterParams.replace(/(\w+):/g, '"$1":').replace(/:([^,}]+)/g, ':"$1"')));
   const [posts, setPosts] = useState(undefined);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalFilterPosts, setTotalFilterPosts] = useState(0);
-  const [classificationFilter, setClassificationFilter] = useState("all");
-  const [totalFundFilter, setTotalFundFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [classificationFilter, setClassificationFilter] = useState(filterValue.classificationFilter ? filterValue.classificationFilter : "all");
+  const [totalFundFilter, setTotalFundFilter] = useState(filterValue.totalFundFilter ? filterValue.totalFundFilter : "all");
+  const [statusFilter, setStatusFilter] = useState(filterValue.statusFilter ? filterValue.statusFilter : "all");
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
@@ -34,8 +39,29 @@ export default function PostList() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setLoading(true);
 
+    const ALL = "all";
+    const filterObj = {};
+    if (classificationFilter !== ALL || totalFundFilter !== ALL || statusFilter !== ALL) {
+      if (classificationFilter !== ALL) filterObj.classificationFilter = classificationFilter;
+      if (totalFundFilter !== ALL) filterObj.totalFundFilter = totalFundFilter;
+      if (statusFilter !== ALL) filterObj.statusFilter = statusFilter;
+
+      let filterString = JSON.stringify(filterObj);
+      filterString = filterString.replace(/"(\w+)":/g, "$1:").replace(/:"([^"]+)"/g, ":$1");
+      const queryString = "?filter=" + filterString;
+      window.history.pushState({}, "", window.location.pathname + queryString);
+    } else {
+      window.history.pushState({}, "", window.location.pathname);
+    }
+
     axios
-      .get(SERVER_URL + "/" + category, { params: { _start: 0, _end: POSTS_PER_PAGE, filter: { classificationFilter, totalFundFilter, statusFilter } } })
+      .get(SERVER_URL + "/" + category, {
+        params: {
+          _start: 0,
+          _end: POSTS_PER_PAGE,
+          filter: { classificationFilter, totalFundFilter, statusFilter },
+        },
+      })
       .then((posts) => {
         setTotalPosts(Number(posts.headers["x-total-count"]));
         setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
@@ -73,63 +99,61 @@ export default function PostList() {
         )}
 
         {isProject && totalPosts > POSTS_PER_PAGE && (
-          <>
-            <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={"center"} alignItems={"center"} gap={"16px"}>
-              <StyledSelectComponent
-                label="Loại dự án"
-                inputWidth={200}
-                isMobile={isMobile}
-                value={classificationFilter}
-                onChange={(e) => setClassificationFilter(e.target.value)}
-                options={[
-                  {
-                    label: "Tất cả",
-                    value: "all",
-                  },
-                  ...Object.entries(classificationMapping).map(([value, label]) => ({
-                    label,
-                    value,
-                  })),
-                ]}
-              />
+          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={"center"} alignItems={"center"} gap={"16px"}>
+            <StyledSelectComponent
+              label="Loại dự án"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={classificationFilter}
+              onChange={(e) => setClassificationFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(classificationMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
 
-              <StyledSelectComponent
-                label="Khoảng tiền"
-                inputWidth={200}
-                isMobile={isMobile}
-                value={totalFundFilter}
-                onChange={(e) => setTotalFundFilter(e.target.value)}
-                options={[
-                  {
-                    label: "Tất cả",
-                    value: "all",
-                  },
-                  ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                    label,
-                    value,
-                  })),
-                ]}
-              />
+            <StyledSelectComponent
+              label="Khoảng tiền"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={totalFundFilter}
+              onChange={(e) => setTotalFundFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
 
-              <StyledSelectComponent
-                label="Tiến độ"
-                inputWidth={200}
-                isMobile={isMobile}
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                options={[
-                  {
-                    label: "Tất cả",
-                    value: "all",
-                  },
-                  ...Object.entries(statusMapping).map(([value, label]) => ({
-                    label,
-                    value,
-                  })),
-                ]}
-              />
-            </Box>
-          </>
+            <StyledSelectComponent
+              label="Tiến độ"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(statusMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
+          </Box>
         )}
 
         {loading ? (
