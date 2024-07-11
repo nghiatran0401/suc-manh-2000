@@ -5,9 +5,11 @@ const { POSTS_PER_PAGE } = require("../constants");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, setExValueInRedis } = require("../services/redis");
 const { convertToDate, updateClassificationAndCategoryCounts } = require("../utils");
 
-const postRouter = express.Router({ mergeParams: true });
 const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
 const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+
+const postRouter = express.Router({ mergeParams: true });
+
 // Get a list of posts
 postRouter.get("/", async (req, res) => {
   const { _start, _end, filter, name_like } = req.query;
@@ -137,7 +139,6 @@ postRouter.get("/stats", async (req, res) => {
 
   try {
     const postCollectionRef = firestore.collection(category);
-
     const posts = (await postCollectionRef.get()).docs;
 
     const statsData = {};
@@ -157,12 +158,7 @@ postRouter.get("/stats", async (req, res) => {
       }
     }
 
-    res
-      .set({
-        "X-Total-Count": posts.length.toString(),
-      })
-      .status(200)
-      .json(statsData);
+    res.set({ "X-Total-Count": posts.length.toString() }).status(200).json(statsData);
   } catch (error) {
     res.status(404).send({ error: `Error getting stats: ${error.message}` });
   }
