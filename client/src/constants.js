@@ -185,4 +185,4 @@ export const publicLogoUrl =
   "https://sucmanh2000.com/wp-content/uploads/2020/10/fl1-2-1.png";
 
 export const COMMON_SEO_DESCRIPTION =
-  "Tiếp tục là một “MỤC TIÊU VIỂN VÔNG CÓ CƠ SỞ” của anh Hoàng Hoa Trung, “Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới” phát động ngày 27/02/2020 là dự án gây quỹ tiếp theo của Dự Án Ánh Sáng Núi Rừng ra đời năm 2009 dưới sự phối hợp, triển khai của Trung tâm tình nguyện Quốc gia.";
+  "“Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới” phát động ngày 27/02/2020 là chương trình gây quỹ thuộc Dự Án “Ánh sáng núi rừng – Mỗi năm một ngôi trường cho trẻ vùng cao” ra đời năm 2009 và nhận được sự bảo trợ của Trung tâm tình nguyện Quốc gia.";

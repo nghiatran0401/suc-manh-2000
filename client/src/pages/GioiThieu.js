@@ -7,26 +7,18 @@ import Companion from "../components/Companion";
 import Footer from "../components/Footer";
 import MetaDecorater from "../components/MetaDecorater";
 import metaThumbnail from "../assets/logo-header.png";
-import { publicLogoUrl } from "../constants";
+import { COMMON_SEO_DESCRIPTION, publicLogoUrl } from "../constants";
 
 console.log("metaThumbnail", metaThumbnail);
 export default function GioiThieu() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const metadata = {
-    pageDescription:
-      "“Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới” phát động ngày 27/02/2020 là chương trình gây quỹ thuộc Dự Án “Ánh sáng núi rừng – Mỗi năm một ngôi trường cho trẻ vùng cao” ra đời năm 2009 và nhận được sự bảo trợ của Trung tâm tình nguyện Quốc gia.",
-    pageTitle: "Về “Sức mạnh 2000” – About The Power of VND 2000",
-    metaImageAlt: metaThumbnail,
-  };
   return (
     <Box>
       <MetaDecorater
-        description={metadata.pageDescription}
-        title={metadata.pageTitle}
+        description={COMMON_SEO_DESCRIPTION}
         imageUrl={publicLogoUrl}
-        imageAlt={"gioi thieu"}
       />
       <HeaderBar />
 
