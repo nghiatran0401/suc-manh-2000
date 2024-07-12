@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
+import {
+  COMMON_SEO_DESCRIPTION,
+  HEADER_DROPDOWN_LIST,
+  SERVER_URL,
+  publicLogoUrl,
+} from "../constants";
+import {
+  useMediaQuery,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  Link,
+  CardContent,
+  Avatar,
+  LinearProgress,
+  Button,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -12,9 +28,9 @@ import HeaderBar from "../components/Header";
 import Footer from "../components/Footer";
 import Companion from "../components/Companion";
 import CarouselMembers from "../components/CarouselMembers";
-import CardList from "../components/CardList";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
+import MetaDecorator from "../components/MetaDecorater";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -34,7 +50,11 @@ export default function Home() {
     setLoading(true);
     console.time("Loading Time Common data");
 
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+    Promise.all([
+      axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"),
+      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
+      axios.get(SERVER_URL + "/getTotalProjectsCount"),
+    ])
       .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
         setNews(news.data);
         setGeneral(classificationAndCategoryCounts.data);
@@ -61,12 +81,29 @@ export default function Home() {
       .catch((e) => console.error(e));
   }, [projectTab]);
 
-  if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
+  if (
+    !(
+      news?.length > 0 &&
+      projects?.length > 0 &&
+      Object.keys(general)?.length > 0
+    )
+  )
+    return <LoadingScreen />;
   return (
     <Box>
+      <MetaDecorator
+        imageUrl={publicLogoUrl}
+        description={COMMON_SEO_DESCRIPTION}
+      />
       <HeaderBar totalProjects={totalProjects} />
 
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
+      <Box
+        maxWidth={"1080px"}
+        display={"flex"}
+        flexDirection={"column"}
+        gap={"24px"}
+        m={isMobile ? "24px 16px" : "88px auto 24px"}
+      >
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -84,7 +121,18 @@ export default function Home() {
                     },
                   }}
                 >
-                  <img style={{ width: "100%", height: "400px", objectFit: "cover" }} alt={news[0].title} src={news[0].image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+                  <img
+                    style={{
+                      width: "100%",
+                      height: "400px",
+                      objectFit: "cover",
+                    }}
+                    alt={news[0].title}
+                    src={
+                      news[0].image ??
+                      "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"
+                    }
+                  />
                   <Box
                     style={{
                       position: "absolute",
@@ -98,7 +146,10 @@ export default function Home() {
                         {news[0].name}
                       </Typography>
                       <Typography variant="body1" color="#fff">
-                        {new Date(news[0].publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                        {new Date(news[0].publish_date).toLocaleDateString(
+                          "vi-VN",
+                          { day: "numeric", month: "long", year: "numeric" }
+                        )}
                       </Typography>
                     </CardContent>
                   </Box>
@@ -106,11 +157,20 @@ export default function Home() {
               </Link>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
+              <Box
+                display={"flex"}
+                flexDirection={"column"}
+                justifyContent={"space-between"}
+              >
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
                   return (
-                    <Link key={latestPost.slug} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                    <Link
+                      key={latestPost.slug}
+                      component={RouterLink}
+                      to={`/thong-bao/${latestPost.slug}`}
+                      style={{ textDecoration: "none", cursor: "pointer" }}
+                    >
                       <Box
                         display={"flex"}
                         gap={"8px"}
@@ -123,14 +183,38 @@ export default function Home() {
                           },
                         }}
                       >
-                        <Avatar variant="rounded" src={latestPost.image} sx={{ width: "80px", height: "80px", objectFit: "cover" }} />
-                        <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
+                        <Avatar
+                          variant="rounded"
+                          src={latestPost.image}
+                          sx={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <Box
+                          display={"flex"}
+                          flexDirection={"column"}
+                          gap={"8px"}
+                        >
                           <Typography variant="body2" color="#334862">
-                            {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
+                            {latestPost.name.length > 100
+                              ? `${latestPost.name.substring(0, 100)}...`
+                              : latestPost.name}
                           </Typography>
 
-                          <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                          <Typography
+                            variant="body2"
+                            color="#334862"
+                            fontSize={"12px"}
+                          >
+                            {new Date(
+                              latestPost.publish_date
+                            ).toLocaleDateString("vi-VN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
                           </Typography>
                         </Box>
                       </Box>
@@ -164,9 +248,13 @@ export default function Home() {
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
               {PROJECT_LIST.children.map((child) => (
-                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
+                <Tab
+                  key={"tab_" + child.path}
+                  onClick={() => setProjectTab(child.path)}
+                >
                   <Typography variant="body1">
-                    {child.title} ({general?.category[child.path.replace("/", "")]})
+                    {child.title} (
+                    {general?.category[child.path.replace("/", "")]})
                   </Typography>
                 </Tab>
               ))}
@@ -180,7 +268,11 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children.map((child) => (
-                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
+                <Box
+                  key={"result_" + child.path}
+                  display={"flex"}
+                  flexDirection={"column"}
+                >
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
@@ -189,7 +281,11 @@ export default function Home() {
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button style={{ marginTop: "16px" }} variant="contained" onClick={() => navigate(child.path)}>
+                    <Button
+                      style={{ marginTop: "16px" }}
+                      variant="contained"
+                      onClick={() => navigate(child.path)}
+                    >
                       Xem các {child.title}
                     </Button>
                   )}
@@ -201,17 +297,36 @@ export default function Home() {
       </Box>
 
       <Box bgcolor={"#f2f2f2"} height={"100%"} p={"32px 0"}>
-        <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
+        <Box
+          maxWidth={"1080px"}
+          display={"flex"}
+          flexDirection={"column"}
+          gap={"24px"}
+          m={"0 auto"}
+          p={"16px"}
+        >
           <Typography variant="h3" color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
         </Box>
 
         <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
-          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={12} sm={6} sx={{ textAlign: isMobile ? "center" : "right" }} p={isMobile ? "0 8px" : 0}>
+          <Grid
+            container
+            spacing={3}
+            sx={{ justifyItems: "center", alignItems: "center" }}
+          >
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              sx={{ textAlign: isMobile ? "center" : "right" }}
+              p={isMobile ? "0 8px" : 0}
+            >
               <Typography variant="h6">
-                Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
+                Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường
+                gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu
+                nội trú, Cầu đi học, và Nhà hạnh phúc.
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
@@ -226,44 +341,113 @@ export default function Home() {
         </Box>
 
         <Box maxWidth={"1080px"} display={"flex"} gap={"24px"} m={"32px auto"}>
-          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
+          <Grid
+            container
+            spacing={3}
+            sx={{ justifyItems: "center", alignItems: "center" }}
+          >
             <Grid item xs={6} sm={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
+              <Typography
+                variant="h2"
+                fontWeight={"bold"}
+                color={"red"}
+                textAlign="center"
+              >
+                <CountUp
+                  start={0}
+                  end={general?.classification["truong-hoc"]}
+                  duration={10}
+                />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign="center"
+              >
                 Dự án xây trường
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
+              <Typography
+                variant="h2"
+                fontWeight={"bold"}
+                color={"red"}
+                textAlign="center"
+              >
+                <CountUp
+                  start={0}
+                  end={general?.classification["khu-noi-tru"]}
+                  duration={10}
+                />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign="center"
+              >
                 Khu nội trú
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
+              <Typography
+                variant="h2"
+                fontWeight={"bold"}
+                color={"red"}
+                textAlign="center"
+              >
+                <CountUp
+                  start={0}
+                  end={general?.classification["nha-hanh-phuc"]}
+                  duration={10}
+                />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign="center"
+              >
                 Nhà hạnh phúc
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
+              <Typography
+                variant="h2"
+                fontWeight={"bold"}
+                color={"red"}
+                textAlign="center"
+              >
+                <CountUp
+                  start={0}
+                  end={general?.classification["cau-hanh-phuc"]}
+                  duration={10}
+                />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign="center"
+              >
                 Cầu đi học
               </Typography>
             </Grid>
             <Grid item xs={6} sm={2.4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["wc"]} duration={10} />
+              <Typography
+                variant="h2"
+                fontWeight={"bold"}
+                color={"red"}
+                textAlign="center"
+              >
+                <CountUp
+                  start={0}
+                  end={general?.classification["wc"]}
+                  duration={10}
+                />
               </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign="center"
+              >
                 Nhà vệ sinh
               </Typography>
             </Grid>
