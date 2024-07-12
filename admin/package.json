@@ -43,8 +43,8 @@
     "vite": "^4.3.1"
   },
   "scripts": {
-    "admin": "copy .env.local .env && refine dev",
-    "deploy:admin": "copy .env.prod .env && tsc && refine build && firebase deploy --only hosting:admin-ec04c"
+    "admin": "cp .env.local .env && refine dev",
+    "deploy:admin": "cp .env.prod .env && tsc && refine build && firebase deploy --only hosting:admin-ec04c"
   },
   "browserslist": {
     "production": [
