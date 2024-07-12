@@ -5,13 +5,26 @@ import HeaderBar from "../components/Header";
 import CarouselMembers from "../components/CarouselMembers";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
+import MetaDecorater from "../components/MetaDecorater"
+import metaThumbnail from "../assets/donate.png";
 
 export default function GioiThieu() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const metadata = {
+    pageDescription: "hehehehe",
+    pageTitle: "hahahahaha",
+    metaImageAlt: "hihihihihi"
+  }
   return (
     <Box>
+      <MetaDecorater
+        description={metadata.pageDescription}
+        title={metadata.pageTitle}
+        imageUrl={metaThumbnail}
+        imageAlt={metadata.metaImageAlt}
+      />
       <HeaderBar />
 
       <Box maxWidth={"1080px"} m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
