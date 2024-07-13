@@ -3,17 +3,16 @@ const { INDEX_NAME, upsertDocumentToIndex, createSearchIndex, removeSearchIndexA
 
 //  *** ASK NGHIA BEFORE RUNNING THIS SCRIPT ***
 
-// Create Redis clients
 const Redis = require("ioredis");
 require("dotenv").config();
 const redisProdClient = new Redis(process.env.REDIS_PROD_URL);
 const redisLocalClient = new Redis(process.env.REDIS_LOCAL_URL);
 
-async function indexFirestoreDocsToRedis() {
-  try {
-    const redisEnv = redisProdClient;
-    console.log(`Indexing Firestore data to Redis at ${process.env.REDIS_LOCAL_URL}`);
+async function indexFirestoreDocsToRedis(env) {
+  const redisEnv = env === "prod" ? redisProdClient : redisLocalClient;
+  console.log(`Indexing Firestore data to Redis at ${env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL}`);
 
+  try {
     await createSearchIndex(redisEnv);
 
     const collections = await firestore.listCollections();
@@ -25,11 +24,11 @@ async function indexFirestoreDocsToRedis() {
       await Promise.all(promises);
       console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     }
+
+    redisEnv.disconnect();
   } catch (error) {
     console.error(`Error indexing Firestore data:`, error.message);
-  } finally {
-    redisEnv.disconnect();
   }
 }
 
-indexFirestoreDocsToRedis().catch(console.error);
+indexFirestoreDocsToRedis("local").catch(console.error);

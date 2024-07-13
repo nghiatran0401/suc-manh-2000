@@ -240,7 +240,7 @@ export default function CarouselMembers() {
       <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
         {MEMBERS.map((item, index) => (
           <Card
-            key={index}
+            key={item.name + index}
             className="card-contanier"
             sx={{
               m: "8px",

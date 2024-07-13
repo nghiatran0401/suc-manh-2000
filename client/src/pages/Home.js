@@ -110,7 +110,7 @@ export default function Home() {
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
                   return (
-                    <Link key={latestPost.slug} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                    <Link key={latestPost.slug + index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
                         display={"flex"}
                         gap={"8px"}
@@ -163,8 +163,8 @@ export default function Home() {
         <Tabs>
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
-              {PROJECT_LIST.children.map((child) => (
-                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
+              {PROJECT_LIST.children.map((child, index) => (
+                <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
                   <Typography variant="body1">
                     {child.title} ({general?.category[child.path.replace("/", "")]})
                   </Typography>
@@ -179,8 +179,8 @@ export default function Home() {
             </Box>
           ) : (
             <>
-              {PROJECT_LIST.children.map((child) => (
-                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
+              {PROJECT_LIST.children.map((child, index) => (
+                <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}

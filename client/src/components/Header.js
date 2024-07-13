@@ -92,7 +92,7 @@ export default function HeaderBar() {
               {/* Center section (menu items) */}
               <Box display="flex" gap="24px" flexGrow={1} justifyContent="left">
                 {HEADER_DROPDOWN_LIST.map((item, index) => (
-                  <Box key={index} display="flex" alignItems="center" gap="8px" sx={{ cursor: "pointer" }}>
+                  <Box key={item.title + index} display="flex" alignItems="center" gap="8px" sx={{ cursor: "pointer" }}>
                     {item.title !== "Home" ? (
                       <Box display="flex">
                         {item.children.length > 0 ? (
