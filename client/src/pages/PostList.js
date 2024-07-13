@@ -16,6 +16,7 @@ import { StyledSelectComponent } from "../components/StyledComponent";
 import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
+import { publicLogoUrl } from "../constants";
 
 export default function PostList() {
   const { category } = useParams();
