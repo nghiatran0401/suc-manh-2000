@@ -20,10 +20,7 @@ homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
         res.status(404).send({ error: "No data found for this page" });
         return;
       }
-
-      const classificationCounts = classificationDoc.data();
-      const categoryCounts = categoryDoc.data();
-      const resultData = { classification: classificationCounts, category: categoryCounts };
+      const resultData = { classification: classificationDoc.data(), category: categoryDoc.data() };
 
       await setExValueInRedis(cachedKey, resultData);
       res.status(200).send(resultData);
@@ -55,7 +52,7 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
       const resultData = counts.reduce((a, b) => a + b, 0);
 
       await setExValueInRedis(cachedKey, resultData);
-      res.status(200).send(resultData);
+      res.status(200).send(String(resultData));
     }
   } catch (error) {
     console.error("Failed to fetch counts:", error);

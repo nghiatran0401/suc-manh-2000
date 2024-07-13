@@ -43,20 +43,17 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  // const debouncedSearch = debounce((value: any) => {
-  //   searchFormProps.form?.setFieldsValue({ name: value });
-  //   searchFormProps.form?.submit();
-  // }, 1000);
-
   return (
     <List>
-      <Form {...searchFormProps} layout="inline">
+      <Form {...searchFormProps} layout="inline" style={{ marginBottom: "24px" }}>
         <Form.Item name="name">
-          {/* onChange={(e) => debouncedSearch(e.target.value)} */}
           <Input placeholder="Search by name" />
         </Form.Item>
-        <SaveButton icon={<SearchOutlined />} onClick={searchFormProps.form?.submit}>Search</SaveButton>
+        <SaveButton icon={<SearchOutlined />} onClick={searchFormProps.form?.submit}>
+          Search
+        </SaveButton>
       </Form>
+
       <Table {...tableProps} rowKey="id">
         <Table.Column title={translate("table.category")} dataIndex="category" render={(_, record: BaseRecord) => <Space>{categoryMapping && categoryMapping[record.category as keyof typeof categoryMapping]}</Space>} />
 

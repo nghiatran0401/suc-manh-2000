@@ -1,3 +1,7 @@
+import logoDonate from "./assets/donate.png";
+import logoWorking from "./assets/working.png";
+import logoFinish from "./assets/finish.png";
+
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 export const POSTS_PER_PAGE = 8;
@@ -176,9 +180,21 @@ export const totalFundMapping = {
 };
 
 export const statusMapping = {
-  "can-quyen-gop": "Cần quyên góp",
-  "dang-xay-dung": "Đang xây dựng",
   "da-hoan-thanh": "Đã hoàn thành",
+  "dang-xay-dung": "Đang xây dựng",
+  "can-quyen-gop": "Cần quyên góp",
+};
+
+export const statusColorMapping = {
+  "can-quyen-gop": "rgba(255, 76, 48, 1)",
+  "dang-xay-dung": "rgba(255, 252, 150, 1)",
+  "da-hoan-thanh": "rgba(210, 238, 130, 1)",
+};
+
+export const statusLogoMapping = {
+  "can-quyen-gop": logoDonate,
+  "dang-xay-dung": logoWorking,
+  "da-hoan-thanh": logoFinish,
 };
 
 export const publicLogoUrl =

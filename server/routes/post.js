@@ -5,6 +5,9 @@ const { POSTS_PER_PAGE } = require("../constants");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, setExValueInRedis } = require("../services/redis");
 const { convertToDate, updateClassificationAndCategoryCounts } = require("../utils");
 
+const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
+const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+
 const postRouter = express.Router({ mergeParams: true });
 
 // Get a list of posts
@@ -27,8 +30,6 @@ postRouter.get("/", async (req, res) => {
 
     if (filter && isProject && totalCount > POSTS_PER_PAGE) {
       const ALL = "all";
-      const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
-      const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
 
       if (filter.classificationFilter !== ALL) {
         query = query.where("classification", "==", filter.classificationFilter);
@@ -130,6 +131,36 @@ postRouter.get("/getLatestPosts", async (req, res) => {
     }
   } catch (error) {
     res.status(404).send({ error: `Error getting a list of 5 latest documents: ${error.message}` });
+  }
+});
+
+postRouter.get("/stats", async (req, res) => {
+  const { category } = req.params;
+
+  try {
+    const postCollectionRef = firestore.collection(category);
+    const posts = (await postCollectionRef.get()).docs;
+
+    const statsData = {};
+    for (const post of posts) {
+      const data = post.data();
+      if (statsData[data.classification]) {
+        statsData[data.classification].count += 1;
+        statsData[data.classification][data.status] += 1;
+      } else {
+        statsData[data.classification] = {
+          count: 1,
+          [STATUSES[0]]: 0,
+          [STATUSES[1]]: 0,
+          [STATUSES[2]]: 0,
+        };
+        statsData[data.classification][data.status] += 1;
+      }
+    }
+
+    res.set({ "X-Total-Count": posts.length.toString() }).status(200).json(statsData);
+  } catch (error) {
+    res.status(404).send({ error: `Error getting stats: ${error.message}` });
   }
 });
 
@@ -241,9 +272,11 @@ postRouter.post("/", async (req, res) => {
     await upsertDocumentToIndex({ ...postToSave, collection_id: category, doc_id: postToSave.id });
 
     // Increase the count of the post's category and classification
-    await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
+    const resultData = await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
+    const cachedKey = `classificationAndCategoryCounts`;
+    await setExValueInRedis(cachedKey, resultData);
 
-    res.status(200).json({ message: "Post created successfully" });
+    res.status(200).json(postToSave);
   } catch (error) {
     res.status(404).send({ error: `Error creating a document: ${error.message}` });
   }
@@ -259,6 +292,7 @@ postRouter.patch("/:id", async (req, res) => {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
     const docData = querySnapshot.docs[0].data();
 
+    let postToSave;
     const commonPostFields = {
       id: updatedPost.id ?? docData.id,
       name: updatedPost.name ?? docData.name,
@@ -268,66 +302,67 @@ postRouter.patch("/:id", async (req, res) => {
       thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
       category: updatedPost.category ?? docData.category,
     };
-    const transformedProjectPost = {
-      ...commonPostFields,
-      description: updatedPost.description ?? docData.description ?? null,
-      totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
-      classification: updatedPost.classification ?? docData.classification ?? null,
-      status: updatedPost.status ?? docData.status ?? null,
-      start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
-      end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
-      donor: {
-        description: updatedPost["donor.description"] ?? docData.donor.description ?? null,
-        images: updatedPost["donor.images"] ?? docData.donor.images ?? null,
-      },
-      progress: [
-        {
-          name: "Ảnh hiện trạng",
-          images: updatedPost["progress.images1"] ?? docData.progress.find((p) => p.name === "Ảnh hiện trạng")?.images ?? [],
+    if (isProject) {
+      postToSave = {
+        ...commonPostFields,
+        description: updatedPost.description ?? docData.description ?? null,
+        totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
+        classification: updatedPost.classification ?? docData.classification ?? null,
+        status: updatedPost.status ?? docData.status ?? null,
+        start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
+        end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
+        donor: {
+          description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
+          images: updatedPost["donor.images"] ?? docData.donor.images ?? null,
         },
-        {
-          name: "Ảnh tiến độ",
-          images: updatedPost["progress.images2"] ?? docData.progress.find((p) => p.name === "Ảnh tiến độ")?.images ?? [],
-        },
-        {
-          name: "Ảnh hoàn thiện",
-          images: updatedPost["progress.images3"] ?? docData.progress.find((p) => p.name === "Ảnh hoàn thiện")?.images ?? [],
-        },
-      ],
-      content: {
-        tabs: [
+        progress: [
           {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            name: "Ảnh hiện trạng",
+            images: updatedPost["progress.images1"] ?? docData.progress.find((p) => p.name === "Ảnh hiện trạng")?.images ?? [],
           },
           {
-            name: "Nhà hảo tâm",
-            description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.description ?? null,
-            slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            name: "Ảnh tiến độ",
+            images: updatedPost["progress.images2"] ?? docData.progress.find((p) => p.name === "Ảnh tiến độ")?.images ?? [],
           },
           {
-            name: "Mô hình xây",
-            description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.description ?? null,
-            slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.slide_show ?? [],
+            name: "Ảnh hoàn thiện",
+            images: updatedPost["progress.images3"] ?? docData.progress.find((p) => p.name === "Ảnh hoàn thiện")?.images ?? [],
           },
         ],
-      },
-    };
-    const transformedOriginalPost = {
-      ...commonPostFields,
-      content: {
-        tabs: [
-          {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
-          },
-        ],
-      },
-    };
-
-    const postToSave = isProject ? transformedProjectPost : transformedOriginalPost;
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+            {
+              name: "Nhà hảo tâm",
+              description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.description ?? null,
+              slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            },
+            {
+              name: "Mô hình xây",
+              description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.description ?? null,
+              slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t) => t.name === "Mô hình xây")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    } else {
+      postToSave = {
+        ...commonPostFields,
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    }
 
     if (!querySnapshot.empty) {
       // Update the post in Firestore
@@ -347,10 +382,15 @@ postRouter.patch("/:id", async (req, res) => {
           classificationCounts[postToSave.classification] = (classificationCounts[postToSave.classification] || 0) + 1;
           classificationCounts[docData.classification] = (classificationCounts[docData.classification] || 0) - 1;
           await firestore.collection("counts").doc("classification").set(classificationCounts);
+
+          const cachedKey = `classificationAndCategoryCounts`;
+          const cachedResultData = await getValueInRedis(cachedKey);
+          const resultData = { classification: classificationCounts, category: cachedResultData.category };
+          await setExValueInRedis(cachedKey, resultData);
         }
       }
 
-      res.status(200).json({ message: "Post updated successfully" });
+      res.status(200).json(postToSave);
     }
   } catch (error) {
     res.status(500).send({ error: `Error updating a document: ${error.message}` });
@@ -374,7 +414,9 @@ postRouter.delete("/:id", async (req, res) => {
 
       // Decrease the count of the post's category and classification
       const docData = querySnapshot.docs[0].data();
-      await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
+      const resultData = await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
+      const cachedKey = `classificationAndCategoryCounts`;
+      await setExValueInRedis(cachedKey, resultData);
 
       res.status(200).json({ message: "Post deleted successfully" });
     }

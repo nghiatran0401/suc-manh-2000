@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from "react";
-import { IResourceComponentsProps, useTranslate, CreateResponse } from "@refinedev/core";
-import { Create, useForm } from "@refinedev/antd";
+import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
+import { Create, useForm, SaveButton } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select } from "antd";
 import { useLocation } from "react-router-dom";
-import { categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
 import { generateNewDocumentId } from "../../helpers";
@@ -14,6 +14,8 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
+  const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
+
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
     // redirect: "edit",
     errorNotification(error, values, resource) {
@@ -23,10 +25,12 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         type: "error",
       };
     },
-    successNotification: (data, values: any) => {
+    // @ts-ignore
+    successNotification: (data: any, values: any) => {
+      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
       return {
-        description: "Bài viết đã được tạo thành công",
-        message: values?.name,
+        description: "Tạo mới thành công",
+        message: <HtmlContent html={messageHtml} />,
         type: "success",
       };
     },
@@ -37,6 +41,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
 
   useEffect(() => {
     formProps.form?.setFieldValue("id", ref.current);
+    formProps.form?.setFieldValue("publish_date", new Date().toISOString().substr(0, 10));
     formProps.form?.setFieldValue("category", collectionName);
     formProps.form?.setFieldValue("classification", "truong-hoc");
     formProps.form?.setFieldValue("status", "can-quyen-gop");
@@ -45,6 +50,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Above save button */}
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <SaveButton onClick={formProps.form?.submit} style={{ width: "fit-content" }} />
+        </div>
+
         {/* ID */}
         <div style={{ display: "none" }}>
           <div
@@ -93,8 +103,10 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
           </div>
           <Form.Item name={"thumbnail"} rules={[{ required: true }]}>
             <ImageUploader
+              maxCount={1}
               handleChange={(urls) => {
                 if (urls && urls.length > 0) {
+                  console.log("here4", urls[0].image);
                   formProps.form?.setFieldValue("thumbnail", urls[0].image);
                 }
               }}
@@ -267,23 +279,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             </Form.Item>
           </div>
         )}
-
-        {/* Metadata */}
-        {/* {isProject && (
-          <div>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số học sinh")}</span>} name={"metadata.totalStudents"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số tiền (VND)")}</span>} name={"metadata.totalMoney"}>
-              <InputNumber onChange={(va) => formProps.form?.setFieldValue("metadata.totalMoney", va)} style={{ width: "200px" }} type="number" />
-              <span> VD: {formProps.form?.getFieldValue("metadata.totalMoney")}</span>
-            </Form.Item>
-
-            <Form.Item style={{ width: "100%" }} label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("Tổng số phòng (học, công vụ, wc)")}</span>} name={"metadata.totalRooms"}>
-              <InputNumber style={{ width: "200px" }} type="number" />
-            </Form.Item>
-          </div>
-        )} */}
 
         {/* Donor */}
         {isProject && (

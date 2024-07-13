@@ -234,13 +234,13 @@ export default function CarouselMembers() {
       }}
     >
       <Typography variant="h5" fontWeight="bold" color={"red"}>
-        Đội ngũ vận hành SỨC MẠNH 2000
+        Đội ngũ vận hành
       </Typography>
 
       <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
         {MEMBERS.map((item, index) => (
           <Card
-            key={index}
+            key={item.name + index}
             className="card-contanier"
             sx={{
               m: "8px",
