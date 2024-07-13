@@ -13,8 +13,10 @@ import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
 import { StyledSelectComponent } from "../components/StyledComponent";
+import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
+import { publicLogoUrl } from "../constants";
 
 export default function PostList() {
   const { category } = useParams();
@@ -104,6 +106,7 @@ export default function PostList() {
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
     <Box>
+      <MetaDecorator description={title} imageUrl={publicLogoUrl} />
       <HeaderBar />
 
       <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
