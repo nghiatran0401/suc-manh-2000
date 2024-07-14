@@ -11,7 +11,6 @@ const INDEX_SCHEMA = ["SCHEMA",
   "name", "TEXT", 
   "cleanedName", "TEXT", 
   "thumbnail", "TEXT",
-  "year", "TEXT",
 
   "category", "TAG",
   "classification", "TAG",

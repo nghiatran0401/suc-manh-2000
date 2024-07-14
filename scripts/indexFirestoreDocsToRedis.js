@@ -1,5 +1,5 @@
 const { firestore } = require("./firebase");
-const { INDEX_NAME, upsertDocumentToIndex, createSearchIndex, removeSearchIndexAndDocuments } = require("../server/services/redis");
+const { upsertDocumentToIndex, createSearchIndex } = require("../server/services/redis");
 
 //  *** ASK NGHIA BEFORE RUNNING THIS SCRIPT ***
 
