@@ -201,9 +201,6 @@ postRouter.post("/", async (req, res) => {
     slug: slugify(createdPost.name, { lower: true, strict: true }),
     thumbnail: createdPost.thumbnail,
     category: createdPost.category,
-    classification: createdPost.classification,
-    status: createdPost.status,
-    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
   };
   const transformedProjectPost = {
     ...commonPostFields,
@@ -306,9 +303,6 @@ postRouter.patch("/:id", async (req, res) => {
       slug: docData.slug,
       thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
       category: updatedPost.category ?? docData.category,
-      totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
-      classification: updatedPost.classification ?? docData.classification ?? null,
-      status: updatedPost.status ?? docData.status ?? null,
     };
     if (isProject) {
       postToSave = {
