@@ -206,7 +206,7 @@ export default function Home() {
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
                     {/* </Grid> */}
-                    <CarouselListCard posts={projects} category={projectTab} />
+                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
                   </TabPanel>
 
                   {projectTab === child.path && (
