@@ -3,7 +3,7 @@ import { useMediaQuery, Box, Grid, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import logo from "../assets/logo-header.png";
 import "./config/styles.css";
-import { maxWidth } from "@mui/system";
+import { HEADER_DROPDOWN_LIST } from "../constants";
 
 export default function Footer() {
   const theme = useTheme();
@@ -22,42 +22,33 @@ export default function Footer() {
           </Typography>
         </Box>
         <Grid container spacing={3} pb={"20px"}>
-          <Grid item xs={6} sm={3}>
-            <Typography variant="h7" color={"#E4E4E4"}>
-              QUYÊN GÓP
-            </Typography>
-            <div className="content-footer">
-              <Typography>Quét QR Momo</Typography>
-              <Typography>Đăng ký bỏ lợn đất</Typography>
-              <Typography>Góp 2000đ mỗi ngày</Typography>
-              <Typography>Rủ 3 người bạn</Typography>
-              <Typography>Gây quỹ</Typography>
-            </div>
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <Typography variant="h7" color={"#E4E4E4"}>
-              TIN TỨC
-            </Typography>
-            <div className="content-footer">
-              <Typography>Tiến độ xây dựng</Typography>
-              <Typography>Báo cáo tài chính</Typography>
-              <Typography>Báo chí - truyền hình đưa tin</Typography>
-              <Typography>Câu chuyện</Typography>
-              <Typography>Tài trợ</Typography>
-            </div>
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <Typography variant="h7" color={"#E4E4E4"}>
-              DỰ ÁN
-            </Typography>
-            <div className="content-footer">
-              <Typography>Dự án 2024</Typography>
-              <Typography>Dự án 2023</Typography>
-              <Typography>Dự án 2022</Typography>
-              <Typography>Dự án 2021</Typography>
-              <Typography>Dự án 2020 - 2012</Typography>
-            </div>
-          </Grid>
+          {HEADER_DROPDOWN_LIST
+            .filter(item => item.title !== 'Home' && item.title !== 'Giới Thiệu' && item.title !== 'Phòng Tin Học Cho Em')
+            .map((item, index) => (
+              <Grid item xs={6} sm={3} key={index}>
+                <Typography variant="h7" color={"#E4E4E4"}>
+                  {item.title}
+                </Typography>
+                <div className="content-footer">
+                  {
+                    item.title === 'Xem Dự án theo năm'
+                      ?
+                      item.children
+                        .filter((_, index) => index <= 4)
+                        .map((child, index) => (
+                          (index <= 3)
+                            ?
+                            <Typography key={index}>{child.title}</Typography>
+                            :
+                            <Typography key={index}>{child.title} - {item.children[item.children.length - 1].title.slice(item.children[item.children.length - 1].title.length - 4, item.children[item.children.length - 1].title.length)}</Typography>
+                        ))
+                      :
+                      item.children.map((child, index) => (
+                        <Typography key={index}>{child.title}</Typography>
+                      ))}
+                </div>
+              </Grid>
+            ))}
           <Grid item xs={6} sm={3}>
             <Typography variant="h7" color={"#E4E4E4"}>
               LIÊN HỆ
