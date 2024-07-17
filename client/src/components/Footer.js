@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import logo from "../assets/logo-header.png";
 import "./config/styles.css";
 import { HEADER_DROPDOWN_LIST } from "../constants";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   const theme = useTheme();
@@ -21,42 +22,33 @@ export default function Footer() {
             Phát triển bởi đội ngũ điều hành Dự án Nuôi Em, Ánh Sáng Núi Rừng, nhóm Tình nguyện Niềm Tin.
           </Typography>
         </Box>
+
         <Grid container spacing={3} pb={"20px"}>
-          {HEADER_DROPDOWN_LIST
-            .filter(item => item.title !== 'Home' && item.title !== 'Giới Thiệu' && item.title !== 'Phòng Tin Học Cho Em')
-            .map((item, index) => (
-              <Grid item xs={6} sm={3} key={index}>
-                <Typography variant="h7" color={"#E4E4E4"}>
-                  {item.title}
-                </Typography>
-                <div className="content-footer">
-                  {
-                    item.title === 'Xem Dự án theo năm'
-                      ?
-                      item.children
-                        .filter((_, index) => index <= 4)
-                        .map((child, index) => (
-                          (index <= 3)
-                            ?
-                            <Typography key={index}>{child.title}</Typography>
-                            :
-                            <Typography key={index}>{child.title} - {item.children[item.children.length - 1].title.slice(item.children[item.children.length - 1].title.length - 4, item.children[item.children.length - 1].title.length)}</Typography>
-                        ))
-                      :
-                      item.children.map((child, index) => (
-                        <Typography key={index}>{child.title}</Typography>
-                      ))}
-                </div>
-              </Grid>
-            ))}
+          {HEADER_DROPDOWN_LIST.filter((item) => ["quyen-gop", "tin-tuc", "du-an"].includes(item.name)).map((item, index) => (
+            <Grid item xs={6} sm={3} key={index}>
+              <Typography variant="h7" color={"#E4E4E4"}>
+                {item.title.toUpperCase()}
+              </Typography>
+              <div className="content-footer">
+                {item.children
+                  .filter((_, index) => index <= 4)
+                  .map((child, index) => (
+                    <Link to={child.path} style={{ width: "fit-content", color: "inherit", textDecoration: " none" }}>
+                      <Typography key={index}>{child.title}</Typography>
+                    </Link>
+                  ))}
+              </div>
+            </Grid>
+          ))}
+
           <Grid item xs={6} sm={3}>
             <Typography variant="h7" color={"#E4E4E4"}>
               LIÊN HỆ
             </Typography>
             <div className="content-footer">
-              <Typography>P702 - 62 Bà Triệu - TW Đoàn.</Typography>
+              <Typography>P702 - 62 Bà Triệu - TW Đoàn</Typography>
               <Typography>Điện thoại: 0975 302 307 | 0986 832 256</Typography>
-              <Typography sx={{ wordWrap: "break-word" }}>Email: niemtingroup@gmail.com</Typography>{" "}
+              <Typography sx={{ wordWrap: "break-word" }}>Email: niemtingroup@gmail.com</Typography>
             </div>
           </Grid>
         </Grid>
