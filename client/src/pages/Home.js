@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
+import { COMMON_SEO_DESCRIPTION, HEADER_DROPDOWN_LIST, SERVER_URL, publicLogoUrl } from "../constants";
 import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
@@ -12,9 +12,9 @@ import HeaderBar from "../components/Header";
 import Footer from "../components/Footer";
 import Companion from "../components/Companion";
 import CarouselMembers from "../components/CarouselMembers";
-import CardList from "../components/CardList";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
+import MetaDecorator from "../components/MetaDecorater";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -64,6 +64,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box>
+      <MetaDecorator imageUrl={publicLogoUrl} description={COMMON_SEO_DESCRIPTION} />
       <HeaderBar />
 
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
@@ -84,7 +85,15 @@ export default function Home() {
                     },
                   }}
                 >
-                  <img style={{ width: "100%", height: "400px", objectFit: "cover" }} alt={news[0].title} src={news[0].image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} />
+                  <img
+                    style={{
+                      width: "100%",
+                      height: "400px",
+                      objectFit: "cover",
+                    }}
+                    alt={news[0].title}
+                    src={news[0].image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+                  />
                   <Box
                     style={{
                       position: "absolute",
@@ -110,7 +119,7 @@ export default function Home() {
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
                   return (
-                    <Link key={latestPost.slug} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                    <Link key={latestPost.slug + index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
                         display={"flex"}
                         gap={"8px"}
@@ -123,14 +132,26 @@ export default function Home() {
                           },
                         }}
                       >
-                        <Avatar variant="rounded" src={latestPost.image} sx={{ width: "80px", height: "80px", objectFit: "cover" }} />
+                        <Avatar
+                          variant="rounded"
+                          src={latestPost.image}
+                          sx={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                          }}
+                        />
                         <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
                           <Typography variant="body2" color="#334862">
                             {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
                           </Typography>
 
                           <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                            {new Date(latestPost.publish_date).toLocaleDateString("vi-VN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
                           </Typography>
                         </Box>
                       </Box>
@@ -163,8 +184,8 @@ export default function Home() {
         <Tabs>
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
-              {PROJECT_LIST.children.map((child) => (
-                <Tab key={"tab_" + child.path} onClick={() => setProjectTab(child.path)}>
+              {PROJECT_LIST.children.map((child, index) => (
+                <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
                   <Typography variant="body1">
                     {child.title} ({general?.category[child.path.replace("/", "")]})
                   </Typography>
@@ -179,13 +200,13 @@ export default function Home() {
             </Box>
           ) : (
             <>
-              {PROJECT_LIST.children.map((child) => (
-                <Box key={"result_" + child.path} display={"flex"} flexDirection={"column"}>
+              {PROJECT_LIST.children.map((child, index) => (
+                <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
                   <TabPanel>
                     {/* <Grid container spacing={3} p={"16px"}> */}
                     {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
                     {/* </Grid> */}
-                    <CarouselListCard posts={projects} category={projectTab} />
+                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
                   </TabPanel>
 
                   {projectTab === child.path && (

@@ -13,8 +13,10 @@ import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
 import { StyledSelectComponent } from "../components/StyledComponent";
+import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
+import { publicLogoUrl } from "../constants";
 
 export default function PostList() {
   const { category } = useParams();
@@ -104,6 +106,7 @@ export default function PostList() {
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
     <Box>
+      <MetaDecorator description={title} imageUrl={publicLogoUrl} />
       <HeaderBar />
 
       <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
@@ -121,51 +124,53 @@ export default function PostList() {
           </Typography>
         ) : (
           <>
-            <Grid container display={"flex"} alignItems={"center"} gap={"16px"} m={"0 auto"} bgcolor={"#f2f2f2"} p={"32px"} borderRadius={"8px"}>
-              <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-                <Typography variant="h5" fontWeight="bold" color={"red"}>
-                  Thống kê nhanh
-                </Typography>
-
-                <Box display={"flex"} gap={"8px"}>
-                  <Typography variant="h6">Tổng dự án trong năm:</Typography>
+            {isProject && (
+              <Grid container display={"flex"} alignItems={"center"} gap={"16px"} m={"0 auto"} bgcolor={"#f2f2f2"} p={"32px"} borderRadius={"8px"}>
+                <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
                   <Typography variant="h5" fontWeight="bold" color={"red"}>
-                    <CountUp start={0} end={totalPosts} duration={10} />
+                    Thống kê nhanh
                   </Typography>
+
+                  <Box display={"flex"} gap={"8px"}>
+                    <Typography variant="h6">Tổng dự án trong năm:</Typography>
+                    <Typography variant="h5" fontWeight="bold" color={"red"}>
+                      <CountUp start={0} end={totalPosts} duration={10} />
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
 
-              <Grid container item display={"flex"} flexWrap={"wrap"} spacing={2} width={"100%"}>
-                {Object.entries(classificationMapping)
-                  .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                  .map(([value, label]) => (
-                    <Grid item xs={12} md={3} sm={6}>
-                      <Card key={value} sx={{ paddingBottom: 0 }}>
-                        <CardContent>
-                          <Typography variant="body1" textAlign={"center"}>
-                            {label}: {statsData[value]?.count ?? 0}
-                          </Typography>
+                <Grid container item display={"flex"} flexWrap={"wrap"} spacing={2} width={"100%"}>
+                  {Object.entries(classificationMapping)
+                    .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                    .map(([value, label]) => (
+                      <Grid item xs={12} md={3} sm={6}>
+                        <Card key={value} sx={{ paddingBottom: 0 }}>
+                          <CardContent>
+                            <Typography variant="body1" textAlign={"center"}>
+                              {label}: {statsData[value]?.count ?? 0}
+                            </Typography>
 
-                          <Box style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "8px" }}>
-                            {Object.keys(statusMapping).map((status) => (
-                              <Chip
-                                variant="outline"
-                                avatar={<img src={statusLogoMapping[status]} alt="logo" />}
-                                label={statsData[value]?.[status] ?? 0}
-                                sx={{ backgroundColor: statusColorMapping[status] }}
-                                onClick={() => {
-                                  setClassificationFilter(value);
-                                  setStatusFilter(status);
-                                }}
-                              />
-                            ))}
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
+                            <Box style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "8px" }}>
+                              {Object.keys(statusMapping).map((status) => (
+                                <Chip
+                                  variant="outline"
+                                  avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                                  label={statsData[value]?.[status] ?? 0}
+                                  sx={{ backgroundColor: statusColorMapping[status] }}
+                                  onClick={() => {
+                                    setClassificationFilter(value);
+                                    setStatusFilter(status);
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                </Grid>
               </Grid>
-            </Grid>
+            )}
 
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <>

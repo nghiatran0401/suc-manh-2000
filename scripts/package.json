@@ -5,7 +5,8 @@
   "main": "deleteAllFirestoreCollections.js",
   "scripts": {
     "migrateRedisProdToLocal": "node migrateRedisProdToLocal.js",
-    "indexFirestoreDocsToRedis": "node indexFirestoreDocsToRedis.js"
+    "indexFirestoreDocsToRedis": "node indexFirestoreDocsToRedis.js",
+    "updateClassificationAndCategoryCounts": "node updateClassificationAndCategoryCounts"
   },
   "keywords": [],
   "author": "",

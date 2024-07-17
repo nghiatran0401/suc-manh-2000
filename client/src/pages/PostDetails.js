@@ -10,7 +10,7 @@ import Footer from "../components/Footer";
 import CarouselMembers from "../components/CarouselMembers";
 import CardDetails from "../components/CardDetails";
 import LoadingScreen from "../components/LoadingScreen";
-
+import MetaDecorater from "../components/MetaDecorater";
 export default function PostDetails() {
   const { category, id } = useParams();
   const [post, setPost] = useState({});
@@ -24,7 +24,10 @@ export default function PostDetails() {
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    Promise.all([axios.get(SERVER_URL + `/${category}/${id}`), axios.get(SERVER_URL + `/thong-bao/getLatestPosts`)])
+    Promise.all([
+      axios.get(SERVER_URL + `/${category}/${id}`),
+      axios.get(SERVER_URL + `/thong-bao/getLatestPosts`),
+    ])
       .then(([postRes, latestPostsRes]) => {
         setPost(postRes.data);
         setLatestPosts(latestPostsRes.data);
@@ -32,13 +35,25 @@ export default function PostDetails() {
       })
       .catch((e) => console.error(e));
   }, [id]);
-
-  if (!(Object.keys(post)?.length > 0 && latestPosts?.length > 0)) return <LoadingScreen />;
+  if (!(Object.keys(post)?.length > 0 && latestPosts?.length > 0))
+    return <LoadingScreen />;
   return (
     <Box>
+      <MetaDecorater
+        imageUrl={post.thumbnail}
+        description={post.description}
+        title={post.name}
+        imageAlt="post thumbnail"
+      />
       <HeaderBar />
 
-      <Box m={isMobile ? "24px 16px" : "88px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>
+      <Box m={isMobile ? "24px 16px" : "88px auto"}>
+        {loading ? (
+          <LoadingScreen />
+        ) : (
+          <CardDetails post={post} latestPosts={latestPosts} />
+        )}
+      </Box>
 
       <CarouselMembers />
       <Companion />

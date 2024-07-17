@@ -1,11 +1,9 @@
 const Redis = require("ioredis");
 require("dotenv").config();
 
-// Create Redis clients
 const redisProdClient = new Redis(process.env.REDIS_PROD_URL);
 const redisLocalClient = new Redis(process.env.REDIS_LOCAL_URL);
 
-// Migrate data
 async function migrateRedisProdToLocal() {
   try {
     const keys = await redisProdClient.keys("*");
