@@ -19,6 +19,7 @@ export const HEADER_DROPDOWN_LIST = [
   },
   {
     path: "#",
+    name: "quyen-gop",
     title: "Quyên Góp",
     children: [
       {
