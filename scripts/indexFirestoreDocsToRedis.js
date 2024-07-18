@@ -31,4 +31,4 @@ async function indexFirestoreDocsToRedis(env) {
   }
 }
 
-indexFirestoreDocsToRedis("local").catch(console.error);
+indexFirestoreDocsToRedis("prod").catch(console.error);

@@ -106,7 +106,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               maxCount={1}
               handleChange={(urls) => {
                 if (urls && urls.length > 0) {
-                  console.log("here4", urls[0].image);
                   formProps.form?.setFieldValue("thumbnail", urls[0].image);
                 }
               }}
