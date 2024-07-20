@@ -53,12 +53,10 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         props.handleChange(urls);
       }}
       customRequest={async ({ file, onSuccess, onError, onProgress }) => {
-        console.log("here", file);
-
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-        const filename_uid = (file as File).name + "_" + uuidv4();
+        const filename_uid = (file as File).name; // (file as File).name + "_" + uuidv4();
         const filePath = `uploads/${currentYear}/${currentMonth}/${filename_uid}`;
 
         try {
