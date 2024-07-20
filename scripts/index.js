@@ -44,4 +44,4 @@ async function moveDocument(sourceCollectionName, destinationCollectionName, doc
 }
 
 // updateSlugForAllDocuments(newsData).catch(console.error);
-// moveDocument("du-an-2024", "du-an-2023", "28443").catch(console.error);
+moveDocument("du-an-2023", "du-an-2022", "14275").catch(console.error);

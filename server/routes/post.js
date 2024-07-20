@@ -106,29 +106,29 @@ postRouter.get("/", async (req, res) => {
 // Get a list of 5 latest posts
 postRouter.get("/getLatestPosts", async (req, res) => {
   const { category } = req.params;
-  const cachedKey = `latestPosts:${category}`;
+  // const cachedKey = `latestPosts:${category}`;
 
   try {
-    const cachedResultData = await getValueInRedis(cachedKey);
+    // const cachedResultData = await getValueInRedis(cachedKey);
 
-    if (cachedResultData) {
-      res.status(200).send(cachedResultData);
-    } else {
-      const postCollectionRef = firestore.collection(category);
-      const query = postCollectionRef.orderBy("publish_date", "desc");
-      const postCollectionSnapshot = await query.offset(0).limit(5).get();
-      const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-      const resultData = postCollectionData.map((post) => ({
-        name: post.name,
-        author: post.author,
-        publish_date: post.publish_date.toDate(),
-        slug: post.slug,
-        image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-      }));
+    // if (cachedResultData) {
+    //   res.status(200).send(cachedResultData);
+    // } else {
+    const postCollectionRef = firestore.collection(category);
+    const query = postCollectionRef.orderBy("publish_date", "desc");
+    const postCollectionSnapshot = await query.offset(0).limit(5).get();
+    const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
+    const resultData = postCollectionData.map((post) => ({
+      name: post.name,
+      author: post.author,
+      publish_date: post.publish_date.toDate(),
+      slug: post.slug,
+      image: post.content.tabs[0].slide_show[0]?.image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
+    }));
 
-      await setExValueInRedis(cachedKey, resultData);
-      res.status(200).send(resultData);
-    }
+    // await setExValueInRedis(cachedKey, resultData);
+    res.status(200).send(resultData);
+    // }
   } catch (error) {
     res.status(404).send({ error: `Error getting a list of 5 latest documents: ${error.message}` });
   }

@@ -177,9 +177,9 @@ export default function CardDetails(props) {
                       <Box maxWidth={"720px"}>
                         {tab.slide_show.map((img, idx) => (
                           <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                            <img key={idx} src={img.image} alt={img.caption ? img.caption.split(".")[0] : "Image"} style={{ width: "100%", objectFit: "contain" }} />
+                            <img key={idx} src={img.image} alt={img.caption} style={{ width: "100%", objectFit: "contain" }} />
                             <Typography variant="body2" color={"#77777"}>
-                              {img.caption ? img.caption.split(".")[0] : "Image"}
+                              {img.caption}
                             </Typography>
                           </Box>
                         ))}
