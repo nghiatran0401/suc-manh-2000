@@ -1,5 +1,5 @@
 import React from "react";
-import { useMediaQuery, Typography, Box, Card as MuiCard, CardContent, Chip, Grid } from "@mui/material";
+import { Typography, Card as MuiCard, CardContent, Chip, Grid } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import "react-multi-carousel/lib/styles.css";
@@ -35,20 +35,20 @@ export default function CarouselListCard(props) {
     infinite: true,
     autoplaySpeed: 2000,
     speed: 1000,
-    rows: 2,
+    rows: props.posts.length > 4 ? 2 : 1,
     responsive: [
       {
         breakpoint: 3000,
         settings: {
-          slidesToShow: 4,
-          slidesToScroll: 4,
+          slidesToShow: props.posts.length > 4 ? 4 : props.posts.length,
+          slidesToScroll: props.posts.length > 4 ? 4 : props.posts.length,
         },
       },
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
+          slidesToShow: props.posts.length > 2 ? 2 : props.posts.length,
+          slidesToScroll: props.posts.length > 2 ? 2 : props.posts.length,
         },
       },
       {
@@ -64,7 +64,7 @@ export default function CarouselListCard(props) {
   return (
     <Slider {...settings}>
       {props.posts.map((post, index) => (
-        <Grid key={post.id + index}>
+        <Grid key={post.id + index} sx={{ maxWidth: "300px !important" }}>
           <Link replace to={`/${props.category ? props.category : category}/${post.slug}`} style={{ textDecoration: "none" }}>
             <Card>
               <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>

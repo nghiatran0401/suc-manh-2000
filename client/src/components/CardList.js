@@ -20,12 +20,11 @@ const Card = styled(MuiCard)({
 
 export default function CardList(props) {
   const { category } = useParams();
-  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
 
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card style={{ minHeight: isProject ? "500px" : "400px" }}>
+        <Card style={{ minHeight: "500px" }}>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
             <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} alt={post.name} />
 
@@ -57,7 +56,7 @@ export default function CardList(props) {
 
           <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {post.totalFund !== undefined && (
-              <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
+              <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
             )}
 
             <Typography variant="body1" fontWeight={"bold"}>

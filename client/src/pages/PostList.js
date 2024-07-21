@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -39,6 +39,7 @@ export default function PostList() {
   const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -48,7 +49,13 @@ export default function PostList() {
   }, []);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
+    if (scrollRef.current) {
+      window.scrollTo({
+        top: scrollRef.current.offsetTop - 20,
+        behavior: "smooth",
+      });
+    }
     setLoading(true);
 
     const ALL = "all";
@@ -79,6 +86,7 @@ export default function PostList() {
         setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
         setPosts(posts.data);
         setHasMore(posts.data.length >= POSTS_PER_PAGE);
+
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -115,6 +123,8 @@ export default function PostList() {
             {title}
           </Typography>
         )}
+
+        {console.log("here2", posts)}
 
         {loading ? (
           <LinearProgress />
@@ -174,7 +184,7 @@ export default function PostList() {
 
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <>
-                <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+                <Box ref={scrollRef} display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
                   <StyledSelectComponent
                     label="Loại dự án"
                     inputWidth={200}
