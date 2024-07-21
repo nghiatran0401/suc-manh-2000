@@ -90,9 +90,8 @@ const ImageUploader = (props: {
         const currentMonth = (currentDate.getMonth() + 1)
           .toString()
           .padStart(2, '0');
-        const filePath = `uploads/${currentYear}/${currentMonth}/${
-          (file as File).name
-        }`;
+        const filename_uid = (file as File).name; // (file as File).name + "_" + uuidv4();
+        const filePath = `uploads/${currentYear}/${currentMonth}/${filename_uid}`;
 
         try {
           const existedImage = await isExistedFileOnFirebase(filePath);

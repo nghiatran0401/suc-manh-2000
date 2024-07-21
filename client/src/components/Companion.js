@@ -51,7 +51,7 @@ export default function Companion() {
 
       <Grid container display={"flex"} gap={5} flexWrap="nowrap" alignItems={"center"} justifyContent={"space-between"}>
         {COMPANIONS.map((d, i) => (
-          <Grid item xs={12} sm={6} md={4} key={i}>
+          <Grid item xs={12} sm={6} md={4} key={d.name + i}>
             <img
               src={d.url}
               alt=""

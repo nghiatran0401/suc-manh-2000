@@ -5,6 +5,8 @@ import HeaderBar from "../components/Header";
 import CarouselMembers from "../components/CarouselMembers";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
+import MetaDecorater from "../components/MetaDecorater";
+import { COMMON_SEO_DESCRIPTION, publicLogoUrl } from "../constants";
 
 export default function GioiThieu() {
   const theme = useTheme();
@@ -12,6 +14,7 @@ export default function GioiThieu() {
 
   return (
     <Box>
+      <MetaDecorater description={COMMON_SEO_DESCRIPTION} imageUrl={publicLogoUrl} />
       <HeaderBar />
 
       <Box maxWidth={"1080px"} m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
