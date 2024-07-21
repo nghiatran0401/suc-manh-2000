@@ -25,70 +25,122 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
-  const filterParams = urlSearchParams.get("filter") || "{}";
-  const searchParams = urlSearchParams.get("q") || "";
+  const searchParams = urlSearchParams.get("q");
 
   const [loading, setLoading] = useState(false);
-  const [filterValue, setFilterValue] = useState(() => JSON.parse(filterParams.replace(/(\w+):/g, '"$1":').replace(/:([^,}]+)/g, ':"$1"')));
-  const [searchValue, setSearchValue] = useState(searchParams);
   const [posts, setPosts] = useState(undefined);
-  const [classificationFilter, setClassificationFilter] = useState(filterValue.classificationFilter ? filterValue.classificationFilter : "all");
-  const [totalFundFilter, setTotalFundFilter] = useState(filterValue.totalFundFilter ? filterValue.totalFundFilter : "all");
-  const [statusFilter, setStatusFilter] = useState(filterValue.statusFilter ? filterValue.statusFilter : "all");
+  const [searchValue, setSearchValue] = useState(searchParams);
+  const [classificationFilter, setClassificationFilter] = useState("all");
+  const [totalFundFilter, setTotalFundFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const title = "Search page";
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
 
   useEffect(() => {
-    if (searchParams) {
-      fetchSearchData(searchParams);
+    const status = urlSearchParams.get("filters[status]");
+    const classification = urlSearchParams.get("filters[classification]");
+    const totalFundMin = urlSearchParams.get("filters[totalFund][min]");
+    const totalFundMax = urlSearchParams.get("filters[totalFund][max]");
+
+    switch (status) {
+      case "dahoanthanh":
+        setStatusFilter("da-hoan-thanh");
+        break;
+      case "canquyengop":
+        setStatusFilter("can-quyen-gop");
+        break;
+      case "dangxaydung":
+        setStatusFilter("dang-xay-dung");
+        break;
+      default:
+        break;
+    }
+
+    switch (classification) {
+      case "truonghoc":
+        setClassificationFilter("truong-hoc");
+        break;
+      case "nhahanhphuc":
+        setClassificationFilter("nha-hanh-phuc");
+        break;
+      case "khunoitru":
+        setClassificationFilter("khu-noi-tru");
+        break;
+      case "cauhanhphuc":
+        setClassificationFilter("cau-hanh-phuc");
+        break;
+      case "phongtinhoc":
+        setClassificationFilter("phong-tin-hoc");
+        break;
+      case "wc":
+        setClassificationFilter("wc");
+        break;
+      case "loaikhac":
+        setClassificationFilter("loai-khac");
+        break;
+      default:
+        break;
+    }
+
+    if (totalFundMin && totalFundMax) {
+      const min = parseInt(totalFundMin, 10) / 1000000;
+      const max = parseInt(totalFundMax, 10) / 1000000;
+      setTotalFundFilter(`${min}-to-${max}`);
     }
   }, []);
 
-  // useEffect(() => {
-  //   window.scrollTo({ top: 0, behavior: "smooth" });
-  //   setLoading(true);
+  useEffect(() => {
+    const filters = {};
+    if (classificationFilter === "all") {
+      urlSearchParams.delete("filters[classification]");
+    } else if (classificationFilter) {
+      filters.classification = classificationFilter.replace(/-/g, "");
+    }
 
-  //   const ALL = "all";
-  //   const filterObj = {};
-  //   if (classificationFilter !== ALL || totalFundFilter !== ALL || statusFilter !== ALL) {
-  //     if (classificationFilter !== ALL) filterObj.classificationFilter = classificationFilter;
-  //     if (totalFundFilter !== ALL) filterObj.totalFundFilter = totalFundFilter;
-  //     if (statusFilter !== ALL) filterObj.statusFilter = statusFilter;
+    if (statusFilter === "all") {
+      urlSearchParams.delete("filters[status]");
+    } else if (statusFilter) {
+      filters.status = statusFilter.replace(/-/g, "");
+    }
 
-  //     let filterString = JSON.stringify(filterObj);
-  //     filterString = filterString.replace(/"(\w+)":/g, "$1:").replace(/:"([^"]+)"/g, ":$1");
-  //     const queryString = "?filter=" + filterString;
-  //     window.history.pushState({}, "", window.location.pathname + queryString);
-  //   } else {
-  //     window.history.pushState({}, "", window.location.pathname);
-  //   }
+    if (totalFundFilter === "all") {
+      urlSearchParams.delete("filters[totalFund][min]");
+      urlSearchParams.delete("filters[totalFund][max]");
+    } else if (totalFundFilter) {
+      const [min, max] = totalFundFilter.split("-to-");
+      if (min && max) {
+        const minAdjusted = parseInt(min, 10) * 1000000;
+        const maxAdjusted = parseInt(max, 10) * 1000000;
+        filters.totalFund = { min: minAdjusted, max: maxAdjusted };
+      }
+    }
 
-  //   axios
-  //     .get(SERVER_URL + "/" + category, {
-  //       params: {
-  //         _start: 0,
-  //         _end: POSTS_PER_PAGE,
-  //         filter: { classificationFilter, totalFundFilter, statusFilter },
-  //       },
-  //     })
-  //     .then((posts) => {
-  // setTotalPosts(Number(posts.headers["x-total-count"]));
-  // setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
-  // setPosts(posts.data);
-  // setHasMore(posts.data.length >= POSTS_PER_PAGE);
-  // setLoading(false);
-  //     })
-  //     .catch((e) => console.error(e));
-  // }, [category, classificationFilter, totalFundFilter, statusFilter]);
+    if (Object.keys(filters).length > 0) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (key === "totalFund" && typeof value === "object" && value.min && value.max) {
+          urlSearchParams.set(`filters[${key}][min]`, value.min);
+          urlSearchParams.set(`filters[${key}][max]`, value.max);
+        } else {
+          urlSearchParams.set(`filters[${key}]`, value);
+        }
+      });
+    }
+    setUrlSearchParams(urlSearchParams);
+
+    if (searchParams) {
+      fetchSearchData(searchParams);
+    }
+  }, [searchParams, classificationFilter, totalFundFilter, statusFilter]);
 
   const fetchSearchData = (value) => {
     setLoading(true);
+
     axios
-      .get(SERVER_URL + "/search?q=" + value)
+      .get(SERVER_URL + window.location.pathname + window.location.search)
       .then((res) => {
-        // setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
-        setPosts(res.data);
+        console.log("here", res.data);
+        setPosts(res.data.filter((post) => post.redisKey.includes("du-an")));
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -116,6 +168,9 @@ export default function PostList() {
 
             urlSearchParams.set("q", searchValue);
             setUrlSearchParams(urlSearchParams);
+            setClassificationFilter("all");
+            setTotalFundFilter("all");
+            setStatusFilter("all");
           }}
         >
           <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
@@ -124,78 +179,78 @@ export default function PostList() {
           </IconButton>
         </Paper>
 
+        <>
+          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+            <StyledSelectComponent
+              label="Loại dự án"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={classificationFilter}
+              onChange={(e) => setClassificationFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(classificationMapping)
+                  .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                  .map(([value, label]) => ({
+                    label,
+                    value,
+                  })),
+              ]}
+            />
+
+            <StyledSelectComponent
+              label="Khoảng tiền"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={totalFundFilter}
+              onChange={(e) => setTotalFundFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
+
+            <StyledSelectComponent
+              label="Tiến độ"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(statusMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
+          </Box>
+
+          <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+            Hiện có {posts.length} kết quả tìm kiếm cho "{urlSearchParams.get("q")}"
+          </Typography>
+        </>
+
         {loading ? (
           <LinearProgress />
         ) : posts.length === 0 ? (
           <Typography variant="h6" textAlign={"center"}>
-            Không tìm thấy dự án nào
+            ----------
           </Typography>
         ) : (
           <>
-            <>
-              <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-                <StyledSelectComponent
-                  label="Loại dự án"
-                  inputWidth={200}
-                  isMobile={isMobile}
-                  value={classificationFilter}
-                  onChange={(e) => setClassificationFilter(e.target.value)}
-                  options={[
-                    {
-                      label: "Tất cả",
-                      value: "all",
-                    },
-                    ...Object.entries(classificationMapping)
-                      .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                      .map(([value, label]) => ({
-                        label,
-                        value,
-                      })),
-                  ]}
-                />
-
-                <StyledSelectComponent
-                  label="Khoảng tiền"
-                  inputWidth={200}
-                  isMobile={isMobile}
-                  value={totalFundFilter}
-                  onChange={(e) => setTotalFundFilter(e.target.value)}
-                  options={[
-                    {
-                      label: "Tất cả",
-                      value: "all",
-                    },
-                    ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                      label,
-                      value,
-                    })),
-                  ]}
-                />
-
-                <StyledSelectComponent
-                  label="Tiến độ"
-                  inputWidth={200}
-                  isMobile={isMobile}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  options={[
-                    {
-                      label: "Tất cả",
-                      value: "all",
-                    },
-                    ...Object.entries(statusMapping).map(([value, label]) => ({
-                      label,
-                      value,
-                    })),
-                  ]}
-                />
-              </Box>
-
-              <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                Hiện có {posts.length} kết quả tìm kiếm cho "{searchParams}"
-              </Typography>
-            </>
-
             <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
               <Grid container spacing={3} p={"16px"}>
                 <CardList posts={posts} showDescription={false} />

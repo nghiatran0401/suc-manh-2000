@@ -124,8 +124,6 @@ export default function PostList() {
           </Typography>
         )}
 
-        {console.log("here2", posts)}
-
         {loading ? (
           <LinearProgress />
         ) : posts.length === 0 ? (

@@ -4,7 +4,7 @@ import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { truncate } from "../helpers";
-import { classificationMapping, statusMapping } from "../constants";
+import { classificationMapping } from "../constants";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
@@ -36,7 +36,11 @@ export default function CardList(props) {
                   top: 0,
                   right: 0,
                   color: "white",
-                  backgroundColor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 0, 1)" : "rgba(210, 238, 130, 1)",
+                  backgroundColor: ["can-quyen-gop", "canquyengop"].includes(post.status)
+                    ? "rgba(255, 76, 48, 1)"
+                    : ["dang-xay-dung", "dangxaydung"].includes(post.status)
+                    ? "rgba(255, 252, 0, 1)"
+                    : "rgba(210, 238, 130, 1)",
                   padding: "5px",
                   display: "flex",
                   alignItems: "center",
@@ -44,11 +48,13 @@ export default function CardList(props) {
                   borderRadius: "10px",
                 }}
               >
-                {post.status === "can-quyen-gop" && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {post.status === "dang-xay-dung" && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {post.status === "da-hoan-thanh" && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                {["can-quyen-gop", "canquyengop"].includes(post.status) && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                {["dang-xay-dung", "dangxaydung"].includes(post.status) && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
                 <Typography color={"black"} variant="body2" fontWeight={"bold"}>
-                  {statusMapping[post.status]}
+                  {["can-quyen-gop", "canquyengop"].includes(post.status) && "Cần quyên góp"}
+                  {["dang-xay-dung", "dangxaydung"].includes(post.status) && "Đang xây dựng"}
+                  {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && "Đã hoàn thành"}
                 </Typography>
               </div>
             )}
@@ -80,14 +86,15 @@ export default function CardList(props) {
             )}
 
             <Box display="flex" flexWrap="wrap" gap={"8px"}>
-              {/* {post.totalFund !== undefined && (
-                <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  $ {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
-                </Typography>
-              )} */}
               {post.classification !== undefined && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {classificationMapping[post.classification]}
+                  {["truong-hoc", "truonghoc"].includes(post.classification) && "Trường học"}
+                  {["nha-hanh-phuc", "nhahanhphuc"].includes(post.classification) && "Nhà hạnh phúc"}
+                  {["khu-noi-tru", "khunoitru"].includes(post.classification) && "Khu nội trú"}
+                  {["cau-hanh-phuc", "cauhanhphuc"].includes(post.classification) && "Cầu hạnh phúc"}
+                  {["phong-tin-hoc", "phongtinhoc"].includes(post.classification) && "Phòng tin học"}
+                  {["wc"].includes(post.classification) && "WC"}
+                  {["loai-khac", "loaikhac"].includes(post.classification) && "Loại khác"}
                 </Typography>
               )}
             </Box>
