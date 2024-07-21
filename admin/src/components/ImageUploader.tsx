@@ -159,7 +159,7 @@ const inputImageCaption = ({
   url: string;
   onSuccess: any;
   fileList: UploadFile[];
-  setFileList: React.Dispatch<React.SetStateAction<UploadFile<any>[]>>;
+  setFileList: (fileList: UploadFile<any>[]) => void;
 }) => {
   let imageCaption = fileName;
   const imageUrl = url;
