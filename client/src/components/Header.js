@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, DialogContent, TextField, Autocomplete, Grid, Card } from "@mui/material";
+import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, Paper, InputBase } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
-import { Menu, ExpandLess, ExpandMore, ArrowDropDown, Search } from "@mui/icons-material";
+import { ExpandLess, ExpandMore, ArrowDropDown, Search } from "@mui/icons-material";
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
 import { HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping } from "../constants";
@@ -13,6 +13,7 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
+import SearchIcon from "@mui/icons-material/Search";
 
 // TODO: extract Search into a separated reusable component
 
@@ -24,7 +25,8 @@ export default function HeaderBar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
-  const [searchOptions, setSearchOptions] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+  // const [searchOptions, setSearchOptions] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
   const autocompleteRef = useRef();
 
@@ -56,13 +58,11 @@ export default function HeaderBar() {
     }
   }, [openSearch]);
 
-  const onSearch = (event, value) => {
-    axios
-      .get(SERVER_URL + "/search?q=" + value)
-      .then((res) => {
-        setSearchOptions(res.data);
-      })
-      .catch((e) => console.error(e));
+  const onSearch = (e) => {
+    if (searchValue) {
+      e.preventDefault();
+      navigate(`/search?q=${searchValue.replace(/\s/g, "+")}`);
+    }
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -129,15 +129,39 @@ export default function HeaderBar() {
               </IconButton>
             </Box>
           )}
+
           <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
-            <DialogContent>
-              <Autocomplete
+            <Paper ref={autocompleteRef} component="form" sx={{ p: "2px 4px", m: "0px auto", display: "flex", alignItems: "center", width: "100%", height: "60px" }} onSubmit={onSearch}>
+              <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+              <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
+                <SearchIcon />
+              </IconButton>
+            </Paper>
+
+            {/* <Autocomplete
                 ref={autocompleteRef}
                 options={searchOptions}
-                onInputChange={onSearch}
+                onInputChange={(event, value) => setSearchValue(value)}
                 getOptionLabel={(option) => option.name}
                 onClose={() => setOpenSearch(false)}
-                renderInput={(params) => <TextField {...params} label="Search" variant="outlined" fullWidth />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search"
+                    variant="outlined"
+                    fullWidth
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => navigate(`/search?q=${params.inputProps.value.replace(/\s/g, "+")}`)}>
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
                 renderOption={(props, option) => (
                   <Link to={`/${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
                     <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
@@ -148,8 +172,7 @@ export default function HeaderBar() {
                     </Box>
                   </Link>
                 )}
-              />
-            </DialogContent>
+              /> */}
           </Dialog>
         </Toolbar>
       </Container>
@@ -184,7 +207,8 @@ export default function HeaderBar() {
                         button
                         onClick={(event) => {
                           event.stopPropagation();
-                          navigate(child.path);
+                          window.location.href = child.path;
+                          // navigate(child.path);
                           setOpenIndex(null);
                           setIsDrawerOpen(false);
                         }}

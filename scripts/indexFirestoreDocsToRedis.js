@@ -1,7 +1,5 @@
 const { firestore } = require("./firebase");
-const { INDEX_NAME, upsertDocumentToIndex, createSearchIndex, removeSearchIndexAndDocuments } = require("../server/services/redis");
-
-//  *** ASK NGHIA BEFORE RUNNING THIS SCRIPT ***
+const { upsertDocumentToIndex, createSearchIndex } = require("../server/services/redis");
 
 const Redis = require("ioredis");
 require("dotenv").config();
@@ -19,8 +17,22 @@ async function indexFirestoreDocsToRedis(env) {
     for (const collection of collections) {
       const snapshot = await collection.get();
 
-      const promises = snapshot.docs.map(async (doc) => await upsertDocumentToIndex({ ...doc.data(), collection_id: collection.id, doc_id: doc.id }, redisEnv));
-
+      const promises = snapshot.docs.map(
+        async (doc) =>
+          await upsertDocumentToIndex(
+            {
+              ...doc.data(),
+              collection_id: collection.id,
+              doc_id: doc.id,
+              year: doc.data().publish_date?.toDate()?.getFullYear(),
+              category: doc.data().category ? splitString(doc.data().category, "-").join("") : "other",
+              classification: doc.data().classification ? splitString(doc.data().classification, "-").join("") : "other",
+              status: doc.data().status ? splitString(doc.data().status, "-").join("") : "other",
+              totalFund: doc.data().totalFund ?? 0,
+            },
+            redisEnv
+          )
+      );
       await Promise.all(promises);
       console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     }
@@ -32,3 +44,7 @@ async function indexFirestoreDocsToRedis(env) {
 }
 
 indexFirestoreDocsToRedis("local").catch(console.error);
+
+function splitString(inputString, separator) {
+  return inputString.split(separator);
+}

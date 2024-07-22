@@ -3,6 +3,7 @@ import Home from "../pages/Home";
 import GioiThieu from "../pages/GioiThieu";
 import PostList from "../pages/PostList";
 import PostDetails from "../pages/PostDetails";
+import Search from "../pages/Search";
 
 export const routes = [
   {
@@ -20,6 +21,10 @@ export const routes = [
   {
     path: "/:category/:id",
     element: <PostDetails />,
+  },
+  {
+    path: "/search",
+    element: <Search />,
   },
 ];
 

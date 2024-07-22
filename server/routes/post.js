@@ -205,9 +205,6 @@ postRouter.post("/", async (req, res) => {
   const transformedProjectPost = {
     ...commonPostFields,
     description: createdPost.description ?? null,
-    classification: createdPost.classification,
-    status: createdPost.status,
-    totalFund: Number(createdPost.totalFund) * 1000000 ?? 0,
     start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : null,
     end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : null,
     donor: {
@@ -269,7 +266,12 @@ postRouter.post("/", async (req, res) => {
     await postDocRef.set(postToSave);
 
     // Add the post to Redis search index
-    await upsertDocumentToIndex({ ...postToSave, collection_id: category, doc_id: postToSave.id });
+    await upsertDocumentToIndex({ 
+      ...postToSave, 
+      collection_id: category, 
+      doc_id: postToSave.id, 
+      year: postToSave.publish_date?.toDate()?.getFullYear(),
+    });
 
     // Increase the count of the post's category and classification
     const resultData = await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
@@ -370,7 +372,12 @@ postRouter.patch("/:id", async (req, res) => {
       await docRef.update(postToSave);
 
       // Update the post in Redis search index
-      await upsertDocumentToIndex({ ...postToSave, collection_id: category, doc_id: postToSave.id });
+      await upsertDocumentToIndex({ 
+        ...postToSave, 
+        collection_id: category, 
+        doc_id: postToSave.id,
+        year: postToSave.publish_date?.toDate()?.getFullYear(),
+      });
 
       // Update the count of the post's classification if it has changed
       // Post's category currently is set to be unchangeable (due to the current Firestore DB data structure)
