@@ -39,15 +39,32 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
       listType="picture-card"
       onPreview={async (file: UploadFile) => window.open(file.response?.url, "_blank")}
       onChange={({ file, fileList: newFileList }) => {
-        const transformedFileList = newFileList.map((f): ImageUploaderImage => ({ uid: f?.uid, name: f?.name, thumbUrl: f?.response?.url, response: f?.response }));
-        const urls = newFileList.map((f): FirestoreDbImage => ({ image: f?.response?.url, caption: f?.response?.caption }));
+        const transformedFileList = newFileList.map(
+          (f): ImageUploaderImage => ({
+            uid: f?.uid,
+            name: f?.name,
+            thumbUrl: f?.response?.url,
+            response: f?.response,
+          })
+        );
+        const urls = newFileList.map(
+          (f): FirestoreDbImage => ({
+            image: f?.response?.url,
+            caption: f?.response?.caption,
+          })
+        );
 
         setFileList(transformedFileList);
         props.handleChange(urls);
       }}
       onRemove={async (file) => {
         const transformedFileList = fileList.filter((f) => f.response?.url !== file.response.url);
-        const urls = transformedFileList.map((f): FirestoreDbImage => ({ image: f?.response?.url, caption: f?.response?.caption }));
+        const urls = transformedFileList.map(
+          (f): FirestoreDbImage => ({
+            image: f?.response?.url,
+            caption: f?.response?.caption,
+          })
+        );
 
         setFileList(transformedFileList);
         props.handleChange(urls);
@@ -62,7 +79,13 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
         try {
           const existedImage = await isExistedFileOnFirebase(filePath);
           if (existedImage) {
-            inputImageCaption({ fileName: existedImage.fileName, url: existedImage.url, onSuccess });
+            inputImageCaption({
+              fileName: existedImage.fileName,
+              url: existedImage.url,
+              onSuccess,
+              fileList,
+              setFileList,
+            });
             return;
           }
 
@@ -70,7 +93,13 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
             file: file as File,
             filePath: filePath,
             handleUrlResponse({ url, fileName }: { url: string; fileName: string }) {
-              inputImageCaption({ fileName, url, onSuccess });
+              inputImageCaption({
+                fileName,
+                url,
+                onSuccess,
+                fileList,
+                setFileList,
+              });
             },
             handleError(error: any) {
               console.log({ error });
@@ -95,20 +124,33 @@ const ImageUploader = (props: { maxCount?: number; initialImages?: { image?: str
   );
 };
 
-const inputImageCaption = ({ fileName, url, onSuccess }: { fileName: string; url: string; onSuccess: any }) => {
+const inputImageCaption = ({ fileName, url, onSuccess, fileList, setFileList }: { fileName: string; url: string; onSuccess: any; fileList: UploadFile[]; setFileList: (fileList: UploadFile<any>[]) => void }) => {
   let imageCaption = fileName;
-  let imageUrl = url;
+  const imageUrl = url;
 
   Modal.confirm({
     title: "Enter the image caption",
-    content: <Input defaultValue={imageCaption} onChange={(e) => (imageCaption = e.target.value)} />,
+    content: (
+      <Input
+        defaultValue={imageCaption}
+        onChange={(e) => (imageCaption = e.target.value)}
+        onPressEnter={() => {
+          onSuccess?.call(Modal, { url: imageUrl, caption: imageCaption }, undefined);
+          Modal.destroyAll();
+        }}
+      />
+    ),
     onOk() {
       onSuccess?.call(this, { url: imageUrl, caption: imageCaption }, undefined);
+    },
+    onCancel() {
+      const transformedFileList = fileList.filter((f) => f.name !== fileName);
+      setFileList(transformedFileList);
     },
   });
 };
 
-export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
+const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleError, handleUrlResponse }: any): void => {
   const storageRef: StorageReference = ref(storage, filePath);
   const FILE_MAX_SIZE = 512000;
 
@@ -120,7 +162,10 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
     uploadTask.on("state_changed", handleSnapshot, handleError, () => {
       getDownloadURL(uploadTask.snapshot.ref).then((URL: string) => {
         if (URL) {
-          handleUrlResponse?.call(this, { url: URL, fileName: fileToUpload.name });
+          handleUrlResponse?.call(this, {
+            url: URL,
+            fileName: fileToUpload.name,
+          });
         }
       });
     });
@@ -140,7 +185,7 @@ export const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, ha
   });
 };
 
-export const deleteFileOnFirebase = async (url: string): Promise<void> => {
+const deleteFileOnFirebase = async (url: string): Promise<void> => {
   let path;
   try {
     path = new URL(url).pathname.split("/o/")[1].split("?")[0];
