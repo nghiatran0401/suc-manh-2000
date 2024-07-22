@@ -64,7 +64,7 @@ export default function CarouselListCard(props) {
   return (
     <Slider {...settings}>
       {props.posts.map((post, index) => (
-        <Grid key={post.id + index} sx={{ maxWidth: "300px !important" }}>
+        <Grid key={post.id + index}>
           <Link replace to={`/${props.category ? props.category : category}/${post.slug}`} style={{ textDecoration: "none" }}>
             <Card>
               <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
