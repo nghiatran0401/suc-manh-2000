@@ -1,30 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import {
-  useMediaQuery,
-  Box,
-  LinearProgress,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-} from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import {
-  POSTS_PER_PAGE,
-  SERVER_URL,
-  HEADER_DROPDOWN_LIST,
-  totalFundMapping,
-  classificationMapping,
-  statusMapping,
-  statusColorMapping,
-  statusLogoMapping,
-  statusColorHoverMapping,
-} from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
@@ -45,83 +25,73 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [filterValue, setFilterValue] = useState(() =>
-    JSON.parse(
-      filterParams.replace(/(\w+):/g, '"$1":').replace(/:([^,}]+)/g, ':"$1"')
-    )
-  );
+  const [filterValue, setFilterValue] = useState(() => JSON.parse(filterParams.replace(/(\w+):/g, '"$1":').replace(/:([^,}]+)/g, ':"$1"')));
   const [posts, setPosts] = useState(undefined);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalFilterPosts, setTotalFilterPosts] = useState(0);
-  const [classificationFilter, setClassificationFilter] = useState(
-    filterValue.classificationFilter ? filterValue.classificationFilter : "all"
-  );
-  const [totalFundFilter, setTotalFundFilter] = useState(
-    filterValue.totalFundFilter ? filterValue.totalFundFilter : "all"
-  );
-  const [statusFilter, setStatusFilter] = useState(
-    filterValue.statusFilter ? filterValue.statusFilter : "all"
-  );
+  const [classificationFilter, setClassificationFilter] = useState(filterValue.classificationFilter ? filterValue.classificationFilter : "all");
+  const [totalFundFilter, setTotalFundFilter] = useState(filterValue.totalFundFilter ? filterValue.totalFundFilter : "all");
+  const [statusFilter, setStatusFilter] = useState(filterValue.statusFilter ? filterValue.statusFilter : "all");
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [statsData, setStatsData] = useState({});
 
-  const isProject =
-    category.includes("du-an") || category.includes("phong-tin-hoc");
-  const title = (
-    "Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)
-  ).toUpperCase();
+  const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
+  const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    axios
-      .get(`${SERVER_URL}/${category}/stats`)
-      .then((stats) => setStatsData(stats.data))
-      .catch((e) => console.error(e));
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
+    // if (scrollRef.current) {
+    //   window.scrollTo({
+    //     top: scrollRef.current.offsetTop - 20,
+    //     behavior: "smooth",
+    //   });
+    // }
     setLoading(true);
+    console.time("Loading Time Post List");
 
     const ALL = "all";
     const filterObj = {};
-    if (
-      classificationFilter !== ALL ||
-      totalFundFilter !== ALL ||
-      statusFilter !== ALL
-    ) {
-      if (classificationFilter !== ALL)
-        filterObj.classificationFilter = classificationFilter;
+    if (classificationFilter !== ALL || totalFundFilter !== ALL || statusFilter !== ALL) {
+      if (classificationFilter !== ALL) filterObj.classificationFilter = classificationFilter;
       if (totalFundFilter !== ALL) filterObj.totalFundFilter = totalFundFilter;
       if (statusFilter !== ALL) filterObj.statusFilter = statusFilter;
 
       let filterString = JSON.stringify(filterObj);
-      filterString = filterString
-        .replace(/"(\w+)":/g, "$1:")
-        .replace(/:"([^"]+)"/g, ":$1");
+      filterString = filterString.replace(/"(\w+)":/g, "$1:").replace(/:"([^"]+)"/g, ":$1");
       const queryString = "?filter=" + filterString;
       window.history.pushState({}, "", window.location.pathname + queryString);
     } else {
       window.history.pushState({}, "", window.location.pathname);
     }
 
-    axios
-      .get(SERVER_URL + "/" + category, {
+    Promise.all([
+      axios.get(SERVER_URL + "/" + category, {
         params: {
           _start: 0,
           _end: POSTS_PER_PAGE,
           filter: { classificationFilter, totalFundFilter, statusFilter },
         },
+      }),
+      axios.get(`${SERVER_URL}/${category}/stats`),
+    ])
+      .then(([postsResponse, statsResponse]) => {
+        setTotalPosts(Number(postsResponse.headers["x-total-count"]));
+        setTotalFilterPosts(Number(postsResponse.headers["x-total-filter-count"]));
+        setPosts(postsResponse.data);
+        setHasMore(postsResponse.data.length >= POSTS_PER_PAGE);
+
+        setStatsData(statsResponse.data);
       })
-      .then((posts) => {
-        setTotalPosts(Number(posts.headers["x-total-count"]));
-        setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
-        setPosts(posts.data);
-        setHasMore(posts.data.length >= POSTS_PER_PAGE);
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
         setLoading(false);
-      })
-      .catch((e) => console.error(e));
+        console.timeEnd("Loading Time Post List");
+      });
   }, [category, classificationFilter, totalFundFilter, statusFilter]);
 
   const fetchMoreData = () => {
@@ -136,10 +106,7 @@ export default function PostList() {
       })
       .then((newPosts) => {
         setPosts([...posts, ...newPosts.data]);
-        if (
-          newPosts.data.length === 0 ||
-          newPosts.data.length < POSTS_PER_PAGE
-        ) {
+        if (newPosts.data.length === 0 || newPosts.data.length < POSTS_PER_PAGE) {
           setHasMore(false);
         }
       })
@@ -151,20 +118,9 @@ export default function PostList() {
     <Box>
       <HeaderBar />
 
-      <Box
-        m={isMobile ? "24px 16px" : "88px auto"}
-        display={"flex"}
-        flexDirection={"column"}
-        gap={"40px"}
-        maxWidth={"1080px"}
-      >
+      <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
         {title && (
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            color={"#000"}
-            textAlign={"center"}
-          >
+          <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
             {title}
           </Typography>
         )}
@@ -178,24 +134,8 @@ export default function PostList() {
         ) : (
           <>
             {isProject && (
-              <Grid
-                container
-                display={"flex"}
-                alignItems={"center"}
-                justifyContent={"center"}
-                gap={"16px"}
-                m={"0 auto"}
-                p={"0 0 0 16px"}
-                borderRadius={"8px"}
-              >
-                <Box
-                  display={"flex"}
-                  flexDirection={"column"}
-                  textAlign={"center"}
-                  alignItems={"center"}
-                  gap={"16px"}
-                  m={"0 auto"}
-                >
+              <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} m={"0 auto"} p={"0 0 0 16px"} borderRadius={"8px"}>
+                <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
                   <Typography variant="h5" fontWeight={700}>
                     Thống kê nhanh
                   </Typography>
@@ -227,26 +167,9 @@ export default function PostList() {
                   {Object.entries(classificationMapping)
                     .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
                     .map(([value, label], index) => (
-                      <Grid
-                        item
-                        md={3}
-                        sm={6}
-                        xs={6}
-                        paddingTop={0}
-                        paddingRight={2}
-                        marginTop={2}
-                        borderRight={
-                          index === 3 || (isMobile && index === 1)
-                            ? ""
-                            : "4px solid #D9D9D9"
-                        }
-                      >
+                      <Grid item md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} marginTop={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "4px solid #D9D9D9"}>
                         <div>
-                          <Typography
-                            variant="h5"
-                            fontWeight={600}
-                            textAlign={"center"}
-                          >
+                          <Typography variant="h5" fontWeight={600} textAlign={"center"}>
                             {statsData[value]?.count ?? 0}
                           </Typography>
                           <Typography variant="body1" textAlign={"center"}>
@@ -265,12 +188,7 @@ export default function PostList() {
                           {Object.keys(statusMapping).map((status) => (
                             <Chip
                               variant="outline"
-                              avatar={
-                                <img
-                                  src={statusLogoMapping[status]}
-                                  alt="logo"
-                                />
-                              }
+                              avatar={<img src={statusLogoMapping[status]} alt="logo" />}
                               label={statsData[value]?.[status] ?? 0}
                               sx={{
                                 backgroundColor: statusColorMapping[status],
@@ -279,8 +197,7 @@ export default function PostList() {
                                   height: "16px",
                                 },
                                 "&:hover": {
-                                  backgroundColor:
-                                    statusColorHoverMapping[status],
+                                  backgroundColor: statusColorHoverMapping[status],
                                 },
                               }}
                               onClick={() => {
@@ -298,13 +215,7 @@ export default function PostList() {
 
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <>
-                <Box
-                  display={"flex"}
-                  flexDirection={isMobile ? "column" : "row"}
-                  justifyContent={isMobile ? "center" : "flex-end"}
-                  alignItems={"center"}
-                  gap={"16px"}
-                >
+                <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
                   <StyledSelectComponent
                     label="Loại dự án"
                     inputWidth={200}
@@ -336,12 +247,10 @@ export default function PostList() {
                         label: "Tất cả",
                         value: "all",
                       },
-                      ...Object.entries(totalFundMapping).map(
-                        ([value, label]) => ({
-                          label,
-                          value,
-                        })
-                      ),
+                      ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                        label,
+                        value,
+                      })),
                     ]}
                   />
 
@@ -356,12 +265,10 @@ export default function PostList() {
                         label: "Tất cả",
                         value: "all",
                       },
-                      ...Object.entries(statusMapping).map(
-                        ([value, label]) => ({
-                          label,
-                          value,
-                        })
-                      ),
+                      ...Object.entries(statusMapping).map(([value, label]) => ({
+                        label,
+                        value,
+                      })),
                     ]}
                   />
                 </Box>
@@ -372,14 +279,7 @@ export default function PostList() {
               </>
             )}
 
-            <Box
-              maxWidth={"1080px"}
-              width={"100%"}
-              m={"0 auto"}
-              display={"flex"}
-              flexDirection={"column"}
-              gap={"32px"}
-            >
+            <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
               <InfiniteScroll
                 dataLength={isProject ? totalFilterPosts : posts.length}
                 hasMore={hasMore}
