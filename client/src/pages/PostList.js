@@ -42,13 +42,19 @@ export default function PostList() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    // window.scrollTo({ top: 0, behavior: "smooth" });
-    // if (scrollRef.current) {
-    //   window.scrollTo({
-    //     top: scrollRef.current.offsetTop - 20,
-    //     behavior: "smooth",
-    //   });
-    // }
+    setClassificationFilter("all");
+    setTotalFundFilter("all");
+    setStatusFilter("all");
+  }, [category]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (scrollRef.current) {
+      window.scrollTo({
+        top: scrollRef.current.offsetTop - 80,
+        behavior: "smooth",
+      });
+    }
     setLoading(true);
     console.time("Loading Time Post List");
 
@@ -125,6 +131,147 @@ export default function PostList() {
           </Typography>
         )}
 
+        {isProject && (
+          <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
+            <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
+              <Typography variant="h5" fontWeight={700}>
+                Thống kê nhanh
+              </Typography>
+
+              <Box bgcolor={"#FFF1F0"} p={6} borderRadius={2}>
+                <Typography variant="h3" fontWeight="bold" color={"red"}>
+                  <CountUp start={0} end={totalPosts} duration={10} />
+                </Typography>
+                <Typography fontSize={"20px"} fontWeight={600} variant="h4">
+                  Tổng dự án trong năm
+                </Typography>
+              </Box>
+            </Box>
+
+            <Grid
+              container
+              item
+              spacing={2}
+              sx={{
+                border: "1px solid #fff",
+                paddingBottom: 2,
+                borderRadius: 2,
+                margin: "16px auto",
+                boxShadow: 2,
+                width: "100%",
+                display: "flex",
+              }}
+            >
+              {Object.entries(classificationMapping)
+                .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                .map(([value, label], index) => (
+                  <Grid item md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} marginTop={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}>
+                    <div>
+                      <Typography variant="h5" fontWeight={600} textAlign={"center"}>
+                        {statsData[value]?.count ?? 0}
+                      </Typography>
+                      <Typography variant="body1" textAlign={"center"}>
+                        {label}
+                      </Typography>
+                    </div>
+
+                    <Box
+                      style={{
+                        display: "flex",
+                        gap: isMobile ? "2px" : "8px",
+                        justifyContent: "center",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {Object.keys(statusMapping).map((status) => (
+                        <Chip
+                          variant="outline"
+                          avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                          label={statsData[value]?.[status] ?? 0}
+                          sx={{
+                            backgroundColor: statusColorMapping[status],
+                            height: isMobile ? "24px" : "32px",
+                            "& .MuiChip-avatar": {
+                              width: "16px",
+                              height: "16px",
+                            },
+                            "&:hover": {
+                              backgroundColor: statusColorHoverMapping[status],
+                            },
+                          }}
+                          onClick={() => {
+                            setClassificationFilter(value);
+                            setStatusFilter(status);
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Grid>
+                ))}
+            </Grid>
+          </Grid>
+        )}
+
+        {isProject && totalPosts > POSTS_PER_PAGE && (
+          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+            <StyledSelectComponent
+              label="Loại dự án"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={classificationFilter}
+              onChange={(e) => setClassificationFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(classificationMapping)
+                  .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                  .map(([value, label]) => ({
+                    label,
+                    value,
+                  })),
+              ]}
+            />
+
+            <StyledSelectComponent
+              label="Khoảng tiền"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={totalFundFilter}
+              onChange={(e) => setTotalFundFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
+
+            <StyledSelectComponent
+              label="Tiến độ"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...Object.entries(statusMapping).map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              ]}
+            />
+          </Box>
+        )}
+
         {loading ? (
           <LinearProgress />
         ) : posts.length === 0 ? (
@@ -133,153 +280,13 @@ export default function PostList() {
           </Typography>
         ) : (
           <>
-            {isProject && (
-              <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} m={"0 auto"} p={"0 0 0 16px"} borderRadius={"8px"}>
-                <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-                  <Typography variant="h5" fontWeight={700}>
-                    Thống kê nhanh
-                  </Typography>
-
-                  <Box bgcolor={"#FFF1F0"} p={6} borderRadius={2}>
-                    <Typography variant="h3" fontWeight="bold" color={"red"}>
-                      <CountUp start={0} end={totalPosts} duration={10} />
-                    </Typography>
-                    <Typography fontSize={"20px"} fontWeight={600} variant="h4">
-                      Tổng dự án trong năm:
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Grid
-                  container
-                  item
-                  spacing={2}
-                  sx={{
-                    border: "1px solid #ffffff",
-                    paddingBottom: 2,
-                    borderRadius: 2,
-                    marginTop: 2,
-                    boxShadow: 2,
-                    width: "100%",
-                    display: "flex",
-                  }}
-                >
-                  {Object.entries(classificationMapping)
-                    .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                    .map(([value, label], index) => (
-                      <Grid item md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} marginTop={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "4px solid #D9D9D9"}>
-                        <div>
-                          <Typography variant="h5" fontWeight={600} textAlign={"center"}>
-                            {statsData[value]?.count ?? 0}
-                          </Typography>
-                          <Typography variant="body1" textAlign={"center"}>
-                            {label}
-                          </Typography>
-                        </div>
-
-                        <Box
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            justifyContent: "center",
-                            marginTop: "8px",
-                          }}
-                        >
-                          {Object.keys(statusMapping).map((status) => (
-                            <Chip
-                              variant="outline"
-                              avatar={<img src={statusLogoMapping[status]} alt="logo" />}
-                              label={statsData[value]?.[status] ?? 0}
-                              sx={{
-                                backgroundColor: statusColorMapping[status],
-                                "& .MuiChip-avatar": {
-                                  width: "16px",
-                                  height: "16px",
-                                },
-                                "&:hover": {
-                                  backgroundColor: statusColorHoverMapping[status],
-                                },
-                              }}
-                              onClick={() => {
-                                setClassificationFilter(value);
-                                setStatusFilter(status);
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      </Grid>
-                    ))}
-                </Grid>
-              </Grid>
-            )}
-
             {isProject && totalPosts > POSTS_PER_PAGE && (
-              <>
-                <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-                  <StyledSelectComponent
-                    label="Loại dự án"
-                    inputWidth={200}
-                    isMobile={isMobile}
-                    value={classificationFilter}
-                    onChange={(e) => setClassificationFilter(e.target.value)}
-                    options={[
-                      {
-                        label: "Tất cả",
-                        value: "all",
-                      },
-                      ...Object.entries(classificationMapping)
-                        .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                        .map(([value, label]) => ({
-                          label,
-                          value,
-                        })),
-                    ]}
-                  />
-
-                  <StyledSelectComponent
-                    label="Khoảng tiền"
-                    inputWidth={200}
-                    isMobile={isMobile}
-                    value={totalFundFilter}
-                    onChange={(e) => setTotalFundFilter(e.target.value)}
-                    options={[
-                      {
-                        label: "Tất cả",
-                        value: "all",
-                      },
-                      ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                        label,
-                        value,
-                      })),
-                    ]}
-                  />
-
-                  <StyledSelectComponent
-                    label="Tiến độ"
-                    inputWidth={200}
-                    isMobile={isMobile}
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    options={[
-                      {
-                        label: "Tất cả",
-                        value: "all",
-                      },
-                      ...Object.entries(statusMapping).map(([value, label]) => ({
-                        label,
-                        value,
-                      })),
-                    ]}
-                  />
-                </Box>
-
-                <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                  Số dự án: {totalFilterPosts}/{totalPosts}
-                </Typography>
-              </>
+              <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+                Số dự án: {totalFilterPosts}/{totalPosts}
+              </Typography>
             )}
 
-            <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+            <Box ref={scrollRef} maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
               <InfiniteScroll
                 dataLength={isProject ? totalFilterPosts : posts.length}
                 hasMore={hasMore}

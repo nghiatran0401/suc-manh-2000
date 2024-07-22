@@ -207,7 +207,8 @@ export default function HeaderBar() {
                         button
                         onClick={(event) => {
                           event.stopPropagation();
-                          navigate(child.path);
+                          window.location.href = child.path;
+                          // navigate(child.path);
                           setOpenIndex(null);
                           setIsDrawerOpen(false);
                         }}
