@@ -23,7 +23,6 @@ export default function CardList(props) {
 
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={6} sm={6} md={3}>
-      {console.log("here", post)}
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card style={{ minHeight: "500px" }}>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>

@@ -43,6 +43,8 @@ export default function PostList() {
     const totalFundMin = urlSearchParams.get("filters[totalFund][min]");
     const totalFundMax = urlSearchParams.get("filters[totalFund][max]");
 
+    console.log("here", { totalFundMin, totalFundMax });
+
     switch (status) {
       case "dahoanthanh":
         setStatusFilter("da-hoan-thanh");
@@ -86,7 +88,14 @@ export default function PostList() {
     if (totalFundMin && totalFundMax) {
       const min = parseInt(totalFundMin, 10) / 1000000;
       const max = parseInt(totalFundMax, 10) / 1000000;
-      setTotalFundFilter(`${min}-to-${max}`);
+
+      if (min === 0 && max === 100) {
+        setTotalFundFilter("less-than-100");
+      } else if (min === 400 && max === 10000) {
+        setTotalFundFilter("more-than-400");
+      } else {
+        setTotalFundFilter(`${min}-to-${max}`);
+      }
     }
   }, []);
 
@@ -108,7 +117,18 @@ export default function PostList() {
       urlSearchParams.delete("filters[totalFund][min]");
       urlSearchParams.delete("filters[totalFund][max]");
     } else if (totalFundFilter) {
-      const [min, max] = totalFundFilter.split("-to-");
+      let min, max;
+      if (totalFundFilter === "less-than-100") {
+        min = "0";
+        max = "100";
+      } else if (totalFundFilter === "more-than-400") {
+        min = "400";
+        max = "10000";
+      } else {
+        min = totalFundFilter.split("-to-")[0];
+        max = totalFundFilter.split("-to-")[1];
+      }
+
       if (min && max) {
         const minAdjusted = parseInt(min, 10) * 1000000;
         const maxAdjusted = parseInt(max, 10) * 1000000;
@@ -118,7 +138,8 @@ export default function PostList() {
 
     if (Object.keys(filters).length > 0) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (key === "totalFund" && typeof value === "object" && value.min && value.max) {
+        if (key === "totalFund") {
+          console.log("here4", { value });
           urlSearchParams.set(`filters[${key}][min]`, value.min);
           urlSearchParams.set(`filters[${key}][max]`, value.max);
         } else {
@@ -139,7 +160,6 @@ export default function PostList() {
     axios
       .get(SERVER_URL + window.location.pathname + window.location.search)
       .then((res) => {
-        console.log("here", res.data);
         setPosts(res.data.filter((post) => post.redisKey.includes("du-an")));
         setLoading(false);
       })
