@@ -4,7 +4,7 @@ import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
@@ -116,7 +116,6 @@ export default function PostList() {
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
     <Box>
-      <MetaDecorator description={title} imageUrl={publicLogoUrl} />
       <HeaderBar />
 
       <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
@@ -135,47 +134,79 @@ export default function PostList() {
         ) : (
           <>
             {isProject && (
-              <Grid container display={"flex"} alignItems={"center"} gap={"16px"} m={"0 auto"} bgcolor={"#f2f2f2"} p={"32px"} borderRadius={"8px"}>
+              <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} m={"0 auto"} p={"0 0 0 16px"} borderRadius={"8px"}>
                 <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-                  <Typography variant="h5" fontWeight="bold" color={"red"}>
+                  <Typography variant="h5" fontWeight={700}>
                     Thống kê nhanh
                   </Typography>
 
-                  <Box display={"flex"} gap={"8px"}>
-                    <Typography variant="h6">Tổng dự án trong năm:</Typography>
-                    <Typography variant="h5" fontWeight="bold" color={"red"}>
+                  <Box bgcolor={"#FFF1F0"} p={6} borderRadius={2}>
+                    <Typography variant="h3" fontWeight="bold" color={"red"}>
                       <CountUp start={0} end={totalPosts} duration={10} />
+                    </Typography>
+                    <Typography fontSize={"20px"} fontWeight={600} variant="h4">
+                      Tổng dự án trong năm:
                     </Typography>
                   </Box>
                 </Box>
 
-                <Grid container item display={"flex"} flexWrap={"wrap"} spacing={2} width={"100%"}>
+                <Grid
+                  container
+                  item
+                  spacing={2}
+                  sx={{
+                    border: "1px solid #ffffff",
+                    paddingBottom: 2,
+                    borderRadius: 2,
+                    marginTop: 2,
+                    boxShadow: 2,
+                    width: "100%",
+                    display: "flex",
+                  }}
+                >
                   {Object.entries(classificationMapping)
                     .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                    .map(([value, label]) => (
-                      <Grid item xs={12} md={3} sm={6}>
-                        <Card key={value} sx={{ paddingBottom: 0 }}>
-                          <CardContent>
-                            <Typography variant="body1" textAlign={"center"}>
-                              {label}: {statsData[value]?.count ?? 0}
-                            </Typography>
+                    .map(([value, label], index) => (
+                      <Grid item md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} marginTop={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "4px solid #D9D9D9"}>
+                        <div>
+                          <Typography variant="h5" fontWeight={600} textAlign={"center"}>
+                            {statsData[value]?.count ?? 0}
+                          </Typography>
+                          <Typography variant="body1" textAlign={"center"}>
+                            {label}
+                          </Typography>
+                        </div>
 
-                            <Box style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "8px" }}>
-                              {Object.keys(statusMapping).map((status) => (
-                                <Chip
-                                  variant="outline"
-                                  avatar={<img src={statusLogoMapping[status]} alt="logo" />}
-                                  label={statsData[value]?.[status] ?? 0}
-                                  sx={{ backgroundColor: statusColorMapping[status] }}
-                                  onClick={() => {
-                                    setClassificationFilter(value);
-                                    setStatusFilter(status);
-                                  }}
-                                />
-                              ))}
-                            </Box>
-                          </CardContent>
-                        </Card>
+                        <Box
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            justifyContent: "center",
+                            marginTop: "8px",
+                          }}
+                        >
+                          {Object.keys(statusMapping).map((status) => (
+                            <Chip
+                              variant="outline"
+                              avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                              label={statsData[value]?.[status] ?? 0}
+                              sx={{
+                                backgroundColor: statusColorMapping[status],
+                                "& .MuiChip-avatar": {
+                                  width: "16px",
+                                  height: "16px",
+                                },
+                                "&:hover": {
+                                  backgroundColor: statusColorHoverMapping[status],
+                                },
+                              }}
+                              onClick={() => {
+                                setClassificationFilter(value);
+                                setStatusFilter(status);
+                              }}
+                            />
+                          ))}
+                        </Box>
                       </Grid>
                     ))}
                 </Grid>
@@ -184,7 +215,6 @@ export default function PostList() {
 
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <>
-                {/* ref={scrollRef}  */}
                 <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
                   <StyledSelectComponent
                     label="Loại dự án"

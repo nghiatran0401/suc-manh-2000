@@ -187,17 +187,24 @@ export const statusMapping = {
 };
 
 export const statusColorMapping = {
-  "can-quyen-gop": "rgba(255, 76, 48, 1)",
-  "dang-xay-dung": "rgba(255, 252, 150, 1)",
-  "da-hoan-thanh": "rgba(210, 238, 130, 1)",
+  "can-quyen-gop": "#F5222D",
+  "dang-xay-dung": "#FAAD14",
+  "da-hoan-thanh": "#58C27D",
 };
 
+export const statusColorHoverMapping = {
+  "can-quyen-gop": "rgba(245, 34, 45, 0.8)",
+  "dang-xay-dung": "rgba(250, 173, 20, 0.8)",
+  "da-hoan-thanh": "rgba(88, 194, 125, 0.8)",
+};
 export const statusLogoMapping = {
   "can-quyen-gop": logoDonate,
   "dang-xay-dung": logoWorking,
   "da-hoan-thanh": logoFinish,
 };
 
-export const publicLogoUrl = "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
+export const publicLogoUrl =
+  "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
 
-export const COMMON_SEO_DESCRIPTION = "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
+export const COMMON_SEO_DESCRIPTION =
+  "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
