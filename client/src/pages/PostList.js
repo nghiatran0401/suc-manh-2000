@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -39,17 +39,18 @@ export default function PostList() {
   const isProject = category.includes("du-an") || category.includes("phong-tin-hoc");
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    axios
-      .get(`${SERVER_URL}/${category}/stats`)
-      .then((stats) => setStatsData(stats.data))
-      .catch((e) => console.error(e));
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
+    // if (scrollRef.current) {
+    //   window.scrollTo({
+    //     top: scrollRef.current.offsetTop - 20,
+    //     behavior: "smooth",
+    //   });
+    // }
     setLoading(true);
+    console.time("Loading Time Post List");
 
     const ALL = "all";
     const filterObj = {};
@@ -66,22 +67,31 @@ export default function PostList() {
       window.history.pushState({}, "", window.location.pathname);
     }
 
-    axios
-      .get(SERVER_URL + "/" + category, {
+    Promise.all([
+      axios.get(SERVER_URL + "/" + category, {
         params: {
           _start: 0,
           _end: POSTS_PER_PAGE,
           filter: { classificationFilter, totalFundFilter, statusFilter },
         },
+      }),
+      axios.get(`${SERVER_URL}/${category}/stats`),
+    ])
+      .then(([postsResponse, statsResponse]) => {
+        setTotalPosts(Number(postsResponse.headers["x-total-count"]));
+        setTotalFilterPosts(Number(postsResponse.headers["x-total-filter-count"]));
+        setPosts(postsResponse.data);
+        setHasMore(postsResponse.data.length >= POSTS_PER_PAGE);
+
+        setStatsData(statsResponse.data);
       })
-      .then((posts) => {
-        setTotalPosts(Number(posts.headers["x-total-count"]));
-        setTotalFilterPosts(Number(posts.headers["x-total-filter-count"]));
-        setPosts(posts.data);
-        setHasMore(posts.data.length >= POSTS_PER_PAGE);
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
         setLoading(false);
-      })
-      .catch((e) => console.error(e));
+        console.timeEnd("Loading Time Post List");
+      });
   }, [category, classificationFilter, totalFundFilter, statusFilter]);
 
   const fetchMoreData = () => {
@@ -174,6 +184,7 @@ export default function PostList() {
 
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <>
+                {/* ref={scrollRef}  */}
                 <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
                   <StyledSelectComponent
                     label="Loại dự án"

@@ -6,11 +6,13 @@ const searchRouter = express.Router();
 searchRouter.get("/", async (req, res) => {
   try {
     const searchKey = req.query.q;
-    if (!searchKey) {
+    const filters = req.query.filters ?? {};
+
+    if (!searchKey && Object.keys(filters).length === 0) {
       return res.status(200).send([]);
     }
 
-    const searchResult = await redisSearchByName(searchKey);
+    const searchResult = await redisSearchByName(searchKey, filters);
 
     res.status(200).send(searchResult);
   } catch (error) {
