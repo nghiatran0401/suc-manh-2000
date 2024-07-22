@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Grid, CardContent, Card as MuiCard, Chip, Box } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
@@ -23,7 +23,8 @@ export default function CardList(props) {
 
   return props.posts?.map((post) => (
     <Grid key={post.id} item xs={6} sm={6} md={3}>
-      <Link to={`${props.category ? props.category : `/${category}`}/${post.slug}`} style={{ textDecoration: "none" }}>
+      {console.log("here", post)}
+      <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card style={{ minHeight: "500px" }}>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
             <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} alt={post.name} />
