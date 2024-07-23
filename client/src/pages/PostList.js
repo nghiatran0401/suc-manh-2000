@@ -41,11 +41,11 @@ export default function PostList() {
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
   const scrollRef = useRef(null);
 
-  useEffect(() => {
-    setClassificationFilter("all");
-    setTotalFundFilter("all");
-    setStatusFilter("all");
-  }, [category]);
+  // useEffect(() => {
+  //   setClassificationFilter("all");
+  //   setTotalFundFilter("all");
+  //   setStatusFilter("all");
+  // }, [category]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
