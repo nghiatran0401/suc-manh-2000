@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
@@ -17,6 +17,7 @@ import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
 import { publicLogoUrl } from "../constants";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 export default function PostList() {
   const { category } = useParams();
@@ -171,7 +172,7 @@ export default function PostList() {
               {Object.entries(classificationMapping)
                 .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
                 .map(([value, label], index) => (
-                  <Grid item md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} marginTop={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}>
+                  <Grid item display={"flex"} flexDirection={"column"} gap={"16px"} md={3} sm={6} xs={6} paddingTop={0} paddingRight={2} borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}>
                     <div>
                       <Typography variant="h5" fontWeight={600} textAlign={"center"}>
                         {statsData[value]?.count ?? 0}
@@ -186,7 +187,6 @@ export default function PostList() {
                         display: "flex",
                         gap: isMobile ? "2px" : "8px",
                         justifyContent: "center",
-                        marginTop: "8px",
                       }}
                     >
                       {Object.keys(statusMapping).map((status) => (
@@ -196,7 +196,7 @@ export default function PostList() {
                           label={statsData[value]?.[status] ?? 0}
                           sx={{
                             backgroundColor: statusColorMapping[status],
-                            height: isMobile ? "24px" : "32px",
+                            height: "24px",
                             "& .MuiChip-avatar": {
                               width: "16px",
                               height: "16px",
@@ -212,6 +212,20 @@ export default function PostList() {
                           }}
                         />
                       ))}
+                    </Box>
+                    <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
+                      <Button
+                        variant="outlined"
+                        sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
+                        endIcon={<ArrowForwardIcon />}
+                        onClick={() => {
+                          setClassificationFilter(value);
+                          setStatusFilter("all");
+                          setTotalFundFilter("all");
+                        }}
+                      >
+                        Xem tất cả
+                      </Button>
                     </Box>
                   </Grid>
                 ))}
@@ -287,13 +301,13 @@ export default function PostList() {
           </Typography>
         ) : (
           <>
-            {isProject && totalPosts > POSTS_PER_PAGE && (
-              <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                Số dự án: {totalFilterPosts}/{totalPosts}
-              </Typography>
-            )}
-
             <Box ref={scrollRef} maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+              {isProject && totalPosts > POSTS_PER_PAGE && (
+                <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+                  Số dự án: {totalFilterPosts}/{totalPosts}
+                </Typography>
+              )}
+
               <InfiniteScroll
                 dataLength={isProject ? totalFilterPosts : posts.length}
                 hasMore={hasMore}
