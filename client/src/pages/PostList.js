@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -41,14 +41,20 @@ export default function PostList() {
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
   const scrollRef = useRef(null);
 
-  // useEffect(() => {
-  //   setClassificationFilter("all");
-  //   setTotalFundFilter("all");
-  //   setStatusFilter("all");
-  // }, [category]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (scrollRef.current && Object.keys(filterValue).length > 0) {
+        window.scrollTo({
+          top: scrollRef.current.offsetTop - 80,
+          behavior: "smooth",
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
     if (scrollRef.current) {
       window.scrollTo({
         top: scrollRef.current.offsetTop - 80,
@@ -202,6 +208,7 @@ export default function PostList() {
                           onClick={() => {
                             setClassificationFilter(value);
                             setStatusFilter(status);
+                            setTotalFundFilter("all");
                           }}
                         />
                       ))}
