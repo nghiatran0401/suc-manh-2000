@@ -16,6 +16,7 @@ import "slick-carousel/slick/slick-theme.css";
 
 const Card = styled(MuiCard)({
   minHeight: "500px",
+  // maxHeight: "fit-content !important",
   cursor: "pointer",
   overflow: "visible",
   margin: "10px",
@@ -31,24 +32,22 @@ export default function CarouselListCard(props) {
 
   const settings = {
     autoplay: true,
-    lazyLoad: true,
-    infinite: true,
     autoplaySpeed: 2000,
     speed: 1000,
-    rows: props.posts.length > 4 ? 2 : 1,
+    rows: 2,
     responsive: [
       {
         breakpoint: 3000,
         settings: {
-          slidesToShow: props.posts.length > 4 ? 4 : props.posts.length,
-          slidesToScroll: props.posts.length > 4 ? 4 : props.posts.length,
+          slidesToShow: 4,
+          slidesToScroll: 4,
         },
       },
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: props.posts.length > 2 ? 2 : props.posts.length,
-          slidesToScroll: props.posts.length > 2 ? 2 : props.posts.length,
+          slidesToShow: 2,
+          slidesToScroll: 2,
         },
       },
       {
