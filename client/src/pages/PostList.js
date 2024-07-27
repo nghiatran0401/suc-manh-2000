@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -16,23 +16,20 @@ import { StyledSelectComponent } from "../components/StyledComponent";
 import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
-import { publicLogoUrl } from "../constants";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 export default function PostList() {
   const { category } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const filterParams = searchParams.get("filter") || "{}";
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [filterValue, setFilterValue] = useState(() => JSON.parse(filterParams.replace(/(\w+):/g, '"$1":').replace(/:([^,}]+)/g, ':"$1"')));
   const [posts, setPosts] = useState(undefined);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalFilterPosts, setTotalFilterPosts] = useState(0);
-  const [classificationFilter, setClassificationFilter] = useState(filterValue.classificationFilter ? filterValue.classificationFilter : "all");
-  const [totalFundFilter, setTotalFundFilter] = useState(filterValue.totalFundFilter ? filterValue.totalFundFilter : "all");
-  const [statusFilter, setStatusFilter] = useState(filterValue.statusFilter ? filterValue.statusFilter : "all");
+  const [classificationFilter, setClassificationFilter] = useState("all");
+  const [totalFundFilter, setTotalFundFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [statsData, setStatsData] = useState({});
@@ -43,8 +40,22 @@ export default function PostList() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
+    const status = urlSearchParams.get("statusFilter");
+    const classification = urlSearchParams.get("classificationFilter");
+    const totalFundFilter = urlSearchParams.get("totalFundFilter");
+
+    if (status) setStatusFilter(status);
+    if (classification) setClassificationFilter(classification);
+    if (totalFundFilter) setTotalFundFilter(totalFundFilter);
+  }, []);
+
+  useEffect(() => {
+    const status = urlSearchParams.get("statusFilter");
+    const classification = urlSearchParams.get("classificationFilter");
+    const totalFundFilter = urlSearchParams.get("totalFundFilter");
+
     const timer = setTimeout(() => {
-      if (scrollRef.current && Object.keys(filterValue).length > 0) {
+      if (scrollRef.current && (status || classification || totalFundFilter)) {
         window.scrollTo({
           top: scrollRef.current.offsetTop - 80,
           behavior: "smooth",
@@ -65,20 +76,29 @@ export default function PostList() {
     setLoading(true);
     console.time("Loading Time Post List");
 
-    const ALL = "all";
-    const filterObj = {};
-    if (classificationFilter !== ALL || totalFundFilter !== ALL || statusFilter !== ALL) {
-      if (classificationFilter !== ALL) filterObj.classificationFilter = classificationFilter;
-      if (totalFundFilter !== ALL) filterObj.totalFundFilter = totalFundFilter;
-      if (statusFilter !== ALL) filterObj.statusFilter = statusFilter;
-
-      let filterString = JSON.stringify(filterObj);
-      filterString = filterString.replace(/"(\w+)":/g, "$1:").replace(/:"([^"]+)"/g, ":$1");
-      const queryString = "?filter=" + filterString;
-      window.history.pushState({}, "", window.location.pathname + queryString);
-    } else {
-      window.history.pushState({}, "", window.location.pathname);
+    const filters = {};
+    if (classificationFilter === "all") {
+      urlSearchParams.delete("classificationFilter");
+    } else if (classificationFilter) {
+      filters.classificationFilter = classificationFilter;
     }
+
+    if (statusFilter === "all") {
+      urlSearchParams.delete("statusFilter");
+    } else if (statusFilter) {
+      filters.statusFilter = statusFilter;
+    }
+
+    if (totalFundFilter === "all") {
+      urlSearchParams.delete("totalFundFilter");
+    } else if (totalFundFilter) {
+      filters.totalFundFilter = totalFundFilter;
+    }
+
+    if (Object.keys(filters).length > 0) {
+      Object.entries(filters).forEach(([key, value]) => urlSearchParams.set(key, value));
+    }
+    setUrlSearchParams(urlSearchParams);
 
     Promise.all([
       axios.get(SERVER_URL + "/" + category, {

@@ -43,8 +43,6 @@ export default function PostList() {
     const totalFundMin = urlSearchParams.get("filters[totalFund][min]");
     const totalFundMax = urlSearchParams.get("filters[totalFund][max]");
 
-    console.log("here", { totalFundMin, totalFundMax });
-
     switch (status) {
       case "dahoanthanh":
         setStatusFilter("da-hoan-thanh");
@@ -139,7 +137,6 @@ export default function PostList() {
     if (Object.keys(filters).length > 0) {
       Object.entries(filters).forEach(([key, value]) => {
         if (key === "totalFund") {
-          console.log("here4", { value });
           urlSearchParams.set(`filters[${key}][min]`, value.min);
           urlSearchParams.set(`filters[${key}][max]`, value.max);
         } else {
