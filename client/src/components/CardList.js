@@ -3,7 +3,7 @@ import { Typography, Grid, CardContent, Card as MuiCard, Chip, Box } from "@mui/
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { truncate } from "../helpers";
+import { capitalizeEachWord, truncate } from "../helpers";
 import { classificationMapping } from "../constants";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
@@ -66,7 +66,7 @@ export default function CardList(props) {
             )}
 
             <Typography variant="body1" fontWeight={"bold"}>
-              {post.name.toUpperCase()}
+              {capitalizeEachWord(post.name)}
             </Typography>
 
             {props.showDescription && post.description && (

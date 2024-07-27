@@ -4,7 +4,7 @@ import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import "react-multi-carousel/lib/styles.css";
 import "./config/styles.css";
-import { truncate } from "../helpers";
+import { capitalizeEachWord, truncate } from "../helpers";
 import { classificationMapping, statusMapping } from "../constants";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
@@ -32,15 +32,15 @@ export default function CarouselListCard(props) {
 
   const settings = {
     autoplay: true,
-    autoplaySpeed: 2000,
-    speed: 1000,
-    rows: 2,
+    autoplaySpeed: 4000,
+    speed: 2000,
+    rows: props.posts.length > 4 ? 2 : 1,
     responsive: [
       {
         breakpoint: 3000,
         settings: {
           slidesToShow: 4,
-          slidesToScroll: 4,
+          slidesToScroll: props.posts.length > 4 ? 4 : props.posts.length,
         },
       },
       {
@@ -102,7 +102,7 @@ export default function CarouselListCard(props) {
                 {post.totalFund !== undefined && <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" />}
 
                 <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
-                  {post.name}
+                  {capitalizeEachWord(post.name)}
                 </Typography>
 
                 {props.showDescription && post.description && (

@@ -27,3 +27,15 @@ export function findTitle(list, title) {
 
   return null;
 }
+
+export const capitalizeEachWord = (str) => {
+  return str
+    .split(" ")
+    .map((word, index, arr) => {
+      if (word.includes("DA")) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+};

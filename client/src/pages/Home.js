@@ -184,13 +184,16 @@ export default function Home() {
         <Tabs>
           <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
-              {PROJECT_LIST.children.map((child, index) => (
-                <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
-                  <Typography variant="body1">
-                    {child.title} ({general?.category[child.path.replace("/", "")]})
-                  </Typography>
-                </Tab>
-              ))}
+              {PROJECT_LIST.children.map(
+                (child, index) =>
+                  !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
+                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
+                      <Typography variant="body1">
+                        {child.title} ({general?.category[child.path.replace("/", "")]})
+                      </Typography>
+                    </Tab>
+                  )
+              )}
             </TabList>
           </div>
 
