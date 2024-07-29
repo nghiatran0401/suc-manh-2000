@@ -221,7 +221,6 @@ postRouter.get("/:id", async (req, res) => {
       postDocData.publish_date = convertToDate(postDocData.publish_date);
       postDocData.start_date = convertToDate(postDocData.start_date);
       postDocData.end_date = convertToDate(postDocData.end_date);
-      console.log("postDocData", postDocData);
       res.status(200).json(postDocData);
     } else {
       res.status(404).json({ error: "Post not found" });
