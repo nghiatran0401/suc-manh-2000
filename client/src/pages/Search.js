@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent, Chip, Avatar } from "@mui/material";
+import {
+  useMediaQuery,
+  Box,
+  LinearProgress,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping } from "../constants";
+import {
+  POSTS_PER_PAGE,
+  SERVER_URL,
+  HEADER_DROPDOWN_LIST,
+  totalFundMapping,
+  classificationMapping,
+  statusMapping,
+  statusColorMapping,
+  statusLogoMapping,
+} from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
@@ -165,121 +184,149 @@ export default function PostList() {
 
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
-    <Box>
-      <MetaDecorator description={title} imageUrl={publicLogoUrl} />
-      <HeaderBar />
-
-      <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
-        {title && (
-          <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
-            {title}
-          </Typography>
-        )}
-
-        <Paper
-          component="form"
-          sx={{ p: "2px 4px", m: "0px auto", display: "flex", alignItems: "center", width: "100%" }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            fetchSearchData(searchValue);
-
-            urlSearchParams.set("q", searchValue);
-            setUrlSearchParams(urlSearchParams);
-            setClassificationFilter("all");
-            setTotalFundFilter("all");
-            setStatusFilter("all");
-          }}
+    <Box
+      m={isMobile ? "24px 16px" : "88px auto"}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"40px"}
+      maxWidth={"1080px"}
+    >
+      {title && (
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          color={"#000"}
+          textAlign={"center"}
         >
-          <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
-          <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
-            <SearchIcon />
-          </IconButton>
-        </Paper>
+          {title}
+        </Typography>
+      )}
 
+      <Paper
+        component="form"
+        sx={{
+          p: "2px 4px",
+          m: "0px auto",
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+        }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          fetchSearchData(searchValue);
+
+          urlSearchParams.set("q", searchValue);
+          setUrlSearchParams(urlSearchParams);
+          setClassificationFilter("all");
+          setTotalFundFilter("all");
+          setStatusFilter("all");
+        }}
+      >
+        <InputBase
+          sx={{ ml: 1, flex: 1 }}
+          placeholder="Search"
+          inputProps={{ "aria-label": "search" }}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+        <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+          <SearchIcon />
+        </IconButton>
+      </Paper>
+
+      <>
+        <Box
+          display={"flex"}
+          flexDirection={isMobile ? "column" : "row"}
+          justifyContent={isMobile ? "center" : "flex-end"}
+          alignItems={"center"}
+          gap={"16px"}
+        >
+          <StyledSelectComponent
+            label="Loại dự án"
+            inputWidth={200}
+            isMobile={isMobile}
+            value={classificationFilter}
+            onChange={(e) => setClassificationFilter(e.target.value)}
+            options={[
+              {
+                label: "Tất cả",
+                value: "all",
+              },
+              ...Object.entries(classificationMapping)
+                .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                .map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+            ]}
+          />
+
+          <StyledSelectComponent
+            label="Khoảng tiền"
+            inputWidth={200}
+            isMobile={isMobile}
+            value={totalFundFilter}
+            onChange={(e) => setTotalFundFilter(e.target.value)}
+            options={[
+              {
+                label: "Tất cả",
+                value: "all",
+              },
+              ...Object.entries(totalFundMapping).map(([value, label]) => ({
+                label,
+                value,
+              })),
+            ]}
+          />
+
+          <StyledSelectComponent
+            label="Tiến độ"
+            inputWidth={200}
+            isMobile={isMobile}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={[
+              {
+                label: "Tất cả",
+                value: "all",
+              },
+              ...Object.entries(statusMapping).map(([value, label]) => ({
+                label,
+                value,
+              })),
+            ]}
+          />
+        </Box>
+
+        <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+          Hiện có {posts.length} kết quả tìm kiếm cho "
+          {urlSearchParams.get("q")}"
+        </Typography>
+      </>
+
+      {loading ? (
+        <LinearProgress />
+      ) : posts.length === 0 ? (
+        <Typography variant="h6" textAlign={"center"}>
+          ----------
+        </Typography>
+      ) : (
         <>
-          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-            <StyledSelectComponent
-              label="Loại dự án"
-              inputWidth={200}
-              isMobile={isMobile}
-              value={classificationFilter}
-              onChange={(e) => setClassificationFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(classificationMapping)
-                  .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                  .map(([value, label]) => ({
-                    label,
-                    value,
-                  })),
-              ]}
-            />
-
-            <StyledSelectComponent
-              label="Khoảng tiền"
-              inputWidth={200}
-              isMobile={isMobile}
-              value={totalFundFilter}
-              onChange={(e) => setTotalFundFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-              ]}
-            />
-
-            <StyledSelectComponent
-              label="Tiến độ"
-              inputWidth={200}
-              isMobile={isMobile}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              options={[
-                {
-                  label: "Tất cả",
-                  value: "all",
-                },
-                ...Object.entries(statusMapping).map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-              ]}
-            />
+          <Box
+            maxWidth={"1080px"}
+            width={"100%"}
+            m={"0 auto"}
+            display={"flex"}
+            flexDirection={"column"}
+            gap={"32px"}
+          >
+            <Grid container spacing={3} p={"16px"}>
+              <CardList posts={posts} showDescription={false} />
+            </Grid>
           </Box>
-
-          <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-            Hiện có {posts.length} kết quả tìm kiếm cho "{urlSearchParams.get("q")}"
-          </Typography>
         </>
-
-        {loading ? (
-          <LinearProgress />
-        ) : posts.length === 0 ? (
-          <Typography variant="h6" textAlign={"center"}>
-            ----------
-          </Typography>
-        ) : (
-          <>
-            <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-              <Grid container spacing={3} p={"16px"}>
-                <CardList posts={posts} showDescription={false} />
-              </Grid>
-            </Box>
-          </>
-        )}
-      </Box>
-
-      <CarouselMembers />
-      <Companion />
-      <Footer />
+      )}
     </Box>
   );
 }
