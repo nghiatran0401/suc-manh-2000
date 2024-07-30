@@ -4,6 +4,7 @@ const { firestore, firebase } = require("../firebase");
 const { POSTS_PER_PAGE } = require("../constants");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, setExValueInRedis } = require("../services/redis");
 const { convertToDate, updateClassificationAndCategoryCounts } = require("../utils");
+const { provinces } = require("../utils/vietnam-provinces");
 
 const CLASSIFICATIONS = ["truong-hoc", "nha-hanh-phuc", "khu-noi-tru", "cau-hanh-phuc", "wc", "loai-khac"];
 const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
@@ -30,11 +31,10 @@ postRouter.get("/", async (req, res) => {
 
     if (filter && isProject && totalCount > POSTS_PER_PAGE) {
       const ALL = "all";
+      console.log("filter", filter);
 
       if (filter.classificationFilter !== ALL) {
         query = query.where("classification", "==", filter.classificationFilter);
-      } else {
-        query = query.where("classification", "in", CLASSIFICATIONS);
       }
 
       if (filter.totalFundFilter !== ALL) {
@@ -57,19 +57,20 @@ postRouter.get("/", async (req, res) => {
           default:
             break;
         }
-      } else {
-        query = query;
       }
 
       if (filter.statusFilter !== ALL) {
         query = query.where("status", "==", filter.statusFilter);
-      } else {
-        query = query.where("status", "in", STATUSES);
       }
+
+      // if (filter.provinceFilter !== ALL) {
+      //   query = query.where("location.province", "==", filter.provinceFilter);
+      // }
 
       totalFilterCount = await query.get().then((snap) => snap.size);
     }
 
+    console.log("totalFilterCount", totalFilterCount);
     if (_end !== undefined && !name_like) {
       query = query.offset(Number(_start)).limit(Number(_end - _start));
     }
@@ -202,9 +203,16 @@ postRouter.post("/", async (req, res) => {
     thumbnail: createdPost.thumbnail,
     category: createdPost.category,
   };
+
   const transformedProjectPost = {
     ...commonPostFields,
     description: createdPost.description ?? null,
+    classification: createdPost.classification ?? null,
+    status: createdPost.status ?? null,
+    totalFund: Number(createdPost.totalFund) * 1000000 ?? null,
+    location: {
+      province: createdPost["location.province"] ?? null,
+    },
     start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : null,
     end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : null,
     donor: {
@@ -266,10 +274,10 @@ postRouter.post("/", async (req, res) => {
     await postDocRef.set(postToSave);
 
     // Add the post to Redis search index
-    await upsertDocumentToIndex({ 
-      ...postToSave, 
-      collection_id: category, 
-      doc_id: postToSave.id, 
+    await upsertDocumentToIndex({
+      ...postToSave,
+      collection_id: category,
+      doc_id: postToSave.id,
       year: postToSave.publish_date?.toDate()?.getFullYear(),
     });
 
@@ -311,6 +319,9 @@ postRouter.patch("/:id", async (req, res) => {
         totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
         classification: updatedPost.classification ?? docData.classification ?? null,
         status: updatedPost.status ?? docData.status ?? null,
+        location: {
+          province: updatedPost["location.province"] ?? docData.location?.province ?? null,
+        },
         start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
         end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
         donor: {
@@ -372,9 +383,9 @@ postRouter.patch("/:id", async (req, res) => {
       await docRef.update(postToSave);
 
       // Update the post in Redis search index
-      await upsertDocumentToIndex({ 
-        ...postToSave, 
-        collection_id: category, 
+      await upsertDocumentToIndex({
+        ...postToSave,
+        collection_id: category,
         doc_id: postToSave.id,
         year: postToSave.publish_date?.toDate()?.getFullYear(),
       });

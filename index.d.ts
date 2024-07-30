@@ -10,6 +10,9 @@ declare namespace Sucmanh2000 {
     classification?: string;
     status?: string;
     totalFund?: number;
+    location?: {
+      province?: string;
+    };
     start_date?: string;
     end_date?: string;
     description?: string;

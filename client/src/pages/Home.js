@@ -213,7 +213,7 @@ export default function Home() {
                   </TabPanel>
 
                   {projectTab === child.path && (
-                    <Button style={{ marginTop: "16px" }} variant="contained" onClick={() => navigate(child.path)}>
+                    <Button variant="contained" onClick={() => navigate(child.path)}>
                       Xem các {child.title}
                     </Button>
                   )}

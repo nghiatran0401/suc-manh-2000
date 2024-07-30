@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
-import { convertToYoutubeUrl } from "../helpers";
+import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
 import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -12,6 +12,7 @@ import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
+import { provincesAndCities } from "../vietnam-provinces";
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
@@ -66,7 +67,8 @@ export default function CardDetails(props) {
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
-        <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
+        <Typography variant="h4" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
+
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
@@ -97,6 +99,11 @@ export default function CardDetails(props) {
           {post.totalFund !== undefined && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+            </Typography>
+          )}
+          {post.location?.province !== null && (
+            <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
             </Typography>
           )}
         </Box>
@@ -271,14 +278,23 @@ export default function CardDetails(props) {
                 alt={post.name}
                 src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
               />
-              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
-              {post.totalFund !== undefined && (
-                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px", width: "fit-content" }}>
-                  <strong>Tổng tiền:</strong> {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
-                </Typography>
-              )}
 
-              {/* {post.start_date !== undefined && (
+              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+
+              <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 8px"}>
+                {post.totalFund !== undefined && (
+                  <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
+                    {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+                  </Typography>
+                )}
+
+                {post.location?.province !== null && (
+                  <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
+                    {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
+                  </Typography>
+                )}
+
+                {/* {post.start_date !== undefined && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
                 </Typography>
@@ -288,6 +304,7 @@ export default function CardDetails(props) {
                   <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
                 </Typography>
               )} */}
+              </Box>
             </Box>
           )}
 

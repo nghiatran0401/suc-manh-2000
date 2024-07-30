@@ -17,6 +17,7 @@ import MetaDecorator from "../components/MetaDecorater";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { provincesAndCities } from "../vietnam-provinces";
 
 export default function PostList() {
   const { category } = useParams();
@@ -30,6 +31,7 @@ export default function PostList() {
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [totalFundFilter, setTotalFundFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [provinceFilter, setProvinceFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [statsData, setStatsData] = useState({});
@@ -43,28 +45,32 @@ export default function PostList() {
     const status = urlSearchParams.get("statusFilter");
     const classification = urlSearchParams.get("classificationFilter");
     const totalFundFilter = urlSearchParams.get("totalFundFilter");
+    const provinceFilter = urlSearchParams.get("provinceFilter");
 
     if (status) setStatusFilter(status);
     if (classification) setClassificationFilter(classification);
     if (totalFundFilter) setTotalFundFilter(totalFundFilter);
+    if (provinceFilter) setProvinceFilter(provinceFilter);
   }, []);
 
-  useEffect(() => {
-    const status = urlSearchParams.get("statusFilter");
-    const classification = urlSearchParams.get("classificationFilter");
-    const totalFundFilter = urlSearchParams.get("totalFundFilter");
+  // useEffect(() => {
+  //   const status = urlSearchParams.get("statusFilter");
+  //   const classification = urlSearchParams.get("classificationFilter");
+  //   const totalFundFilter = urlSearchParams.get("totalFundFilter");
+  //   const provinceFilter = urlSearchParams.get("provinceFilter");
+  //   const isScrolling = status || classification || totalFundFilter || provinceFilter;
 
-    const timer = setTimeout(() => {
-      if (scrollRef.current && (status || classification || totalFundFilter)) {
-        window.scrollTo({
-          top: scrollRef.current.offsetTop - 80,
-          behavior: "smooth",
-        });
-      }
-    }, 100);
+  //   const timer = setTimeout(() => {
+  //     if (scrollRef.current && isScrolling) {
+  //       window.scrollTo({
+  //         top: scrollRef.current.offsetTop - 80,
+  //         behavior: "smooth",
+  //       });
+  //     }
+  //   }, 100);
 
-    return () => clearTimeout(timer);
-  }, [loading]);
+  //   return () => clearTimeout(timer);
+  // }, [loading]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -95,6 +101,12 @@ export default function PostList() {
       filters.totalFundFilter = totalFundFilter;
     }
 
+    if (provinceFilter === "all") {
+      urlSearchParams.delete("provinceFilter");
+    } else if (provinceFilter) {
+      filters.provinceFilter = provinceFilter;
+    }
+
     if (Object.keys(filters).length > 0) {
       Object.entries(filters).forEach(([key, value]) => urlSearchParams.set(key, value));
     }
@@ -105,7 +117,7 @@ export default function PostList() {
         params: {
           _start: 0,
           _end: POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter },
+          filter: { classificationFilter, totalFundFilter, statusFilter, provinceFilter },
         },
       }),
       axios.get(`${SERVER_URL}/${category}/stats`),
@@ -125,7 +137,7 @@ export default function PostList() {
         setLoading(false);
         console.timeEnd("Loading Time Post List");
       });
-  }, [category, classificationFilter, totalFundFilter, statusFilter]);
+  }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
   const fetchMoreData = () => {
     const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
@@ -134,7 +146,7 @@ export default function PostList() {
         params: {
           _start: nextPage * POSTS_PER_PAGE,
           _end: (nextPage + 1) * POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter },
+          filter: { classificationFilter, totalFundFilter, statusFilter, provinceFilter },
         },
       })
       .then((newPosts) => {
@@ -229,6 +241,7 @@ export default function PostList() {
                             setClassificationFilter(value);
                             setStatusFilter(status);
                             setTotalFundFilter("all");
+                            setProvinceFilter("all");
                           }}
                         />
                       ))}
@@ -242,6 +255,7 @@ export default function PostList() {
                           setClassificationFilter(value);
                           setStatusFilter("all");
                           setTotalFundFilter("all");
+                          setProvinceFilter("all");
                         }}
                       >
                         Xem tất cả
@@ -254,7 +268,7 @@ export default function PostList() {
         )}
 
         {isProject && totalPosts > POSTS_PER_PAGE && (
-          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
             <StyledSelectComponent
               label="Loại dự án"
               inputWidth={200}
@@ -307,6 +321,24 @@ export default function PostList() {
                 ...Object.entries(statusMapping).map(([value, label]) => ({
                   label,
                   value,
+                })),
+              ]}
+            />
+
+            <StyledSelectComponent
+              label="Tỉnh"
+              inputWidth={200}
+              isMobile={isMobile}
+              value={provinceFilter}
+              onChange={(e) => setProvinceFilter(e.target.value)}
+              options={[
+                {
+                  label: "Tất cả",
+                  value: "all",
+                },
+                ...provincesAndCities.map((i) => ({
+                  label: i.province,
+                  value: i.provinceValue,
                 })),
               ]}
             />

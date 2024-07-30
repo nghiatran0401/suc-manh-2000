@@ -7,6 +7,7 @@ import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } fro
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
 import { generateNewDocumentId } from "../../helpers";
+import { provinces } from "../../vietnam-provinces";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -218,6 +219,31 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             </div>
             <Form.Item name={"totalFund"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <InputNumber defaultValue={0} style={{ width: "100%" }} addonAfter={".000.000"} />
+            </Form.Item>
+          </div>
+        )}
+
+        {/* Location - Province */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              <span style={{ color: "red" }}>*</span> {translate("post.fields.location.province")}
+            </div>
+            <Form.Item name={"location.province"} rules={[{ required: true }]} style={{ width: "40%" }}>
+              <Select showSearch placeholder="Select or enter a new province">
+                {provinces.map((p) => (
+                  <Select.Option key={p} value={p}>
+                    {p}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </div>
         )}

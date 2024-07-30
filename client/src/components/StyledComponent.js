@@ -58,7 +58,7 @@ export const StyledSelectComponent = (props) => {
   const { size, inputWidth, value, label, onChange, options, isMobile } = props;
 
   return (
-    <Stack alignItems={"center"} direction={"row"} spacing={1.5}>
+    <Stack display={"flex"} direction={"column"} spacing={0.5}>
       {label && (
         <Typography color={"rgba(0, 0, 0, 0.5)"} variant="subtitle2" width={isMobile ? "100px" : "max-content"}>
           {label}

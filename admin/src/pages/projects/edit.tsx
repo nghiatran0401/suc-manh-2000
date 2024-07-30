@@ -7,6 +7,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
+import { provinces } from "../../vietnam-provinces";
 
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -41,10 +42,13 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
+      formProps.form?.setFieldValue("location.province", projectData.location?.province);
       formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
       formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
     }
   }, [projectData]);
+
+  console.log("hhere", projectData);
 
   if (isLoading || !projectData) return <LoadingScreen />;
   return (
@@ -59,6 +63,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.name")}</span>} name={"name"} rules={[{ required: true }]}>
           <Input />
         </Form.Item>
+
         {/* Thumbnail */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.thumbnail")}</span>} name={"thumbnail"} rules={[{ required: true }]}>
           <ImageUploader
@@ -80,10 +85,12 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             }}
           />
         </Form.Item>
+
         {/* Publish date */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>} name={"publish_date"} rules={[{ required: true }]} style={{ width: "40%" }}>
           <Input type="date" />
         </Form.Item>
+
         {/* Category */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>} name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
           <Select disabled>
@@ -94,6 +101,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             ))}
           </Select>
         </Form.Item>
+
         {/* Classification */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.classification")}</span>} name={"classification"} rules={[{ required: true }]} style={{ width: "40%" }}>
@@ -106,6 +114,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </Select>
           </Form.Item>
         )}
+
         {/* Status */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.status")}</span>} name={"status"} rules={[{ required: true }]} style={{ width: "40%" }}>
@@ -118,30 +127,48 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </Select>
           </Form.Item>
         )}
+
         {/* TotalFund */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.totalFund")}</span>} name={"totalFund"} rules={[{ required: true }]} style={{ width: "40%" }}>
             <InputNumber style={{ width: "100%" }} addonAfter={".000.000"} />
           </Form.Item>
         )}
+
+        {/* Location - Province */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.location.province")}</span>} name={"location.province"} rules={[{ required: true }]} style={{ width: "40%" }}>
+            <Select showSearch placeholder="Select or enter a new province">
+              {provinces.map((p) => (
+                <Select.Option key={p} value={p}>
+                  {p}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        )}
+
         {/* Start date */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.start_date")}</span>} name={"start_date"} style={{ width: "40%" }}>
             <Input type="date" />
           </Form.Item>
         )}
+
         {/* End date */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.end_date")}</span>} name={"end_date"} style={{ width: "40%" }}>
             <Input type="date" />
           </Form.Item>
         )}
+
         {/* Description */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"}>
             <RichTextEditor initialContent={projectData.description} onChange={() => {}} />
           </Form.Item>
         )}
+
         {/* Donor */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.name")}</span>}>
@@ -169,6 +196,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </div>
           </Form.Item>
         )}
+
         {/* Progress */}
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.name")}</span>}>
@@ -212,6 +240,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </div>
           </Form.Item>
         )}
+
         {/* Tabs content */}
         <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.name")}</span>}>
           <div style={{ marginLeft: "24px" }}>

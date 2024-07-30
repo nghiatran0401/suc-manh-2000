@@ -67,6 +67,8 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
         <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />
 
+        <Table.Column title={translate("post.fields.location.province")} dataIndex="location.province" render={(_, record: BaseRecord) => <Space>{record.location?.province ?? "N/A"}</Space>} />
+
         <Table.Column
           title={translate("post.fields.url")}
           dataIndex="url"
