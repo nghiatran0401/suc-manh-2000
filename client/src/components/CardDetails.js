@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
-import { convertToYoutubeUrl } from "../helpers";
+import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
 import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -23,6 +23,7 @@ export default function CardDetails(props) {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isProject = category.includes("du-an");
 
   useEffect(() => {
     setLoading(true);
@@ -62,11 +63,11 @@ export default function CardDetails(props) {
             return null;
           })}
         </Link>
-        <Typography color="textPrimary">{post.name}</Typography>
+        <Typography color="textPrimary">{capitalizeEachWord(post.name)}</Typography>
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
-        <Typography variant="h4" dangerouslySetInnerHTML={{ __html: post.name }} />
+        <Typography variant="h4" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
@@ -239,8 +240,8 @@ export default function CardDetails(props) {
                           <Box width={isMobile ? "auto" : "720px"}>
                             {/* <CarouselSlide items={tab.slide_show} /> */}
                             {tab.slide_show.map((img, idx) => (
-                              <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                                <img key={idx} src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
+                              <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                                <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
                                 <Typography variant="body2" color={"#77777"}>
                                   {img.caption.split(".")[0]}
                                 </Typography>
@@ -328,13 +329,15 @@ export default function CardDetails(props) {
         </Grid>
       </Grid>
 
-      <Box m={"16px"}>
-        <Typography variant="h5" fontWeight="bold" color={"red"}>
-          Các dự án khác của năm 2024
-        </Typography>
+      {isProject && (
+        <Box m={"16px"}>
+          <Typography variant="h5" fontWeight="bold" color={"red"}>
+            Các dự án khác của năm 2024
+          </Typography>
 
-        <CarouselListCard posts={projects} category={category} />
-      </Box>
+          <CarouselListCard posts={projects} category={category} />
+        </Box>
+      )}
 
       <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
         <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>

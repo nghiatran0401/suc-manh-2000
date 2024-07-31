@@ -1,28 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import {
-  useMediaQuery,
-  Box,
-  LinearProgress,
-  Typography,
-  Grid,
-  Chip,
-  Button,
-} from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import {
-  POSTS_PER_PAGE,
-  SERVER_URL,
-  HEADER_DROPDOWN_LIST,
-  totalFundMapping,
-  classificationMapping,
-  statusMapping,
-  statusColorMapping,
-  statusLogoMapping,
-  statusColorHoverMapping,
-} from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
@@ -47,11 +29,8 @@ export default function PostList() {
   const [hasMore, setHasMore] = useState(true);
   const [statsData, setStatsData] = useState({});
 
-  const isProject =
-    category.includes("du-an") || category.includes("phong-tin-hoc");
-  const title = (
-    "Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)
-  ).toUpperCase();
+  const isProject = category.includes("du-an");
+  const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
   const scrollRef = useRef(null);
 
@@ -112,9 +91,7 @@ export default function PostList() {
     }
 
     if (Object.keys(filters).length > 0) {
-      Object.entries(filters).forEach(([key, value]) =>
-        urlSearchParams.set(key, value)
-      );
+      Object.entries(filters).forEach(([key, value]) => urlSearchParams.set(key, value));
     }
     setUrlSearchParams(urlSearchParams);
 
@@ -130,9 +107,7 @@ export default function PostList() {
     ])
       .then(([postsResponse, statsResponse]) => {
         setTotalPosts(Number(postsResponse.headers["x-total-count"]));
-        setTotalFilterPosts(
-          Number(postsResponse.headers["x-total-filter-count"])
-        );
+        setTotalFilterPosts(Number(postsResponse.headers["x-total-filter-count"]));
         setPosts(postsResponse.data);
         setHasMore(postsResponse.data.length >= POSTS_PER_PAGE);
 
@@ -159,10 +134,7 @@ export default function PostList() {
       })
       .then((newPosts) => {
         setPosts([...posts, ...newPosts.data]);
-        if (
-          newPosts.data.length === 0 ||
-          newPosts.data.length < POSTS_PER_PAGE
-        ) {
+        if (newPosts.data.length === 0 || newPosts.data.length < POSTS_PER_PAGE) {
           setHasMore(false);
         }
       })
@@ -171,41 +143,16 @@ export default function PostList() {
 
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
-    <Box
-      m={isMobile ? "24px 16px" : "88px auto"}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"40px"}
-      maxWidth={"1080px"}
-    >
+    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
       {title && (
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          color={"#000"}
-          textAlign={"center"}
-        >
+        <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
           {title}
         </Typography>
       )}
 
       {isProject && (
-        <Grid
-          container
-          display={"flex"}
-          alignItems={"center"}
-          justifyContent={"center"}
-          gap={"16px"}
-          borderRadius={"8px"}
-        >
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            textAlign={"center"}
-            alignItems={"center"}
-            gap={"16px"}
-            m={"0 auto"}
-          >
+        <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
+          <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
             <Typography variant="h5" fontWeight={700}>
               Thống kê nhanh
             </Typography>
@@ -248,18 +195,10 @@ export default function PostList() {
                   xs={6}
                   paddingTop={0}
                   paddingRight={2}
-                  borderRight={
-                    index === 3 || (isMobile && index === 1)
-                      ? ""
-                      : "2px solid #D9D9D9"
-                  }
+                  borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}
                 >
                   <div>
-                    <Typography
-                      variant="h5"
-                      fontWeight={600}
-                      textAlign={"center"}
-                    >
+                    <Typography variant="h5" fontWeight={600} textAlign={"center"}>
                       {statsData[value]?.count ?? 0}
                     </Typography>
                     <Typography variant="body1" textAlign={"center"}>
@@ -278,9 +217,7 @@ export default function PostList() {
                       <Chip
                         key={status}
                         variant="outline"
-                        avatar={
-                          <img src={statusLogoMapping[status]} alt="logo" />
-                        }
+                        avatar={<img src={statusLogoMapping[status]} alt="logo" />}
                         label={statsData[value]?.[status] ?? 0}
                         sx={{
                           backgroundColor: statusColorMapping[status],
@@ -301,12 +238,7 @@ export default function PostList() {
                       />
                     ))}
                   </Box>
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    width="100%"
-                    height={"32px"}
-                  >
+                  <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
                     <Button
                       variant="outlined"
                       sx={{
@@ -334,13 +266,7 @@ export default function PostList() {
       )}
 
       {isProject && totalPosts > POSTS_PER_PAGE && (
-        <Box
-          display={"flex"}
-          flexDirection={isMobile ? "column" : "row"}
-          justifyContent={isMobile ? "center" : "flex-end"}
-          alignItems={"center"}
-          gap={"16px"}
-        >
+        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <StyledSelectComponent
             label="Loại dự án"
             inputWidth={200}
@@ -407,29 +333,14 @@ export default function PostList() {
         </Typography>
       ) : (
         <>
-          <Box
-            ref={scrollRef}
-            maxWidth={"1080px"}
-            width={"100%"}
-            m={"0 auto"}
-            display={"flex"}
-            flexDirection={"column"}
-            gap={"32px"}
-          >
+          <Box ref={scrollRef} maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
             {isProject && totalPosts > POSTS_PER_PAGE && (
               <Typography variant="body1" textAlign={"right"} mr={"16px"}>
                 Số dự án: {totalFilterPosts}/{totalPosts}
               </Typography>
             )}
 
-            <InfiniteScroll
-              hasMore={hasMore}
-              loader={
-                <LinearProgress key={"linear-loader"} sx={{ mt: "100px" }} />
-              }
-              loadMore={fetchMoreData}
-              style={{ overflow: "hidden" }}
-            >
+            <InfiniteScroll hasMore={hasMore} loader={<LinearProgress key={"linear-loader"} sx={{ mt: "100px" }} />} loadMore={fetchMoreData} style={{ overflow: "hidden" }}>
               <Grid container spacing={3} p={"16px"}>
                 <CardList posts={posts} showDescription={false} />
               </Grid>
