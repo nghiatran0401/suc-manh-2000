@@ -106,7 +106,16 @@ export default function CardDetails(props) {
       {post?.donor && Object.keys(post?.donor).length > 0 && (
         <Box bgcolor={"#f1f1f1"}>
           <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
-            <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
+            <Typography
+              color={"#77777"}
+              variant="h6"
+              dangerouslySetInnerHTML={{ __html: post.donor.description }}
+              sx={{
+                width: "100%", // Adjust the width as needed
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+              }}
+            />
 
             {post.donor.images.length === 1 && <img src={post.donor.images[0].image} alt={post.donor.name} style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }} />}
 

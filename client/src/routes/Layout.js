@@ -8,9 +8,10 @@ import Footer from "../components/Footer";
 export default function Layout() {
   return (
     <Box>
+      <HeaderBar />
+
       <Outlet />
 
-      <HeaderBar />
       <CarouselMembers />
       <Companion />
       <Footer />
