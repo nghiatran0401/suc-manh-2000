@@ -68,7 +68,12 @@ export default function HeaderBar() {
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <AppBar color="inherit" className="bar" position="fixed" sx={{ top: 0, zIndex: 10000, ...(isMobile && { position: "static" }) }}>
-      <Container sx={{ maxWidth: "1080px !important", padding: !isMobile ? "0px !important" : "auto" }}>
+      <Container
+        sx={{
+          maxWidth: "1080px !important",
+          padding: !isMobile ? "0px !important" : "auto",
+        }}
+      >
         <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }}>
           {isMobile ? (
             <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
@@ -92,7 +97,7 @@ export default function HeaderBar() {
               {/* Center section (menu items) */}
               <Box display="flex" gap="24px" flexGrow={1} justifyContent="left">
                 {HEADER_DROPDOWN_LIST.map((item, index) => (
-                  <Box key={item.title + index} display="flex" alignItems="center" gap="8px" sx={{ cursor: "pointer" }}>
+                  <Box key={item.title + index} display="flex" alignItems="center" sx={{ cursor: "pointer" }}>
                     {item.title !== "Home" ? (
                       <Box display="flex">
                         {item.children.length > 0 ? (
@@ -103,7 +108,7 @@ export default function HeaderBar() {
                             </Typography>
                             <CDropdownMenu color="secondary">
                               {item.children.map((child, childIndex) => (
-                                <CDropdownItem key={childIndex} href={child.path}>
+                                <CDropdownItem key={`${child.title}-${childIndex}`} href={child.path}>
                                   <Typography variant="body1">
                                     {child.title}
                                     {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
@@ -131,7 +136,19 @@ export default function HeaderBar() {
           )}
 
           <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
-            <Paper ref={autocompleteRef} component="form" sx={{ p: "2px 4px", m: "0px auto", display: "flex", alignItems: "center", width: "100%", height: "60px" }} onSubmit={onSearch}>
+            <Paper
+              ref={autocompleteRef}
+              component="form"
+              sx={{
+                p: "2px 4px",
+                m: "0px auto",
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                height: "60px",
+              }}
+              onSubmit={onSearch}
+            >
               <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
               <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
                 <SearchIcon />

@@ -14,7 +14,14 @@ export default function Footer() {
     <Box bgcolor={"#262626"}>
       <Box display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={"1080px"} m={"auto"} p={"20px"}>
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} gap={"24px"} p={"20px"}>
-          <img src={logo} alt="logo" style={{ maxWidth: isMobile ? "60px" : "100px", objectFit: "contain" }} />
+          <img
+            src={logo}
+            alt="logo"
+            style={{
+              maxWidth: isMobile ? "60px" : "100px",
+              objectFit: "contain",
+            }}
+          />
           <Typography variant="body1" color={"#E4E4E4"}>
             Dự án Sức Mạnh 2000 - Dự án gây quỹ của Ánh Sáng Núi Rừng điều hành bởi Hoàng Hoa Trung - Forbes Việt Nam 30Under 30 đồng hành bởi Trung tâm Tình Nguyện Quốc Gia.
             <br />
@@ -25,7 +32,7 @@ export default function Footer() {
 
         <Grid container spacing={3} pb={"20px"}>
           {HEADER_DROPDOWN_LIST.filter((item) => ["quyen-gop", "tin-tuc", "du-an"].includes(item.name)).map((item, index) => (
-            <Grid item xs={6} sm={3} key={index}>
+            <Grid key={index} item xs={6} sm={3}>
               <Typography variant="h7" color={"#E4E4E4"}>
                 {item.title.toUpperCase()}
               </Typography>
@@ -33,9 +40,9 @@ export default function Footer() {
                 {item.children
                   .filter((_, index) => index <= 4)
                   .map((child, index) => (
-                    <Link to={child.path} style={{ width: "fit-content", color: "inherit", textDecoration: " none" }}>
-                      <Typography key={index}>{child.title}</Typography>
-                    </Link>
+                    <Typography key={index} sx={{ cursor: "pointer" }} onClick={() => (window.location.href = child.path)}>
+                      {child.title}
+                    </Typography>
                   ))}
               </div>
             </Grid>

@@ -7,7 +7,7 @@ import Search from "../pages/Search";
 
 export const routes = [
   {
-    path: "/",
+    path: "",
     element: <Home />,
   },
   {

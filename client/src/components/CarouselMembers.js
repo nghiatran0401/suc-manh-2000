@@ -1,5 +1,12 @@
 import React from "react";
-import { Typography, Box, Card, CardContent, CardMedia, CardActions } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+} from "@mui/material";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import "./config/styles.css";
@@ -171,7 +178,7 @@ export default function CarouselMembers() {
     },
   };
 
-  const CustomLeftArrow = ({ onClick, ...rest }) => {
+  const CustomLeftArrow = ({ onClick }) => {
     return (
       <button
         onClick={onClick}
@@ -188,14 +195,13 @@ export default function CarouselMembers() {
           color: "white",
           border: "none",
         }}
-        {...rest}
       >
         <KeyboardArrowLeftIcon />
       </button>
     );
   };
 
-  const CustomRightArrow = ({ onClick, ...rest }) => {
+  const CustomRightArrow = ({ onClick }) => {
     return (
       <button
         onClick={onClick}
@@ -212,7 +218,6 @@ export default function CarouselMembers() {
           color: "white",
           border: "none",
         }}
-        {...rest}
       >
         <KeyboardArrowRightIcon />
       </button>
@@ -237,10 +242,17 @@ export default function CarouselMembers() {
         Đội ngũ vận hành
       </Typography>
 
-      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
+      <Carousel
+        responsive={responsive}
+        autoPlay
+        infinite
+        autoPlaySpeed={5000}
+        customLeftArrow={<CustomLeftArrow />}
+        customRightArrow={<CustomRightArrow />}
+      >
         {MEMBERS.map((item, index) => (
           <Card
-            key={item.name + index}
+            key={index}
             className="card-contanier"
             sx={{
               m: "8px",
@@ -249,28 +261,52 @@ export default function CarouselMembers() {
               },
             }}
           >
-            <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
-            <CardContent sx={{ minHeight: "340px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", p: "12px" }}>
+            <CardMedia
+              component="img"
+              alt={item.caption}
+              height="300"
+              image={item.image}
+              style={{ objectFit: "fit", objectPosition: "top" }}
+            />
+            <CardContent
+              sx={{
+                minHeight: "340px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "8px",
+                p: "12px",
+              }}
+            >
               {item.name && item.role && (
                 <>
                   <Typography align="center" variant="h6" fontWeight={"bold"}>
                     {item.name}
                   </Typography>
 
-                  <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
+                  <Typography
+                    align="center"
+                    variant="body1"
+                    fontWeight={"bold"}
+                    height={"50px"}
+                  >
                     {item.role}
                   </Typography>
 
-                  <CardActions sx={{ display: "flex", justifyContent: "center" }}>
+                  <CardActions
+                    sx={{ display: "flex", justifyContent: "center" }}
+                  >
                     <FacebookOutlinedIcon />
                     <EmailOutlinedIcon />
                     <LinkedInIcon />
                     <TwitterIcon />
                   </CardActions>
 
-                  <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}>
-                    {}
-                  </Typography>
+                  <Typography
+                    align="left"
+                    variant="body2"
+                    dangerouslySetInnerHTML={{ __html: item.description }}
+                  ></Typography>
                 </>
               )}
 
