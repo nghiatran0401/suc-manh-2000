@@ -65,9 +65,7 @@ export default function CardList(props) {
               <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
             )}
 
-            <Typography variant="body1" fontWeight={"bold"}>
-              {capitalizeEachWord(post.name)}
-            </Typography>
+            <Typography variant="body1">{capitalizeEachWord(post.name)}</Typography>
 
             {props.showDescription && post.description && (
               <>
