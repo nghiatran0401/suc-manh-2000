@@ -147,4 +147,8 @@ function removeVietnameseAccents(str) {
   return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched) => map[matched]);
 }
 
-module.exports = { convertToCleanedName };
+function escapeSpecialCharacters(str) {
+  return str.replace(/[-_]/g, "\\$&");
+}
+
+module.exports = { convertToCleanedName, escapeSpecialCharacters };

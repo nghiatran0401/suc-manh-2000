@@ -5,8 +5,7 @@ import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import "react-multi-carousel/lib/styles.css";
 import "./config/styles.css";
-import { capitalizeEachWord, truncate } from "../helpers";
-import { classificationMapping, statusMapping } from "../constants";
+import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
@@ -106,7 +105,7 @@ export default function CarouselListCard(props) {
               </div>
 
               <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between", minHeight: isMobile ? "fit-content" : "175px" }}>
-                {post.totalFund && (
+                {Boolean(post.totalFund) && (
                   <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
                 )}
 
@@ -127,9 +126,9 @@ export default function CarouselListCard(props) {
                     </Typography>
                   )}
 
-                  {post["location.province"] && (
+                  {post.province && (
                     <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                      {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
+                      {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
                     </Typography>
                   )}
                 </Box>

@@ -1,5 +1,6 @@
 const Redis = require("ioredis");
-const { convertToCleanedName } = require("../utils/search");
+const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
+const { filter } = require("lodash");
 require("dotenv").config();
 
 const redis = new Redis(process.env.REDIS_URL);
@@ -16,7 +17,7 @@ const INDEX_SCHEMA = [
   "cleanedName",
   "TEXT",
   "publishDate",
-  "NUMERIC",
+  "TEXT",
   "thumbnail",
   "TEXT",
   "category",
@@ -27,10 +28,9 @@ const INDEX_SCHEMA = [
   "TAG",
   "totalFund",
   "NUMERIC",
-  "location.province",
+  "province",
   "TAG",
 ];
-const SEARCH_FIELD = ["name", "cleanedName", "category", "classification", "status", "totalFund", "location.province"];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
 async function createSearchIndex(redisEnv = redis) {
@@ -87,19 +87,19 @@ async function upsertDocumentToIndex(data, redisEnv = redis) {
       "cleanedName",
       convertToCleanedName(data.name),
       "publishDate",
-      data.publish_date.toDate(),
+      data.publish_date?.toDate(),
       "thumbnail",
       data.thumbnail,
       "category",
       data.category,
       "classification",
-      data.classification ?? null,
+      data.classification,
       "status",
-      data.status ?? null,
+      data.status,
       "totalFund",
-      data.totalFund ?? null,
-      "location.province",
-      data.location?.province ?? null
+      data.totalFund,
+      "province",
+      data.location?.province
     );
     console.log(`Document '${data.doc_id}' added to index '${INDEX_NAME}' successfully`);
   } catch (error) {
@@ -112,50 +112,65 @@ async function removeDocumentFromIndex(data) {
   console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
 }
 
-function escapeSpecialCharacters(str) {
-  return str.replace(/[-_]/g, "\\$&");
-}
-
-async function redisSearchByName(searchKey, filters, start, end) {
+async function redisSearchByName(q, filters) {
   let query = "";
-  const args = [INDEX_NAME];
+  const args = [];
+  args.push("FT.SEARCH");
+  args.push(INDEX_NAME);
 
-  if (searchKey) {
-    query += `(@${SEARCH_FIELD[0]}:${searchKey}*) | (@${SEARCH_FIELD[1]}:${convertToCleanedName(searchKey)}*)`;
+  console.log("here1", { q, filters });
+
+  if (q) {
+    query += `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`;
   }
 
-  // if (filters.year) {
-  //   query += ` @${SEARCH_FIELD[2]}:${filters.year}`;
-  // }
-
-  // if (filters.status) {
-  //   query += ` @${SEARCH_FIELD[3]}:{${filters.status}}`;
-  // }
-
-  if (filters.classification) {
-    query += ` @classification:{${escapeSpecialCharacters("khu-noi-tru")}}`;
+  if (filters.categoryFilter) {
+    query += ` @category:{${escapeSpecialCharacters(filters.categoryFilter)}}`;
   }
 
-  console.log("here", { redisSearchByName, query });
+  if (filters.classificationFilter) {
+    query += ` @classification:{${escapeSpecialCharacters(filters.classificationFilter)}}`;
+  }
 
-  // if (filters.totalFund) {
-  //   query += ` @${SEARCH_FIELD[5]}:[${filters.totalFund.min}, ${filters.totalFund.max}]`;
-  // }
+  if (filters.statusFilter) {
+    query += ` @status:{${escapeSpecialCharacters(filters.statusFilter)}}`;
+  }
+
+  if (filters.totalFundFilter) {
+    switch (filters.totalFundFilter) {
+      case "less-than-100":
+        query += ` @totalFund:[0, 100000000]`;
+        break;
+      case "100-to-200":
+        query += ` @totalFund:[100000000, 200000000]`;
+        break;
+      case "200-to-300":
+        query += ` @totalFund:[200000000, 300000000]`;
+        break;
+      case "300-to-400":
+        query += ` @totalFund:[300000000, 400000000]`;
+        break;
+      case "more-than-400":
+        query += ` @totalFund:[400000000, inf]`;
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (filters.provinceFilter) {
+    query += ` @province:{${escapeSpecialCharacters(filters.provinceFilter)}}`;
+  }
 
   args.push(query);
-
-  // Handle sorting
   args.push("SORTBY", "category", "DESC");
+  args.push("LIMIT", 0, 10000); // get all results
 
-  // Handle limit
-  args.push("LIMIT", 0, 30);
-  // args.push("LIMIT", start, end - start);
-  console.log("here2", { q: "FT.SEARCH", ...args });
-
-  const results = await redis.call("FT.SEARCH", ...args);
+  console.log("here2", { args: args });
+  const results = await redis.call(...args);
   const transformedResults = [];
   const totalCount = results[0];
-  console.log("here3", totalCount);
+  console.log("here3", { totalCount: totalCount });
 
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];

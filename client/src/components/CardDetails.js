@@ -96,14 +96,14 @@ export default function CardDetails(props) {
               {statusMapping[post.status]}
             </Typography>
           )}
-          {post.totalFund && (
+          {Boolean(post.totalFund) && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
             </Typography>
           )}
-          {post["location.province"] && (
+          {post.province && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-              {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
+              {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
             </Typography>
           )}
         </Box>
@@ -291,15 +291,15 @@ export default function CardDetails(props) {
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
 
               <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 8px"}>
-                {post.totalFund && (
+                {Boolean(post.totalFund) && (
                   <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
                     {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
                   </Typography>
                 )}
 
-                {post["location.province"] && (
+                {post.province && (
                   <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
-                    {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
+                    {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
                   </Typography>
                 )}
 
