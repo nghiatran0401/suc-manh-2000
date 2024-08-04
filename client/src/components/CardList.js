@@ -25,8 +25,8 @@ const Card = styled(MuiCard)({
 export default function CardList(props) {
   const { category } = useParams();
 
-  return props.posts?.map((post) => (
-    <Grid key={post.id} item xs={6} sm={6} md={3}>
+  return props.posts?.map((post, ix) => (
+    <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
@@ -69,9 +69,7 @@ export default function CardList(props) {
               <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
             )}
 
-            <Typography variant="body1" fontWeight={"bold"}>
-              {capitalizeEachWord(post.name)}
-            </Typography>
+            <Typography variant="body1">{capitalizeEachWord(post.name)}</Typography>
 
             <Box display="flex" flexWrap="wrap" gap={"8px"}>
               {post.classification !== undefined && (

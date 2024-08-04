@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { COMMON_SEO_DESCRIPTION, HEADER_DROPDOWN_LIST, SERVER_URL, publicLogoUrl } from "../constants";
+import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
 import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
@@ -8,13 +8,8 @@ import CountUp from "react-countup";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { useNavigate } from "react-router-dom";
-import HeaderBar from "../components/Header";
-import Footer from "../components/Footer";
-import Companion from "../components/Companion";
-import CarouselMembers from "../components/CarouselMembers";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
-import MetaDecorator from "../components/MetaDecorater";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -63,10 +58,7 @@ export default function Home() {
 
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
-    <Box>
-      <MetaDecorator imageUrl={publicLogoUrl} description={COMMON_SEO_DESCRIPTION} />
-      <HeaderBar />
-
+    <>
       <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
@@ -203,22 +195,24 @@ export default function Home() {
             </Box>
           ) : (
             <>
-              {PROJECT_LIST.children.map((child, index) => (
-                <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
-                  <TabPanel>
-                    {/* <Grid container spacing={3} p={"16px"}> */}
-                    {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
-                    {/* </Grid> */}
-                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
-                  </TabPanel>
+              {PROJECT_LIST.children
+                .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
+                .map((child, index) => (
+                  <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
+                    <TabPanel>
+                      {/* <Grid container spacing={3} p={"16px"}> */}
+                      {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
+                      {/* </Grid> */}
+                      <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
+                    </TabPanel>
 
-                  {projectTab === child.path && (
-                    <Button variant="contained" onClick={() => navigate(child.path)}>
-                      Xem các {child.title}
-                    </Button>
-                  )}
-                </Box>
-              ))}
+                    {projectTab === child.path && (
+                      <Button variant="contained" onClick={() => navigate(child.path)}>
+                        Xem các {child.title}
+                      </Button>
+                    )}
+                  </Box>
+                ))}
             </>
           )}
         </Tabs>
@@ -294,10 +288,6 @@ export default function Home() {
           </Grid>
         </Box>
       </Box>
-
-      <CarouselMembers />
-      <Companion />
-      <Footer />
-    </Box>
+    </>
   );
 }

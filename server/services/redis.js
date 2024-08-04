@@ -84,7 +84,7 @@ async function removeDocumentFromIndex(data) {
   console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
 }
 
-async function redisSearchByName(searchKey, filters) {
+async function redisSearchByName(searchKey, filters, start, end) {
   let query = "";
   const args = [INDEX_NAME];
 
@@ -113,8 +113,12 @@ async function redisSearchByName(searchKey, filters) {
   // Handle sorting
   args.push("SORTBY", "category", "DESC");
 
+  {
+    console.log("here123", { start, end });
+  }
   // Handle limit
-  args.push("LIMIT", 0, 30);
+  // args.push("LIMIT", 0, 10000);
+  args.push("LIMIT", start, end - start);
 
   const results = await redis.call("FT.SEARCH", ...args);
   const transformedResults = [];

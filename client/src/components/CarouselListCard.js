@@ -110,7 +110,7 @@ export default function CarouselListCard(props) {
                   <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
                 )}
 
-                <Typography variant="body1" fontWeight={"bold"} mt={"16px"}>
+                <Typography variant="body1" mt={"16px"}>
                   {capitalizeEachWord(post.name)}
                 </Typography>
 

@@ -24,6 +24,7 @@ export default function CardDetails(props) {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isProject = category.includes("du-an");
 
   useEffect(() => {
     setLoading(true);
@@ -63,12 +64,11 @@ export default function CardDetails(props) {
             return null;
           })}
         </Link>
-        <Typography color="textPrimary">{post.name}</Typography>
+        <Typography color="textPrimary">{capitalizeEachWord(post.name)}</Typography>
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h4" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
-
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
@@ -112,7 +112,16 @@ export default function CardDetails(props) {
       {post?.donor && Object.keys(post?.donor).length > 0 && (
         <Box bgcolor={"#f1f1f1"}>
           <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
-            <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
+            <Typography
+              color={"#77777"}
+              variant="h6"
+              dangerouslySetInnerHTML={{ __html: post.donor.description }}
+              sx={{
+                width: "100%", // Adjust the width as needed
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+              }}
+            />
 
             {post.donor.images.length === 1 && <img src={post.donor.images[0].image} alt={post.donor.name} style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }} />}
 
@@ -130,21 +139,21 @@ export default function CardDetails(props) {
       {post?.progress && post?.progress?.length > 0 && (
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {post?.progress?.map((progress, index) => (
-            <Grid item xs={4} p={"0px !important"} maxWidth={"100%"}>
-              <CarouselSlide key={index} title={progress.name} items={progress.images} position="progress" />
+            <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
+              <CarouselSlide title={progress.name} items={progress.images} position="progress" />
             </Grid>
           ))}
         </Grid>
       )}
 
-      <Grid container xs={12} sx={{ m: "16px 0px", flexDirection: { xs: "column-reverse", sm: "row" } }}>
+      <Grid container sx={{ m: "16px 0px", flexDirection: { xs: "column-reverse", sm: "row" } }}>
         <Grid item xs={12} sm={9} p={"0px !important"}>
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
                 post.content.tabs.map((tab, index) => (
-                  <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                    <Typography key={index} variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
+                  <Box key={index} display={"flex"} flexDirection={"column"} gap={"16px"}>
+                    <Typography variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
 
                     {tab.embedded_url?.length > 0 && (
                       <Box>
@@ -183,8 +192,8 @@ export default function CardDetails(props) {
                     {tab.slide_show?.length > 0 && (
                       <Box maxWidth={"720px"}>
                         {tab.slide_show.map((img, idx) => (
-                          <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                            <img key={idx} src={img.image} alt={img.caption} style={{ width: "100%", objectFit: "contain" }} />
+                          <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                            <img src={img.image} alt={img.caption} style={{ width: "100%", objectFit: "contain" }} />
                             <Typography variant="body2" color={"#77777"}>
                               {img.caption}
                             </Typography>
@@ -246,8 +255,8 @@ export default function CardDetails(props) {
                           <Box width={isMobile ? "auto" : "720px"}>
                             {/* <CarouselSlide items={tab.slide_show} /> */}
                             {tab.slide_show.map((img, idx) => (
-                              <Box display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                                <img key={idx} src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
+                              <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                                <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
                                 <Typography variant="body2" color={"#77777"}>
                                   {img.caption.split(".")[0]}
                                 </Typography>
@@ -340,33 +349,20 @@ export default function CardDetails(props) {
                   </Link>
                 ))}
               </Box>
-
-              {/* {isMobile && (
-              <Box display="flex" flexDirection="column" gap={2}>
-                {latestPosts.map((latestPost, index) => (
-                  <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer", color: "#334862" }}>
-                    <Box display="flex" alignItems="center" gap={2} minHeight="72px" borderRadius={8} p={1} bgcolor="#f0f0f0">
-                      <Avatar variant="rounded" src={latestPost.image} style={{ width: 50, height: 50 }} />
-                      <Typography variant="body2" style={{ flex: 1, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
-                      </Typography>
-                    </Box>
-                  </Link>
-                ))}
-              </Box>
-            )} */}
             </Box>
           )}
         </Grid>
       </Grid>
 
-      <Box m={"16px"}>
-        <Typography variant="h5" fontWeight="bold" color={"red"}>
-          Các dự án khác của năm 2024
-        </Typography>
+      {isProject && (
+        <Box m={"16px"}>
+          <Typography variant="h5" fontWeight="bold" color={"red"}>
+            Các dự án khác của năm 2024
+          </Typography>
 
-        <CarouselListCard posts={projects} category={category} />
-      </Box>
+          <CarouselListCard posts={projects} category={category} />
+        </Box>
+      )}
 
       <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
         <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
