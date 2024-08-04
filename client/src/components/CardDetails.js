@@ -6,7 +6,7 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -30,9 +30,9 @@ export default function CardDetails(props) {
     setLoading(true);
 
     axios
-      .get(SERVER_URL + `/${category}`, { params: { _start: 0, _end: 24 } })
-      .then((projects) => {
-        setProjects(projects.data);
+      .get(SERVER_URL + `/${category}`)
+      .then((postsResponse) => {
+        setProjects(postsResponse.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -48,7 +48,7 @@ export default function CardDetails(props) {
 
   if (loading) return <LoadingScreen />;
   return (
-    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
+    <Box maxWidth={DESKTOP_WIDTH} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb">
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
@@ -78,12 +78,12 @@ export default function CardDetails(props) {
             <EventIcon sx={{ width: 32, height: 32 }} />
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
           </Box>
-          {post.classification !== undefined && (
+          {post.classification && (
             <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {classificationMapping[post.classification]}
             </Typography>
           )}
-          {post.status !== undefined && (
+          {post.status && (
             <Typography
               variant="body2"
               sx={{
@@ -96,14 +96,14 @@ export default function CardDetails(props) {
               {statusMapping[post.status]}
             </Typography>
           )}
-          {post.totalFund !== undefined && (
+          {post.totalFund && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
             </Typography>
           )}
-          {post.location?.province !== null && (
+          {post["location.province"] && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-              {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
+              {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
             </Typography>
           )}
         </Box>
@@ -280,7 +280,7 @@ export default function CardDetails(props) {
         </Grid>
 
         <Grid item xs={12} sm={3}>
-          {post.description !== undefined && (
+          {post.description && (
             <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"}>
               <img
                 style={{ width: "100%", height: "225px", objectFit: "fill", borderRadius: "16px 16px 0 0" }}
@@ -291,24 +291,24 @@ export default function CardDetails(props) {
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
 
               <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 8px"}>
-                {post.totalFund !== undefined && (
+                {post.totalFund && (
                   <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
                     {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
                   </Typography>
                 )}
 
-                {post.location?.province !== null && (
+                {post["location.province"] && (
                   <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
-                    {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
+                    {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
                   </Typography>
                 )}
 
-                {/* {post.start_date !== undefined && (
+                {/* {post.start_date  && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
                 </Typography>
               )}
-              {post.end_date !== undefined && (
+              {post.end_date && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
                 </Typography>

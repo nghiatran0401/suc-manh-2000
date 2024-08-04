@@ -4,7 +4,7 @@ import { useMediaQuery, Box, LinearProgress, Typography, Grid, Card, CardContent
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, DESKTOP_WIDTH } from "../constants";
 import HeaderBar from "../components/Header";
 import Companion from "../components/Companion";
 import Footer from "../components/Footer";
@@ -180,7 +180,7 @@ export default function PostList() {
 
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
-    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
+    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={DESKTOP_WIDTH}>
       {title && (
         <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
           {title}
@@ -296,7 +296,7 @@ export default function PostList() {
         </Typography>
       ) : (
         <>
-          {/* <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+          {/* <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
             <Grid container spacing={3} p={"16px"}>
               <CardList posts={posts} showDescription={false} />
             </Grid>

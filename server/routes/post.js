@@ -88,7 +88,7 @@ postRouter.get("/", async (req, res) => {
 
     //   const mapDocToData = (doc) => {
     //     const data = doc.data();
-    //     data.publish_date = convertToDate(data.publish_date);
+    // data.publish_date = convertToDate(data.publish_date);
     //     data.start_date = convertToDate(data.start_date);
     //     data.end_date = convertToDate(data.end_date);
 
@@ -145,20 +145,27 @@ postRouter.get("/getLatestPosts", async (req, res) => {
 
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
+  const cachedKey = `post:${category}:${id}`;
 
   try {
-    const postDocRef = firestore.collection(category).where("slug", "==", id);
-    const postDocRefSnapshot = await postDocRef.get();
+    const cachedResultData = await getValueInRedis(cachedKey);
 
-    if (!postDocRefSnapshot.empty) {
+    if (cachedResultData) {
+      res.status(200).send(cachedResultData);
+    } else {
+      const postDocRef = firestore.collection(category).where("slug", "==", id);
+      const postDocRefSnapshot = await postDocRef.get();
+
+      if (postDocRefSnapshot.empty) {
+        res.status(404).json({ error: "Post not found" });
+      }
+
       const postDocData = postDocRefSnapshot.docs[0].data();
       postDocData.publish_date = convertToDate(postDocData.publish_date);
       postDocData.start_date = convertToDate(postDocData.start_date);
       postDocData.end_date = convertToDate(postDocData.end_date);
 
       res.status(200).json(postDocData);
-    } else {
-      res.status(404).json({ error: "Post not found" });
     }
   } catch (error) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });

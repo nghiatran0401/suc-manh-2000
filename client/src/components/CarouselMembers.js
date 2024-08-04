@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
-} from "@mui/material";
+import { Typography, Box, Card, CardContent, CardMedia, CardActions } from "@mui/material";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import "./config/styles.css";
@@ -29,6 +22,7 @@ import VoThiTuyetMinh from "../assets/team/Vo_Thi_Tuyet_Minh.png";
 import PhamNgocCham from "../assets/team/Pham_Ngoc_Cham.png";
 import NguyenThiAnhDao from "../assets/team/Nguyen_Thi_Anh_Dao.png";
 import TranHuuNghia from "../assets/team/Tran_Huu_Nghia.png";
+import { DESKTOP_WIDTH } from "../constants";
 
 export const MEMBERS = [
   {
@@ -226,7 +220,7 @@ export default function CarouselMembers() {
 
   return (
     <Box
-      maxWidth={"1080px"}
+      maxWidth={DESKTOP_WIDTH}
       display={"flex"}
       flexDirection={"column"}
       gap={"16px"}
@@ -242,14 +236,7 @@ export default function CarouselMembers() {
         Đội ngũ vận hành
       </Typography>
 
-      <Carousel
-        responsive={responsive}
-        autoPlay
-        infinite
-        autoPlaySpeed={5000}
-        customLeftArrow={<CustomLeftArrow />}
-        customRightArrow={<CustomRightArrow />}
-      >
+      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
         {MEMBERS.map((item, index) => (
           <Card
             key={index}
@@ -261,13 +248,7 @@ export default function CarouselMembers() {
               },
             }}
           >
-            <CardMedia
-              component="img"
-              alt={item.caption}
-              height="300"
-              image={item.image}
-              style={{ objectFit: "fit", objectPosition: "top" }}
-            />
+            <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
             <CardContent
               sx={{
                 minHeight: "340px",
@@ -284,29 +265,18 @@ export default function CarouselMembers() {
                     {item.name}
                   </Typography>
 
-                  <Typography
-                    align="center"
-                    variant="body1"
-                    fontWeight={"bold"}
-                    height={"50px"}
-                  >
+                  <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
                     {item.role}
                   </Typography>
 
-                  <CardActions
-                    sx={{ display: "flex", justifyContent: "center" }}
-                  >
+                  <CardActions sx={{ display: "flex", justifyContent: "center" }}>
                     <FacebookOutlinedIcon />
                     <EmailOutlinedIcon />
                     <LinkedInIcon />
                     <TwitterIcon />
                   </CardActions>
 
-                  <Typography
-                    align="left"
-                    variant="body2"
-                    dangerouslySetInnerHTML={{ __html: item.description }}
-                  ></Typography>
+                  <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}></Typography>
                 </>
               )}
 

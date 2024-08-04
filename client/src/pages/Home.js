@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
 import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
@@ -48,7 +48,7 @@ export default function Home() {
     axios
       .get(SERVER_URL + projectTab)
       .then((projects) => {
-        setProjects(projects.data);
+        setProjects(projects.data.posts);
 
         setLoading(false);
         console.timeEnd("Loading Time Projects list");
@@ -59,7 +59,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <>
-      <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
+      <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -157,7 +157,7 @@ export default function Home() {
       </Box>
 
       <Box
-        maxWidth={"1080px"}
+        maxWidth={DESKTOP_WIDTH}
         display={"flex"}
         flexDirection={"column"}
         gap={"24px"}
@@ -219,7 +219,7 @@ export default function Home() {
       </Box>
 
       <Box bgcolor={"#f2f2f2"} height={"100%"} p={"32px 0"}>
-        <Box maxWidth={"1080px"} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
+        <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
           <Typography variant="h3" color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
@@ -243,7 +243,7 @@ export default function Home() {
           </Grid>
         </Box>
 
-        <Box maxWidth={"1080px"} display={"flex"} gap={"24px"} m={"32px auto"}>
+        <Box maxWidth={DESKTOP_WIDTH} display={"flex"} gap={"24px"} m={"32px auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
             <Grid item xs={6} sm={2.4}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">

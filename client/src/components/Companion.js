@@ -6,6 +6,7 @@ import TrungTamTinhNguyenQuocGia from "../assets/companions/Trung_tam_tinh_nguye
 import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.jpeg";
 import NuoiEm from "../assets/companions/Nuoi_em.png";
 import Dentsu from "../assets/companions/Dentsu.png";
+import { DESKTOP_WIDTH } from "../constants";
 
 const COMPANIONS = [
   {
@@ -33,7 +34,7 @@ const COMPANIONS = [
 export default function Companion() {
   return (
     <Box
-      maxWidth={"1080px"}
+      maxWidth={DESKTOP_WIDTH}
       display={"flex"}
       flexDirection={"column"}
       gap={"24px"}

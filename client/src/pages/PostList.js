@@ -3,7 +3,7 @@ import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
@@ -39,6 +39,7 @@ export default function PostList() {
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
 
+  // for applying filters into url params
   useEffect(() => {
     const status = urlSearchParams.get("statusFilter");
     const classification = urlSearchParams.get("classificationFilter");
@@ -51,6 +52,7 @@ export default function PostList() {
     if (provinceFilter) setProvinceFilter(provinceFilter);
   }, []);
 
+  // for scrolling to top when there is no filter
   useEffect(() => {
     const status = urlSearchParams.get("statusFilter");
     const classification = urlSearchParams.get("classificationFilter");
@@ -70,6 +72,7 @@ export default function PostList() {
     return () => clearTimeout(timer);
   }, [loading]);
 
+  // for fetching data from server with/without filters
   useEffect(() => {
     setLoading(true);
     console.time("Loading Time Post List");
@@ -128,7 +131,7 @@ export default function PostList() {
 
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
-    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
+    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={DESKTOP_WIDTH}>
       <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
         {title}
       </Typography>
@@ -328,38 +331,36 @@ export default function PostList() {
           Không tìm thấy dự án nào
         </Typography>
       ) : (
-        <>
-          <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-            {isProject && (
-              <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                Số dự án: {posts.length}/{totalPosts}
-              </Typography>
-            )}
+        <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+          {isProject && (
+            <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+              Số dự án: {posts.length}/{totalPosts}
+            </Typography>
+          )}
 
-            <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-              <Grid container spacing={3} p={"16px"}>
-                <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} />
-              </Grid>
-            </Box>
-
-            <Box display="flex" justifyContent="center">
-              <Pagination
-                color="primary"
-                variant="outlined"
-                shape="rounded"
-                count={count}
-                page={page}
-                onChange={(e, page) => {
-                  setPage(page);
-                  window.scrollTo({
-                    top: scrollRef.current.offsetTop - 80,
-                    behavior: "smooth",
-                  });
-                }}
-              />
-            </Box>
+          <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+            <Grid container spacing={3} p={"16px"}>
+              <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} isProject={isProject} />
+            </Grid>
           </Box>
-        </>
+
+          <Box display="flex" justifyContent="center">
+            <Pagination
+              color="primary"
+              variant="outlined"
+              shape="rounded"
+              count={count}
+              page={page}
+              onChange={(e, page) => {
+                setPage(page);
+                window.scrollTo({
+                  top: scrollRef.current.offsetTop - 80,
+                  behavior: "smooth",
+                });
+              }}
+            />
+          </Box>
+        </Box>
       )}
     </Box>
   );

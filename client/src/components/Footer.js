@@ -3,7 +3,7 @@ import { useMediaQuery, Box, Grid, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import logo from "../assets/logo-header.png";
 import "./config/styles.css";
-import { HEADER_DROPDOWN_LIST } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST } from "../constants";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
@@ -12,7 +12,7 @@ export default function Footer() {
 
   return (
     <Box bgcolor={"#262626"}>
-      <Box display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={"1080px"} m={"auto"} p={"20px"}>
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH} m={"auto"} p={"20px"}>
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} gap={"24px"} p={"20px"}>
           <img
             src={logo}

@@ -15,6 +15,8 @@ const INDEX_SCHEMA = [
   "TEXT",
   "cleanedName",
   "TEXT",
+  "publishDate",
+  "NUMERIC",
   "thumbnail",
   "TEXT",
   "category",
@@ -84,6 +86,8 @@ async function upsertDocumentToIndex(data, redisEnv = redis) {
       data.name,
       "cleanedName",
       convertToCleanedName(data.name),
+      "publishDate",
+      data.publish_date.toDate(),
       "thumbnail",
       data.thumbnail,
       "category",
@@ -203,6 +207,7 @@ async function getValuesByCategoryInRedis(category, filters) {
 
       values.push({ ...value, redisKey: key });
     }
+    values.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
 
     const getStatsData = (posts) => {
       const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
