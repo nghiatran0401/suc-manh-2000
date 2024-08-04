@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Typography, Grid, CardContent, Card as MuiCard, Chip, Box } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { capitalizeEachWord, truncate } from "../helpers";
-import { classificationMapping } from "../constants";
+import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
@@ -25,7 +24,7 @@ const Card = styled(MuiCard)({
 export default function CardList(props) {
   const { category } = useParams();
 
-  return props.posts?.map((post, ix) => (
+  return props.posts.map((post, ix) => (
     <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
@@ -84,28 +83,12 @@ export default function CardList(props) {
                 </Typography>
               )}
 
-              {post.location?.province !== null && (
+              {post["location.province"] !== null && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
+                  {provincesAndCities.find((i) => i.provinceValue === post["location.province"])?.province ?? "Khác"}
                 </Typography>
               )}
             </Box>
-
-            {/* {props.showDescription && post.description && (
-              <>
-                <div
-                  style={{
-                    backgroundColor: "rgba(0, 0, 0, .1)",
-                    display: "block",
-                    height: "2px",
-                    margin: "0.5em 0",
-                    maxWidth: "30px",
-                    width: "100%",
-                  }}
-                />
-                <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
-              </>
-            )} */}
           </CardContent>
         </Card>
       </Link>

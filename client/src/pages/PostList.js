@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button } from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroller";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
@@ -20,21 +19,25 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [posts, setPosts] = useState(undefined);
+  const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
-  const [totalFilterPosts, setTotalFilterPosts] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const count = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const startIndex = (page - 1) * POSTS_PER_PAGE;
+  const endIndex = startIndex + POSTS_PER_PAGE;
+
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [totalFundFilter, setTotalFundFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [provinceFilter, setProvinceFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+
   const [statsData, setStatsData] = useState({});
+  const scrollRef = useRef(null);
 
   const isProject = category.includes("du-an");
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
-  const scrollRef = useRef(null);
 
   useEffect(() => {
     const status = urlSearchParams.get("statusFilter");
@@ -53,12 +56,12 @@ export default function PostList() {
     const classification = urlSearchParams.get("classificationFilter");
     const totalFundFilter = urlSearchParams.get("totalFundFilter");
     const provinceFilter = urlSearchParams.get("provinceFilter");
-    const isScrolling = status || classification || totalFundFilter || provinceFilter;
+    const isScrolling = !(status || classification || totalFundFilter || provinceFilter);
 
     const timer = setTimeout(() => {
       if (scrollRef.current && isScrolling) {
         window.scrollTo({
-          top: scrollRef.current.offsetTop - 80,
+          top: 0,
           behavior: "smooth",
         });
       }
@@ -68,62 +71,51 @@ export default function PostList() {
   }, [loading]);
 
   useEffect(() => {
+    setLoading(true);
+    console.time("Loading Time Post List");
+
+    if (classificationFilter === "all") {
+      urlSearchParams.delete("classificationFilter");
+    } else if (classificationFilter) {
+      urlSearchParams.set("classificationFilter", classificationFilter);
+    }
+
+    if (statusFilter === "all") {
+      urlSearchParams.delete("statusFilter");
+    } else if (statusFilter) {
+      urlSearchParams.set("statusFilter", statusFilter);
+    }
+
+    if (totalFundFilter === "all") {
+      urlSearchParams.delete("totalFundFilter");
+    } else if (totalFundFilter) {
+      urlSearchParams.set("totalFundFilter", totalFundFilter);
+    }
+
+    if (provinceFilter === "all") {
+      urlSearchParams.delete("provinceFilter");
+    } else if (provinceFilter) {
+      urlSearchParams.set("provinceFilter", provinceFilter);
+    }
+
+    setUrlSearchParams(urlSearchParams);
     if (scrollRef.current) {
       window.scrollTo({
         top: scrollRef.current.offsetTop - 80,
         behavior: "smooth",
       });
     }
-    setLoading(true);
-    console.time("Loading Time Post List");
 
-    const filters = {};
-    if (classificationFilter === "all") {
-      urlSearchParams.delete("classificationFilter");
-    } else if (classificationFilter) {
-      filters.classificationFilter = classificationFilter;
-    }
-
-    if (statusFilter === "all") {
-      urlSearchParams.delete("statusFilter");
-    } else if (statusFilter) {
-      filters.statusFilter = statusFilter;
-    }
-
-    if (totalFundFilter === "all") {
-      urlSearchParams.delete("totalFundFilter");
-    } else if (totalFundFilter) {
-      filters.totalFundFilter = totalFundFilter;
-    }
-
-    if (provinceFilter === "all") {
-      urlSearchParams.delete("provinceFilter");
-    } else if (provinceFilter) {
-      filters.provinceFilter = provinceFilter;
-    }
-
-    if (Object.keys(filters).length > 0) {
-      Object.entries(filters).forEach(([key, value]) => urlSearchParams.set(key, value));
-    }
-    setUrlSearchParams(urlSearchParams);
-
-    Promise.all([
-      axios.get(SERVER_URL + "/" + category, {
+    axios
+      .get(SERVER_URL + "/" + category, {
         params: {
-          _start: 0,
-          _end: POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter, provinceFilter },
+          filters: { classification: classificationFilter, totalFund: totalFundFilter, status: statusFilter, "location.province": provinceFilter },
         },
-      }),
-      axios.get(`${SERVER_URL}/${category}/stats`),
-    ])
-      .then(([postsResponse, statsResponse]) => {
+      })
+      .then((postsResponse) => {
+        setPosts(postsResponse.data.posts);
         setTotalPosts(Number(postsResponse.headers["x-total-count"]));
-        setTotalFilterPosts(Number(postsResponse.headers["x-total-filter-count"]));
-        setPosts(postsResponse.data);
-        setHasMore(postsResponse.data.length >= POSTS_PER_PAGE);
-
-        setStatsData(statsResponse.data);
+        setStatsData(postsResponse.data.stats);
       })
       .catch((error) => {
         console.error(error);
@@ -134,33 +126,12 @@ export default function PostList() {
       });
   }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
-  const fetchMoreData = () => {
-    const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
-    axios
-      .get(SERVER_URL + "/" + category, {
-        params: {
-          _start: nextPage * POSTS_PER_PAGE,
-          _end: (nextPage + 1) * POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter, provinceFilter },
-        },
-      })
-      .then((newPosts) => {
-        setPosts([...posts, ...newPosts.data]);
-        if (newPosts.data.length === 0 || newPosts.data.length < POSTS_PER_PAGE) {
-          setHasMore(false);
-        }
-      })
-      .catch((e) => console.error(e));
-  };
-
   if (!posts || posts.length < 0) return <LoadingScreen />;
   return (
     <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
-      {title && (
-        <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
-          {title}
-        </Typography>
-      )}
+      <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
+        {title}
+      </Typography>
 
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
@@ -272,8 +243,8 @@ export default function PostList() {
         </Grid>
       )}
 
-      {isProject && totalPosts > POSTS_PER_PAGE && (
-        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+      {isProject && (
+        <Box ref={scrollRef} display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <StyledSelectComponent
             label="Loại dự án"
             inputWidth={200}
@@ -358,18 +329,35 @@ export default function PostList() {
         </Typography>
       ) : (
         <>
-          <Box ref={scrollRef} maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-            {isProject && totalPosts > POSTS_PER_PAGE && (
+          <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+            {isProject && (
               <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                Số dự án: {totalFilterPosts}/{totalPosts}
+                Số dự án: {posts.length}/{totalPosts}
               </Typography>
             )}
 
-            <InfiniteScroll hasMore={hasMore} loader={<LinearProgress key={"linear-loader"} sx={{ mt: "100px" }} />} loadMore={fetchMoreData} style={{ overflow: "hidden" }}>
+            <Box maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
               <Grid container spacing={3} p={"16px"}>
-                <CardList posts={posts} showDescription={false} />
+                <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} />
               </Grid>
-            </InfiniteScroll>
+            </Box>
+
+            <Box display="flex" justifyContent="center">
+              <Pagination
+                color="primary"
+                variant="outlined"
+                shape="rounded"
+                count={count}
+                page={page}
+                onChange={(e, page) => {
+                  setPage(page);
+                  window.scrollTo({
+                    top: scrollRef.current.offsetTop - 80,
+                    behavior: "smooth",
+                  });
+                }}
+              />
+            </Box>
           </Box>
         </>
       )}

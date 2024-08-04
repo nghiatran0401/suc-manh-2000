@@ -13,7 +13,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
+  const isProject = collectionName.includes("du-an");
   const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
   const { formProps, saveButtonProps, queryResult } = useForm({

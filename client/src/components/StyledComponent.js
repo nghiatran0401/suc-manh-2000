@@ -96,11 +96,11 @@ export const StyledSelectComponent = (props) => {
         }}
         onChange={onChange}
       >
-        {options.map((option) => {
+        {options.map((option, idx) => {
           if (option.value === value)
             return (
               <StyledSelectedItem
-                key={option.value}
+                key={idx}
                 value={option.value}
                 label={
                   <Stack>
@@ -128,7 +128,7 @@ export const StyledSelectComponent = (props) => {
             );
           return (
             <StyledSelectItem
-              key={option.value}
+              key={idx}
               sx={{
                 paddingRight: "24px",
               }}

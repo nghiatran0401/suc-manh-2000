@@ -4,7 +4,7 @@ import logoFinish from "./assets/finish.png";
 
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-export const POSTS_PER_PAGE = 8;
+export const POSTS_PER_PAGE = 96;
 
 export const HEADER_DROPDOWN_LIST = [
   {
@@ -203,8 +203,6 @@ export const statusLogoMapping = {
   "da-hoan-thanh": logoFinish,
 };
 
-export const publicLogoUrl =
-  "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
+export const publicLogoUrl = "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
 
-export const COMMON_SEO_DESCRIPTION =
-  "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
+export const COMMON_SEO_DESCRIPTION = "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";

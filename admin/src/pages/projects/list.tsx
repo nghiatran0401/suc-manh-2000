@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
-import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters, HttpError } from "@refinedev/core";
-import { useTable, List, EditButton, ShowButton, DeleteButton, SaveButton } from "@refinedev/antd";
+import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
+import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form } from "antd";
 import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../constants";
 import { SearchOutlined } from "@ant-design/icons";
-// import { debounce } from "lodash";
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();

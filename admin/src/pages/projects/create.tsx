@@ -13,7 +13,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
+  const isProject = collectionName.includes("du-an");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 

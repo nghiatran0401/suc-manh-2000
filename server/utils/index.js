@@ -1,4 +1,3 @@
-const { result } = require("lodash");
 const { firestore } = require("../firebase");
 
 function convertToDate(prop) {
