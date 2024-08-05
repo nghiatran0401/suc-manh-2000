@@ -209,102 +209,92 @@ async function getValueInRedis(key) {
 
 async function getValuesByCategoryInRedis(category, filters, start, end) {
   try {
-    const pattern = `post:${category}:*`;
-    const keys = await redis.keys(pattern);
+    const sortedSetKey = `sorted_posts:${category}`;
 
-    if (keys.length === 0) return [];
-
-    let values = [];
-    for (const key of keys) {
-      const type = await redis.type(key);
-      let value;
-
-      if (type === "string") {
-        value = await redis.get(key);
-        value = value ? JSON.parse(value) : null;
-      } else if (type === "hash") {
-        value = await redis.hgetall(key);
-      } else {
-        continue;
-      }
-
-      values.push({ ...value, redisKey: key });
-    }
-    values.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
-
+    // Scenario 1: Return a sorted array from start point to end point
     if (start !== undefined && end !== undefined) {
-      values = values.slice(start, end);
+      const items = await redis.zrevrange(sortedSetKey, start, end - 1);
+      const parsedItems = items.map((item) => JSON.parse(item));
+      return { cachedResultData: parsedItems, totalValuesLength: parsedItems.length };
     }
 
-    const getStatsData = (posts) => {
-      const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
-      const statsData = {};
+    // Retrieve all items for scenarios 2 and 3
+    const items = await redis.zrevrange(sortedSetKey, 0, -1);
+    const values = items.map((item) => JSON.parse(item));
 
-      for (const post of posts) {
-        if (statsData[post.classification]) {
-          statsData[post.classification].count += 1;
-          statsData[post.classification][post.status] += 1;
-        } else {
-          statsData[post.classification] = {
-            count: 1,
-            [STATUSES[0]]: 0,
-            [STATUSES[1]]: 0,
-            [STATUSES[2]]: 0,
-          };
-          statsData[post.classification][post.status] += 1;
-        }
-      }
+    // // Scenario 2: Return a sorted array with the stats calculation
+    // if (requireStats) {
+    //   const statsData = getStatsData(values);
+    //   return { cachedResultData: values, totalValuesLength: values.length, statsData: statsData };
+    // }
 
-      return statsData;
-    };
+    // Scenario 3: Return a sorted array with the stats and filters operations
+    let filteredValues = [...values];
+    if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {
+      filteredValues = applyFilters(values, filters);
+    }
+
     const statsData = getStatsData(values);
-
-    if (!filters || Object.keys(filters).length <= 0 || Object.values(filters).every((f) => f === "all")) {
-      return { cachedResultData: values, totalValuesLength: values.length, statsData: statsData };
-    }
-
-    const getNestedValue = (obj, path) => {
-      if (path.includes("location")) {
-        return [path].reduce((acc, part) => acc && acc[part], obj);
-      } else {
-        return path.split(".").reduce((acc, part) => acc && acc[part], obj);
-      }
-    };
-
-    const filteredValues = values.filter((item) => {
-      return Object.keys(filters).every((key) => {
-        const filterValue = filters[key];
-        if (filterValue === "all") return true;
-
-        if (key === "totalFund") {
-          const totalFund = getNestedValue(item, key);
-          switch (filterValue) {
-            case "less-than-100":
-              return totalFund < 100000000;
-            case "100-to-200":
-              return totalFund >= 100000000 && totalFund < 200000000;
-            case "200-to-300":
-              return totalFund >= 200000000 && totalFund < 300000000;
-            case "300-to-400":
-              return totalFund >= 300000000 && totalFund < 400000000;
-            case "more-than-400":
-              return totalFund >= 400000000;
-            default:
-              return true;
-          }
-        }
-
-        const itemValue = getNestedValue(item, key);
-        return itemValue === filterValue;
-      });
-    });
-
     return { cachedResultData: filteredValues, totalValuesLength: values.length, statsData: statsData };
   } catch (error) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
   }
 }
+
+const getStatsData = (posts) => {
+  const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+  const statsData = {};
+
+  for (const post of posts) {
+    if (statsData[post.classification]) {
+      statsData[post.classification].count += 1;
+      statsData[post.classification][post.status] += 1;
+    } else {
+      statsData[post.classification] = {
+        count: 1,
+        [STATUSES[0]]: 0,
+        [STATUSES[1]]: 0,
+        [STATUSES[2]]: 0,
+      };
+      statsData[post.classification][post.status] += 1;
+    }
+  }
+
+  return statsData;
+};
+
+const applyFilters = (values, filters) => {
+  const getNestedValue = (obj, path) => path.split(".").reduce((acc, part) => acc && acc[part], obj);
+
+  return values.filter((item) => {
+    return Object.keys(filters).every((key) => {
+      const filterValue = filters[key];
+      if (filterValue === "all") return true;
+
+      if (key === "totalFund") {
+        const totalFund = getNestedValue(item, key);
+        switch (filterValue) {
+          case "less-than-100":
+            return totalFund < 100000000;
+          case "100-to-200":
+            return totalFund >= 100000000 && totalFund < 200000000;
+          case "200-to-300":
+            return totalFund >= 200000000 && totalFund < 300000000;
+          case "300-to-400":
+            return totalFund >= 300000000 && totalFund < 400000000;
+          case "more-than-400":
+            return totalFund >= 400000000;
+          default:
+            return true;
+        }
+      }
+
+      const itemValue = getNestedValue(item, key);
+      return itemValue === filterValue;
+    });
+  });
+};
 
 async function setExValueInRedis(key, value, exp = false) {
   try {

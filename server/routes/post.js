@@ -13,11 +13,7 @@ postRouter.get("/", async (req, res) => {
   try {
     const { cachedResultData, totalValuesLength, statsData } = await getValuesByCategoryInRedis(category, filters, start, end);
 
-    if (cachedResultData) {
-      res.status(200).send({ posts: cachedResultData, stats: statsData, totalPosts: totalValuesLength });
-    } else {
-      res.status(404).send({ error: `Error getting all documents in Redis` });
-    }
+    res.status(200).send({ posts: cachedResultData, totalPosts: totalValuesLength, stats: statsData });
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }

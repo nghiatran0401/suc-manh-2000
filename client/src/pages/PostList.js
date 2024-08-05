@@ -125,7 +125,7 @@ export default function PostList() {
       });
   }, [urlSearchParams, category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
-  if (posts.length <= 0 || Object.keys(statsData).length <= 0) return <LoadingScreen />;
+  if (!posts || !statsData) return <LoadingScreen />;
   return (
     <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
       <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
@@ -328,15 +328,17 @@ export default function PostList() {
 
       {loading ? (
         <LinearProgress />
-      ) : posts.length === 0 ? (
-        <Typography variant="h6" textAlign={"center"}>
-          Không tìm thấy dự án nào
-        </Typography>
       ) : (
         <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
           {isProject && (
             <Typography variant="body1" textAlign={"right"} mr={"16px"}>
               Số dự án: {posts.length}/{totalPosts}
+            </Typography>
+          )}
+
+          {posts.length === 0 && (
+            <Typography variant="h6" textAlign={"center"}>
+              Không tìm thấy dự án nào
             </Typography>
           )}
 
