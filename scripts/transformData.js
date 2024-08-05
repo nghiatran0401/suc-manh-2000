@@ -184,10 +184,6 @@ async function transformData() {
         const { combined_urls, contentWithoutEmbeddedUrl } = extractEmbedUrl(post_content);
         const { images, contentWithoutImages } = await extractImagesAndContent(combined_urls && combined_urls.length > 0 ? contentWithoutEmbeddedUrl : post_content);
 
-        // if (post_name === "hoi-dua-vov2-len-lam-chuong-trinh-phat-mung-2-tet") {
-        //   console.log("here2", combined_urls);
-        // }
-
         return {
           id: ID,
           author: post_author ? "Hoàng Hoa Trung" : "Admin Group",

@@ -1,21 +1,29 @@
 import React, { useEffect } from "react";
-import { IResourceComponentsProps, BaseRecord, useTranslate, CrudFilters, HttpError } from "@refinedev/core";
-import { useTable, List, EditButton, ShowButton, DeleteButton, SaveButton } from "@refinedev/antd";
+import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
+import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form } from "antd";
-import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { useLocation } from "react-router-dom";
+import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import { SearchOutlined } from "@ant-design/icons";
-// import { debounce } from "lodash";
+import { provincesAndCities } from "../../utils/vietnam-provinces";
+import { capitalizeEachWord } from "../../utils/helpers";
+
+interface ISearch {
+  name: string;
+}
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
+  const { pathname } = useLocation();
+  const collectionName = pathname.split("/")[1];
+  const isProject = collectionName.includes("du-an");
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }, []);
-
-  interface ISearch {
-    name: string;
-  }
 
   const { tableProps, searchFormProps } = useTable<Sucmanh2000.Post, HttpError, ISearch>({
     syncWithLocation: true,
@@ -25,7 +33,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       current: 1,
     },
     errorNotification: (data, values, resource) => {
-      console.log({ data, values, resource });
       return {
         description: `Đã xảy ra lỗi`,
         message: data?.message ?? "Có lỗi xảy ra khi tải dữ liệu",
@@ -57,15 +64,24 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       <Table {...tableProps} rowKey="id">
         <Table.Column title={translate("table.category")} dataIndex="category" render={(_, record: BaseRecord) => <Space>{categoryMapping && categoryMapping[record.category as keyof typeof categoryMapping]}</Space>} />
 
-        <Table.Column title={translate("table.name")} dataIndex="name" render={(_, record: BaseRecord) => <Space>{record.name}</Space>} />
+        <Table.Column title={translate("table.name")} dataIndex="name" render={(_, record: BaseRecord) => <Space>{capitalizeEachWord(record.name)}</Space>} />
 
-        <Table.Column
-          title={translate("post.fields.classification")}
-          dataIndex="classification"
-          render={(_, record: BaseRecord) => <Space>{classificationMapping[record.classification as keyof typeof classificationMapping] ?? "N/A"}</Space>}
-        />
+        {isProject && (
+          <Table.Column
+            title={translate("post.fields.classification")}
+            dataIndex="classification"
+            render={(_, record: BaseRecord) => <Space>{classificationMapping[record.classification as keyof typeof classificationMapping] ?? "N/A"}</Space>}
+          />
+        )}
+        {isProject && <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />}
 
-        <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />
+        {isProject && (
+          <Table.Column
+            title={translate("post.fields.province")}
+            dataIndex="province"
+            render={(_, record: BaseRecord) => <Space>{provincesAndCities.find((i) => i.provinceValue === record.province)?.province ?? <span style={{ color: "red" }}>N/A</span>}</Space>}
+          />
+        )}
 
         <Table.Column
           title={translate("post.fields.url")}
@@ -78,19 +94,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             </Space>
           )}
         />
-        <Table.Column
-          title={translate("post.fields.publish_date")}
-          dataIndex="publish_date"
-          render={(_, record: BaseRecord) => (
-            <Space>
-              {new Date(record.publish_date).toLocaleDateString("vi-VN", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </Space>
-          )}
-        />
+        <Table.Column title={translate("post.fields.publish_date")} dataIndex="publish_date" render={(_, record: BaseRecord) => <Space>{new Date(record.publishDate).toLocaleDateString("vi-VN")}</Space>} />
 
         <Table.Column
           title={translate("table.actions")}

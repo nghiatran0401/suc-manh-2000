@@ -24,11 +24,6 @@ async function indexFirestoreDocsToRedis(env) {
               ...doc.data(),
               collection_id: collection.id,
               doc_id: doc.id,
-              year: doc.data().publish_date?.toDate()?.getFullYear(),
-              category: doc.data().category ? splitString(doc.data().category, "-").join("") : "other",
-              classification: doc.data().classification ? splitString(doc.data().classification, "-").join("") : "other",
-              status: doc.data().status ? splitString(doc.data().status, "-").join("") : "other",
-              totalFund: doc.data().totalFund ?? 0,
             },
             redisEnv
           )

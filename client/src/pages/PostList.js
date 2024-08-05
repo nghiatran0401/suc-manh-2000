@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button } from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroller";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
@@ -12,6 +11,7 @@ import { StyledSelectComponent } from "../components/StyledComponent";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { provincesAndCities } from "../vietnam-provinces";
 
 export default function PostList() {
   const { category } = useParams();
@@ -19,40 +19,51 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [posts, setPosts] = useState(undefined);
+  const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
-  const [totalFilterPosts, setTotalFilterPosts] = useState(0);
+  const [statsData, setStatsData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const count = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const startIndex = (page - 1) * POSTS_PER_PAGE;
+  const endIndex = startIndex + POSTS_PER_PAGE;
+
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [totalFundFilter, setTotalFundFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [statsData, setStatsData] = useState({});
+  const [provinceFilter, setProvinceFilter] = useState("all");
+
+  const scrollRef = useRef(null);
 
   const isProject = category.includes("du-an");
   const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
-  const scrollRef = useRef(null);
 
+  // for applying filters into url params
   useEffect(() => {
     const status = urlSearchParams.get("statusFilter");
     const classification = urlSearchParams.get("classificationFilter");
     const totalFundFilter = urlSearchParams.get("totalFundFilter");
+    const provinceFilter = urlSearchParams.get("provinceFilter");
 
     if (status) setStatusFilter(status);
     if (classification) setClassificationFilter(classification);
     if (totalFundFilter) setTotalFundFilter(totalFundFilter);
+    if (provinceFilter) setProvinceFilter(provinceFilter);
   }, []);
 
+  // for scrolling to top when there is no filter
   useEffect(() => {
     const status = urlSearchParams.get("statusFilter");
     const classification = urlSearchParams.get("classificationFilter");
     const totalFundFilter = urlSearchParams.get("totalFundFilter");
+    const provinceFilter = urlSearchParams.get("provinceFilter");
+    const isScrolling = !(status || classification || totalFundFilter || provinceFilter);
 
     const timer = setTimeout(() => {
-      if (scrollRef.current && (status || classification || totalFundFilter)) {
+      if (scrollRef.current && isScrolling) {
         window.scrollTo({
-          top: scrollRef.current.offsetTop - 80,
+          top: 0,
           behavior: "smooth",
         });
       }
@@ -61,95 +72,67 @@ export default function PostList() {
     return () => clearTimeout(timer);
   }, [loading]);
 
+  // for fetching data from server with/without filters
   useEffect(() => {
+    setLoading(true);
+
+    if (classificationFilter === "all") {
+      urlSearchParams.delete("classificationFilter");
+    } else if (classificationFilter) {
+      urlSearchParams.set("classificationFilter", classificationFilter);
+    }
+
+    if (statusFilter === "all") {
+      urlSearchParams.delete("statusFilter");
+    } else if (statusFilter) {
+      urlSearchParams.set("statusFilter", statusFilter);
+    }
+
+    if (totalFundFilter === "all") {
+      urlSearchParams.delete("totalFundFilter");
+    } else if (totalFundFilter) {
+      urlSearchParams.set("totalFundFilter", totalFundFilter);
+    }
+
+    if (provinceFilter === "all") {
+      urlSearchParams.delete("provinceFilter");
+    } else if (provinceFilter) {
+      urlSearchParams.set("provinceFilter", provinceFilter);
+    }
+
+    setUrlSearchParams(urlSearchParams);
     if (scrollRef.current) {
       window.scrollTo({
         top: scrollRef.current.offsetTop - 80,
         behavior: "smooth",
       });
     }
-    setLoading(true);
-    console.time("Loading Time Post List");
 
-    const filters = {};
-    if (classificationFilter === "all") {
-      urlSearchParams.delete("classificationFilter");
-    } else if (classificationFilter) {
-      filters.classificationFilter = classificationFilter;
-    }
-
-    if (statusFilter === "all") {
-      urlSearchParams.delete("statusFilter");
-    } else if (statusFilter) {
-      filters.statusFilter = statusFilter;
-    }
-
-    if (totalFundFilter === "all") {
-      urlSearchParams.delete("totalFundFilter");
-    } else if (totalFundFilter) {
-      filters.totalFundFilter = totalFundFilter;
-    }
-
-    if (Object.keys(filters).length > 0) {
-      Object.entries(filters).forEach(([key, value]) => urlSearchParams.set(key, value));
-    }
-    setUrlSearchParams(urlSearchParams);
-
-    Promise.all([
-      axios.get(SERVER_URL + "/" + category, {
-        params: {
-          _start: 0,
-          _end: POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter },
-        },
-      }),
-      axios.get(`${SERVER_URL}/${category}/stats`),
-    ])
-      .then(([postsResponse, statsResponse]) => {
-        setTotalPosts(Number(postsResponse.headers["x-total-count"]));
-        setTotalFilterPosts(Number(postsResponse.headers["x-total-filter-count"]));
-        setPosts(postsResponse.data);
-        setHasMore(postsResponse.data.length >= POSTS_PER_PAGE);
-
-        setStatsData(statsResponse.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        setLoading(false);
-        console.timeEnd("Loading Time Post List");
-      });
-  }, [category, classificationFilter, totalFundFilter, statusFilter]);
-
-  const fetchMoreData = () => {
-    const nextPage = Math.floor(posts.length / POSTS_PER_PAGE);
     axios
       .get(SERVER_URL + "/" + category, {
         params: {
-          _start: nextPage * POSTS_PER_PAGE,
-          _end: (nextPage + 1) * POSTS_PER_PAGE,
-          filter: { classificationFilter, totalFundFilter, statusFilter },
+          filters: { classification: classificationFilter, totalFund: totalFundFilter, status: statusFilter, province: provinceFilter },
         },
       })
-      .then((newPosts) => {
-        setPosts([...posts, ...newPosts.data]);
-        if (newPosts.data.length === 0 || newPosts.data.length < POSTS_PER_PAGE) {
-          setHasMore(false);
-        }
+      .then((postsResponse) => {
+        setPosts(postsResponse.data.posts);
+        setTotalPosts(postsResponse.data.totalPosts);
+        setStatsData(postsResponse.data.stats);
+        setLoading(false);
       })
-      .catch((e) => console.error(e));
-  };
+      .catch((error) => {
+        console.error(error.message);
+      });
+  }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
-  if (!posts || posts.length < 0) return <LoadingScreen />;
+  if (posts.length <= 0 || Object.keys(statsData).length <= 0) return <LoadingScreen />;
   return (
-    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={"1080px"}>
-      {title && (
-        <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
-          {title}
-        </Typography>
-      )}
+    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
+      <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
+        {title}
+      </Typography>
 
+      {/* Statistics */}
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
           <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
@@ -161,8 +144,11 @@ export default function PostList() {
               <Typography variant="h3" fontWeight="bold" color={"red"}>
                 <CountUp start={0} end={totalPosts} duration={10} />
               </Typography>
-              <Typography fontSize={"20px"} fontWeight={600} variant="h4">
-                Tổng dự án trong năm
+              <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
+                TỔNG DỰ ÁN TRONG NĂM
+              </Typography>
+              <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)}/{totalPosts} Dự án đã khởi công
               </Typography>
             </Box>
           </Box>
@@ -185,7 +171,7 @@ export default function PostList() {
               .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
               .map(([value, label], index) => (
                 <Grid
-                  key={`${value}-${index}`}
+                  key={index}
                   item
                   display={"flex"}
                   flexDirection={"column"}
@@ -197,14 +183,15 @@ export default function PostList() {
                   paddingRight={2}
                   borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}
                 >
-                  <div>
-                    <Typography variant="h5" fontWeight={600} textAlign={"center"}>
+                  <Box display={"flex"} flexDirection={"column"} alignItems={"center"} gap={"4px"}>
+                    <Typography variant="h5" fontWeight={600}>
                       {statsData[value]?.count ?? 0}
                     </Typography>
-                    <Typography variant="body1" textAlign={"center"}>
-                      {label}
+                    <Typography variant="body1">{label}</Typography>
+                    <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
+                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)}/{statsData[value]?.count ?? 0} Dự án đã khởi công
                     </Typography>
-                  </div>
+                  </Box>
 
                   <Box
                     style={{
@@ -213,9 +200,9 @@ export default function PostList() {
                       justifyContent: "center",
                     }}
                   >
-                    {Object.keys(statusMapping).map((status) => (
+                    {Object.keys(statusMapping).map((status, idx) => (
                       <Chip
-                        key={status}
+                        key={idx}
                         variant="outline"
                         avatar={<img src={statusLogoMapping[status]} alt="logo" />}
                         label={statsData[value]?.[status] ?? 0}
@@ -234,6 +221,7 @@ export default function PostList() {
                           setClassificationFilter(value);
                           setStatusFilter(status);
                           setTotalFundFilter("all");
+                          setProvinceFilter("all");
                         }}
                       />
                     ))}
@@ -241,19 +229,13 @@ export default function PostList() {
                   <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
                     <Button
                       variant="outlined"
-                      sx={{
-                        width: "100%",
-                        textTransform: "none",
-                        color: "#000",
-                        borderColor: "#D9D9D9",
-                        borderRadius: "32px",
-                        m: isMobile ? "0px" : "0px 16px",
-                      }}
+                      sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => {
                         setClassificationFilter(value);
                         setStatusFilter("all");
                         setTotalFundFilter("all");
+                        setProvinceFilter("all");
                       }}
                     >
                       Xem tất cả
@@ -265,8 +247,9 @@ export default function PostList() {
         </Grid>
       )}
 
-      {isProject && totalPosts > POSTS_PER_PAGE && (
-        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+      {/* Filters */}
+      {isProject && (
+        <Box ref={scrollRef} display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <StyledSelectComponent
             label="Loại dự án"
             inputWidth={200}
@@ -322,6 +305,24 @@ export default function PostList() {
               })),
             ]}
           />
+
+          <StyledSelectComponent
+            label="Tỉnh"
+            inputWidth={200}
+            isMobile={isMobile}
+            value={provinceFilter}
+            onChange={(e) => setProvinceFilter(e.target.value)}
+            options={[
+              {
+                label: "Tất cả",
+                value: "all",
+              },
+              ...provincesAndCities.map((i) => ({
+                label: i.province,
+                value: i.provinceValue,
+              })),
+            ]}
+          />
         </Box>
       )}
 
@@ -332,21 +333,36 @@ export default function PostList() {
           Không tìm thấy dự án nào
         </Typography>
       ) : (
-        <>
-          <Box ref={scrollRef} maxWidth={"1080px"} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-            {isProject && totalPosts > POSTS_PER_PAGE && (
-              <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                Số dự án: {totalFilterPosts}/{totalPosts}
-              </Typography>
-            )}
+        <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+          {isProject && (
+            <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+              Số dự án: {posts.length}/{totalPosts}
+            </Typography>
+          )}
 
-            <InfiniteScroll hasMore={hasMore} loader={<LinearProgress key={"linear-loader"} sx={{ mt: "100px" }} />} loadMore={fetchMoreData} style={{ overflow: "hidden" }}>
-              <Grid container spacing={3} p={"16px"}>
-                <CardList posts={posts} showDescription={false} />
-              </Grid>
-            </InfiniteScroll>
+          <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+            <Grid container spacing={3} p={"16px"}>
+              <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} />
+            </Grid>
           </Box>
-        </>
+
+          <Box display="flex" justifyContent="center">
+            <Pagination
+              color="primary"
+              variant="outlined"
+              shape="rounded"
+              count={count}
+              page={page}
+              onChange={(e, page) => {
+                setPage(page);
+                window.scrollTo({
+                  top: scrollRef.current.offsetTop - 80,
+                  behavior: "smooth",
+                });
+              }}
+            />
+          </Box>
+        </Box>
       )}
     </Box>
   );

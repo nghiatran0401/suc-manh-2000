@@ -5,29 +5,16 @@ const { getValueInRedis, setExValueInRedis } = require("../services/redis");
 const homeRouter = express.Router();
 
 homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
-  const cachedKey = `classificationAndCategoryCounts`;
-
   try {
-    const cachedResultData = await getValueInRedis(cachedKey);
-
-    if (cachedResultData) {
-      res.status(200).send(cachedResultData);
-    } else {
-      const classificationDoc = await firestore.collection("counts").doc("classification").get();
-      const categoryDoc = await firestore.collection("counts").doc("category").get();
-
-      if (!classificationDoc.exists || !categoryDoc.exists) {
-        res.status(404).send({ error: "No data found for this page" });
-        return;
-      }
-      const resultData = { classification: classificationDoc.data(), category: categoryDoc.data() };
-
-      await setExValueInRedis(cachedKey, resultData);
-      res.status(200).send(resultData);
+    const classificationDoc = await firestore.collection("counts").doc("classification").get();
+    const categoryDoc = await firestore.collection("counts").doc("category").get();
+    if (!classificationDoc.exists || !categoryDoc.exists) {
+      res.status(404).send({ error: "No data found for this page" });
     }
+
+    res.status(200).send({ classification: classificationDoc.data(), category: categoryDoc.data() });
   } catch (error) {
-    console.error("Failed to fetch counts:", error);
-    res.status(500).send({ error: "Failed to fetch data" });
+    res.status(500).send({ error: `Failed to fetch data: ${error.message}` });
   }
 });
 
@@ -51,12 +38,11 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
       );
       const resultData = counts.reduce((a, b) => a + b, 0);
 
-      await setExValueInRedis(cachedKey, resultData);
+      await setExValueInRedis(cachedKey, resultData, true);
       res.status(200).send(String(resultData));
     }
   } catch (error) {
-    console.error("Failed to fetch counts:", error);
-    res.status(500).send({ error: "Failed to fetch data" });
+    res.status(500).send({ error: `Failed to fetch data: ${error.message}` });
   }
 });
 module.exports = homeRouter;

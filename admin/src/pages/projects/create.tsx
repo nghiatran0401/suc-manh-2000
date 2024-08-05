@@ -3,22 +3,22 @@ import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Create, useForm, SaveButton } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select } from "antd";
 import { useLocation } from "react-router-dom";
-import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
-import { generateNewDocumentId } from "../../helpers";
+import { generateNewDocumentId } from "../../utils/helpers";
+import { provincesAndCities } from "../../utils/vietnam-provinces";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
-  const isProject = collectionName.includes("du-an") || collectionName.includes("phong-tin-hoc");
+  const isProject = collectionName.includes("du-an");
   const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
-    // redirect: "edit",
-    errorNotification(error, values, resource) {
+    errorNotification(error) {
       return {
         description: error?.message ?? "Lỗi ở server",
         message: "Error code: " + error?.statusCode,
@@ -26,17 +26,14 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
       };
     },
     // @ts-ignore
-    successNotification: (data: any, values: any) => {
-      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
+    successNotification: (data: any) => {
+      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.category + "/" + data?.slug}">${data?.name}</a>`;
       return {
         description: "Tạo mới thành công",
         message: <HtmlContent html={messageHtml} />,
         type: "success",
       };
     },
-    // onMutationSuccess: (data) => {
-    //   window.location.href = `/${collectionName}/edit/${data.data.slug}`;
-    // },
   });
 
   useEffect(() => {
@@ -218,6 +215,31 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             </div>
             <Form.Item name={"totalFund"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <InputNumber defaultValue={0} style={{ width: "100%" }} addonAfter={".000.000"} />
+            </Form.Item>
+          </div>
+        )}
+
+        {/* Location - Province */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              <span style={{ color: "red" }}>*</span> {translate("post.fields.province")}
+            </div>
+            <Form.Item name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
+              <Select showSearch placeholder="Select or enter a new province">
+                {provincesAndCities.map((p) => (
+                  <Select.Option key={p.provinceValue} value={p.provinceValue}>
+                    {p.province}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </div>
         )}

@@ -4,7 +4,9 @@ import logoFinish from "./assets/finish.png";
 
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-export const POSTS_PER_PAGE = 8;
+export const POSTS_PER_PAGE = 96;
+
+export const DESKTOP_WIDTH = "1100px";
 
 export const HEADER_DROPDOWN_LIST = [
   {
@@ -149,17 +151,17 @@ export const categoryMapping = {
   "cau-chuyen": "Câu chuyện",
   "tai-tro": "Tài trợ",
   "phong-tin-hoc": "Phòng Tin Học Cho Em",
-  "du-an-2012": "Dự án 2012",
-  "du-an-2014-2015": "Dự án 2014 - 2015",
-  "du-an-2016": "Dự án 2016",
-  "du-an-2017": "Dự án 2017",
-  "du-an-2018": "Dự án 2018",
-  "du-an-2019": "Dự án 2019",
-  "du-an-2020": "Dự án 2020",
-  "du-an-2021": "Dự án 2021",
-  "du-an-2022": "Dự án 2022",
-  "du-an-2023": "Dự án 2023",
   "du-an-2024": "Dự án 2024",
+  "du-an-2023": "Dự án 2023",
+  "du-an-2022": "Dự án 2022",
+  "du-an-2021": "Dự án 2021",
+  "du-an-2020": "Dự án 2020",
+  "du-an-2019": "Dự án 2019",
+  "du-an-2018": "Dự án 2018",
+  "du-an-2017": "Dự án 2017",
+  "du-an-2016": "Dự án 2016",
+  "du-an-2014-2015": "Dự án 2014 - 2015",
+  "du-an-2012": "Dự án 2012",
 };
 
 export const classificationMapping = {
@@ -203,8 +205,6 @@ export const statusLogoMapping = {
   "da-hoan-thanh": logoFinish,
 };
 
-export const publicLogoUrl =
-  "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
+export const publicLogoUrl = "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
 
-export const COMMON_SEO_DESCRIPTION =
-  "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
+export const COMMON_SEO_DESCRIPTION = "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";

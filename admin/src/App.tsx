@@ -4,19 +4,20 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { ErrorComponent, notificationProvider, ThemedLayoutV2, ThemedSiderV2, ThemedTitleV2 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 import routerBindings, { CatchAllNavigate, DocumentTitleHandler, NavigateToResource, UnsavedChangesNotifier } from "@refinedev/react-router-v6";
-import dataProvider, { axiosInstance } from "@refinedev/simple-rest";
+import { axiosInstance } from "@refinedev/simple-rest";
 import { useTranslation } from "react-i18next";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { authProvider } from "./authProvider";
+import { authProvider } from "./utils/authProvider";
 import Header from "./components/Header";
 import { Login } from "./pages/auth";
 import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/projects";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
-import { SERVER_URL, categoryMapping, icons } from "./constants";
+import { SERVER_URL, categoryMapping, icons } from "./utils/constants";
 import axios from "axios";
 import LoadingScreen from "./components/LoadingScreen";
+import customDataProvider from "./utils/customDataProvider";
 
 function App() {
   const [general, setGeneral] = useState<any>({});
@@ -78,7 +79,7 @@ function App() {
     <BrowserRouter>
       <RefineKbarProvider>
         <Refine
-          dataProvider={dataProvider(SERVER_URL, axiosInstance)}
+          dataProvider={customDataProvider(SERVER_URL, axiosInstance)}
           notificationProvider={notificationProvider}
           authProvider={authProvider}
           i18nProvider={i18nProvider}

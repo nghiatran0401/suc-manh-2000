@@ -1,20 +1,25 @@
 import React from "react";
 import { Box, Grid, Typography } from "@mui/material";
+import { DESKTOP_WIDTH } from "../constants";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "./config/styles.css";
 
-import SucManh2000 from "../assets/companions/Suc_manh_2000.png";
-import TrungTamTinhNguyenQuocGia from "../assets/companions/Trung_tam_tinh_nguyen_quoc_gia.jpeg";
-import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.jpeg";
+import SM2000 from "../assets/companions/SM_2000.png";
+import VVC from "../assets/companions/VVC.png";
+import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.png";
 import NuoiEm from "../assets/companions/Nuoi_em.png";
 import Dentsu from "../assets/companions/Dentsu.png";
 
 const COMPANIONS = [
   {
     name: "Sức mạnh 2000",
-    url: SucManh2000,
+    url: SM2000,
   },
   {
     name: "Trung tâm tình nguyện quốc gia",
-    url: TrungTamTinhNguyenQuocGia,
+    url: VVC,
   },
   {
     name: "Tình nguyện Niềm Tin",
@@ -31,30 +36,49 @@ const COMPANIONS = [
 ];
 
 export default function Companion() {
-  return (
-    <Box
-      maxWidth={"1080px"}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"24px"}
-      m={"64px auto"}
-      sx={{
-        "@media (max-width: 600px)": {
-          m: "16px auto",
-          p: "0 16px",
+  const settings = {
+    autoplay: true,
+    dots: true,
+    autoplaySpeed: 4000,
+    speed: 2000,
+    rows: 1,
+    responsive: [
+      {
+        breakpoint: 3000,
+        settings: {
+          slidesToShow: 5,
+          slidesToScroll: 5,
         },
-      }}
-    >
-      <Typography variant="h5" fontWeight="bold" color={"red"}>
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        },
+      },
+      {
+        breakpoint: 464,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+        },
+      },
+    ],
+  };
+
+  return (
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
         Đơn vị đồng hành
       </Typography>
 
-      <Grid container display={"flex"} gap={5} flexWrap="nowrap" alignItems={"center"} justifyContent={"space-between"}>
-        {COMPANIONS.map((d, i) => (
-          <Grid item xs={12} sm={6} md={4} key={d.name + i}>
+      <Slider {...settings}>
+        {COMPANIONS.map((d, index) => (
+          <Grid key={index} m={"24px auto"}>
             <img
               src={d.url}
-              alt=""
+              alt={d.name}
               style={{
                 width: "100%",
                 height: "100px",
@@ -63,7 +87,7 @@ export default function Companion() {
             />
           </Grid>
         ))}
-      </Grid>
+      </Slider>
     </Box>
   );
 }

@@ -1,5 +1,5 @@
 import { collection, doc } from "firebase/firestore";
-import { firestore } from "./firebase/client";
+import { firestore } from "../firebase/client";
 
 export const generateNewDocumentId = (props: { collection: string }) => {
   try {
@@ -10,4 +10,16 @@ export const generateNewDocumentId = (props: { collection: string }) => {
   } catch (e: any) {
     return e.toString();
   }
+};
+
+export const capitalizeEachWord = (str: any) => {
+  return str
+    .split(" ")
+    .map((word: any, index: any, arr: any) => {
+      if (word.includes("DA")) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
 };

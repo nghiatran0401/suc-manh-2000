@@ -20,10 +20,10 @@ export default function PostDetails() {
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    Promise.all([axios.get(SERVER_URL + `/${category}/${id}`), axios.get(SERVER_URL + `/thong-bao/getLatestPosts`)])
+    Promise.all([axios.get(SERVER_URL + `/${category}/${id}`), axios.get(SERVER_URL + "/thong-bao", { params: { start: 0, end: 5 } })])
       .then(([postRes, latestPostsRes]) => {
         setPost(postRes.data);
-        setLatestPosts(latestPostsRes.data);
+        setLatestPosts(latestPostsRes.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));

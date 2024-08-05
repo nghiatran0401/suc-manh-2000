@@ -6,12 +6,13 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
+import { provincesAndCities } from "../vietnam-provinces";
 
 export default function CardDetails(props) {
   const { category, id } = useParams();
@@ -29,9 +30,9 @@ export default function CardDetails(props) {
     setLoading(true);
 
     axios
-      .get(SERVER_URL + `/${category}`, { params: { _start: 0, _end: 24 } })
-      .then((projects) => {
-        setProjects(projects.data);
+      .get(SERVER_URL + `/${category}`)
+      .then((postsResponse) => {
+        setProjects(postsResponse.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -47,7 +48,7 @@ export default function CardDetails(props) {
 
   if (loading) return <LoadingScreen />;
   return (
-    <Box maxWidth={"1080px"} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
+    <Box maxWidth={DESKTOP_WIDTH} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb">
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
@@ -77,7 +78,7 @@ export default function CardDetails(props) {
             <EventIcon sx={{ width: 32, height: 32 }} />
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
           </Box>
-          {post.classification !== undefined && (
+          {post.classification && (
             <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {classificationMapping[post.classification]}
             </Typography>
@@ -95,9 +96,14 @@ export default function CardDetails(props) {
               {statusMapping[post.status]}
             </Typography>
           )}
-          {post.totalFund !== undefined && (
+          {Boolean(post.totalFund) && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+            </Typography>
+          )}
+          {post.location?.province && (
+            <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
             </Typography>
           )}
         </Box>
@@ -134,7 +140,12 @@ export default function CardDetails(props) {
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {post?.progress?.map((progress, index) => (
             <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
-              <CarouselSlide title={progress.name} items={progress.images} position="progress" />
+              <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+                <Typography variant="h5" fontWeight="bold" m={"8px"}>
+                  {progress.name}
+                </Typography>
+                <CarouselSlide items={progress.images} />
+              </Box>
             </Grid>
           ))}
         </Grid>
@@ -274,38 +285,43 @@ export default function CardDetails(props) {
         </Grid>
 
         <Grid item xs={12} sm={3}>
-          {post.description !== undefined && (
+          {post.description && (
             <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"}>
-              <img
-                style={{ width: "100%", height: "225px", objectFit: "fill", borderRadius: "16px 16px 0 0" }}
-                alt={post.name}
-                src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
-              />
-              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
-              {post.totalFund !== undefined && (
-                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px", width: "fit-content" }}>
-                  <strong>Tổng tiền:</strong> {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
-                </Typography>
-              )}
+              <img style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} alt={post.name} src={post.thumbnail} />
 
-              {/* {post.start_date !== undefined && (
+              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+
+              <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 8px"}>
+                {Boolean(post.totalFund) && (
+                  <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
+                    {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+                  </Typography>
+                )}
+
+                {post.province && (
+                  <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
+                    {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
+                  </Typography>
+                )}
+
+                {/* {post.start_date  && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
                 </Typography>
               )}
-              {post.end_date !== undefined && (
+              {post.end_date && (
                 <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
                   <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
                 </Typography>
               )} */}
+              </Box>
             </Box>
           )}
 
-          {/* TODO: Refactor this as a reused component */}
           {!isMobile && (
             <Box position="sticky" top={80} zIndex={1} bgcolor="#fff" boxShadow={1} p={"16px 8px"} borderRadius={4}>
               <Typography variant="h6" fontWeight="bold" align="center">
-                BÀI VIẾT MỚI NHẤT
+                THÔNG BÁO MỚI NHẤT
               </Typography>
               <Box textAlign={"center"}>------</Box>
               <Box display="flex" flexDirection="column" gap={1}>
@@ -318,15 +334,12 @@ export default function CardDetails(props) {
                       textDecoration: "none",
                       cursor: "pointer",
                       color: "#334862",
-                      ":hover": {
-                        // textDecoration: "underline",
-                        color: "#000",
-                      },
+                      ":hover": { color: "#000" },
                     }}
                   >
                     <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
-                      <Avatar variant="rounded" src={latestPost.image} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
-                      <Typography variant="body2" sx={{ flex: 1, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <Avatar variant="rounded" src={latestPost.thumbnail} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
+                      <Typography variant="body2" sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
                         {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
                       </Typography>
                     </Box>

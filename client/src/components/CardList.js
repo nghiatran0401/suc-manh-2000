@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Typography, Grid, CardContent, Card as MuiCard, Chip, Box } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { capitalizeEachWord, truncate } from "../helpers";
-import { classificationMapping } from "../constants";
+import charityMoneyIcon from "../assets/charity-money.png";
+import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
+import { provincesAndCities } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
-  minHeight: "500px",
+  minHeight: "300px",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
   cursor: "pointer",
   transition: "transform 0.3s ease-in-out",
   "&:hover": {
@@ -21,14 +24,14 @@ const Card = styled(MuiCard)({
 export default function CardList(props) {
   const { category } = useParams();
 
-  return props.posts?.map((post) => (
-    <Grid key={post.id} item xs={6} sm={6} md={3}>
+  return props.posts.map((post, ix) => (
+    <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card style={{ minHeight: "500px" }}>
+        <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} alt={post.name} />
+            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt={post.thumbnail} />
 
-            {post.status !== undefined && (
+            {post.status && (
               <div
                 style={{
                   margin: "5px",
@@ -60,31 +63,21 @@ export default function CardList(props) {
             )}
           </div>
 
-          <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {post.totalFund !== undefined && (
-              <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
+          <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between" }}>
+            {Boolean(post.totalFund) && (
+              <Chip
+                icon={<img src={charityMoneyIcon} />}
+                label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}`}
+                variant="outlined"
+                color="primary"
+                sx={{ width: "fit-content" }}
+              />
             )}
 
             <Typography variant="body1">{capitalizeEachWord(post.name)}</Typography>
 
-            {props.showDescription && post.description && (
-              <>
-                <div
-                  style={{
-                    backgroundColor: "rgba(0, 0, 0, .1)",
-                    display: "block",
-                    height: "2px",
-                    margin: "0.5em 0",
-                    maxWidth: "30px",
-                    width: "100%",
-                  }}
-                />
-                <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: truncate(post.description.replace(/h1/g, "div"), 100) }} />
-              </>
-            )}
-
             <Box display="flex" flexWrap="wrap" gap={"8px"}>
-              {post.classification !== undefined && (
+              {post.classification && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
                   {["truong-hoc", "truonghoc"].includes(post.classification) && "Trường học"}
                   {["nha-hanh-phuc", "nhahanhphuc"].includes(post.classification) && "Nhà hạnh phúc"}
@@ -93,6 +86,12 @@ export default function CardList(props) {
                   {["phong-tin-hoc", "phongtinhoc"].includes(post.classification) && "Phòng tin học"}
                   {["wc"].includes(post.classification) && "WC"}
                   {["loai-khac", "loaikhac"].includes(post.classification) && "Loại khác"}
+                </Typography>
+              )}
+
+              {post.province && (
+                <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                  {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
                 </Typography>
               )}
             </Box>

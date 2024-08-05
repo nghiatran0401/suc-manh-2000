@@ -58,7 +58,7 @@ export const StyledSelectComponent = (props) => {
   const { size, inputWidth, value, label, onChange, options, isMobile } = props;
 
   return (
-    <Stack alignItems={"center"} direction={"row"} spacing={1.5}>
+    <Stack display={"flex"} direction={"column"} spacing={0.5}>
       {label && (
         <Typography color={"rgba(0, 0, 0, 0.5)"} variant="subtitle2" width={isMobile ? "100px" : "max-content"}>
           {label}
@@ -96,11 +96,11 @@ export const StyledSelectComponent = (props) => {
         }}
         onChange={onChange}
       >
-        {options.map((option) => {
+        {options.map((option, idx) => {
           if (option.value === value)
             return (
               <StyledSelectedItem
-                key={option.value}
+                key={idx}
                 value={option.value}
                 label={
                   <Stack>
@@ -128,7 +128,7 @@ export const StyledSelectComponent = (props) => {
             );
           return (
             <StyledSelectItem
-              key={option.value}
+              key={idx}
               sx={{
                 paddingRight: "24px",
               }}

@@ -7,15 +7,12 @@ import "@coreui/coreui/dist/css/coreui.min.css";
 import { ExpandLess, ExpandMore, ArrowDropDown, Search } from "@mui/icons-material";
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
-import { HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping } from "../constants";
+import { HEADER_DROPDOWN_LIST } from "../constants";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
-import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
-
-// TODO: extract Search into a separated reusable component
 
 export default function HeaderBar() {
   const navigate = useNavigate();
@@ -26,7 +23,6 @@ export default function HeaderBar() {
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  // const [searchOptions, setSearchOptions] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
   const autocompleteRef = useRef();
 
@@ -62,6 +58,8 @@ export default function HeaderBar() {
     if (searchValue) {
       e.preventDefault();
       navigate(`/search?q=${searchValue.replace(/\s/g, "+")}`);
+      setOpenSearch(false);
+      setSearchValue("");
     }
   };
 
@@ -154,42 +152,6 @@ export default function HeaderBar() {
                 <SearchIcon />
               </IconButton>
             </Paper>
-
-            {/* <Autocomplete
-                ref={autocompleteRef}
-                options={searchOptions}
-                onInputChange={(event, value) => setSearchValue(value)}
-                getOptionLabel={(option) => option.name}
-                onClose={() => setOpenSearch(false)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Search"
-                    variant="outlined"
-                    fullWidth
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => navigate(`/search?q=${params.inputProps.value.replace(/\s/g, "+")}`)}>
-                            <SearchIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
-                renderOption={(props, option) => (
-                  <Link to={`/${option.category}/${option.slug}`} style={{ textDecoration: "none" }}>
-                    <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
-                      <img loading="lazy" src={option.thumbnail} alt={"Error thumbnail image"} style={{ width: 100, height: 100, objectFit: "contain" }} />
-                      <Typography variant="body1" color="#000">
-                        [{categoryMapping[option.category]}] {option.classification && `${classificationMapping[option.classification]} - `} {option.name}
-                      </Typography>
-                    </Box>
-                  </Link>
-                )}
-              /> */}
           </Dialog>
         </Toolbar>
       </Container>
@@ -221,11 +183,9 @@ export default function HeaderBar() {
                     {item.children.map((child, childIndex) => (
                       <ListItem
                         key={childIndex}
-                        button
                         onClick={(event) => {
                           event.stopPropagation();
                           window.location.href = child.path;
-                          // navigate(child.path);
                           setOpenIndex(null);
                           setIsDrawerOpen(false);
                         }}

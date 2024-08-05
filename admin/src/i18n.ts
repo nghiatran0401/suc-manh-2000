@@ -25,6 +25,8 @@ const resources = {
           description: "Mô tả",
           classification: "Phân loại",
           status: "Trạng thái",
+          province: "Tỉnh",
+          district: "Quận/Huyện",
           totalFund: "Tổng tiền",
           start_date: "Ngày khởi công",
           end_date: "Ngày khánh thành",
