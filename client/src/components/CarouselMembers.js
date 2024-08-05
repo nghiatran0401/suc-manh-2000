@@ -1,14 +1,13 @@
 import React from "react";
-import { Typography, Box, Card, CardContent, CardMedia, CardActions } from "@mui/material";
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
-import "./config/styles.css";
+import { Typography, Box, Card, CardContent, CardMedia, CardActions, Grid } from "@mui/material";
 import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/Twitter";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "./config/styles.css";
 
 import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.png";
 import DoThiKimHoa from "../assets/team/Do_Thi_Kim_Hoa.png";
@@ -33,7 +32,7 @@ export const MEMBERS = [
         <li>Forbes Under 30 Việt Nam 2020</li>
         <li>Gương mặt trẻ tiêu biểu Việt Nam</li>
         <li >Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
-        <li>Trưởng nhóm tình nguyện Niềm tin</li><li>14 năm gắn bó với các HĐXH vùng cao</li>
+        <li>Trưởng nhóm tình nguyện Niềm tin</li>
       </ul>`,
     image: HoangHoaTrung,
   },
@@ -154,141 +153,89 @@ export const MEMBERS = [
 ];
 
 export default function CarouselMembers() {
-  const responsive = {
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
-      items: 4,
-      slidesToSlide: 4, // optional, default to 1.
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
-      items: 2,
-      slidesToSlide: 2, // optional, default to 1.
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
-      items: 1,
-      slidesToSlide: 1, // optional, default to 1.
-    },
-  };
-
-  const CustomLeftArrow = ({ onClick }) => {
-    return (
-      <button
-        onClick={onClick}
-        style={{
-          position: "absolute",
-          left: "0px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 2,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          borderRadius: "50%",
-          width: "40px",
-          height: "40px",
-          color: "white",
-          border: "none",
-        }}
-      >
-        <KeyboardArrowLeftIcon />
-      </button>
-    );
-  };
-
-  const CustomRightArrow = ({ onClick }) => {
-    return (
-      <button
-        onClick={onClick}
-        style={{
-          position: "absolute",
-          right: "0px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 2,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          borderRadius: "50%",
-          width: "40px",
-          height: "40px",
-          color: "white",
-          border: "none",
-        }}
-      >
-        <KeyboardArrowRightIcon />
-      </button>
-    );
+  const settings = {
+    autoplay: true,
+    dots: true,
+    autoplaySpeed: 4000,
+    speed: 2000,
+    rows: 1,
+    responsive: [
+      {
+        breakpoint: 3000,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 4,
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+        },
+      },
+      {
+        breakpoint: 464,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   return (
-    <Box
-      maxWidth={DESKTOP_WIDTH}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"16px"}
-      m={"32px auto"}
-      sx={{
-        "@media (max-width: 600px)": {
-          m: "16px auto",
-          p: "0 16px",
-        },
-      }}
-    >
-      <Typography variant="h5" fontWeight="bold" color={"red"}>
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"32px auto"}>
+      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
         Đội ngũ vận hành
       </Typography>
 
-      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} customLeftArrow={<CustomLeftArrow />} customRightArrow={<CustomRightArrow />}>
+      <Slider {...settings}>
         {MEMBERS.map((item, index) => (
-          <Card
-            key={index}
-            className="card-contanier"
-            sx={{
-              m: "8px",
-              "@media (max-width: 600px)": {
-                m: 0,
-              },
-            }}
-          >
-            <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
-            <CardContent
-              sx={{
-                minHeight: "340px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "8px",
-                p: "12px",
-              }}
-            >
-              {item.name && item.role && (
-                <>
-                  <Typography align="center" variant="h6" fontWeight={"bold"}>
-                    {item.name}
+          <Grid key={index}>
+            <Card className="card-contanier" sx={{ margin: "10px", minHeight: "350px" }}>
+              <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+              <CardContent
+                sx={{
+                  minHeight: "340px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "8px",
+                  p: "12px",
+                }}
+              >
+                {item.name && item.role && (
+                  <>
+                    <Typography align="center" variant="h6" fontWeight={"bold"}>
+                      {item.name}
+                    </Typography>
+
+                    <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
+                      {item.role}
+                    </Typography>
+
+                    <CardActions sx={{ display: "flex", justifyContent: "center" }}>
+                      <FacebookOutlinedIcon />
+                      <EmailOutlinedIcon />
+                      <LinkedInIcon />
+                      <TwitterIcon />
+                    </CardActions>
+
+                    <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}></Typography>
+                  </>
+                )}
+
+                {item.caption && (
+                  <Typography align="center" variant="body2">
+                    {item.caption}
                   </Typography>
-
-                  <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
-                    {item.role}
-                  </Typography>
-
-                  <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-                    <FacebookOutlinedIcon />
-                    <EmailOutlinedIcon />
-                    <LinkedInIcon />
-                    <TwitterIcon />
-                  </CardActions>
-
-                  <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}></Typography>
-                </>
-              )}
-
-              {item.caption && (
-                <Typography align="center" variant="body2">
-                  {item.caption}
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </Carousel>
+      </Slider>
     </Box>
   );
 }

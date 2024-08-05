@@ -27,31 +27,23 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    console.time("Loading Time Common data");
-
-    Promise.all([axios.get(SERVER_URL + "/thong-bao" + "/getLatestPosts"), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+    Promise.all([axios.get(SERVER_URL + "/thong-bao", { params: { start: 0, end: 5 } }), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
       .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
-        setNews(news.data);
+        setNews(news.data.posts);
         setGeneral(classificationAndCategoryCounts.data);
         setTotalFinishedProjects(Number(totalProjectsCount.data));
-
         setLoading(false);
-        console.timeEnd("Loading Time Common data");
       })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
-    console.time("Loading Time Projects list");
-
     axios
       .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data.posts);
-
         setLoading(false);
-        console.timeEnd("Loading Time Projects list");
       })
       .catch((e) => console.error(e));
   }, [projectTab]);
@@ -83,8 +75,8 @@ export default function Home() {
                       height: "400px",
                       objectFit: "cover",
                     }}
-                    alt={news[0].title}
-                    src={news[0].image ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
+                    alt={news[0].name}
+                    src={news[0].thumbnail}
                   />
                   <Box
                     style={{
@@ -99,7 +91,7 @@ export default function Home() {
                         {news[0].name}
                       </Typography>
                       <Typography variant="body1" color="#fff">
-                        {new Date(news[0].publish_date).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                        {new Date(news[0].publishDate).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
                   </Box>
@@ -111,7 +103,7 @@ export default function Home() {
                 {news.map((latestPost, index) => {
                   if (index === 0) return;
                   return (
-                    <Link key={latestPost.slug + index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                    <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
                         display={"flex"}
                         gap={"8px"}
@@ -126,7 +118,7 @@ export default function Home() {
                       >
                         <Avatar
                           variant="rounded"
-                          src={latestPost.image}
+                          src={latestPost.thumbnail}
                           sx={{
                             width: "80px",
                             height: "80px",
@@ -139,7 +131,7 @@ export default function Home() {
                           </Typography>
 
                           <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.publish_date).toLocaleDateString("vi-VN", {
+                            {new Date(latestPost.publishDate).toLocaleDateString("vi-VN", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",

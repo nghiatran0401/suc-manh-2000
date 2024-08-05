@@ -3,8 +3,6 @@ import { useMediaQuery, Typography, Card as MuiCard, CardContent, Chip, Grid, Bo
 import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
-import "react-multi-carousel/lib/styles.css";
-import "./config/styles.css";
 import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
@@ -13,6 +11,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "./config/styles.css";
 import { provincesAndCities } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
@@ -66,7 +65,7 @@ export default function CarouselListCard(props) {
   return (
     <Slider {...settings}>
       {props.posts.map((post, index) => (
-        <Grid key={post.id + index}>
+        <Grid key={index}>
           <Link replace to={`/${props.category ? props.category : category}/${post.slug}`} style={{ textDecoration: "none" }}>
             <Card>
               <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>

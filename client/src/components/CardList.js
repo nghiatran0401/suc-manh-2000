@@ -2,7 +2,7 @@ import React from "react";
 import { Typography, Grid, CardContent, Card as MuiCard, Chip, Box } from "@mui/material";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import charityMoneyIcon from "../assets/charity-money.png";
 import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
@@ -65,7 +65,13 @@ export default function CardList(props) {
 
           <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between" }}>
             {Boolean(post.totalFund) && (
-              <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
+              <Chip
+                icon={<img src={charityMoneyIcon} />}
+                label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}`}
+                variant="outlined"
+                color="primary"
+                sx={{ width: "fit-content" }}
+              />
             )}
 
             <Typography variant="body1">{capitalizeEachWord(post.name)}</Typography>

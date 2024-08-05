@@ -1,24 +1,25 @@
 import React from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { DESKTOP_WIDTH } from "../constants";
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import "./config/styles.css";
 
-import SucManh2000 from "../assets/companions/Suc_manh_2000.png";
-import TrungTamTinhNguyenQuocGia from "../assets/companions/Trung_tam_tinh_nguyen_quoc_gia.jpeg";
-import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.jpeg";
+import SM2000 from "../assets/companions/SM_2000.png";
+import VVC from "../assets/companions/VVC.png";
+import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.png";
 import NuoiEm from "../assets/companions/Nuoi_em.png";
 import Dentsu from "../assets/companions/Dentsu.png";
 
 const COMPANIONS = [
   {
     name: "Sức mạnh 2000",
-    url: SucManh2000,
+    url: SM2000,
   },
   {
     name: "Trung tâm tình nguyện quốc gia",
-    url: TrungTamTinhNguyenQuocGia,
+    url: VVC,
   },
   {
     name: "Tình nguyện Niềm Tin",
@@ -35,54 +36,58 @@ const COMPANIONS = [
 ];
 
 export default function Companion() {
-  const responsive = {
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
-      items: 5,
-      slidesToSlide: 5,
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
-      items: 3,
-      slidesToSlide: 3,
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
-      items: 2,
-      slidesToSlide: 2,
-    },
+  const settings = {
+    autoplay: true,
+    dots: true,
+    autoplaySpeed: 4000,
+    speed: 2000,
+    rows: 1,
+    responsive: [
+      {
+        breakpoint: 3000,
+        settings: {
+          slidesToShow: 5,
+          slidesToScroll: 5,
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        },
+      },
+      {
+        breakpoint: 464,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+        },
+      },
+    ],
   };
 
   return (
-    <Box
-      maxWidth={DESKTOP_WIDTH}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"24px"}
-      m={"64px auto"}
-      sx={{
-        "@media (max-width: 600px)": {
-          m: "16px auto",
-          p: "0 16px",
-        },
-      }}
-    >
-      <Typography variant="h5" fontWeight="bold" color={"red"}>
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
         Đơn vị đồng hành
       </Typography>
-      <Carousel responsive={responsive} autoPlay infinite autoPlaySpeed={5000} arrows={false}>
-        {COMPANIONS.map((d, i) => (
-          <img
-            src={d.url}
-            alt={d.name}
-            style={{
-              width: "100%",
-              height: "100px",
-              objectFit: "contain",
-            }}
-          />
+
+      <Slider {...settings}>
+        {COMPANIONS.map((d, index) => (
+          <Grid key={index} m={"24px auto"}>
+            <img
+              src={d.url}
+              alt={d.name}
+              style={{
+                width: "100%",
+                height: "100px",
+                objectFit: "contain",
+              }}
+            />
+          </Grid>
         ))}
-      </Carousel>
+      </Slider>
     </Box>
   );
 }

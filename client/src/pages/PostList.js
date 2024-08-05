@@ -75,7 +75,6 @@ export default function PostList() {
   // for fetching data from server with/without filters
   useEffect(() => {
     setLoading(true);
-    console.time("Loading Time Post List");
 
     if (classificationFilter === "all") {
       urlSearchParams.delete("classificationFilter");
@@ -119,13 +118,10 @@ export default function PostList() {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
+        setLoading(false);
       })
       .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        setLoading(false);
-        console.timeEnd("Loading Time Post List");
+        console.error(error.message);
       });
   }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
@@ -193,7 +189,7 @@ export default function PostList() {
                     </Typography>
                     <Typography variant="body1">{label}</Typography>
                     <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                      {statsData[value]["dang-xay-dung"] + statsData[value]["da-hoan-thanh"]}/{statsData[value]?.count} Dự án đã khởi công
+                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)}/{statsData[value]?.count ?? 0} Dự án đã khởi công
                     </Typography>
                   </Box>
 

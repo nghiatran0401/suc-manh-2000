@@ -1,6 +1,5 @@
 const Redis = require("ioredis");
 const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
-const { filter } = require("lodash");
 require("dotenv").config();
 
 const redis = new Redis(process.env.REDIS_URL);
@@ -206,14 +205,14 @@ async function getValueInRedis(key) {
   }
 }
 
-async function getValuesByCategoryInRedis(category, filters) {
+async function getValuesByCategoryInRedis(category, filters, start, end) {
   try {
     const pattern = `post:${category}:*`;
     const keys = await redis.keys(pattern);
 
     if (keys.length === 0) return [];
 
-    const values = [];
+    let values = [];
     for (const key of keys) {
       const type = await redis.type(key);
       let value;
@@ -230,6 +229,10 @@ async function getValuesByCategoryInRedis(category, filters) {
       values.push({ ...value, redisKey: key });
     }
     values.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+
+    if (start !== undefined && end !== undefined) {
+      values = values.slice(start, end);
+    }
 
     const getStatsData = (posts) => {
       const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];

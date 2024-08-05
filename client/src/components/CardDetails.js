@@ -83,7 +83,7 @@ export default function CardDetails(props) {
               {classificationMapping[post.classification]}
             </Typography>
           )}
-          {post.status && (
+          {post.status !== undefined && (
             <Typography
               variant="body2"
               sx={{
@@ -140,7 +140,12 @@ export default function CardDetails(props) {
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {post?.progress?.map((progress, index) => (
             <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
-              <CarouselSlide title={progress.name} items={progress.images} position="progress" />
+              <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+                <Typography variant="h5" fontWeight="bold" m={"8px"}>
+                  {progress.name}
+                </Typography>
+                <CarouselSlide items={progress.images} />
+              </Box>
             </Grid>
           ))}
         </Grid>
@@ -282,11 +287,7 @@ export default function CardDetails(props) {
         <Grid item xs={12} sm={3}>
           {post.description && (
             <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"}>
-              <img
-                style={{ width: "100%", height: "225px", objectFit: "fill", borderRadius: "16px 16px 0 0" }}
-                alt={post.name}
-                src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"}
-              />
+              <img style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} alt={post.name} src={post.thumbnail} />
 
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
 
@@ -317,11 +318,10 @@ export default function CardDetails(props) {
             </Box>
           )}
 
-          {/* TODO: Refactor this as a reused component */}
           {!isMobile && (
             <Box position="sticky" top={80} zIndex={1} bgcolor="#fff" boxShadow={1} p={"16px 8px"} borderRadius={4}>
               <Typography variant="h6" fontWeight="bold" align="center">
-                BÀI VIẾT MỚI NHẤT
+                THÔNG BÁO MỚI NHẤT
               </Typography>
               <Box textAlign={"center"}>------</Box>
               <Box display="flex" flexDirection="column" gap={1}>
@@ -334,15 +334,12 @@ export default function CardDetails(props) {
                       textDecoration: "none",
                       cursor: "pointer",
                       color: "#334862",
-                      ":hover": {
-                        // textDecoration: "underline",
-                        color: "#000",
-                      },
+                      ":hover": { color: "#000" },
                     }}
                   >
                     <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
-                      <Avatar variant="rounded" src={latestPost.image} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
-                      <Typography variant="body2" sx={{ flex: 1, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <Avatar variant="rounded" src={latestPost.thumbnail} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
+                      <Typography variant="body2" sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
                         {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
                       </Typography>
                     </Box>

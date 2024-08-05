@@ -34,6 +34,11 @@ export default function PostList() {
 
   // for applying filters into url params
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
     const category = urlSearchParams.get("categoryFilter");
     const classification = urlSearchParams.get("classificationFilter");
     const status = urlSearchParams.get("statusFilter");

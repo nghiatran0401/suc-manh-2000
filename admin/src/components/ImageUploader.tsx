@@ -178,7 +178,6 @@ const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleErr
       uploadFile(result);
     },
     error(err) {
-      console.log(">>>>>>>>Cannot compress file for some reason");
       console.log(err);
       uploadFile(file);
     },

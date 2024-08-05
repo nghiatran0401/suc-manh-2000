@@ -1,138 +1,25 @@
 const express = require("express");
 const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
-const { upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, setExValueInRedis, getValuesByCategoryInRedis } = require("../services/redis");
-const { convertToDate, updateClassificationAndCategoryCounts } = require("../utils");
+const { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } = require("../services/redis");
+const { updateClassificationAndCategoryCounts } = require("../utils");
 
 const postRouter = express.Router({ mergeParams: true });
 
 postRouter.get("/", async (req, res) => {
-  const { filters } = req.query;
+  const { filters, start, end } = req.query;
   const { category } = req.params;
 
   try {
-    const { cachedResultData, totalValuesLength, statsData } = await getValuesByCategoryInRedis(category, filters);
+    const { cachedResultData, totalValuesLength, statsData } = await getValuesByCategoryInRedis(category, filters, start, end);
 
     if (cachedResultData) {
       res.status(200).send({ posts: cachedResultData, stats: statsData, totalPosts: totalValuesLength });
     } else {
       res.status(404).send({ error: `Error getting all documents in Redis` });
     }
-
-    // monitor this and/or create a script to index all data to Redis
-    // else {
-    //   const postCollectionRef = firestore.collection(category);
-    //   const categoryDoc = await firestore.collection("counts").doc("category").get();
-
-    //   let totalCount = categoryDoc.data()[category];
-    //   if (!totalCount) {
-    //     totalCount = await postCollectionRef.get().then((snap) => snap.size);
-    //   }
-
-    //   let query = postCollectionRef.orderBy("publish_date", "desc");
-    //   let totalFilterCount;
-
-    //   if (filters && isProject && totalCount > POSTS_PER_PAGE) {
-    //     const ALL = "all";
-
-    //     if (filters.classificationFilter !== ALL) {
-    //       query = query.where("classification", "==", filters.classificationFilter);
-    //     }
-
-    //     if (filters.totalFundFilter !== ALL) {
-    //       switch (filters.totalFundFilter) {
-    //         case "less-than-100":
-    //           query = query.where("totalFund", "<", 100000000);
-    //           break;
-    //         case "100-to-200":
-    //           query = query.where("totalFund", ">=", 100000000).where("totalFund", "<", 200000000);
-    //           break;
-    //         case "200-to-300":
-    //           query = query.where("totalFund", ">=", 200000000).where("totalFund", "<", 300000000);
-    //           break;
-    //         case "300-to-400":
-    //           query = query.where("totalFund", ">=", 300000000).where("totalFund", "<", 400000000);
-    //           break;
-    //         case "more-than-400":
-    //           query = query.where("totalFund", ">=", 400000000);
-    //           break;
-    //         default:
-    //           break;
-    //       }
-    //     }
-
-    //     if (filters.statusFilter !== ALL) {
-    //       query = query.where("status", "==", filter.statusFilter);
-    //     }
-
-    //     // if (filter.provinceFilter !== ALL) {
-    //     //   query = query.where("province", "==", filter.provinceFilter);
-    //     // }
-
-    //     totalFilterCount = await query.get().then((snap) => snap.size);
-    //   }
-
-    //   console.log("totalFilterCount", totalFilterCount);
-    //   if (_end !== undefined && !name_like) {
-    //     query = query.offset(Number(_start)).limit(Number(_end - _start));
-    //   }
-
-    //   const postCollectionSnapshot = await query.get();
-
-    //   const mapDocToData = (doc) => {
-    //     const data = doc.data();
-    // data.publish_date = convertToDate(data.publish_date);
-    //     data.start_date = convertToDate(data.start_date);
-    //     data.end_date = convertToDate(data.end_date);
-
-    //     return data;
-    //   };
-
-    //   let postCollectionData;
-    //   if (name_like) {
-    //     postCollectionData = postCollectionSnapshot.docs.filter((doc) => doc.data().name.toLowerCase().includes(name_like.toLowerCase())).map(mapDocToData);
-    //   } else {
-    //     postCollectionData = postCollectionSnapshot.docs.map(mapDocToData);
-    //   }
-
-    //   res.set({
-    //     "X-Total-Count": totalCount?.toString(),
-    //     "Access-Control-Expose-Headers": "X-Total-Count",
-    //   });
-    //   res.status(200).send(postCollectionData);
-    // }
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
-  }
-});
-
-// TODO: Combine with get obove
-postRouter.get("/getLatestPosts", async (req, res) => {
-  const { category } = req.params;
-  const cachedKey = `latestPosts:${category}`;
-
-  try {
-    const cachedResultData = await getValueInRedis(cachedKey);
-
-    if (cachedResultData) {
-      res.status(200).send(cachedResultData);
-    } else {
-      const postCollectionRef = firestore.collection(category);
-      const query = postCollectionRef.orderBy("publish_date", "desc");
-      const postCollectionSnapshot = await query.offset(0).limit(5).get();
-      const postCollectionData = postCollectionSnapshot.docs.map((doc) => doc.data());
-      const resultData = postCollectionData.map((post) => ({
-        name: post.name,
-        publish_date: post.publish_date.toDate(),
-        slug: post.slug,
-        image: post.content.tabs[0].slide_show[0]?.image,
-      }));
-
-      await setExValueInRedis(cachedKey, resultData);
-      res.status(200).send(resultData);
-    }
-  } catch (error) {
-    res.status(404).send({ error: `Error getting a list of 5 latest documents: ${error.message}` });
   }
 });
 
@@ -142,15 +29,14 @@ postRouter.get("/:id", async (req, res) => {
   try {
     const postDocRef = firestore.collection(category).where("slug", "==", id);
     const postDocRefSnapshot = await postDocRef.get();
-
     if (postDocRefSnapshot.empty) {
       res.status(404).json({ error: "Post not found" });
     }
 
     const postDocData = postDocRefSnapshot.docs[0].data();
-    postDocData.publish_date = convertToDate(postDocData.publish_date);
-    postDocData.start_date = convertToDate(postDocData.start_date);
-    postDocData.end_date = convertToDate(postDocData.end_date);
+    postDocData.publish_date = postDocData.publish_date?.toDate();
+    postDocData.start_date = postDocData.start_date?.toDate();
+    postDocData.end_date = postDocData.end_date?.toDate();
 
     res.status(200).json(postDocData);
   } catch (error) {
@@ -246,9 +132,8 @@ postRouter.post("/", async (req, res) => {
       doc_id: postToSave.id,
     });
 
-    // Increase the count of the post's category and classification (in Firestore and Redis)
-    const resultData = await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
-    await setExValueInRedis(`classificationAndCategoryCounts`, resultData);
+    // Increase the count of the post's category and classification (in Firestore)
+    await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
 
     res.status(200).send(postToSave);
   } catch (error) {
@@ -353,21 +238,10 @@ postRouter.patch("/:id", async (req, res) => {
       doc_id: postToSave.id,
     });
 
-    // Update the count of the post's classification if it has changed (in Firestore and Redis)
+    // Update the count of the post's classification if it has changed (in Firestore)
     // Post's category currently is set to be unchangeable (due to current Firestore DB data structure)
     if (isProject && postToSave.classification !== docData.classification) {
-      const classificationDoc = await firestore.collection("counts").doc("classification").get();
-
-      if (classificationDoc.exists) {
-        const classificationCounts = classificationDoc.data();
-        classificationCounts[postToSave.classification] = classificationCounts[postToSave.classification] + 1;
-        classificationCounts[docData.classification] = classificationCounts[docData.classification] - 1;
-        await firestore.collection("counts").doc("classification").set(classificationCounts);
-
-        const cachedResultData = await getValueInRedis("classificationAndCategoryCounts");
-        const resultData = { classification: classificationCounts, category: cachedResultData.category };
-        await setExValueInRedis("classificationAndCategoryCounts", resultData);
-      }
+      Promise.all([updateClassificationAndCategoryCounts(postToSave.classification, undefined, +1), updateClassificationAndCategoryCounts(docData.classification, undefined, -1)]);
     }
 
     res.status(200).send(postToSave);
@@ -392,8 +266,7 @@ postRouter.delete("/:id", async (req, res) => {
 
     // Decrease the count of the post's category and classification (in Firestore and Redis)
     const docData = querySnapshot.docs[0].data();
-    const resultData = await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
-    await setExValueInRedis("classificationAndCategoryCounts", resultData);
+    await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
 
     res.status(200).send({ message: "Post deleted successfully" });
   } catch (error) {
