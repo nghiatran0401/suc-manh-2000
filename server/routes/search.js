@@ -5,13 +5,13 @@ const searchRouter = express.Router();
 
 searchRouter.get("/", async (req, res) => {
   const { q, categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter } = req.query;
+  const filters = { categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter };
 
   try {
-    if (!q && Object.keys(filters).length === 0) {
+    if (!q || Object.keys(filters).length <= 0) {
       return res.status(200).send([]);
     }
 
-    const filters = { categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter };
     const searchResult = await redisSearchByName(q, filters);
     res.status(200).send(searchResult);
   } catch (error) {

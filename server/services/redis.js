@@ -118,8 +118,6 @@ async function redisSearchByName(q, filters) {
   args.push("FT.SEARCH");
   args.push(INDEX_NAME);
 
-  console.log("here1", { q, filters });
-
   if (q) {
     query += `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`;
   }
@@ -166,11 +164,9 @@ async function redisSearchByName(q, filters) {
   args.push("SORTBY", "category", "DESC");
   args.push("LIMIT", 0, 10000); // get all results
 
-  console.log("here2", { args: args });
   const results = await redis.call(...args);
   const transformedResults = [];
   const totalCount = results[0];
-  console.log("here3", { totalCount: totalCount });
 
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];
@@ -191,8 +187,19 @@ async function redisSearchByName(q, filters) {
 
 async function getValueInRedis(key) {
   try {
-    const value = await redis.get(key);
-    return value ? JSON.parse(value) : null;
+    const type = await redis.type(key);
+    let value;
+
+    if (type === "string") {
+      value = await redis.get(key);
+      value = value ? JSON.parse(value) : null;
+    } else if (type === "hash") {
+      value = await redis.hgetall(key);
+    } else {
+      value = null;
+    }
+
+    return value;
   } catch (error) {
     console.error("Error getting value from Redis:", error.message);
     throw error;

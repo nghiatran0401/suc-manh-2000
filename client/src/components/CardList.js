@@ -9,8 +9,8 @@ import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
 import { provincesAndCities } from "../vietnam-provinces";
 
-const Card = styled(MuiCard)(({ isProject }) => ({
-  minHeight: isProject ? "400px" : "300px",
+const Card = styled(MuiCard)({
+  minHeight: "300px",
   height: "100%",
   display: "flex",
   flexDirection: "column",
@@ -19,7 +19,7 @@ const Card = styled(MuiCard)(({ isProject }) => ({
   "&:hover": {
     transform: "scale(1.05)",
   },
-}));
+});
 
 export default function CardList(props) {
   const { category } = useParams();
@@ -27,9 +27,9 @@ export default function CardList(props) {
   return props.posts.map((post, ix) => (
     <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
-        <Card isProject={props.isProject}>
+        <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt={post.name} />
+            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt={post.thumbnail} />
 
             {post.status && (
               <div

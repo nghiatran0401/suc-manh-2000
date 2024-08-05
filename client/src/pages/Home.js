@@ -200,9 +200,6 @@ export default function Home() {
                 .map((child, index) => (
                   <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
                     <TabPanel>
-                      {/* <Grid container spacing={3} p={"16px"}> */}
-                      {/* <CardList title={""} posts={projects} loading={loading} showDescription={false} category={projectTab} /> */}
-                      {/* </Grid> */}
                       <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
                     </TabPanel>
 
@@ -220,7 +217,7 @@ export default function Home() {
 
       <Box bgcolor={"#f2f2f2"} height={"100%"} p={"32px 0"}>
         <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
-          <Typography variant="h3" color={"red"} textAlign={"center"}>
+          <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
         </Box>

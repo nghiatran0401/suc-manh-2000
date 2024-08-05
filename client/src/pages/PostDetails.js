@@ -13,6 +13,8 @@ export default function PostDetails() {
   const [latestPosts, setLatestPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  console.log("her", post);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 

@@ -21,6 +21,7 @@ export default function PostList() {
 
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
+  const [statsData, setStatsData] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const count = Math.ceil(posts.length / POSTS_PER_PAGE);
@@ -32,7 +33,6 @@ export default function PostList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [provinceFilter, setProvinceFilter] = useState("all");
 
-  const [statsData, setStatsData] = useState({});
   const scrollRef = useRef(null);
 
   const isProject = category.includes("du-an");
@@ -112,12 +112,12 @@ export default function PostList() {
     axios
       .get(SERVER_URL + "/" + category, {
         params: {
-          filters: { classification: classificationFilter, totalFund: totalFundFilter, status: statusFilter, "location.province": provinceFilter },
+          filters: { classification: classificationFilter, totalFund: totalFundFilter, status: statusFilter, province: provinceFilter },
         },
       })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
-        setTotalPosts(Number(postsResponse.headers["x-total-count"]));
+        setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
       })
       .catch((error) => {
@@ -129,13 +129,14 @@ export default function PostList() {
       });
   }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
-  if (!posts || posts.length < 0) return <LoadingScreen />;
+  if (posts.length <= 0 || Object.keys(statsData).length <= 0) return <LoadingScreen />;
   return (
-    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={DESKTOP_WIDTH}>
+    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
       <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
         {title}
       </Typography>
 
+      {/* Statistics */}
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
           <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
@@ -147,8 +148,11 @@ export default function PostList() {
               <Typography variant="h3" fontWeight="bold" color={"red"}>
                 <CountUp start={0} end={totalPosts} duration={10} />
               </Typography>
-              <Typography fontSize={"20px"} fontWeight={600} variant="h4">
-                Tổng dự án trong năm
+              <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
+                TỔNG DỰ ÁN TRONG NĂM
+              </Typography>
+              <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)}/{totalPosts} Dự án đã khởi công
               </Typography>
             </Box>
           </Box>
@@ -183,14 +187,15 @@ export default function PostList() {
                   paddingRight={2}
                   borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}
                 >
-                  <div>
-                    <Typography variant="h5" fontWeight={600} textAlign={"center"}>
+                  <Box display={"flex"} flexDirection={"column"} alignItems={"center"} gap={"4px"}>
+                    <Typography variant="h5" fontWeight={600}>
                       {statsData[value]?.count ?? 0}
                     </Typography>
-                    <Typography variant="body1" textAlign={"center"}>
-                      {label}
+                    <Typography variant="body1">{label}</Typography>
+                    <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
+                      {statsData[value]["dang-xay-dung"] + statsData[value]["da-hoan-thanh"]}/{statsData[value]?.count} Dự án đã khởi công
                     </Typography>
-                  </div>
+                  </Box>
 
                   <Box
                     style={{
@@ -246,6 +251,7 @@ export default function PostList() {
         </Grid>
       )}
 
+      {/* Filters */}
       {isProject && (
         <Box ref={scrollRef} display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <StyledSelectComponent
@@ -340,7 +346,7 @@ export default function PostList() {
 
           <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
             <Grid container spacing={3} p={"16px"}>
-              <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} isProject={isProject} />
+              <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} />
             </Grid>
           </Box>
 

@@ -7,11 +7,10 @@ import "@coreui/coreui/dist/css/coreui.min.css";
 import { ExpandLess, ExpandMore, ArrowDropDown, Search } from "@mui/icons-material";
 import "./config/styles.css";
 import logo from "../assets/logo-header.png";
-import { HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping } from "../constants";
+import { HEADER_DROPDOWN_LIST } from "../constants";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
-import { Link } from "react-router-dom";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -26,7 +25,6 @@ export default function HeaderBar() {
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  // const [searchOptions, setSearchOptions] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
   const autocompleteRef = useRef();
 

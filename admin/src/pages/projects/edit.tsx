@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Edit, SaveButton, useForm } from "@refinedev/antd";
-import { Form, Input, InputNumber, Row, Select } from "antd";
+import { Form, Input, InputNumber, Select } from "antd";
 import { useLocation } from "react-router-dom";
 import LoadingScreen from "../../components/LoadingScreen";
-import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../constants";
+import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
-import { provinces } from "../../vietnam-provinces";
+import { provincesAndCities } from "../../utils/vietnam-provinces";
 
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -25,8 +25,8 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
       };
     },
     // @ts-ignore
-    successNotification(data: any, values: any) {
-      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.data?.category + "/" + data?.data?.slug}">${data?.data?.name}</a>`;
+    successNotification(data: any) {
+      const messageHtml = `<a target="_blank" href="${CLIENT_URL + "/" + data?.category + "/" + data?.slug}">${data?.name}</a>`;
       return {
         description: "Cập nhật thành công",
         message: <HtmlContent html={messageHtml} />,
@@ -42,13 +42,11 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
-      formProps.form?.setFieldValue("location.province", projectData.location?.province);
+      formProps.form?.setFieldValue("province", projectData.location?.province);
       formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
       formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
     }
   }, [projectData]);
-
-  console.log("hhere", projectData);
 
   if (isLoading || !projectData) return <LoadingScreen />;
   return (
@@ -137,11 +135,11 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         {/* Location - Province */}
         {isProject && (
-          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.location.province")}</span>} name={"location.province"} rules={[{ required: true }]} style={{ width: "40%" }}>
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.province")}</span>} name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
             <Select showSearch placeholder="Select or enter a new province">
-              {provinces.map((p) => (
-                <Select.Option key={p} value={p}>
-                  {p}
+              {provincesAndCities.map((p) => (
+                <Select.Option key={p.provinceValue} value={p.provinceValue}>
+                  {p.province}
                 </Select.Option>
               ))}
             </Select>

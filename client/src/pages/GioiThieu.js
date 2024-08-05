@@ -1,7 +1,6 @@
 import React from "react";
 import { useMediaQuery, Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import HeaderBar from "../components/Header";
 import { DESKTOP_WIDTH } from "../constants";
 
 export default function GioiThieu() {

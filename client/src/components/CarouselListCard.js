@@ -15,8 +15,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { provincesAndCities } from "../vietnam-provinces";
 
-const Card = styled(MuiCard)(({ isMobile }) => ({
-  minHeight: isMobile ? "fit-content" : "400px",
+const Card = styled(MuiCard)({
+  minHeight: "400px",
   height: "100%",
   display: "flex",
   flexDirection: "column",
@@ -26,7 +26,7 @@ const Card = styled(MuiCard)(({ isMobile }) => ({
     transform: "scale(1.05)",
   },
   margin: "10px",
-}));
+});
 
 export default function CarouselListCard(props) {
   const { category } = useParams();
@@ -68,7 +68,7 @@ export default function CarouselListCard(props) {
       {props.posts.map((post, index) => (
         <Grid key={post.id + index}>
           <Link replace to={`/${props.category ? props.category : category}/${post.slug}`} style={{ textDecoration: "none" }}>
-            <Card isMobile={isMobile}>
+            <Card>
               <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                 <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ?? "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"} alt={post.name} />
 

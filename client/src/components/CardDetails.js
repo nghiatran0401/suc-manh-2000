@@ -101,9 +101,9 @@ export default function CardDetails(props) {
               {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
             </Typography>
           )}
-          {post.province && (
+          {post.location?.province && (
             <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-              {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
+              {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
             </Typography>
           )}
         </Box>

@@ -83,7 +83,7 @@ export default function PostList() {
 
     if (searchParams) {
       setSearchValue(searchParams);
-      fetchSearchData(searchParams);
+      fetchSearchData();
     }
   }, [searchParams, categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
@@ -97,6 +97,20 @@ export default function PostList() {
         setLoading(false);
       })
       .catch((e) => console.error(e));
+  };
+
+  const onSearch = (e) => {
+    e.preventDefault();
+    fetchSearchData();
+
+    urlSearchParams.set("q", searchValue);
+    setUrlSearchParams(urlSearchParams);
+
+    setCategoryFilter("all");
+    setClassificationFilter("all");
+    setTotalFundFilter("all");
+    setStatusFilter("all");
+    setProvinceFilter("all");
   };
 
   if (!posts || posts.length < 0) return <LoadingScreen />;
@@ -115,32 +129,10 @@ export default function PostList() {
           alignItems: "center",
           width: "100%",
         }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          fetchSearchData();
-
-          urlSearchParams.set("q", searchValue);
-          setUrlSearchParams(urlSearchParams);
-
-          setClassificationFilter("all");
-          setTotalFundFilter("all");
-          setStatusFilter("all");
-          setProvinceFilter("all");
-        }}
+        onSubmit={onSearch}
       >
-        <InputBase
-          sx={{ ml: 1, flex: 1 }}
-          placeholder="Search"
-          inputProps={{ "aria-label": "search" }}
-          value={searchValue}
-          onChange={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            setSearchValue(e.target.value);
-          }}
-        />
-        <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+        <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+        <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
           <SearchIcon />
         </IconButton>
       </Paper>

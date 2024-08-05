@@ -14,14 +14,7 @@ postRouter.get("/", async (req, res) => {
     const { cachedResultData, totalValuesLength, statsData } = await getValuesByCategoryInRedis(category, filters);
 
     if (cachedResultData) {
-      // why res.set ? admin uses it
-      res
-        .set({
-          "X-Total-Count": totalValuesLength.toString(),
-          "Access-Control-Expose-Headers": "X-Total-Count",
-        })
-        .status(200)
-        .send({ posts: cachedResultData, stats: statsData });
+      res.status(200).send({ posts: cachedResultData, stats: statsData, totalPosts: totalValuesLength });
     } else {
       res.status(404).send({ error: `Error getting all documents in Redis` });
     }
@@ -73,7 +66,7 @@ postRouter.get("/", async (req, res) => {
     //     }
 
     //     // if (filter.provinceFilter !== ALL) {
-    //     //   query = query.where("location.province", "==", filter.provinceFilter);
+    //     //   query = query.where("province", "==", filter.provinceFilter);
     //     // }
 
     //     totalFilterCount = await query.get().then((snap) => snap.size);
@@ -113,7 +106,7 @@ postRouter.get("/", async (req, res) => {
   }
 });
 
-// Combine with get obove
+// TODO: Combine with get obove
 postRouter.get("/getLatestPosts", async (req, res) => {
   const { category } = req.params;
   const cachedKey = `latestPosts:${category}`;
@@ -145,28 +138,21 @@ postRouter.get("/getLatestPosts", async (req, res) => {
 
 postRouter.get("/:id", async (req, res) => {
   const { category, id } = req.params;
-  const cachedKey = `post:${category}:${id}`;
 
   try {
-    const cachedResultData = await getValueInRedis(cachedKey);
+    const postDocRef = firestore.collection(category).where("slug", "==", id);
+    const postDocRefSnapshot = await postDocRef.get();
 
-    if (cachedResultData) {
-      res.status(200).send(cachedResultData);
-    } else {
-      const postDocRef = firestore.collection(category).where("slug", "==", id);
-      const postDocRefSnapshot = await postDocRef.get();
-
-      if (postDocRefSnapshot.empty) {
-        res.status(404).json({ error: "Post not found" });
-      }
-
-      const postDocData = postDocRefSnapshot.docs[0].data();
-      postDocData.publish_date = convertToDate(postDocData.publish_date);
-      postDocData.start_date = convertToDate(postDocData.start_date);
-      postDocData.end_date = convertToDate(postDocData.end_date);
-
-      res.status(200).json(postDocData);
+    if (postDocRefSnapshot.empty) {
+      res.status(404).json({ error: "Post not found" });
     }
+
+    const postDocData = postDocRefSnapshot.docs[0].data();
+    postDocData.publish_date = convertToDate(postDocData.publish_date);
+    postDocData.start_date = convertToDate(postDocData.start_date);
+    postDocData.end_date = convertToDate(postDocData.end_date);
+
+    res.status(200).json(postDocData);
   } catch (error) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });
   }
@@ -264,7 +250,7 @@ postRouter.post("/", async (req, res) => {
     const resultData = await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);
     await setExValueInRedis(`classificationAndCategoryCounts`, resultData);
 
-    res.status(200).json(postToSave);
+    res.status(200).send(postToSave);
   } catch (error) {
     res.status(404).send({ error: `Error creating a document: ${error.message}` });
   }
@@ -374,17 +360,17 @@ postRouter.patch("/:id", async (req, res) => {
 
       if (classificationDoc.exists) {
         const classificationCounts = classificationDoc.data();
-        classificationCounts[postToSave.classification] = (classificationCounts[postToSave.classification] || 0) + 1;
-        classificationCounts[docData.classification] = (classificationCounts[docData.classification] || 0) - 1;
+        classificationCounts[postToSave.classification] = classificationCounts[postToSave.classification] + 1;
+        classificationCounts[docData.classification] = classificationCounts[docData.classification] - 1;
         await firestore.collection("counts").doc("classification").set(classificationCounts);
 
-        const cachedResultData = await getValueInRedis(cachedKey);
+        const cachedResultData = await getValueInRedis("classificationAndCategoryCounts");
         const resultData = { classification: classificationCounts, category: cachedResultData.category };
-        await setExValueInRedis(`classificationAndCategoryCounts`, resultData);
+        await setExValueInRedis("classificationAndCategoryCounts", resultData);
       }
     }
 
-    res.status(200).json(postToSave);
+    res.status(200).send(postToSave);
   } catch (error) {
     res.status(500).send({ error: `Error updating a document: ${error.message}` });
   }
@@ -395,7 +381,6 @@ postRouter.delete("/:id", async (req, res) => {
 
   try {
     const querySnapshot = await firestore.collection(category).where("slug", "==", id).get();
-
     if (querySnapshot.empty) {
       res.status(500).send({ error: `There's no document with id: ${id}` });
     }
@@ -408,9 +393,9 @@ postRouter.delete("/:id", async (req, res) => {
     // Decrease the count of the post's category and classification (in Firestore and Redis)
     const docData = querySnapshot.docs[0].data();
     const resultData = await updateClassificationAndCategoryCounts(docData.classification, docData.category, -1);
-    await setExValueInRedis(`classificationAndCategoryCounts`, resultData);
+    await setExValueInRedis("classificationAndCategoryCounts", resultData);
 
-    res.status(200).json({ message: "Post deleted successfully" });
+    res.status(200).send({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).send({ error: `Error deleting a document: ${error.message}` });
   }

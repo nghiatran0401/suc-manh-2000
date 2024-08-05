@@ -1,7 +1,7 @@
 import { AuthBindings } from "@refinedev/core";
-import { auth } from "./firebase/client";
+import { auth } from "../firebase/client";
 import { User } from "firebase/auth";
-import { AuthService } from "./firebase/authentication";
+import { AuthService } from "../firebase/authentication";
 
 export const TOKEN_KEY = "refine-auth";
 
