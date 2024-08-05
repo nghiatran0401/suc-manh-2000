@@ -50,7 +50,7 @@ export default function PostList() {
     if (classification) setClassificationFilter(classification);
     if (totalFundFilter) setTotalFundFilter(totalFundFilter);
     if (provinceFilter) setProvinceFilter(provinceFilter);
-  }, []);
+  }, [urlSearchParams]);
 
   // for scrolling to top when there is no filter
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function PostList() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [loading]);
+  }, [loading, urlSearchParams]);
 
   // for fetching data from server with/without filters
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function PostList() {
       .catch((error) => {
         console.error(error.message);
       });
-  }, [category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
+  }, [urlSearchParams, category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
   if (posts.length <= 0 || Object.keys(statsData).length <= 0) return <LoadingScreen />;
   return (

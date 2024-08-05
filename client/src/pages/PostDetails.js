@@ -27,7 +27,7 @@ export default function PostDetails() {
         setLoading(false);
       })
       .catch((e) => console.error(e));
-  }, [id]);
+  }, [id, category]);
 
   if (!(Object.keys(post)?.length > 0 && latestPosts?.length > 0)) return <LoadingScreen />;
 

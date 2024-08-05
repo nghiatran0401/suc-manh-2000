@@ -15,7 +15,7 @@ import LoadingScreen from "./LoadingScreen";
 import { provincesAndCities } from "../vietnam-provinces";
 
 export default function CardDetails(props) {
-  const { category, id } = useParams();
+  const { category } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
   const [isIframeLoading, setIsIframeLoading] = useState(true);
@@ -179,6 +179,7 @@ export default function CardDetails(props) {
                                 )}
                                 <iframe
                                   key={index}
+                                  title={tab.name}
                                   width="100%"
                                   height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
                                   src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}
@@ -241,6 +242,7 @@ export default function CardDetails(props) {
                                     )}
                                     <iframe
                                       key={index}
+                                      title={tab.name}
                                       width="100%"
                                       height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
                                       src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}

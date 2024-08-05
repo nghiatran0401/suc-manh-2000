@@ -50,7 +50,7 @@ export default function PostList() {
     if (status) setStatusFilter(status);
     if (totalFundFilter) setTotalFundFilter(totalFundFilter);
     if (provinceFilter) setProvinceFilter(provinceFilter);
-  }, []);
+  }, [urlSearchParams]);
 
   // for fetching data from server with/without filters
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function PostList() {
       setSearchValue(searchParams);
       fetchSearchData();
     }
-  }, [searchParams, categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
+  }, [urlSearchParams, searchParams, categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
   const fetchSearchData = () => {
     setLoading(true);

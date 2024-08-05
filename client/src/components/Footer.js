@@ -4,7 +4,6 @@ import { useTheme } from "@mui/material/styles";
 import logo from "../assets/logo-header.png";
 import "./config/styles.css";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST } from "../constants";
-import { Link } from "react-router-dom";
 
 export default function Footer() {
   const theme = useTheme();

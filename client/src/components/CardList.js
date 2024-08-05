@@ -66,7 +66,7 @@ export default function CardList(props) {
           <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between" }}>
             {Boolean(post.totalFund) && (
               <Chip
-                icon={<img src={charityMoneyIcon} />}
+                icon={<img src={charityMoneyIcon} alt="Money icon" style={{ marginRight: "1px" }} />}
                 label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}`}
                 variant="outlined"
                 color="primary"

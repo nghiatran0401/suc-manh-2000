@@ -76,7 +76,7 @@ export const StyledSelectComponent = (props) => {
         displayEmpty
         sx={{
           width: inputWidth,
-          height: size == "large" ? "56px" : "40px",
+          height: size === "large" ? "56px" : "40px",
         }}
         value={value}
         IconComponent={(params) => {

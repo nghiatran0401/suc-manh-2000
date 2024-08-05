@@ -101,7 +101,7 @@ export default function Home() {
             <Grid item xs={12} sm={4}>
               <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
                 {news.map((latestPost, index) => {
-                  if (index === 0) return;
+                  if (index === 0) return null;
                   return (
                     <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
