@@ -259,7 +259,6 @@ function removeVietnameseAccents(str) {
   return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched) => map[matched]);
 }
 
-extractProvincesFromName();
-
 // updateSlugForAllDocuments(newsData).catch(console.error);
 // moveDocument("du-an-2023", "du-an-2022", "14275").catch(console.error);
+// extractProvincesFromName();

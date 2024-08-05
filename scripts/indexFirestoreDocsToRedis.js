@@ -38,7 +38,7 @@ async function indexFirestoreDocsToRedis(env) {
   }
 }
 
-indexFirestoreDocsToRedis("local").catch(console.error);
+indexFirestoreDocsToRedis("prod").catch(console.error);
 
 function splitString(inputString, separator) {
   return inputString.split(separator);
