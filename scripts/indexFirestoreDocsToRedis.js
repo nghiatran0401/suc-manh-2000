@@ -2,12 +2,11 @@ const { firestore } = require("./firebase");
 const { upsertDocumentToIndex, createSearchIndex } = require("../server/services/redis");
 
 const Redis = require("ioredis");
-require("dotenv").config();
-const redisProdClient = new Redis(process.env.REDIS_PROD_URL);
-const redisLocalClient = new Redis(process.env.REDIS_LOCAL_URL);
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 async function indexFirestoreDocsToRedis(env) {
-  const redisEnv = env === "prod" ? redisProdClient : redisLocalClient;
+  const redisEnv = new Redis(env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL);
   console.log(`Indexing Firestore data to Redis at ${env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL}`);
 
   try {
@@ -39,7 +38,3 @@ async function indexFirestoreDocsToRedis(env) {
 }
 
 indexFirestoreDocsToRedis("prod").catch(console.error);
-
-function splitString(inputString, separator) {
-  return inputString.split(separator);
-}
