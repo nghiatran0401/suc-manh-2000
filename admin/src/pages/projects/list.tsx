@@ -39,12 +39,17 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         type: "error",
       };
     },
-    onSearch: (values) => {
+    onSearch: (data) => {
+      // if (!data.name) {
+      //   const baseUrl = window.location.origin + window.location.pathname;
+      //   window.history.pushState({}, "", baseUrl);
+      //   // window.location.replace(baseUrl);
+      // }
       return [
         {
           field: "name",
           operator: "contains",
-          value: values.name,
+          value: data.name,
         },
       ];
     },

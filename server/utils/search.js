@@ -1,8 +1,8 @@
 function convertToCleanedName(name) {
-  const cleanedName = removeVietnameseAccents(name ?? "")
-    ?.toLowerCase()
-    ?.replace(/[^a-z0-9 ]/g, "");
-  return cleanedName;
+  return removeVietnameseAccents(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/[-_]/g, "\\$&");
 }
 
 function removeVietnameseAccents(str) {

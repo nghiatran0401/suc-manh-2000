@@ -25,7 +25,6 @@ export default function CardDetails(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isProject = category.includes("du-an");
-  console.log("here", post?.id);
 
   useEffect(() => {
     setLoading(true);
@@ -136,6 +135,8 @@ export default function CardDetails(props) {
           </Box>
         </Box>
       )}
+
+      {console.log("here2", post?.progress)}
 
       {post?.progress && post?.progress?.length > 0 && (
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>

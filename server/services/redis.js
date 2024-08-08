@@ -165,12 +165,9 @@ async function redisSearchByName(q, filters) {
   args.push("SORTBY", "category", "DESC");
   args.push("LIMIT", 0, 10000); // get all results
 
-  console.log("here", args);
-
   const results = await redis.call(...args);
   const transformedResults = [];
   const totalCount = results[0];
-  console.log("here2", { results, totalCount });
 
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];
@@ -225,12 +222,14 @@ async function getValuesByCategoryInRedis(category, filters, start, end) {
     const items = await redis.zrevrange(sortedSetKey, 0, -1);
     const values = items.map((item) => JSON.parse(item));
 
-    // // Scenario 2: Return a sorted array with the stats calculation
-    // if (requireStats) {
-    //   const statsData = getStatsData(values);
-    //   return { cachedResultData: values, totalValuesLength: values.length, statsData: statsData };
-    // }
+    // Scenario 2: Return a searched values array in admin
+    if (Array.isArray(filters) && filters[0]) {
+      const q = JSON.parse(filters[0]).value;
+      if (!q) return { cachedResultData: values, totalValuesLength: values.length };
 
+      const a = await redisSearchByName(q, {});
+      return { cachedResultData: a, totalValuesLength: a.length };
+    }
     // Scenario 3: Return a sorted array with the stats and filters operations
     let filteredValues = [...values];
     if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {

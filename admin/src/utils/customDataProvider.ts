@@ -3,8 +3,8 @@ import { axiosInstance } from "@refinedev/simple-rest";
 import { AxiosInstance } from "axios";
 
 const customDataProvider = (apiUrl: string, httpClient: AxiosInstance = axiosInstance): DataProvider => ({
-  getList: async ({ resource, pagination }) => {
-    const { data } = await httpClient.get(`${apiUrl}/${resource}`, { params: { ...pagination } });
+  getList: async ({ resource, pagination, filters }) => {
+    const { data } = await httpClient.get(`${apiUrl}/${resource}`, { params: { pagination, filters } });
     return {
       data: data.posts,
       total: data.totalPosts,
