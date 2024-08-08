@@ -9,6 +9,7 @@ import { StyledSelectComponent } from "../components/StyledComponent";
 import { useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import { provincesAndCities } from "../vietnam-provinces";
+import { set } from "lodash";
 
 export default function PostList() {
   const theme = useTheme();
@@ -29,6 +30,7 @@ export default function PostList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [totalFundFilter, setTotalFundFilter] = useState("all");
   const [provinceFilter, setProvinceFilter] = useState("all");
+  const [provinceCount, setProvinceCount] = useState({});
 
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
 
@@ -95,10 +97,13 @@ export default function PostList() {
   const fetchSearchData = () => {
     setLoading(true);
 
-    axios
-      .get(SERVER_URL + window.location.pathname + window.location.search, { filters: { categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter } })
-      .then((res) => {
-        setPosts(res.data.filter((post) => post.redisKey.includes("du-an")));
+    Promise.all([
+      axios.get(SERVER_URL + window.location.pathname + window.location.search, { filters: { categoryFilter, classificationFilter, totalFundFilter, statusFilter, provinceFilter } }),
+      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
+    ])
+      .then(([res1, res2]) => {
+        setPosts(res1.data.filter((post) => post.redisKey.includes("du-an")));
+        setProvinceCount(res2.data.province);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -223,15 +228,20 @@ export default function PostList() {
           label="Tỉnh"
           inputWidth={200}
           isMobile={isMobile}
-          value={provinceFilter}
-          onChange={(e) => setProvinceFilter(e.target.value)}
+          searchable={true}
+          value={
+            provincesAndCities.find((i) => i.provinceValue === provinceFilter)
+              ? { label: provincesAndCities.find((i) => i.provinceValue === provinceFilter).province, value: provincesAndCities.find((i) => i.provinceValue === provinceFilter).provinceValue }
+              : null
+          }
+          onChange={(option) => setProvinceFilter(option.value)}
           options={[
             {
               label: "Tất cả",
               value: "all",
             },
             ...provincesAndCities.map((i) => ({
-              label: i.province,
+              label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
               value: i.provinceValue,
             })),
           ]}

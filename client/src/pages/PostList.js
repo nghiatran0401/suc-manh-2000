@@ -22,6 +22,7 @@ export default function PostList() {
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [statsData, setStatsData] = useState({});
+  const [provinceCount, setProvinceCount] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const count = Math.ceil(posts.length / POSTS_PER_PAGE);
@@ -108,16 +109,24 @@ export default function PostList() {
       });
     }
 
-    axios
-      .get(SERVER_URL + "/" + category, {
+    Promise.all([
+      axios.get(SERVER_URL + "/" + category, {
         params: {
-          filters: { classification: classificationFilter, totalFund: totalFundFilter, status: statusFilter, province: provinceFilter },
+          filters: {
+            classification: classificationFilter,
+            totalFund: totalFundFilter,
+            status: statusFilter,
+            province: provinceFilter,
+          },
         },
-      })
-      .then((postsResponse) => {
+      }),
+      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
+    ])
+      .then(([postsResponse, countsResponse]) => {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
+        setProvinceCount(countsResponse.data.province);
         setLoading(false);
       })
       .catch((error) => {
@@ -306,15 +315,20 @@ export default function PostList() {
             label="Tỉnh"
             inputWidth={200}
             isMobile={isMobile}
-            value={provinceFilter}
-            onChange={(e) => setProvinceFilter(e.target.value)}
+            searchable={true}
+            value={
+              provincesAndCities.find((i) => i.provinceValue === provinceFilter)
+                ? { label: provincesAndCities.find((i) => i.provinceValue === provinceFilter).province, value: provincesAndCities.find((i) => i.provinceValue === provinceFilter).provinceValue }
+                : null
+            }
+            onChange={(option) => setProvinceFilter(option.value)}
             options={[
               {
                 label: "Tất cả",
                 value: "all",
               },
               ...provincesAndCities.map((i) => ({
-                label: i.province,
+                label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
                 value: i.provinceValue,
               })),
             ]}

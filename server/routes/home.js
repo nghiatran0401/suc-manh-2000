@@ -6,13 +6,17 @@ const homeRouter = express.Router();
 
 homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
   try {
-    const classificationDoc = await firestore.collection("counts").doc("classification").get();
-    const categoryDoc = await firestore.collection("counts").doc("category").get();
+    const [classificationDoc, categoryDoc, provinceDoc] = await Promise.all([
+      firestore.collection("counts").doc("classification").get(),
+      firestore.collection("counts").doc("category").get(),
+      firestore.collection("counts").doc("province").get(),
+    ]);
+
     if (!classificationDoc.exists || !categoryDoc.exists) {
       res.status(404).send({ error: "No data found for this page" });
     }
 
-    res.status(200).send({ classification: classificationDoc.data(), category: categoryDoc.data() });
+    res.status(200).send({ classification: classificationDoc.data(), category: categoryDoc.data(), province: provinceDoc.data() });
   } catch (error) {
     res.status(500).send({ error: `Failed to fetch data: ${error.message}` });
   }

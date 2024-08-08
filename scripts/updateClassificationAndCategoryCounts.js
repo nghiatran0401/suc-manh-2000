@@ -3,6 +3,7 @@ const { firestore } = require("./firebase");
 async function updateClassificationAndCategoryCounts() {
   let classificationCounts = {};
   let categoryCounts = {};
+  let provinceCounts = {};
 
   // Get all collections
   const collections = await firestore.listCollections();
@@ -17,6 +18,7 @@ async function updateClassificationAndCategoryCounts() {
       const data = doc.data();
       const classification = data.classification;
       const category = data.category;
+      const province = data.location?.province;
 
       if (classification) {
         if (!classificationCounts[classification]) {
@@ -31,16 +33,24 @@ async function updateClassificationAndCategoryCounts() {
         }
         categoryCounts[category]++;
       }
+
+      if (province) {
+        if (!provinceCounts[province]) {
+          provinceCounts[province] = 0;
+        }
+        provinceCounts[province]++;
+      }
     }
   }
 
-  console.log("counts", { classificationCounts, categoryCounts });
+  console.log("counts", { classificationCounts, categoryCounts, provinceCounts });
 
   // Upload the counts to Firestore
   try {
     await firestore.collection("counts").doc("classification").set(classificationCounts);
     await firestore.collection("counts").doc("category").set(categoryCounts);
-    console.log("Updated classification and category counts");
+    await firestore.collection("counts").doc("province").set(provinceCounts);
+    console.log("Updated classification, category and province counts");
   } catch (error) {
     console.error("Failed to upload counts:", error);
   }

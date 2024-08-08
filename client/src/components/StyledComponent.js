@@ -3,6 +3,7 @@ import { styled } from "@mui/material/styles";
 import { Box, IconButton, MenuItem, Select, Stack, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { default as ReactSelect } from "react-select";
 
 export const StyledSelect = styled(Select)({
   width: "200px",
@@ -55,7 +56,7 @@ export const StyledSelectedItem = (props) => {
 };
 
 export const StyledSelectComponent = (props) => {
-  const { size, inputWidth, value, label, onChange, options, isMobile } = props;
+  const { size, inputWidth, value, label, onChange, options, isMobile, searchable } = props;
 
   return (
     <Stack display={"flex"} direction={"column"} spacing={0.5}>
@@ -64,100 +65,118 @@ export const StyledSelectComponent = (props) => {
           {label}
         </Typography>
       )}
-      <StyledSelect
-        renderValue={(value) => {
-          return <Typography variant="body1"> {options.find((option) => option.value === value)?.label ?? ""}</Typography>;
-        }}
-        MenuProps={{
-          sx: {
-            transform: inputWidth ? "" : "translateX(-25px)",
-          },
-        }}
-        displayEmpty
-        sx={{
-          width: inputWidth,
-          height: size === "large" ? "56px" : "40px",
-        }}
-        value={value}
-        IconComponent={(params) => {
-          return (
-            <IconButton
-              sx={{
-                top: "0 !important",
-                right: "0 !important",
-                bottom: "0 !important",
-              }}
-              className={params.className}
-              disableRipple
-            >
-              <KeyboardArrowDownIcon sx={{ fontSize: "16px" }} />
-            </IconButton>
-          );
-        }}
-        onChange={onChange}
-      >
-        {options.map((option, idx) => {
-          if (option.value === value)
+
+      {searchable && (
+        <ReactSelect
+          placeholder={"Tất cả"}
+          styles={{
+            container: (provided) => ({
+              ...provided,
+              width: inputWidth,
+            }),
+          }}
+          options={options}
+          value={value}
+          onChange={onChange}
+        />
+      )}
+
+      {!searchable && (
+        <StyledSelect
+          renderValue={(value) => {
+            return <Typography variant="body1"> {options.find((option) => option.value === value)?.label ?? ""}</Typography>;
+          }}
+          MenuProps={{
+            sx: {
+              transform: inputWidth ? "" : "translateX(-25px)",
+            },
+          }}
+          displayEmpty
+          sx={{
+            width: inputWidth,
+            height: size === "large" ? "56px" : "40px",
+          }}
+          value={value}
+          IconComponent={(params) => {
             return (
-              <StyledSelectedItem
-                key={idx}
-                value={option.value}
-                label={
-                  <Stack>
-                    <Typography fontSize={14} fontWeight={500}>
-                      {option.label}
-                    </Typography>
-                    {option.description && (
-                      <Box>
-                        <Typography
-                          sx={{
-                            width: "200px",
-                            whiteSpace: "pre-wrap",
-                          }}
-                          color={"rgba(0, 0, 0, 0.6)"}
-                          fontSize={12}
-                          fontWeight={400}
-                        >
-                          {option.description}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                }
-              />
+              <IconButton
+                sx={{
+                  top: "0 !important",
+                  right: "0 !important",
+                  bottom: "0 !important",
+                }}
+                className={params.className}
+                disableRipple
+              >
+                <KeyboardArrowDownIcon sx={{ fontSize: "16px" }} />
+              </IconButton>
             );
-          return (
-            <StyledSelectItem
-              key={idx}
-              sx={{
-                paddingRight: "24px",
-              }}
-              value={option.value}
-            >
-              <Stack>
-                <Typography fontSize={14} fontWeight={500}>
-                  {option.label}
-                </Typography>
-                {option.description && (
-                  <Box>
-                    <Typography
-                      sx={{
-                        width: "200px",
-                        whiteSpace: "pre-wrap",
-                      }}
-                      color={"rgba(0, 0, 0, 0.6)"}
-                      fontSize={12}
-                      fontWeight={400}
-                    >
-                      {option.description}
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
-            </StyledSelectItem>
-          );
-        })}
-      </StyledSelect>
+          }}
+          onChange={onChange}
+        >
+          {options.map((option, idx) => {
+            if (option.value === value)
+              return (
+                <StyledSelectedItem
+                  key={idx}
+                  value={option.value}
+                  label={
+                    <Stack>
+                      <Typography fontSize={14} fontWeight={500}>
+                        {option.label}
+                      </Typography>
+                      {option.description && (
+                        <Box>
+                          <Typography
+                            sx={{
+                              width: "200px",
+                              whiteSpace: "pre-wrap",
+                            }}
+                            color={"rgba(0, 0, 0, 0.6)"}
+                            fontSize={12}
+                            fontWeight={400}
+                          >
+                            {option.description}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  }
+                />
+              );
+            return (
+              <StyledSelectItem
+                key={idx}
+                sx={{
+                  paddingRight: "24px",
+                }}
+                value={option.value}
+              >
+                <Stack>
+                  <Typography fontSize={14} fontWeight={500}>
+                    {option.label}
+                  </Typography>
+                  {option.description && (
+                    <Box>
+                      <Typography
+                        sx={{
+                          width: "200px",
+                          whiteSpace: "pre-wrap",
+                        }}
+                        color={"rgba(0, 0, 0, 0.6)"}
+                        fontSize={12}
+                        fontWeight={400}
+                      >
+                        {option.description}
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </StyledSelectItem>
+            );
+          })}
+        </StyledSelect>
+      )}
     </Stack>
   );
 };

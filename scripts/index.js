@@ -1,26 +1,4 @@
-const { firestore, bucket } = require("./firebase");
-const fs = require("fs");
-const path = require("path");
-const projectsData = require("../transformed_pages.json");
-const newsData = require("../transformed_posts.json");
-
-async function updateSlugForAllDocuments(original_data) {
-  const collections = await firestore.listCollections();
-  for (const collection of collections) {
-    const snapshot = await collection.get();
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      if (data.hasOwnProperty("slug")) {
-        const d = original_data.find((project) => String(project.id) === String(doc.id));
-        if (d) {
-          const newSlug = d.slug;
-          console.log("Updating slug for", doc.id, "from", data.slug, "to", newSlug);
-          await doc.ref.update({ slug: newSlug });
-        }
-      }
-    }
-  }
-}
+const { firestore } = require("./firebase");
 
 async function moveDocument(sourceCollectionName, destinationCollectionName, docId) {
   const sourceDocRef = firestore.collection(sourceCollectionName).doc(docId);
@@ -68,14 +46,14 @@ async function extractProvincesFromName() {
           capitalizeEachWord(cleanedString).includes(".") ||
           capitalizeEachWord(cleanedString).includes("Đb")
         ) {
-          await doc.ref.update({ location: { province: null } });
+          // await doc.ref.update({ location: { province: null } });
           continue;
         }
 
         const transformedProvince = removeVietnameseAccents(capitalizeEachWord(cleanedString).toLowerCase().replace(/\s+/g, "-"));
         provinces[transformedProvince] = provinces[transformedProvince] ? provinces[transformedProvince] + 1 : 1;
 
-        await doc.ref.update({ location: { province: transformedProvince } });
+        // await doc.ref.update({ location: { province: transformedProvince } });
       }
     }
   }
@@ -259,6 +237,5 @@ function removeVietnameseAccents(str) {
   return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched) => map[matched]);
 }
 
-// updateSlugForAllDocuments(newsData).catch(console.error);
 // moveDocument("du-an-2023", "du-an-2022", "14275").catch(console.error);
 // extractProvincesFromName();
