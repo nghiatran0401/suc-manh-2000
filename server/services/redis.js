@@ -227,7 +227,7 @@ async function getValuesByCategoryInRedis(category, filters, start, end) {
       const q = JSON.parse(filters[0]).value;
       if (!q) return { cachedResultData: values, totalValuesLength: values.length };
 
-      const a = await redisSearchByName(q, {});
+      const a = await redisSearchByName(q, { categoryFilter: category });
       return { cachedResultData: a, totalValuesLength: a.length };
     }
     // Scenario 3: Return a sorted array with the stats and filters operations
