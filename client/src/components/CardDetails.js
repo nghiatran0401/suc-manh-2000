@@ -25,6 +25,7 @@ export default function CardDetails(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isProject = category.includes("du-an");
+  console.log("here", post?.id);
 
   useEffect(() => {
     setLoading(true);
@@ -68,7 +69,7 @@ export default function CardDetails(props) {
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
-        <Typography variant="h4" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
+        <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
           <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
@@ -342,7 +343,10 @@ export default function CardDetails(props) {
                     <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
                       <Avatar variant="rounded" src={latestPost.thumbnail} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
                       <Typography variant="body2" sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {latestPost.name.length > 80 ? `${latestPost.name.substring(0, 80)}...` : latestPost.name}
+                        {latestPost.name
+                          .replace(/Dự án Sức mạnh 2000|ngày/g, "")
+                          .trim()
+                          .replace(/^\w/, (c) => c.toUpperCase())}{" "}
                       </Typography>
                     </Box>
                   </Link>

@@ -165,9 +165,12 @@ async function redisSearchByName(q, filters) {
   args.push("SORTBY", "category", "DESC");
   args.push("LIMIT", 0, 10000); // get all results
 
+  console.log("here", args);
+
   const results = await redis.call(...args);
   const transformedResults = [];
   const totalCount = results[0];
+  console.log("here2", { results, totalCount });
 
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];

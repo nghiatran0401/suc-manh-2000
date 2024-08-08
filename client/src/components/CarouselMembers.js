@@ -26,12 +26,12 @@ import { DESKTOP_WIDTH } from "../constants";
 export const MEMBERS = [
   {
     name: "HOÀNG HOA TRUNG",
-    role: "Sáng Lập Dự Án SM2000 và Hệ Sinh Thái Nuôi Em",
+    role: "Sáng Lập Dự Án Sức Mạnh 2000 và Hệ Sinh Thái Nuôi Em",
     description: `
       <ul style="margin-left: -24px;">
         <li>Forbes Under 30 Việt Nam 2020</li>
         <li>Gương mặt trẻ tiêu biểu Việt Nam</li>
-        <li >Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
+        <li>Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
         <li>Trưởng nhóm tình nguyện Niềm tin</li>
       </ul>`,
     image: HoangHoaTrung,
@@ -48,7 +48,7 @@ export const MEMBERS = [
   },
   {
     name: "HÙNG VÕ",
-    role: "Cố Vấn Chiến Lược và Truyền Thông Bền Vững",
+    role: "Cố Vấn Chiến Lược & Truyền Thông - Nhà Tài Trợ Thiên Thần",
     description: `
       <ul style="margin-left: -24px;">
         <li>Phó Tổng Marketing của Biti's</li>
@@ -61,14 +61,14 @@ export const MEMBERS = [
   },
   {
     name: "HÙNG VŨ",
-    role: "Cố Vấn Tài Chính và Nhà Tài Trợ Thiên Thần",
+    role: "Cố Vấn Tài Chính - Nhà Tài Trợ Thiên Thần tiêu biểu",
     description: "Công ty Ocean Brand",
     image: HungVu,
   },
 
   {
     name: "NGUYỄN THỊ HIỀN",
-    role: "Phó Chủ Nhiệm Dự Án SM2000",
+    role: "Phó Chủ Nhiệm Dự Án",
     description: `
       <ul style="margin-left: -24px;">
         <li>12 năm hoạt động công tác xã hội và tình nguyện từ các CLB sinh viên, tổ chức tại Việt Nam & Thái Lan</li> 
@@ -78,7 +78,7 @@ export const MEMBERS = [
   },
   {
     name: "LÊ HOÀNG YẾN",
-    role: "Phụ Trách Tiến Độ Dự Án SM2000",
+    role: "Phụ Trách Tiến Độ",
     description: `
       <ul style="margin-left: -24px;">
         <li>4+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
@@ -89,7 +89,7 @@ export const MEMBERS = [
   },
   {
     name: "VÕ THỊ TUYẾT MINH",
-    role: "Phụ Trách Sao Kê và Góp Lẻ SM2000",
+    role: "Phụ Trách Sao Kê và Góp Lẻ",
     description: `
       <ul style="margin-left: -24px;">
         <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
@@ -100,7 +100,7 @@ export const MEMBERS = [
   },
   {
     name: "PHẠM NGỌC CHÂM",
-    role: "Phụ Trách Góp Lẻ SM2000 và Nuôi Em Campuchia - Kenya",
+    role: "Phụ Trách Góp Lẻ Sức Mạnh 2000 và Nuôi Em Campuchia - Kenya",
     description: `
       <ul style="margin-left: -24px;">
         <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
@@ -142,7 +142,7 @@ export const MEMBERS = [
   },
   {
     name: "TRẦN HỮU NGHĨA",
-    role: "Phụ Trách Kĩ Thuật Web SM2000",
+    role: "Phụ Trách Kĩ Thuật Web",
     description: `
       <ul style="margin-left: -24px;">
         <li>1+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
@@ -211,7 +211,7 @@ export default function CarouselMembers() {
                       {item.name}
                     </Typography>
 
-                    <Typography align="center" variant="body1" fontWeight={"bold"} height={"50px"}>
+                    <Typography align="center" variant="body2" fontWeight={"bold"} height={"30px"}>
                       {item.role}
                     </Typography>
 

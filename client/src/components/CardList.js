@@ -94,6 +94,12 @@ export default function CardList(props) {
                   {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
                 </Typography>
               )}
+
+              {post.category && window.location.href.includes("/search") && (
+                <Typography variant="body2" sx={{ bgcolor: "rgb(255, 204, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                  {post.category.replace("du-an-", "DA ")}
+                </Typography>
+              )}
             </Box>
           </CardContent>
         </Card>

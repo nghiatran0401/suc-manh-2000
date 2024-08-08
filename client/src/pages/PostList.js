@@ -36,7 +36,7 @@ export default function PostList() {
   const scrollRef = useRef(null);
 
   const isProject = category.includes("du-an");
-  const title = ("Lưu trữ danh mục: " + findTitle(HEADER_DROPDOWN_LIST, "/" + category)).toUpperCase();
+  const title = findTitle(HEADER_DROPDOWN_LIST, "/" + category);
   const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
 
   // for applying filters into url params
@@ -128,7 +128,7 @@ export default function PostList() {
   if (!posts || !statsData) return <LoadingScreen />;
   return (
     <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
-      <Typography variant="h5" fontWeight="bold" color={"#000"} textAlign={"center"}>
+      <Typography variant="h4" fontWeight="bold" color={"#000"} textAlign={"center"}>
         {title}
       </Typography>
 
@@ -136,19 +136,15 @@ export default function PostList() {
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
           <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-            <Typography variant="h5" fontWeight={700}>
-              Thống kê nhanh
-            </Typography>
-
             <Box bgcolor={"#FFF1F0"} p={6} borderRadius={2}>
               <Typography variant="h3" fontWeight="bold" color={"red"}>
                 <CountUp start={0} end={totalPosts} duration={10} />
               </Typography>
               <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
-                TỔNG DỰ ÁN TRONG NĂM
+                DỰ ÁN TRONG NĂM
               </Typography>
               <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)}/{totalPosts} Dự án đã khởi công
+                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)}/{totalPosts} Dự án khởi công
               </Typography>
             </Box>
           </Box>
@@ -189,7 +185,7 @@ export default function PostList() {
                     </Typography>
                     <Typography variant="body1">{label}</Typography>
                     <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)}/{statsData[value]?.count ?? 0} Dự án đã khởi công
+                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)}/{statsData[value]?.count ?? 0} Dự án khởi công
                     </Typography>
                   </Box>
 
@@ -238,7 +234,7 @@ export default function PostList() {
                         setProvinceFilter("all");
                       }}
                     >
-                      Xem tất cả
+                      Tất cả
                     </Button>
                   </Box>
                 </Grid>
