@@ -3,15 +3,14 @@ import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, totalFundMapping, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
 import LoadingScreen from "../components/LoadingScreen";
-import { StyledSelectComponent } from "../components/StyledComponent";
 import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { provincesAndCities } from "../vietnam-provinces";
+import FilterList from "../components/FilterList";
 
 export default function PostList() {
   const { category } = useParams();
@@ -254,84 +253,17 @@ export default function PostList() {
 
       {/* Filters */}
       {isProject && (
-        <Box ref={scrollRef} display={"flex"} flexDirection={isMobile ? "column" : "row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-          <StyledSelectComponent
-            label="Loại dự án"
-            inputWidth={200}
-            isMobile={isMobile}
-            value={classificationFilter}
-            onChange={(e) => setClassificationFilter(e.target.value)}
-            options={[
-              {
-                label: "Tất cả",
-                value: "all",
-              },
-              ...Object.entries(classificationMapping)
-                .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-                .map(([value, label]) => ({
-                  label,
-                  value,
-                })),
-            ]}
-          />
-
-          <StyledSelectComponent
-            label="Khoảng tiền"
-            inputWidth={200}
-            isMobile={isMobile}
-            value={totalFundFilter}
-            onChange={(e) => setTotalFundFilter(e.target.value)}
-            options={[
-              {
-                label: "Tất cả",
-                value: "all",
-              },
-              ...Object.entries(totalFundMapping).map(([value, label]) => ({
-                label,
-                value,
-              })),
-            ]}
-          />
-
-          <StyledSelectComponent
-            label="Tiến độ"
-            inputWidth={200}
-            isMobile={isMobile}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={[
-              {
-                label: "Tất cả",
-                value: "all",
-              },
-              ...Object.entries(statusMapping).map(([value, label]) => ({
-                label,
-                value,
-              })),
-            ]}
-          />
-
-          <StyledSelectComponent
-            label="Tỉnh"
-            inputWidth={200}
-            isMobile={isMobile}
-            searchable={true}
-            value={
-              provincesAndCities.find((i) => i.provinceValue === provinceFilter)
-                ? { label: provincesAndCities.find((i) => i.provinceValue === provinceFilter).province, value: provincesAndCities.find((i) => i.provinceValue === provinceFilter).provinceValue }
-                : null
-            }
-            onChange={(option) => setProvinceFilter(option.value)}
-            options={[
-              {
-                label: "Tất cả",
-                value: "all",
-              },
-              ...provincesAndCities.map((i) => ({
-                label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
-                value: i.provinceValue,
-              })),
-            ]}
+        <Box display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+          <FilterList
+            classificationFilter={classificationFilter}
+            setClassificationFilter={setClassificationFilter}
+            totalFundFilter={totalFundFilter}
+            setTotalFundFilter={setTotalFundFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            provinceFilter={provinceFilter}
+            setProvinceFilter={setProvinceFilter}
+            provinceCount={provinceCount}
           />
         </Box>
       )}

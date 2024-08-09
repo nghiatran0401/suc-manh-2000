@@ -5,8 +5,8 @@ export const provincesAndCities = [
     provinceValue: "an-giang",
   },
   {
-    city: "Bà Rịa - Vũng Tàu",
-    province: "Bà Rịa - Vũng Tàu",
+    city: "Vũng Tàu",
+    province: "Vũng Tàu",
     provinceValue: "ba-ria-vung-tau",
   },
   {
@@ -285,8 +285,8 @@ export const provincesAndCities = [
     provinceValue: "tien-giang",
   },
   {
-    city: "TP. Hồ Chí Minh",
-    province: "TP. Hồ Chí Minh",
+    city: "Hồ Chí Minh",
+    province: "Hồ Chí Minh",
     provinceValue: "tp-ho-chi-minh",
   },
   {
