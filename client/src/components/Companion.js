@@ -38,7 +38,7 @@ const COMPANIONS = [
 export default function Companion() {
   const settings = {
     autoplay: true,
-    dots: true,
+    // dots: true,
     autoplaySpeed: 4000,
     speed: 2000,
     rows: 1,
@@ -68,26 +68,28 @@ export default function Companion() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"64px auto"}>
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
       <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
         Đơn vị đồng hành
       </Typography>
 
-      <Slider {...settings}>
-        {COMPANIONS.map((d, index) => (
-          <Grid key={index} m={"24px auto"}>
-            <img
-              src={d.url}
-              alt={d.name}
-              style={{
-                width: "100%",
-                height: "100px",
-                objectFit: "contain",
-              }}
-            />
-          </Grid>
-        ))}
-      </Slider>
+      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
+        <Slider {...settings}>
+          {COMPANIONS.map((d, index) => (
+            <Grid key={index} m={"24px auto"}>
+              <img
+                src={d.url}
+                alt={d.name}
+                style={{
+                  width: "100%",
+                  height: "100px",
+                  objectFit: "contain",
+                }}
+              />
+            </Grid>
+          ))}
+        </Slider>
+      </div>
     </Box>
   );
 }

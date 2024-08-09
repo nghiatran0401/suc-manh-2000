@@ -1,9 +1,5 @@
 import React from "react";
-import { Typography, Box, Card, CardContent, CardMedia, CardActions, Grid } from "@mui/material";
-import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import TwitterIcon from "@mui/icons-material/Twitter";
+import { Typography, Box, Card, CardContent, CardMedia, Grid } from "@mui/material";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -29,7 +25,7 @@ export const MEMBERS = [
     role: "Sáng Lập Dự Án Sức Mạnh 2000 và Hệ Sinh Thái Nuôi Em",
     description: `
       <ul style="margin-left: -24px;">
-        <li>Forbes Under 30 Việt Nam 2020</li>
+        <li>Forbes 30 Under 30 Việt Nam 2020</li>
         <li>Gương mặt trẻ tiêu biểu Việt Nam</li>
         <li>Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
         <li>Trưởng nhóm tình nguyện Niềm tin</li>
@@ -41,8 +37,8 @@ export const MEMBERS = [
     role: "Giám Đốc Trung Tâm Tình Nguyện Quốc Gia",
     description: `
       <ul style="margin-left: -24px;">
-        <li>7 năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam” do Liên Hợp Quốc tài trợ</li>
-        <li>9 năm làm công tác quản lý, điều hành Trung tâm Tình nguyện Quốc gia</li>
+        <li>7+ năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam” - Liên Hợp Quốc</li>
+        <li>9+ năm điều hành Trung tâm Tình nguyện Quốc gia</li>
       </ul>`,
     image: DoThiKimHoa,
   },
@@ -51,11 +47,9 @@ export const MEMBERS = [
     role: "Cố Vấn Chiến Lược & Truyền Thông - Nhà Tài Trợ Thiên Thần",
     description: `
       <ul style="margin-left: -24px;">
-        <li>Phó Tổng Marketing của Biti's</li>
-        <li>Cố Vấn của Thiên Long</li>
-        <li>Tổng Giám Đốc điều hành của Dentsu Redder</li>
+        <li>Phó Tổng Marketing Biti's</li>
+        <li>Tổng Giám Đốc điều hành Dentsu Redder</li>
         <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - ĐH Fulbright Việt Nam</li>
-        <li>Nhà sáng lập Young Marketers</li>
       </ul>`,
     image: HungVo,
   },
@@ -71,7 +65,7 @@ export const MEMBERS = [
     role: "Phó Chủ Nhiệm Dự Án",
     description: `
       <ul style="margin-left: -24px;">
-        <li>12 năm hoạt động công tác xã hội và tình nguyện từ các CLB sinh viên, tổ chức tại Việt Nam & Thái Lan</li> 
+        <li>12+ năm hoạt động CTXH và tình nguyện từ các CLB sinh viên, tổ chức tại Việt Nam & Thái Lan</li> 
         <li>Tiến Sỹ Thủy Văn và Môi Trường tại Ý</li>
       </ul>`,
     image: NguyenThiHien,
@@ -81,8 +75,7 @@ export const MEMBERS = [
     role: "Phụ Trách Tiến Độ",
     description: `
       <ul style="margin-left: -24px;">
-        <li>4+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
-        <li>Cử nhân ĐH Kinh tế Quốc dân</li>
+        <li>4+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Hiện tại đang làm việc trong lĩnh vực Tài chính - Kế toán</li>
       </ul>`,
     image: LeHoangYen,
@@ -92,7 +85,7 @@ export const MEMBERS = [
     role: "Phụ Trách Sao Kê và Góp Lẻ",
     description: `
       <ul style="margin-left: -24px;">
-        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Cử nhân tài chính kế toán</li>
       </ul>
     `,
@@ -103,7 +96,7 @@ export const MEMBERS = [
     role: "Phụ Trách Góp Lẻ Sức Mạnh 2000 và Nuôi Em Campuchia - Kenya",
     description: `
       <ul style="margin-left: -24px;">
-        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
       </ul>
     `,
     image: PhamNgocCham,
@@ -114,7 +107,7 @@ export const MEMBERS = [
     description: `
       <ul style="margin-left: -24px;">
         <li>Nhân sự từ Trung tâm Tình Nguyện Quốc Gia</li>
-        <li>Phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và vận hành, báo cáo, chứng từ</li>
+        <li>Phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và báo cáo, chứng từ</li>
       </ul>
     `,
     image: TranThuyTrang,
@@ -124,7 +117,7 @@ export const MEMBERS = [
     role: "Partnership",
     description: `
       <ul style="margin-left: -24px;">
-        <li>2+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Sinh viên năm 3 - Đại Học Thương Mại</li>
       </ul>
     `,
@@ -135,7 +128,7 @@ export const MEMBERS = [
     role: "Vận Hành Dự án Nuôi Em 500 thuộc Nhà Hạnh Phúc",
     description: `
       <ul style="margin-left: -24px;">
-        <li>5+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Phụ trách cấp và duy trì học bổng cho các em đến năm 18 tuổi</li>
       </ul>`,
     image: NguyenThiAnhDao,
@@ -145,7 +138,7 @@ export const MEMBERS = [
     role: "Phụ Trách Kĩ Thuật Web",
     description: `
       <ul style="margin-left: -24px;">
-        <li>1+ năm tham gia các HĐXH và đồng thời làm TNV của dự án</li>
+        <li>1+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Hiện đang là Software Engineer cho công ty Startup tại Singapore<Eli>
       </ul>`,
     image: TranHuuNghia,
@@ -177,65 +170,53 @@ export default function CarouselMembers() {
       {
         breakpoint: 464,
         settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
+          slidesToShow: 2,
+          slidesToScroll: 2,
         },
       },
     ],
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"32px auto"}>
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
       <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
         Đội ngũ vận hành
       </Typography>
 
-      <Slider {...settings}>
-        {MEMBERS.map((item, index) => (
-          <Grid key={index}>
-            <Card className="card-contanier" sx={{ margin: "10px", minHeight: "350px" }}>
-              <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
-              <CardContent
-                sx={{
-                  minHeight: "340px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "8px",
-                  p: "12px",
-                }}
-              >
-                {item.name && item.role && (
-                  <>
-                    <Typography align="center" variant="h6" fontWeight={"bold"}>
-                      {item.name}
-                    </Typography>
+      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
+        <Slider {...settings}>
+          {MEMBERS.map((item, index) => (
+            <Grid key={index}>
+              <Card className="card-contanier" sx={{ margin: "10px" }}>
+                <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+                <CardContent
+                  sx={{
+                    minHeight: "300px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  {item.name && item.role && (
+                    <>
+                      <Typography align="center" variant="h6" fontWeight={"bold"}>
+                        {item.name}
+                      </Typography>
 
-                    <Typography align="center" variant="body2" fontWeight={"bold"} height={"30px"}>
-                      {item.role}
-                    </Typography>
+                      <Typography align="center" variant="body2" fontWeight={"bold"}>
+                        {item.role}
+                      </Typography>
 
-                    <CardActions sx={{ display: "flex", justifyContent: "center" }}>
-                      <FacebookOutlinedIcon />
-                      <EmailOutlinedIcon />
-                      <LinkedInIcon />
-                      <TwitterIcon />
-                    </CardActions>
-
-                    <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }}></Typography>
-                  </>
-                )}
-
-                {item.caption && (
-                  <Typography align="center" variant="body2">
-                    {item.caption}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Slider>
+                      <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Slider>
+      </div>
     </Box>
   );
 }
