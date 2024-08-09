@@ -41,31 +41,33 @@ export default function CarouselSlide({ items }) {
   };
 
   return (
-    <Slider {...settings}>
-      {items.length > 0 &&
-        items.map((item, index) => (
-          <Grid key={index}>
+    <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
+      <Slider {...settings}>
+        {items.length > 0 &&
+          items.map((item, index) => (
+            <Grid key={index}>
+              <Card style={{ margin: "8px" }}>
+                {item.image ? (
+                  <img src={item.image} alt={item.caption} style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} />
+                ) : (
+                  <div style={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <img src={logo} style={{ height: "100px", objectFit: "contain", objectPosition: "center" }} />
+                  </div>
+                )}
+              </Card>
+            </Grid>
+          ))}
+
+        {items.length === 0 && (
+          <Grid>
             <Card style={{ margin: "8px" }}>
-              {item.image ? (
-                <img src={item.image} alt={item.caption} style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} />
-              ) : (
-                <div style={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <img src={logo} style={{ height: "100px", objectFit: "contain", objectPosition: "center" }} />
-                </div>
-              )}
+              <div style={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <img src={logo} style={{ height: "100px", objectFit: "contain", objectPosition: "center" }} />
+              </div>
             </Card>
           </Grid>
-        ))}
-
-      {items.length === 0 && (
-        <Grid>
-          <Card style={{ margin: "8px" }}>
-            <div style={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <img src={logo} style={{ height: "100px", objectFit: "contain", objectPosition: "center" }} />
-            </div>
-          </Card>
-        </Grid>
-      )}
-    </Slider>
+        )}
+      </Slider>
+    </div>
   );
 }

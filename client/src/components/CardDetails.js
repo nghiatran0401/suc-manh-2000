@@ -6,7 +6,7 @@ import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -135,8 +135,6 @@ export default function CardDetails(props) {
           </Box>
         </Box>
       )}
-
-      {console.log("here2", post?.progress)}
 
       {post?.progress && post?.progress?.length > 0 && (
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
@@ -360,8 +358,8 @@ export default function CardDetails(props) {
 
       {isProject && (
         <Box m={"16px"}>
-          <Typography variant="h5" fontWeight="bold" color={"red"}>
-            Các dự án khác của năm 2024
+          <Typography variant="h5" fontWeight="bold" color={"red"} mb={"8px"}>
+            {categoryMapping[category]} khác
           </Typography>
 
           <CarouselListCard posts={projects} category={category} />
