@@ -350,4 +350,6 @@ module.exports = {
   getValuesByCategoryInRedis,
   setExValueInRedis,
   delValueInRedis,
+  applyFilters,
+  getStatsData,
 };

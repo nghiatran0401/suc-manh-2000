@@ -5,6 +5,7 @@ const mockRedisInstance = {
   set: jest.fn(),
   del: jest.fn(),
   call: jest.fn(),
+  zrevrange: jest.fn(),
   // Add more Redis methods as needed for your tests
 };
 
