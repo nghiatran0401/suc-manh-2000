@@ -49,7 +49,7 @@ export const HEADER_DROPDOWN_LIST = [
   {
     path: "#",
     name: "tin-tuc",
-    title: "Tin Sức mạnh 2000",
+    title: "Tin Tức",
     children: [
       // {
       //   path: "/thong-bao",

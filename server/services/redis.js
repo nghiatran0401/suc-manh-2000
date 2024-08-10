@@ -209,35 +209,34 @@ async function getValueInRedis(key) {
 
 async function getValuesByCategoryInRedis(category, filters, start, end) {
   try {
-    const sortedSetKey = `sorted_posts:${category}`;
+    const sortedSetKeyPattern = `sorted_posts:${category}`;
+    const categoryPostKeyPattern = `post:${category}:*`;
 
-    // Scenario 1: Return a sorted array from start point to end point
+    const categoryPostKeys = await redis.keys(categoryPostKeyPattern);
+    const items = await redis.zrevrange(sortedSetKeyPattern, 0, -1);
+    const values = items.map((item) => JSON.parse(item));
+
+    // Scenario 1: Return a sorted array from start to end point
     if (start !== undefined && end !== undefined) {
-      const items = await redis.zrevrange(sortedSetKey, start, end - 1);
+      const items = await redis.zrevrange(sortedSetKeyPattern, start, end - 1);
       const parsedItems = items.map((item) => JSON.parse(item));
       return { cachedResultData: parsedItems, totalValuesLength: parsedItems.length };
     }
-
-    // Retrieve all items for scenarios 2 and 3
-    const items = await redis.zrevrange(sortedSetKey, 0, -1);
-    const values = items.map((item) => JSON.parse(item));
 
     // Scenario 2: Return a searched values array in admin
     if (Array.isArray(filters) && filters[0]) {
       const q = JSON.parse(filters[0]).value;
       if (!q) return { cachedResultData: values, totalValuesLength: values.length };
-
-      const a = await redisSearchByName(q, { categoryFilter: category });
-      return { cachedResultData: a, totalValuesLength: a.length };
+      const searchedResults = await redisSearchByName(q, { categoryFilter: category });
+      return { cachedResultData: searchedResults, totalValuesLength: searchedResults.length };
     }
+
     // Scenario 3: Return a sorted array with the stats and filters operations
-    let filteredValues = [...values];
     if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {
-      filteredValues = applyFilters(values, filters);
+      const filteredValues = applyFilters(values, filters);
+      const statsData = getStatsData(values);
+      return { cachedResultData: filteredValues, totalValuesLength: categoryPostKeys.length, statsData: statsData };
     }
-
-    const statsData = getStatsData(values);
-    return { cachedResultData: filteredValues, totalValuesLength: values.length, statsData: statsData };
   } catch (error) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
