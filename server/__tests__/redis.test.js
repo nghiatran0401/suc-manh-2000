@@ -11,7 +11,17 @@ const {
   getValueInRedis,
   createSearchIndex,
   getRedisDataWithKeyPattern,
+  removeDocumentFromIndex,
+  upsertDocumentToIndex,
+  redisSearchByName,
 } = require('../services/redis');
+
+const { convertToCleanedName, escapeSpecialCharacters } = require('../utils/search');
+
+jest.mock('../utils/search', () => ({
+  convertToCleanedName: jest.fn(),
+  escapeSpecialCharacters: jest.fn(),
+}));
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
@@ -369,5 +379,120 @@ describe('createSearchIndex', () => {
 
     expect(redis.call).toHaveBeenCalledWith('FT.INFO', INDEX_NAME);
     expect(redis.call).toHaveBeenCalledWith('FT.CREATE', INDEX_NAME, 'PREFIX', '1', 'post:', ...INDEX_SCHEMA);
+  });
+});
+
+describe('removeDocumentFromIndex', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call redis.call with FT.DEL and correct parameters', async () => {
+    const mockData = {
+      collection_id: '123',
+      doc_id: '456',
+    };
+
+    redis.call.mockResolvedValueOnce('OK');
+
+    await removeDocumentFromIndex(mockData);
+
+    expect(redis.call).toHaveBeenCalledWith('FT.DEL', INDEX_NAME, `post:${mockData.collection_id}:${mockData.doc_id}`);
+  });
+});
+
+describe('upsertDocumentToIndex', () => {
+  beforeEach(() => {
+    jest.clearAllMocks(); // Clear any previous mocks
+  });
+
+  it('should call redis.call with correct parameters', async () => {
+    const mockData = {
+      collection_id: '123',
+      doc_id: '456',
+      id: 'id1',
+      slug: 'slug1',
+      name: 'Test Name',
+      publish_date: { toDate: () => new Date('2024-08-10') },
+      thumbnail: 'thumbnail_url',
+      category: 'category1',
+      classification: 'classification1',
+      status: 'active',
+      totalFund: 1000,
+      location: { province: 'province1' },
+    };
+
+    convertToCleanedName.mockReturnValue('cleaned_name');
+
+    // Mock implementation for redis.call
+    redis.call.mockResolvedValueOnce('OK');
+
+    await upsertDocumentToIndex(mockData);
+
+    expect(redis.call).toHaveBeenCalledWith(
+      "FT.ADD",
+      INDEX_NAME,
+      `post:${mockData.collection_id}:${mockData.doc_id}`,
+      1.0,
+      "REPLACE",
+      "FIELDS",
+      "id",
+      mockData.id,
+      "slug",
+      mockData.slug,
+      "name",
+      mockData.name,
+      "cleanedName",
+      'cleaned_name',
+      "publishDate",
+      mockData.publish_date.toDate(),
+      "thumbnail",
+      mockData.thumbnail,
+      "category",
+      mockData.category,
+      "classification",
+      mockData.classification,
+      "status",
+      mockData.status,
+      "totalFund",
+      mockData.totalFund,
+      "province",
+      mockData.location?.province
+    );
+  });
+});
+
+describe('redisSearchByName', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should construct the correct query and return transformed results', async () => {
+    const q = 'example';
+    const filters = {
+    };
+
+    const mockResults = [
+      2,
+      'doc1', ['name', 'Example Name', 'cleanedName', 'example', 'category', 'news'],
+      'doc2', ['name', 'Another Name', 'cleanedName', 'another', 'category', 'news'],
+    ];
+
+    redis.call.mockResolvedValue(mockResults);
+
+    const result = await redisSearchByName(q, filters);
+
+    // Verify that redis.call was called with the correct parameters
+    expect(redis.call).toHaveBeenCalledWith(
+      'FT.SEARCH',
+      INDEX_NAME,
+      '(@name:example*) | (@cleanedName:cleaned_name*)',
+      'SORTBY',
+      'category',
+      'DESC',
+      'LIMIT',
+      0,
+      10000
+    );
   });
 });
