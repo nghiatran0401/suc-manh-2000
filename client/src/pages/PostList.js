@@ -253,7 +253,7 @@ export default function PostList() {
 
       {/* Filters */}
       {isProject && (
-        <Box display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
+        <Box ref={scrollRef} display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <FilterList
             classificationFilter={classificationFilter}
             setClassificationFilter={setClassificationFilter}

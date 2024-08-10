@@ -209,39 +209,58 @@ async function getValueInRedis(key) {
 
 async function getValuesByCategoryInRedis(category, filters, start, end) {
   try {
-    const sortedSetKeyPattern = `sorted_posts:${category}`;
-    const categoryPostKeyPattern = `post:${category}:*`;
-
-    const categoryPostKeys = await redis.keys(categoryPostKeyPattern);
-    const items = await redis.zrevrange(sortedSetKeyPattern, 0, -1);
-    const values = items.map((item) => JSON.parse(item));
+    const categoryPostsKeyPattern = `post:${category}:*`;
+    const sortedCategoryPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
 
     // Scenario 1: Return a sorted array from start to end point
     if (start !== undefined && end !== undefined) {
-      const items = await redis.zrevrange(sortedSetKeyPattern, start, end - 1);
-      const parsedItems = items.map((item) => JSON.parse(item));
+      const parsedItems = sortedCategoryPosts.slice(start, end);
       return { cachedResultData: parsedItems, totalValuesLength: parsedItems.length };
     }
 
     // Scenario 2: Return a searched values array in admin
     if (Array.isArray(filters) && filters[0]) {
       const q = JSON.parse(filters[0]).value;
-      if (!q) return { cachedResultData: values, totalValuesLength: values.length };
+      if (!q) return { cachedResultData: sortedCategoryPosts, totalValuesLength: sortedCategoryPosts.length };
       const searchedResults = await redisSearchByName(q, { categoryFilter: category });
       return { cachedResultData: searchedResults, totalValuesLength: searchedResults.length };
     }
 
-    // Scenario 3: Return a sorted array with the stats and filters operations
+    // Scenario 3: Return a sorted array with the stats and/or filters operations
+    let filteredValues = [...sortedCategoryPosts];
     if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {
-      const filteredValues = applyFilters(values, filters);
-      const statsData = getStatsData(values);
-      return { cachedResultData: filteredValues, totalValuesLength: categoryPostKeys.length, statsData: statsData };
+      filteredValues = applyFilters(sortedCategoryPosts, filters);
     }
+
+    const statsData = getStatsData(sortedCategoryPosts);
+    return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData: statsData };
   } catch (error) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
   }
 }
+
+const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern) => {
+  const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
+
+  const pipeline = redis.pipeline();
+  categoryPostKeys.forEach((key) => pipeline.hgetall(key));
+  const results = await pipeline.exec();
+
+  const posts = results
+    .map(([err, postData]) => {
+      if (err) {
+        console.error(`Error fetching data for key: ${err}`);
+        return null;
+      }
+      return postData;
+    })
+    .filter((post) => post !== null);
+
+  posts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+
+  return posts;
+};
 
 const getStatsData = (posts) => {
   const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
