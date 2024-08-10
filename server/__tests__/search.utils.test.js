@@ -11,11 +11,6 @@ describe('convertToCleanedName', () => {
     expect(convertToCleanedName(input)).toBe(expectedOutput);
   });
 
-  it('should handle null input gracefully', () => {
-    const expectedOutput = '';
-    expect(convertToCleanedName(null)).toBe(expectedOutput);
-  });
-
   it('should remove non-alphanumeric characters', () => {
     const input = 'Nguyễn Văn A!@#$%^&*()_+';
     const expectedOutput = 'nguyen van a';

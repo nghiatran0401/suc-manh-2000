@@ -9,8 +9,8 @@ const {
   applyFilters,
   getStatsData,
   getValueInRedis,
-  getValuesByCategoryInRedis,
   createSearchIndex,
+  getRedisDataWithKeyPattern,
 } = require('../services/redis');
 
 const INDEX_NAME = "post_index";
@@ -326,25 +326,25 @@ describe('getValueInRedis', () => {
   });
 });
 
-describe('getValuesByCategoryInRedis', () => {
-  const category = 'testCategory';
-  const mockKey = `sorted_posts:${category}`;
-  
+describe('getRedisDataWithKeyPattern', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return a sorted array from start point to end point', async () => {
-    const start = 0;
-    const end = 2;
-    const items = ['{"foo":"bar1"}', '{"foo":"bar2"}'];
-    redis.zrevrange.mockResolvedValueOnce(items);
-
-    const result = await getValuesByCategoryInRedis(category, null, start, end);
-
-    expect(redis.zrevrange).toHaveBeenCalledWith(mockKey, start, end - 1);
-    expect(result.cachedResultData).toEqual([{ foo: 'bar1' }, { foo: 'bar2' }]);
-    expect(result.totalValuesLength).toBe(2);
+  it('should return sorted posts based on publishDate', async () => {
+    const categoryPostsKeyPattern = 'post:*';
+    const mockKeysResult = ['post:1', 'post:2'];
+    
+    redis.keys.mockResolvedValue(mockKeysResult);
+    
+    const result = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
+    
+    expect(result).toEqual([
+      { publishDate: '2024-08-10', content: 'Post 1' },
+      { publishDate: '2024-08-09', content: 'Post 2' },
+    ]);
+    
+    expect(redis.keys).toHaveBeenCalledWith(categoryPostsKeyPattern);
   });
 });
 
