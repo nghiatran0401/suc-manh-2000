@@ -18,7 +18,7 @@ async function updateClassificationAndCategoryCounts() {
       const data = doc.data();
       const classification = data.classification;
       const category = data.category;
-      const province = data.location?.province;
+      const provinceValue = data.location?.provinceValue;
 
       if (classification) {
         if (!classificationCounts[classification]) {
@@ -34,11 +34,11 @@ async function updateClassificationAndCategoryCounts() {
         categoryCounts[category]++;
       }
 
-      if (province) {
-        if (!provinceCounts[province]) {
-          provinceCounts[province] = 0;
+      if (provinceValue) {
+        if (!provinceCounts[provinceValue]) {
+          provinceCounts[provinceValue] = 0;
         }
-        provinceCounts[province]++;
+        provinceCounts[provinceValue]++;
       }
     }
   }

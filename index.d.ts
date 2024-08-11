@@ -12,6 +12,9 @@ declare namespace Sucmanh2000 {
     totalFund?: number;
     location?: {
       province?: string;
+      provinceValue?: string;
+      distanceToHCMC?: number;
+      distanceToHN?: number;
     };
     start_date?: string;
     end_date?: string;

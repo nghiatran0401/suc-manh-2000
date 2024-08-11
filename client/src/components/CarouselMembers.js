@@ -93,7 +93,7 @@ export const MEMBERS = [
   },
   {
     name: "PHẠM NGỌC CHÂM",
-    role: "Phụ Trách Góp Lẻ Sức Mạnh 2000 và Nuôi Em Campuchia - Kenya",
+    role: "Phụ Trách Góp Lẻ SM2000 và Nuôi Em Campuchia - Kenya",
     description: `
       <ul style="margin-left: -24px;">
         <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
