@@ -12,7 +12,6 @@ import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
-import { provincesAndCities } from "../vietnam-provinces";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -25,6 +24,8 @@ export default function CardDetails(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isProject = category.includes("du-an");
+
+  console.log("here", post);
 
   useEffect(() => {
     setLoading(true);
@@ -69,25 +70,30 @@ export default function CardDetails(props) {
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
-        <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"}>
-          <Box display={"flex"} alignItems={"center"} gap={"8px"}>
+
+        <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
+          {/* <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.author }} />
-          </Box>
-          <Box display={"flex"} alignItems={"center"} gap={"8px"}>
+          </Box> */}
+          {/* <Box display={"flex"} alignItems={"center"} gap={"8px"}>
             <EventIcon sx={{ width: 32, height: 32 }} />
             <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
-          </Box>
+          </Box> */}
+          <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            {post.publish_date.split("T")[0]}
+          </Typography>
           {post.classification && (
-            <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {classificationMapping[post.classification]}
             </Typography>
           )}
           {post.status !== undefined && (
             <Typography
               variant="body2"
+              fontWeight={600}
               sx={{
-                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 76, 48, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 102, 102, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
                 p: "6px",
                 width: "fit-content",
                 borderRadius: "8px",
@@ -96,14 +102,9 @@ export default function CardDetails(props) {
               {statusMapping[post.status]}
             </Typography>
           )}
-          {Boolean(post.totalFund) && (
-            <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-              {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
-            </Typography>
-          )}
           {post.location?.province && (
-            <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-              {provincesAndCities.find((i) => i.provinceValue === post.location?.province)?.province ?? "Khác"}
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {post.location?.province}
             </Typography>
           )}
         </Box>
@@ -293,16 +294,22 @@ export default function CardDetails(props) {
 
               <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
 
-              <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 8px"}>
+              <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 16px"}>
                 {Boolean(post.totalFund) && (
-                  <Typography variant="body2" sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
-                    {post.totalFund > 0 ? post.totalFund.toLocaleString() : "Đang xử lý"}
+                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                    {/* <img src={charityMoneyIcon} alt="Money icon" style={{ marginRight: "8px" }} /> */}
+                    {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
                   </Typography>
                 )}
 
-                {post.province && (
-                  <Typography variant="body2" sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", borderRadius: "8px", width: "fit-content" }}>
-                    {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
+                {post.location?.distanceToHN && (
+                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(153, 255, 204, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                    {post.location?.distanceToHN ? `Cách Hà Nội ${post.location?.distanceToHN} km` : ""}
+                  </Typography>
+                )}
+                {post.location?.distanceToHCMC && (
+                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(153, 255, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                    {post.location?.distanceToHCMC ? `Cách TP Hồ Chí Minh ${post.location?.distanceToHCMC} km` : ""}
                   </Typography>
                 )}
 

@@ -3,6 +3,7 @@ const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } = require("../services/redis");
 const { updateClassificationAndCategoryCounts } = require("../utils");
+const provincesAndCities = require("../vietnam-provinces");
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -61,7 +62,10 @@ postRouter.post("/", async (req, res) => {
     status: createdPost.status ?? null,
     totalFund: Number(createdPost.totalFund) * 1000000 ?? null,
     location: {
-      province: createdPost.province ?? null,
+      province: provincesAndCities.find((p) => p.provinceValue === createdPost.provinceValue)?.province ?? null,
+      provinceValue: createdPost.provinceValue ?? null,
+      distanceToHCMC: createdPost.distanceToHCMC ?? null,
+      distanceToHN: createdPost.distanceToHN ?? null,
     },
     start_date: createdPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.start_date)) : null,
     end_date: createdPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.end_date)) : null,
@@ -164,7 +168,10 @@ postRouter.patch("/:id", async (req, res) => {
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
         location: {
-          province: updatedPost.province ?? docData.location?.province ?? null,
+          province: provincesAndCities.find((p) => p.provinceValue === updatedPost.provinceValue)?.province ?? docData.location?.province ?? null,
+          provinceValue: updatedPost.provinceValue ?? docData.location?.provinceValue ?? null,
+          distanceToHCMC: updatedPost.distanceToHCMC ?? docData.location?.distanceToHCMC ?? null,
+          distanceToHN: updatedPost.distanceToHN ?? docData.location?.distanceToHN ?? null,
         },
         start_date: updatedPost.start_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.start_date)) : docData.start_date ?? null,
         end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,

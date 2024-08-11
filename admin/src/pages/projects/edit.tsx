@@ -42,9 +42,11 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
-      formProps.form?.setFieldValue("province", projectData.location?.province);
       formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
       formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
+      formProps.form?.setFieldValue("province", projectData.location?.province);
+      formProps.form?.setFieldValue("distanceToHCMC", projectData.location?.distanceToHCMC);
+      formProps.form?.setFieldValue("distanceToHN", projectData.location?.distanceToHN);
     }
   }, [projectData]);
 
@@ -143,6 +145,20 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 </Select.Option>
               ))}
             </Select>
+          </Form.Item>
+        )}
+
+        {/* Distance to HN */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.distanceToHN")}</span>} name={"distanceToHN"} style={{ width: "40%" }}>
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+        )}
+
+        {/* Distance to HCMC */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.distanceToHCMC")}</span>} name={"distanceToHCMC"} style={{ width: "40%" }}>
+            <InputNumber style={{ width: "100%" }} />
           </Form.Item>
         )}
 
