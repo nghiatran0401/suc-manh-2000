@@ -16,3 +16,5 @@ admin/dist
 firebase-debug.log
 firestore-debug.log
 .kai_prettierrc.json
+
+server/coverage

@@ -12,7 +12,6 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./config/styles.css";
-import { provincesAndCities } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
   minHeight: "400px",
@@ -128,7 +127,7 @@ export default function CarouselListCard(props) {
 
                     {post.province && (
                       <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                        {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
+                        {post.province}
                       </Typography>
                     )}
                   </Box>

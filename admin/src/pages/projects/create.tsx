@@ -232,7 +232,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             >
               <span style={{ color: "red" }}>*</span> {translate("post.fields.province")}
             </div>
-            <Form.Item name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
+            <Form.Item name={"provinceValue"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select showSearch placeholder="Select or enter a new province">
                 {provincesAndCities.map((p) => (
                   <Select.Option key={p.provinceValue} value={p.provinceValue}>
@@ -240,6 +240,44 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                   </Select.Option>
                 ))}
               </Select>
+            </Form.Item>
+          </div>
+        )}
+
+        {/* Distance to HN */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              {translate("post.fields.distanceToHN")}
+            </div>
+            <Form.Item name={"distanceToHN"} style={{ width: "40%" }}>
+              <InputNumber defaultValue={0} style={{ width: "100%" }} />
+            </Form.Item>
+          </div>
+        )}
+
+        {/* Distance to HCM */}
+        {isProject && (
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                width: "20%",
+                fontWeight: "bold",
+                fontSize: "16px",
+                paddingRight: "10px",
+              }}
+            >
+              {translate("post.fields.distanceToHCMC")}
+            </div>
+            <Form.Item name={"distanceToHCMC"} style={{ width: "40%" }}>
+              <InputNumber defaultValue={0} style={{ width: "100%" }} />
             </Form.Item>
           </div>
         )}

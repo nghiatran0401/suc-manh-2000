@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Pagination, Paper, InputBase, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { SERVER_URL, totalFundMapping, classificationMapping, statusMapping, DESKTOP_WIDTH, POSTS_PER_PAGE, categoryMapping } from "../constants";
+import { SERVER_URL, DESKTOP_WIDTH, POSTS_PER_PAGE } from "../constants";
 import CardList from "../components/CardList";
 import LoadingScreen from "../components/LoadingScreen";
-import { StyledSelectComponent } from "../components/StyledComponent";
 import { useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
-import { provincesAndCities } from "../vietnam-provinces";
 import FilterList from "../components/FilterList";
 
 export default function PostList() {

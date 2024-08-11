@@ -24,10 +24,12 @@ const resources = {
           thumbnail: "Ảnh đại diện",
           description: "Mô tả",
           classification: "Phân loại",
+          totalFund: "Tổng tiền",
           status: "Trạng thái",
           province: "Tỉnh",
           district: "Quận/Huyện",
-          totalFund: "Tổng tiền",
+          distanceToHCMC: "Khoảng cách đến TP.HCM",
+          distanceToHN: "Khoảng cách đến Hà Nội",
           start_date: "Ngày khởi công",
           end_date: "Ngày khánh thành",
           donor: {
