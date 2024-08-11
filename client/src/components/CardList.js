@@ -7,7 +7,6 @@ import { capitalizeEachWord } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
-import { provincesAndCities } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
   minHeight: "300px",
@@ -91,13 +90,19 @@ export default function CardList(props) {
 
               {post.province && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {provincesAndCities.find((i) => i.provinceValue === post.province)?.province ?? "Khác"}
+                  {post.province}
+                </Typography>
+              )}
+
+              {post.distanceToHN && (
+                <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                  {post.distanceToHN && `Cách Hà Nội ${post.distanceToHN} km`}
                 </Typography>
               )}
 
               {post.category && window.location.href.includes("/search") && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(255, 204, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {post.category.replace("du-an-", "DA ")}
+                  {post.category.replace("du-an-", "")}
                 </Typography>
               )}
             </Box>

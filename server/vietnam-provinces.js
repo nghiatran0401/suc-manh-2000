@@ -1,4 +1,4 @@
-export const provincesAndCities = [
+const provincesAndCities = [
   {
     city: "An Giang",
     province: "An Giang",
@@ -441,3 +441,5 @@ export const provincesAndCities = [
     distanceToHN: 183,
   },
 ].sort((a, b) => a.province.localeCompare(b.province));
+
+module.exports = provincesAndCities;

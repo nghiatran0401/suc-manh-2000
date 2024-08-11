@@ -80,13 +80,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         )}
         {isProject && <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />}
 
-        {isProject && (
-          <Table.Column
-            title={translate("post.fields.province")}
-            dataIndex="province"
-            render={(_, record: BaseRecord) => <Space>{provincesAndCities.find((i) => i.provinceValue === record.province)?.province ?? <span style={{ color: "red" }}>N/A</span>}</Space>}
-          />
-        )}
+        {isProject && <Table.Column title={translate("post.fields.province")} dataIndex="province" render={(_, record: BaseRecord) => <Space>{record.province ?? <span style={{ color: "red" }}>N/A</span>}</Space>} />}
 
         <Table.Column
           title={translate("post.fields.url")}
