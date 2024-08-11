@@ -12,7 +12,7 @@ import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.png";
 import NuoiEm from "../assets/companions/Nuoi_em.png";
 import Dentsu from "../assets/companions/Dentsu.png";
 
-const COMPANIONS = [
+export const COMPANIONS = [
   {
     name: "Sức mạnh 2000",
     url: SM2000,
@@ -68,12 +68,25 @@ export default function Companion() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
-      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
+    <Box
+      maxWidth={DESKTOP_WIDTH}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"16px"}
+      m={"16px auto"}
+    >
+      <Typography variant="h5" fontWeight="bold" m={"0 16px"}>
         Đơn vị đồng hành
       </Typography>
 
-      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
+      <div
+        style={{
+          maxWidth: "100vw",
+          width: "100%",
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+      >
         <Slider {...settings}>
           {COMPANIONS.map((d, index) => (
             <Grid key={index} m={"24px auto"}>

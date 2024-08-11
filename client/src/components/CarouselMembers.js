@@ -1,10 +1,21 @@
 import React from "react";
-import { Typography, Box, Card, CardContent, CardMedia, Grid } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+  Grid,
+} from "@mui/material";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./config/styles.css";
-
+import { ReactComponent as FacebookIcon } from "../assets/icons/facebook-icon.svg";
+import { ReactComponent as XIcon } from "../assets/icons/x-icon.svg";
+import { ReactComponent as EmailIcon } from "../assets/icons/email-icon.svg";
+import { ReactComponent as LinkedInIcon } from "../assets/icons/linkedin-icon.svg";
 import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.png";
 import DoThiKimHoa from "../assets/team/Do_Thi_Kim_Hoa.png";
 import HungVo from "../assets/team/Hung_Vo.png";
@@ -178,17 +189,36 @@ export default function CarouselMembers() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
-      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
+    <Box
+      maxWidth={DESKTOP_WIDTH}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"16px"}
+      m={"16px auto"}
+    >
+      <Typography variant="h5" fontWeight="bold" m={"0 16px"}>
         Đội ngũ vận hành
       </Typography>
 
-      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
-        <Slider {...settings}>
+      <div
+        style={{
+          maxWidth: "100vw",
+          width: "100%",
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+      >
+        <Slider {...settings} arrows={true}>
           {MEMBERS.map((item, index) => (
             <Grid key={index}>
               <Card className="card-contanier" sx={{ margin: "10px" }}>
-                <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+                <CardMedia
+                  component="img"
+                  alt={item.caption}
+                  height="300"
+                  image={item.image}
+                  style={{ objectFit: "fit", objectPosition: "top" }}
+                />
                 <CardContent
                   sx={{
                     minHeight: "300px",
@@ -200,18 +230,42 @@ export default function CarouselMembers() {
                 >
                   {item.name && item.role && (
                     <>
-                      <Typography align="center" variant="h6" fontWeight={"bold"}>
+                      <Typography
+                        align="center"
+                        variant="h6"
+                        fontWeight={"bold"}
+                      >
                         {item.name}
                       </Typography>
 
-                      <Typography align="center" variant="body2" fontWeight={"bold"}>
+                      <Typography
+                        align="center"
+                        variant="body2"
+                        fontWeight={"bold"}
+                      >
                         {item.role}
                       </Typography>
 
-                      <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                      <Typography
+                        align="left"
+                        variant="body2"
+                        dangerouslySetInnerHTML={{ __html: item.description }}
+                      />
                     </>
                   )}
                 </CardContent>
+                <CardActions
+                  sx={{
+                    justifyContent: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <FacebookIcon />
+                  <XIcon />
+                  <EmailIcon />
+                  <LinkedInIcon />
+                </CardActions>
               </Card>
             </Grid>
           ))}
