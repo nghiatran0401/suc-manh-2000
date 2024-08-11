@@ -151,4 +151,4 @@ function escapeSpecialCharacters(str) {
   return str.replace(/[-_]/g, "\\$&");
 }
 
-module.exports = { convertToCleanedName, escapeSpecialCharacters, removeVietnameseAccents };
+module.exports = { convertToCleanedName, escapeSpecialCharacters };
