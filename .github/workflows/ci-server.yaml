@@ -3,7 +3,7 @@ name: Server CI
 on:
   push:
     branches:
-      - epic-191
+      - main
   pull_request:
     paths:
       - 'server/**'
@@ -26,5 +26,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # - name: Run tests
-      #   run: npm test
+      - name: Run unit tests
+        run: npm run test
