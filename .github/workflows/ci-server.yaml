@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - '**'  # Run on pull requests to any branch
+  push:
+    branches:
+      - main  # Run on push to the main branch
 
 jobs:
   build:
