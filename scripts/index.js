@@ -20,5 +20,4 @@ async function moveDocument(sourceCollectionName, destinationCollectionName, doc
 
   console.log(`Moved document with id: ${docId} from ${sourceCollectionName} to ${destinationCollectionName}`);
 }
-
 // moveDocument("du-an-2023", "du-an-2022", "14275").catch(console.error);
