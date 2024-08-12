@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
-import EventIcon from "@mui/icons-material/Event";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
@@ -24,8 +23,6 @@ export default function CardDetails(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isProject = category.includes("du-an");
-
-  console.log("here", post);
 
   useEffect(() => {
     setLoading(true);
@@ -222,7 +219,11 @@ export default function CardDetails(props) {
                   {post.content.tabs.map((tab, index) => (
                     <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "720px", width: "100%" }}>
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        <Typography variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description }} />
+                        <Typography
+                          variant="body1"
+                          sx={{ wordWrap: "break-word", "& figure": { width: "auto !important" }, "& iframe": { width: "-webkit-fill-available !important" } }}
+                          dangerouslySetInnerHTML={{ __html: tab.description }}
+                        />
 
                         {tab.embedded_url?.length > 0 && (
                           <Box>
@@ -261,7 +262,6 @@ export default function CardDetails(props) {
 
                         {tab.slide_show?.length > 0 && (
                           <Box width={isMobile ? "auto" : "720px"}>
-                            {/* <CarouselSlide items={tab.slide_show} /> */}
                             {tab.slide_show.map((img, idx) => (
                               <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
                                 <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
