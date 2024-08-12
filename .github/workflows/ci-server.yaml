@@ -1,12 +1,9 @@
 name: Server CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    paths:
-      - 'server/**'
+    branches:
+      - '**'  # Run on pull requests to any branch
 
 jobs:
   build:
