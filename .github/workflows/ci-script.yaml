@@ -1,0 +1,33 @@
+name: Scripts CI
+
+on:
+  pull_request:
+    branches:
+      - '**'  # Run on pull requests to any branch
+  push:
+    branches:
+      - main  # Run on push to the main branch
+
+jobs:
+  countPosts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20' # Adjust based on your Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Count Projects in Redis
+        run: npm run countPosts
+        working-directory: ./scripts
+        env:
+          REDIS_PROD_URL: ${{ secrets.REDIS_PROD_URL }} # Use the secret stored in GitHub

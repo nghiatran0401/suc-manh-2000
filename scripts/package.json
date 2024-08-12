@@ -11,5 +11,8 @@
     "firebase-admin": "^12.1.1",
     "ioredis": "^5.4.1",
     "slugify": "^1.6.6"
+  },
+  "scripts": {
+    "countPosts": "node countPosts.js"
   }
 }
