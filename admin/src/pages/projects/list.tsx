@@ -5,7 +5,6 @@ import { Table, Space, Input, Form } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, POSTS_PER_PAGE, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import { SearchOutlined } from "@ant-design/icons";
-import { provincesAndCities } from "../../utils/vietnam-provinces";
 import { capitalizeEachWord } from "../../utils/helpers";
 
 interface ISearch {
@@ -80,7 +79,9 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         )}
         {isProject && <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />}
 
-        {isProject && <Table.Column title={translate("post.fields.province")} dataIndex="province" render={(_, record: BaseRecord) => <Space>{record.province ?? <span style={{ color: "red" }}>N/A</span>}</Space>} />}
+        {isProject && (
+          <Table.Column title={translate("post.fields.province")} dataIndex="province" render={(_, record: BaseRecord) => <Space>{record.province ? record.province : <span style={{ color: "red" }}>N/A</span>}</Space>} />
+        )}
 
         <Table.Column
           title={translate("post.fields.url")}
