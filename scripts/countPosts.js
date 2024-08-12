@@ -4,7 +4,7 @@ const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 async function countPosts() {
-  const redisInstance = new Redis(process.env.REDIS_PROD_URL);
+  const redisInstance = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
   try {
     const keys = await redisInstance.keys('post:*');
