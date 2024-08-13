@@ -1,6 +1,6 @@
 const { firestore } = require("./firebase");
 
-async function updateClassificationAndCategoryCounts() {
+async function updateFirebaseCountsCollection() {
   let classificationCounts = {};
   let categoryCounts = {};
   let provinceCounts = {};
@@ -56,4 +56,4 @@ async function updateClassificationAndCategoryCounts() {
   }
 }
 
-updateClassificationAndCategoryCounts().catch(console.error);
+updateFirebaseCountsCollection().catch(console.error);
