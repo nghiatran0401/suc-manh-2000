@@ -193,7 +193,7 @@ export const metadataMapping = {
   constructionItems: "Hạng mục công trình",
   progress: "Tiến độ",
   type: "Hạng mục",
-  totalStudents: "Số học sinh",
+  totalStudents: "Số học sinh huởng lợi",
   totalClassrooms: "Số phòng học",
   totalPublicAffairsRooms: "Số phòng công vụ",
   totalToilets: "Số WC",

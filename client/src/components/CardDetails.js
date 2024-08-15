@@ -104,7 +104,7 @@ export default function CardDetails(props) {
         </Box>
       </Box>
 
-      {post?.donor && post.donor.description && (
+      {post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"}>
           <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
             <Typography
@@ -128,6 +128,10 @@ export default function CardDetails(props) {
               />
             )}
           </Box>
+        </Box>
+      ) : (
+        <Box bgcolor={"#f1f1f1"} height={"100px"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
+          <Typography variant="h6">Hiện chưa có Nhà Tài Trợ</Typography>
         </Box>
       )}
 
