@@ -283,7 +283,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Start Date */}
-        {isProject && (
+        {/* {isProject && (
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -299,10 +299,10 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <Input type="date" />
             </Form.Item>
           </div>
-        )}
+        )} */}
 
         {/* End Date */}
-        {isProject && (
+        {/* {isProject && (
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -318,7 +318,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <Input type="date" />
             </Form.Item>
           </div>
-        )}
+        )} */}
 
         {/* Description */}
         {isProject && (

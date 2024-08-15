@@ -4,6 +4,9 @@
   "private": true,
   "license": "ISC",
   "dependencies": {
+    "airtable": "^0.12.2",
+    "axios": "^1.7.3",
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.1",
     "ioredis": "^5.4.1",

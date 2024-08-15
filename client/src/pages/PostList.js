@@ -152,7 +152,7 @@ export default function PostList() {
                 DỰ ÁN TRONG NĂM
               </Typography>
               <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)}/{totalPosts} Dự án khởi công
+                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
               </Typography>
             </Box>
           </Box>
@@ -193,7 +193,7 @@ export default function PostList() {
                     </Typography>
                     <Typography variant="body1">{label}</Typography>
                     <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)}/{statsData[value]?.count ?? 0} Dự án khởi công
+                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)} Dự án đã khởi công
                     </Typography>
                   </Box>
 

@@ -65,7 +65,7 @@ export const HEADER_DROPDOWN_LIST = [
       },
       {
         path: "/bao-chi-truyen-hinh",
-        title: "Báo chí – truyền hình đưa tin",
+        title: "Báo chí – truyền hình",
       },
       {
         path: "/cau-chuyen",
@@ -84,7 +84,7 @@ export const HEADER_DROPDOWN_LIST = [
   {
     path: "#",
     name: "du-an",
-    title: "Xem Dự án theo năm",
+    title: "Dự án theo năm",
     children: [
       {
         path: "/du-an-2024",
@@ -186,6 +186,19 @@ export const statusMapping = {
   "da-hoan-thanh": "Đã hoàn thành",
   "dang-xay-dung": "Đang xây dựng",
   "can-quyen-gop": "Cần quyên góp",
+};
+
+export const metadataMapping = {
+  stage: "Cấp",
+  progress: "Tiến độ",
+  totalPublicAffairsRooms: "Số phòng công vụ",
+  totalKitchens: "Số bếp",
+  totalStudents: "Số học sinh",
+  totalClassrooms: "Số phòng học",
+  totalToilets: "Số WC",
+  totalRooms: "Số phòng ở",
+  type: "Hạng mục",
+  constructionItems: "Hạng mục công trình",
 };
 
 export const statusColorMapping = {
