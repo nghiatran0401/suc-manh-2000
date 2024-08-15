@@ -1,3 +1,4 @@
+const provincesAndCities = require("./vietnam-provinces");
 const { firestore } = require("./firebase");
 
 async function updateFirebaseCountsCollection() {
@@ -18,7 +19,7 @@ async function updateFirebaseCountsCollection() {
       const data = doc.data();
       const classification = data.classification;
       const category = data.category;
-      const provinceValue = data.location?.provinceValue;
+      const provinceValue = provincesAndCities.find((p) => p.province === data.location?.province)?.provinceValue;
 
       if (classification) {
         if (!classificationCounts[classification]) {

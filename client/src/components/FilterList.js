@@ -10,7 +10,7 @@ const FilterList = (props) => {
     <>
       {categoryFilter && (
         <StyledSelectComponent
-          label="Danh mục"
+          label="Năm"
           value={
             Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)
               ? { label: Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)[1], value: categoryFilter }

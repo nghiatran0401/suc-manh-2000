@@ -190,15 +190,15 @@ export const statusMapping = {
 
 export const metadataMapping = {
   stage: "Cấp",
+  constructionItems: "Hạng mục công trình",
   progress: "Tiến độ",
-  totalPublicAffairsRooms: "Số phòng công vụ",
-  totalKitchens: "Số bếp",
+  type: "Hạng mục",
   totalStudents: "Số học sinh",
   totalClassrooms: "Số phòng học",
+  totalPublicAffairsRooms: "Số phòng công vụ",
   totalToilets: "Số WC",
   totalRooms: "Số phòng ở",
-  type: "Hạng mục",
-  constructionItems: "Hạng mục công trình",
+  totalKitchens: "Số bếp",
 };
 
 export const statusColorMapping = {

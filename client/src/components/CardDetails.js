@@ -11,7 +11,6 @@ import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -301,7 +300,7 @@ export default function CardDetails(props) {
                   })
                   .map(
                     ([key, value], index) =>
-                      value && (
+                      value !== null && (
                         <Typography key={index} variant="body1" color={"#77777"}>
                           <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
                         </Typography>
