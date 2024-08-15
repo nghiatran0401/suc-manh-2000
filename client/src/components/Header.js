@@ -172,7 +172,7 @@ export default function HeaderBar() {
                     }
                   }}
                 >
-                  <ListItemText primary={item.title} />
+                  <ListItemText primary={item.name === "du-an" ? `${item.title} (${totalProjects})` : item.title} />
                   {item.children.length > 0 ? openIndex === index ? <ExpandLess /> : <ExpandMore /> : null}
                 </ListItem>
               )}

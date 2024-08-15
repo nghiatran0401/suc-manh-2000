@@ -5,6 +5,7 @@ declare namespace Sucmanh2000 {
     author: string;
     publish_date: string;
     slug: string;
+    description?: string;
     thumbnail: string;
     category?: string;
     classification?: string;
@@ -12,14 +13,24 @@ declare namespace Sucmanh2000 {
     totalFund?: number;
     location?: {
       province?: string;
-      provinceValue?: string;
+      district?: string;
+      commune?: string;
       distanceToHCMC?: number;
       distanceToHN?: number;
     };
-    start_date?: string;
-    end_date?: string;
-    description?: string;
+    metadata?: {
+      stage?: string;
+      totalStudents?: number;
+      totalClassrooms?: number;
+      totalRooms?: number;
+      totalKitchens?: number;
+      totalToilets?: number;
+      progress?: string;
+      start_date?: string;
+      end_date?: string;
+    };
     donor?: Donor;
+    donors?: string[];
     progress?: Progress;
     content: {
       tabs: TabsContent;

@@ -5,7 +5,7 @@ import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -69,17 +69,9 @@ export default function CardDetails(props) {
         <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
 
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
-          {/* <Box display={"flex"} alignItems={"center"} gap={"8px"}>
-            <Avatar sx={{ width: 32, height: 32 }}>{post.author.charAt(0)}</Avatar>
-            <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.author }} />
-          </Box> */}
-          {/* <Box display={"flex"} alignItems={"center"} gap={"8px"}>
-            <EventIcon sx={{ width: 32, height: 32 }} />
-            <Typography variant="body1" dangerouslySetInnerHTML={{ __html: post.publish_date.split("T")[0] }} />
-          </Box> */}
-          <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+          {/* <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
             {post.publish_date.split("T")[0]}
-          </Typography>
+          </Typography> */}
           {post.classification && (
             <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {classificationMapping[post.classification]}
@@ -99,15 +91,20 @@ export default function CardDetails(props) {
               {statusMapping[post.status]}
             </Typography>
           )}
+          {Boolean(post.totalFund) && (
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+            </Typography>
+          )}
           {post.location?.province && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(255, 153, 204, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.location?.province}
             </Typography>
           )}
         </Box>
       </Box>
 
-      {post?.donor && Object.keys(post?.donor).length > 0 && (
+      {post?.donor && post.donor.description && (
         <Box bgcolor={"#f1f1f1"}>
           <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
             <Typography
@@ -115,7 +112,7 @@ export default function CardDetails(props) {
               variant="h6"
               dangerouslySetInnerHTML={{ __html: post.donor.description }}
               sx={{
-                width: "100%", // Adjust the width as needed
+                width: "100%",
                 wordWrap: "break-word",
                 overflowWrap: "break-word",
               }}
@@ -221,7 +218,7 @@ export default function CardDetails(props) {
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                         <Typography
                           variant="body1"
-                          sx={{ wordWrap: "break-word", "& figure": { width: "auto !important" }, "& iframe": { width: "-webkit-fill-available !important" } }}
+                          sx={{ wordBreak: "break-word", "& figure": { width: "auto !important" }, "& iframe": { width: "-webkit-fill-available !important" } }}
                           dangerouslySetInnerHTML={{ __html: tab.description }}
                         />
 
@@ -289,40 +286,48 @@ export default function CardDetails(props) {
 
         <Grid item xs={12} sm={3}>
           {post.description && (
-            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"}>
-              <img style={{ width: "100%", height: "300px", objectFit: "contain", objectPosition: "center" }} alt={post.name} src={post.thumbnail} />
+            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"} gap={"16px"}>
+              <img style={{ objectFit: "contain", objectPosition: "center", borderRadius: "16px 16px 0 0" }} alt={post.name} src={post.thumbnail} />
+              <Typography variant="body1" fontWeight={"bold"} textAlign={"center"} p={"0 8px"} dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
 
-              <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} />
+              {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
 
-              <Box display={"flex"} flexWrap={"wrap"} gap={"8px"} m={"0px 16px"}>
-                {Boolean(post.totalFund) && (
-                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                    {/* <img src={charityMoneyIcon} alt="Money icon" style={{ marginRight: "8px" }} /> */}
-                    {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
-                  </Typography>
-                )}
+              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"24px"} p={"0 8px"}>
+                {Object.entries(post.metadata)
+                  .sort(([keyA], [keyB]) => {
+                    const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
+                    return order.indexOf(keyA) - order.indexOf(keyB);
+                  })
+                  .map(
+                    ([key, value], index) =>
+                      value !== null && (
+                        <Typography key={index} variant="body1" color={"#77777"}>
+                          <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                        </Typography>
+                      )
+                  )}
 
                 {post.location?.distanceToHN && (
-                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(153, 255, 204, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                    {post.location?.distanceToHN ? `Cách Hà Nội ${post.location?.distanceToHN} km` : ""}
+                  <Typography variant="body1" color={"#77777"}>
+                    <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
                   </Typography>
                 )}
                 {post.location?.distanceToHCMC && (
-                  <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(153, 255, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                    {post.location?.distanceToHCMC ? `Cách TP Hồ Chí Minh ${post.location?.distanceToHCMC} km` : ""}
+                  <Typography variant="body1" color={"#77777"}>
+                    <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
                   </Typography>
                 )}
-
-                {/* {post.start_date  && (
-                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
-                  <strong>Ngày khởi công:</strong> {formatDate(post.start_date)}
-                </Typography>
-              )}
-              {post.end_date && (
-                <Typography variant="body2" sx={{ display: "block", bgcolor: "rgba(213, 184, 255, 1)", p: "6px", m: "8px 24px", borderRadius: "8px" }}>
-                  <strong>Ngày khánh thành:</strong> {formatDate(post.end_date)}
-                </Typography>
-              )} */}
+                <Box>--------------</Box>
+                {Boolean(post.totalFund) && (
+                  <Typography variant="body1" color={"#77777"}>
+                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+                  </Typography>
+                )}
+                {post.donors.length > 0 && (
+                  <Typography variant="body1" color={"#77777"}>
+                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
+                  </Typography>
+                )}
               </Box>
             </Box>
           )}

@@ -42,8 +42,8 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
-      formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
-      formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
+      // formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
+      // formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
       formProps.form?.setFieldValue("province", projectData.location?.province);
       formProps.form?.setFieldValue("distanceToHCMC", projectData.location?.distanceToHCMC);
       formProps.form?.setFieldValue("distanceToHN", projectData.location?.distanceToHN);
@@ -163,18 +163,18 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Start date */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.start_date")}</span>} name={"start_date"} style={{ width: "40%" }}>
             <Input type="date" />
           </Form.Item>
-        )}
+        )} */}
 
         {/* End date */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.end_date")}</span>} name={"end_date"} style={{ width: "40%" }}>
             <Input type="date" />
           </Form.Item>
-        )}
+        )} */}
 
         {/* Description */}
         {isProject && (

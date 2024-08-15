@@ -10,7 +10,7 @@ const FilterList = (props) => {
     <>
       {categoryFilter && (
         <StyledSelectComponent
-          label="Danh mục"
+          label="Năm"
           value={
             Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)
               ? { label: Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)[1], value: categoryFilter }
@@ -61,12 +61,8 @@ const FilterList = (props) => {
       {provinceFilter && (
         <StyledSelectComponent
           label="Tỉnh"
-          value={
-            provincesAndCities.find((i) => i.provinceValue === provinceFilter)
-              ? { label: provincesAndCities.find((i) => i.provinceValue === provinceFilter).province, value: provincesAndCities.find((i) => i.provinceValue === provinceFilter).provinceValue }
-              : null
-          }
-          onChange={(option) => setProvinceFilter(option.value)}
+          value={provincesAndCities.find((i) => i.province === provinceFilter) ? { label: provinceFilter, value: provincesAndCities.find((i) => i.province === provinceFilter).provinceValue } : null}
+          onChange={(option) => setProvinceFilter(option.value === "all" ? "all" : provincesAndCities.find((i) => i.provinceValue === option.value).province)}
           options={provincesAndCities.map((i) => ({
             label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
             value: i.provinceValue,
