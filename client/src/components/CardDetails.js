@@ -293,19 +293,20 @@ export default function CardDetails(props) {
               {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
 
               <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"24px"} p={"0 8px"}>
-                {Object.entries(post.metadata)
-                  .sort(([keyA], [keyB]) => {
-                    const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
-                    return order.indexOf(keyA) - order.indexOf(keyB);
-                  })
-                  .map(
-                    ([key, value], index) =>
-                      value !== null && (
-                        <Typography key={index} variant="body1" color={"#77777"}>
-                          <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
-                        </Typography>
-                      )
-                  )}
+                {post.metadata &&
+                  Object.entries(post.metadata)
+                    .sort(([keyA], [keyB]) => {
+                      const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
+                      return order.indexOf(keyA) - order.indexOf(keyB);
+                    })
+                    .map(
+                      ([key, value], index) =>
+                        value !== null && (
+                          <Typography key={index} variant="body1" color={"#77777"}>
+                            <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                          </Typography>
+                        )
+                    )}
 
                 {post.location?.distanceToHN && (
                   <Typography variant="body1" color={"#77777"}>
@@ -323,7 +324,7 @@ export default function CardDetails(props) {
                     <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
                   </Typography>
                 )}
-                {post.donors.length > 0 && (
+                {post.donors?.length > 0 && (
                   <Typography variant="body1" color={"#77777"}>
                     <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
                   </Typography>

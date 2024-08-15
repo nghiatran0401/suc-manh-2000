@@ -27,7 +27,6 @@ export const MEMBERS = [
       <ul style="margin-left: -24px;">
         <li>Forbes 30 Under 30 Việt Nam 2020</li>
         <li>Gương mặt trẻ tiêu biểu Việt Nam</li>
-        <li>Phó ban Mạng lưới tình nguyện quốc gia khu vực miền Bắc</li>
         <li>Trưởng nhóm tình nguyện Niềm tin</li>
       </ul>`,
     image: HoangHoaTrung,
@@ -37,7 +36,7 @@ export const MEMBERS = [
     role: "Giám Đốc Trung Tâm Tình Nguyện Quốc Gia",
     description: `
       <ul style="margin-left: -24px;">
-        <li>7+ năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam” - Liên Hợp Quốc</li>
+        <li>7+ năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam”</li>
         <li>9+ năm điều hành Trung tâm Tình nguyện Quốc gia</li>
       </ul>`,
     image: DoThiKimHoa,
@@ -191,7 +190,7 @@ export default function CarouselMembers() {
                 <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
                 <CardContent
                   sx={{
-                    minHeight: "300px",
+                    minHeight: "270px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",

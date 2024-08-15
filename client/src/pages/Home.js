@@ -51,6 +51,7 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <>
+      {/* News: Tien do du an */}
       <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
@@ -148,6 +149,7 @@ export default function Home() {
         </Box>
       </Box>
 
+      {/* Projects: Du an thien nguyen */}
       <Box
         maxWidth={DESKTOP_WIDTH}
         display={"flex"}
@@ -207,12 +209,11 @@ export default function Home() {
         </Tabs>
       </Box>
 
-      <Box bgcolor={"#f2f2f2"} height={"100%"} p={"32px 0"}>
-        <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={"0 auto"} p={"16px"}>
-          <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
-            Dự Án Sức Mạnh 2000
-          </Typography>
-        </Box>
+      {/* Projects Statistics */}
+      <Box maxWidth={"100%"} display="flex" flexDirection={"column"} gap={"24px"} bgcolor={"#f2f2f2"} m={"40px auto"} p={isMobile ? "24px" : "40px"}>
+        <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
+          Dự Án Sức Mạnh 2000
+        </Typography>
 
         <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
           <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
@@ -232,9 +233,22 @@ export default function Home() {
           </Grid>
         </Box>
 
-        <Box maxWidth={DESKTOP_WIDTH} display={"flex"} gap={"24px"} m={"32px auto"}>
-          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={6} sm={2.4}>
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            border: "1px solid #fff",
+            paddingBottom: 2,
+            borderRadius: 2,
+            margin: "16px auto",
+            boxShadow: 2,
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            width: isMobile ? "100%" : DESKTOP_WIDTH,
+          }}
+        >
+          <Grid item container xs={12} sm={2.4 * 2}>
+            <Grid item xs={6} sm={6} borderRight={"2px solid #D9D9D9"}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
               </Typography>
@@ -242,7 +256,8 @@ export default function Home() {
                 Trường học
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={2.4}>
+
+            <Grid item xs={6} sm={6} borderRight={isMobile ? "" : "2px solid #D9D9D9"}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
               </Typography>
@@ -250,7 +265,9 @@ export default function Home() {
                 Khu nội trú
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={2.4}>
+          </Grid>
+          <Grid item container xs={12} sm={2.4 * 3}>
+            <Grid item xs={4} borderRight={"2px solid #D9D9D9"}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
               </Typography>
@@ -258,7 +275,7 @@ export default function Home() {
                 Nhà hạnh phúc
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={2.4}>
+            <Grid item xs={4} borderRight={"2px solid #D9D9D9"}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
               </Typography>
@@ -266,7 +283,7 @@ export default function Home() {
                 Cầu đi học
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={2.4}>
+            <Grid item xs={4}>
               <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
                 <CountUp start={0} end={general?.classification["wc"]} duration={10} />
               </Typography>
@@ -275,7 +292,7 @@ export default function Home() {
               </Typography>
             </Grid>
           </Grid>
-        </Box>
+        </Grid>
       </Box>
     </>
   );
