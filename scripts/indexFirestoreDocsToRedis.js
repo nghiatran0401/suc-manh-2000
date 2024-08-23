@@ -3,7 +3,12 @@ const { firestore } = require("./firebase");
 const Redis = require("ioredis");
 const redis = new Redis(process.env.REDIS_PROD_URL);
 
-console.log("here", process.env.REDIS_PROD_URL);
+function convertToCleanedName(name) {
+  return removeVietnameseAccents(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/[-_]/g, "\\$&");
+}
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
