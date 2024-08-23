@@ -36,15 +36,11 @@ const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 async function createSearchIndex() {
   try {
     await redis.call("FT.INFO", INDEX_NAME);
-    console.log(`Index '${INDEX_NAME}' already exists`);
-
-    await removeSearchIndexAndDocuments(redis);
-
-    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
-    console.log(`Index '${INDEX_NAME}' created successfully`);
+    return;
+    // await removeSearchIndexAndDocuments(redis);
+    // await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
   } catch (error) {
     await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
-    console.log(`Index '${INDEX_NAME}' created successfully`);
   }
 }
 
@@ -56,14 +52,12 @@ async function removeSearchIndexAndDocuments() {
         const docId = results[i];
 
         await redis.call("FT.DEL", INDEX_NAME, docId);
-        console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
       }
 
       results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     }
 
     await redis.call("FT.DROPINDEX", INDEX_NAME);
-    console.log(`Index '${INDEX_NAME}' deleted successfully`);
   } catch (error) {
     console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
   }
@@ -101,7 +95,6 @@ async function upsertDocumentToIndex(data) {
       "province",
       data.location?.province
     );
-    console.log(`Document '${data.doc_id}' added to index '${INDEX_NAME}' successfully`);
   } catch (error) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);
   }
@@ -109,7 +102,6 @@ async function upsertDocumentToIndex(data) {
 
 async function removeDocumentFromIndex(data) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
-  console.log(`Document '${data.doc_id}' deleted from index '${INDEX_NAME}' successfully`);
 }
 
 async function redisSearchByName(q, filters) {
