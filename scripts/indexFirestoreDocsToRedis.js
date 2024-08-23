@@ -1,16 +1,43 @@
 const { firestore } = require("./firebase");
-const { upsertDocumentToIndex, createSearchIndex } = require("../server/services/redis");
+const { convertToCleanedName } = require("../server/utils/search");
 
 const Redis = require("ioredis");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+const redis = new Redis(process.env.REDIS_URL);
 
-async function indexFirestoreDocsToRedis(env) {
-  const redisEnv = new Redis(env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL);
-  console.log(`Indexing Firestore data to Redis at ${env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL}`);
+const INDEX_NAME = "post_index";
+const INDEX_SCHEMA = [
+  "SCHEMA",
+  "id",
+  "TEXT",
+  "slug",
+  "TEXT",
+  "name",
+  "TEXT",
+  "cleanedName",
+  "TEXT",
+  "publishDate",
+  "TEXT",
+  "thumbnail",
+  "TEXT",
+  "category",
+  "TAG",
+  "classification",
+  "TAG",
+  "status",
+  "TAG",
+  "totalFund",
+  "NUMERIC",
+  "province",
+  "TAG",
+];
 
+async function indexFirestoreDocsToRedis() {
   try {
-    await createSearchIndex(redisEnv);
+    // if index exists, return
+    await redis.call("FT.INFO", INDEX_NAME);
+  } catch (error) {
+    // if index does not exist, create index and documents
+    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
 
     const collections = await firestore.listCollections();
     for (const collection of collections) {
@@ -23,17 +50,45 @@ async function indexFirestoreDocsToRedis(env) {
           doc_id: doc.id,
         };
 
-        await upsertDocumentToIndex(data, redisEnv);
+        await redis.call(
+          "FT.ADD",
+          INDEX_NAME,
+          `post:${data.collection_id}:${data.doc_id}`,
+          1.0,
+          "REPLACE",
+          "FIELDS",
+          "id",
+          data.id,
+          "slug",
+          data.slug,
+          "name",
+          data.name,
+          "cleanedName",
+          convertToCleanedName(data.name),
+          "publishDate",
+          data.publish_date?.toDate(),
+          "thumbnail",
+          data.thumbnail,
+          "category",
+          data.category,
+          "classification",
+          data.classification,
+          "status",
+          data.status,
+          "totalFund",
+          data.totalFund,
+          "province",
+          data.location?.province
+        );
       });
 
       await Promise.all(promises);
-      console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     }
-
-    redisEnv.disconnect();
-  } catch (error) {
-    console.error(`Error indexing Firestore data:`, error.message);
   }
+
+  console.log("[indexFirestoreDocsToRedis]: Succeeded!");
 }
 
-indexFirestoreDocsToRedis("local").catch(console.error);
+// indexFirestoreDocsToRedis();
+
+module.exports = indexFirestoreDocsToRedis;
