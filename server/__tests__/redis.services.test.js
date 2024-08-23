@@ -12,7 +12,9 @@ const {
   getStatsData,
 } = require("../services/redis");
 const Redis = require("ioredis");
-const redis = new Redis();
+const redis = new Redis(process.env.REDIS_URL);
+
+console.log("here2", process.env.REDIS_URL);
 
 jest.mock("ioredis");
 
