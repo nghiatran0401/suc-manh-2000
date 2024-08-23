@@ -6,7 +6,7 @@ on:
       - epic-191 # main
 
 jobs:
-  serverUnitTesting:
+  serverUnitTests:
     runs-on: ubuntu-latest
     defaults:
       run:
