@@ -3,7 +3,7 @@ name: SM2000 CI
 on:
   push:
     branches:
-      - epic-191 # main
+      - main
 
 jobs:
   serverUnitTests:

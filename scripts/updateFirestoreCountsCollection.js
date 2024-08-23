@@ -6,15 +6,9 @@ async function updateFirestoreCountsCollection() {
   let categoryCounts = {};
   let provinceCounts = {};
 
-  // Get all collections
   const collections = await firestore.listCollections();
-
-  // Iterate over each collection
   for (const collection of collections) {
-    // Get all documents in the collection
     const documents = await collection.get();
-
-    // Iterate over each document
     for (const doc of documents.docs) {
       const data = doc.data();
       const classification = data.classification;
@@ -44,7 +38,6 @@ async function updateFirestoreCountsCollection() {
     }
   }
 
-  // Upload the counts to Firestore
   try {
     await firestore.collection("counts").doc("classification").set(classificationCounts);
     await firestore.collection("counts").doc("category").set(categoryCounts);
