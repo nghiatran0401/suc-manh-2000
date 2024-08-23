@@ -1,16 +1,9 @@
 const { firestore } = require("./firebase");
 const { upsertDocumentToIndex, createSearchIndex } = require("../server/services/redis");
 
-const Redis = require("ioredis");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-
-async function indexFirestoreDocsToRedis(env) {
-  const redisEnv = new Redis(env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL);
-  console.log(`Indexing Firestore data to Redis at ${env === "prod" ? process.env.REDIS_PROD_URL : process.env.REDIS_LOCAL_URL}`);
-
+async function indexFirestoreDocsToRedis() {
   try {
-    await createSearchIndex(redisEnv);
+    await createSearchIndex();
 
     const collections = await firestore.listCollections();
     for (const collection of collections) {
@@ -23,19 +16,18 @@ async function indexFirestoreDocsToRedis(env) {
           doc_id: doc.id,
         };
 
-        await upsertDocumentToIndex(data, redisEnv);
+        await upsertDocumentToIndex(data);
       });
 
       await Promise.all(promises);
     }
 
     console.log("[indexFirestoreDocsToRedis]: Succeeded!");
-    redisEnv.disconnect();
   } catch (error) {
     console.error("[indexFirestoreDocsToRedis]: Failed! - ", error.message);
   }
 }
 
-// indexFirestoreDocsToRedis("prod");
+// indexFirestoreDocsToRedis();
 
 module.exports = indexFirestoreDocsToRedis;

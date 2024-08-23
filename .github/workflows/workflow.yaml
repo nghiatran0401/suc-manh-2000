@@ -23,8 +23,6 @@ jobs:
       - name: Run unit tests
         run: npm run test
         working-directory: ./server
-      - name: Log test output
-        run: echo ${{ job.status }}
 
   workflowScripts:
     runs-on: ubuntu-latest

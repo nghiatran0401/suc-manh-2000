@@ -33,45 +33,45 @@ const INDEX_SCHEMA = [
 ];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
-async function createSearchIndex(redisEnv = redis) {
+async function createSearchIndex() {
   try {
-    await redisEnv.call("FT.INFO", INDEX_NAME);
+    await redis.call("FT.INFO", INDEX_NAME);
     console.log(`Index '${INDEX_NAME}' already exists`);
 
-    await removeSearchIndexAndDocuments(redisEnv);
+    await removeSearchIndexAndDocuments(redis);
 
-    await redisEnv.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
+    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
     console.log(`Index '${INDEX_NAME}' created successfully`);
   } catch (error) {
-    await redisEnv.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
+    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
     console.log(`Index '${INDEX_NAME}' created successfully`);
   }
 }
 
-async function removeSearchIndexAndDocuments(redisEnv = redis) {
+async function removeSearchIndexAndDocuments() {
   try {
-    let results = await redisEnv.call("FT.SEARCH", INDEX_NAME, "*");
+    let results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     while (results[0] > 0) {
       for (let i = 1; i < results.length; i += 2) {
         const docId = results[i];
 
-        await redisEnv.call("FT.DEL", INDEX_NAME, docId);
+        await redis.call("FT.DEL", INDEX_NAME, docId);
         console.log(`Document '${docId}' deleted from index '${INDEX_NAME}' successfully`);
       }
 
-      results = await redisEnv.call("FT.SEARCH", INDEX_NAME, "*");
+      results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     }
 
-    await redisEnv.call("FT.DROPINDEX", INDEX_NAME);
+    await redis.call("FT.DROPINDEX", INDEX_NAME);
     console.log(`Index '${INDEX_NAME}' deleted successfully`);
   } catch (error) {
     console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
   }
 }
 
-async function upsertDocumentToIndex(data, redisEnv = redis) {
+async function upsertDocumentToIndex(data) {
   try {
-    await redisEnv.call(
+    await redis.call(
       "FT.ADD",
       INDEX_NAME,
       `post:${data.collection_id}:${data.doc_id}`,
