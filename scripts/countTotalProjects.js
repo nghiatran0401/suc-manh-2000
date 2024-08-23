@@ -1,7 +1,7 @@
 const { firestore } = require("./firebase");
 
 const Redis = require("ioredis");
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_PROD_URL);
 
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
