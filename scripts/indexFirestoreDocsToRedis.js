@@ -27,13 +27,15 @@ async function indexFirestoreDocsToRedis(env) {
       });
 
       await Promise.all(promises);
-      console.log(`Indexed ${snapshot.docs.length} documents from collection '${collection.id}'`);
     }
 
+    console.log("[indexFirestoreDocsToRedis]: Succeeded!");
     redisEnv.disconnect();
   } catch (error) {
-    console.error(`Error indexing Firestore data:`, error.message);
+    console.error("[indexFirestoreDocsToRedis]: Failed! - ", error.message);
   }
 }
 
-indexFirestoreDocsToRedis("local").catch(console.error);
+// indexFirestoreDocsToRedis("prod");
+
+module.exports = indexFirestoreDocsToRedis;

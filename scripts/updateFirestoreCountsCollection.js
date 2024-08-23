@@ -1,7 +1,7 @@
 const provincesAndCities = require("./vietnam-provinces");
 const { firestore } = require("./firebase");
 
-async function updateFirebaseCountsCollection() {
+async function updateFirestoreCountsCollection() {
   let classificationCounts = {};
   let categoryCounts = {};
   let provinceCounts = {};
@@ -44,17 +44,19 @@ async function updateFirebaseCountsCollection() {
     }
   }
 
-  console.log("counts", { classificationCounts, categoryCounts, provinceCounts });
-
   // Upload the counts to Firestore
   try {
     await firestore.collection("counts").doc("classification").set(classificationCounts);
     await firestore.collection("counts").doc("category").set(categoryCounts);
     await firestore.collection("counts").doc("province").set(provinceCounts);
-    console.log("Updated classification, category and province counts");
+
+    // console.log("counts", { classificationCounts, categoryCounts, provinceCounts });
+    console.log("[updateFirestoreCountsCollection]: Succeeded!");
   } catch (error) {
-    console.error("Failed to upload counts:", error);
+    console.error("[updateFirestoreCountsCollection]: Failed! - ", error);
   }
 }
 
-updateFirebaseCountsCollection().catch(console.error);
+// await updateFirestoreCountsCollection();
+
+module.exports = updateFirestoreCountsCollection;
