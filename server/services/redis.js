@@ -1,6 +1,6 @@
 const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
-// const path = require("path");
-// require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const Redis = require("ioredis");
 
 const redis = new Redis(process.env.REDIS_URL);
