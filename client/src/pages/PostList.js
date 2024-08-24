@@ -143,17 +143,46 @@ export default function PostList() {
       {/* Statistics */}
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
-          <Box display={"flex"} flexDirection={"column"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-            <Box bgcolor={"#FFF1F0"} p={6} borderRadius={2}>
-              <Typography variant="h3" fontWeight="bold" color={"red"}>
-                <CountUp start={0} end={totalPosts} duration={10} />
+          <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
+            <Box bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
+              <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
+                {Number(Object.values(statsData).reduce((acc, curr) => acc + curr["totalFund"], 0)).toLocaleString()} VND
               </Typography>
               <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
-                DỰ ÁN TRONG NĂM
+                TỔNG SỐ TIỀN ĐÃ QUYÊN GÓP
               </Typography>
-              <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
+            </Box>
+
+            <Box bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
+              <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
+                {/* <CountUp start={0} end={totalPosts} duration={10} /> */}
+                {totalPosts}
               </Typography>
+              <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
+                TỔNG DỰ ÁN ĐÃ KHỞI CÔNG
+              </Typography>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: isMobile ? "2px" : "8px",
+                }}
+              >
+                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                  {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
+                </Typography>
+                {isMobile && (
+                  <>
+                    <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                      {Object.values(statsData).reduce((acc, curr) => acc + curr["da-hoan-thanh"], 0)} Dự án đã hoàn thành
+                    </Typography>
+                    <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                      {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"], 0)} Dự án đang xây dựng
+                    </Typography>
+                  </>
+                )}
+              </Box>
             </Box>
           </Box>
 
@@ -171,82 +200,87 @@ export default function PostList() {
               display: "flex",
             }}
           >
-            {Object.entries(classificationMapping)
-              .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
-              .map(([value, label], index) => (
-                <Grid
-                  key={index}
-                  item
-                  display={"flex"}
-                  flexDirection={"column"}
-                  gap={"16px"}
-                  md={3}
-                  sm={6}
-                  xs={6}
-                  paddingTop={0}
-                  paddingRight={2}
-                  borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}
-                >
-                  <Box display={"flex"} flexDirection={"column"} alignItems={"center"} gap={"4px"}>
-                    <Typography variant="h5" fontWeight={600}>
-                      {statsData[value]?.count ?? 0}
-                    </Typography>
-                    <Typography variant="body1">{label}</Typography>
-                    <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                      {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)} Dự án đã khởi công
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    style={{
-                      display: "flex",
-                      gap: isMobile ? "2px" : "8px",
-                      justifyContent: "center",
-                    }}
+            {statsData &&
+              Object.keys(statsData).length > 0 &&
+              Object.entries(classificationMapping)
+                .filter(([v, l]) => !EXCLUDED_FILTER.includes(v))
+                .map(([value, label], index) => (
+                  <Grid
+                    key={index}
+                    item
+                    display={"flex"}
+                    flexDirection={"column"}
+                    gap={"16px"}
+                    md={3}
+                    sm={6}
+                    xs={6}
+                    paddingTop={0}
+                    paddingRight={2}
+                    borderRight={index === 3 || (isMobile && index === 1) ? "" : "2px solid #D9D9D9"}
                   >
-                    {Object.keys(statusMapping).map((status, idx) => (
-                      <Chip
-                        key={idx}
-                        variant="outline"
-                        avatar={<img src={statusLogoMapping[status]} alt="logo" />}
-                        label={statsData[value]?.[status] ?? 0}
-                        sx={{
-                          backgroundColor: statusColorMapping[status],
-                          height: "24px",
-                          "& .MuiChip-avatar": {
-                            width: "16px",
-                            height: "16px",
-                          },
-                          "&:hover": {
-                            backgroundColor: statusColorHoverMapping[status],
-                          },
-                        }}
+                    <Box display={"flex"} flexDirection={"column"} alignItems={"center"} gap={"4px"}>
+                      <Typography variant="h5" fontWeight={600}>
+                        {statsData[value]?.count ?? 0}
+                      </Typography>
+                      <Typography variant="body1">{label}</Typography>
+                      <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
+                        {statsData[value]["dang-xay-dung"] + statsData[value]["da-hoan-thanh"]} Dự án khởi công
+                      </Typography>
+                      <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
+                        {(Number(statsData[value]["totalFund"]) / 1_000_000_000).toFixed(1).toLocaleString()} tỷ Tiền quyên góp
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      style={{
+                        display: "flex",
+                        gap: isMobile ? "2px" : "8px",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {Object.keys(statusMapping).map((status, idx) => (
+                        <Chip
+                          key={idx}
+                          variant="outline"
+                          avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                          label={statsData[value]?.[status] ?? 0}
+                          sx={{
+                            backgroundColor: statusColorMapping[status],
+                            height: "24px",
+                            "& .MuiChip-avatar": {
+                              width: "16px",
+                              height: "16px",
+                            },
+                            "&:hover": {
+                              backgroundColor: statusColorHoverMapping[status],
+                            },
+                          }}
+                          onClick={() => {
+                            setClassificationFilter(value);
+                            setStatusFilter(status);
+                            setTotalFundFilter("all");
+                            setProvinceFilter("all");
+                          }}
+                        />
+                      ))}
+                    </Box>
+                    <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
+                      <Button
+                        variant="outlined"
+                        sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
+                        endIcon={<ArrowForwardIcon />}
                         onClick={() => {
                           setClassificationFilter(value);
-                          setStatusFilter(status);
+                          setStatusFilter("all");
                           setTotalFundFilter("all");
                           setProvinceFilter("all");
                         }}
-                      />
-                    ))}
-                  </Box>
-                  <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
-                    <Button
-                      variant="outlined"
-                      sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
-                      endIcon={<ArrowForwardIcon />}
-                      onClick={() => {
-                        setClassificationFilter(value);
-                        setStatusFilter("all");
-                        setTotalFundFilter("all");
-                        setProvinceFilter("all");
-                      }}
-                    >
-                      Tất cả
-                    </Button>
-                  </Box>
-                </Grid>
-              ))}
+                      >
+                        Tất cả
+                      </Button>
+                    </Box>
+                  </Grid>
+                ))}
           </Grid>
         </Grid>
       )}

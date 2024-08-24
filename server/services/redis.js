@@ -283,14 +283,21 @@ const getStatsData = (posts) => {
     if (statsData[post.classification]) {
       statsData[post.classification].count += 1;
       statsData[post.classification][post.status] += 1;
+      if (["dang-xay-dung", "da-hoan-thanh"].includes(post.status)) {
+        statsData[post.classification]["totalFund"] += Number(post.totalFund);
+      }
     } else {
       statsData[post.classification] = {
         count: 1,
         [STATUSES[0]]: 0,
         [STATUSES[1]]: 0,
         [STATUSES[2]]: 0,
+        totalFund: 0,
       };
       statsData[post.classification][post.status] += 1;
+      if (["dang-xay-dung", "da-hoan-thanh"].includes(post.status)) {
+        statsData[post.classification]["totalFund"] += Number(post.totalFund);
+      }
     }
   }
 

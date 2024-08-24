@@ -69,7 +69,7 @@
 #img-trans {
   transition: opacity 1s ease-in-out;
 }
-@media(max-width: 600px) {
+@media (max-width: 600px) {
   .bar-container {
     .bar {
       justify-content: center;

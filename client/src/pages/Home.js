@@ -10,6 +10,8 @@ import "react-tabs/style/react-tabs.css";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
+import constructionIcon from "../assets/construction.png";
+import peopleIcon from "../assets/people.png";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -20,6 +22,7 @@ export default function Home() {
   const [projectTab, setProjectTab] = useState("/du-an-2024");
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
+  const [totalBeneficialStudents, setTotalBeneficialStudents] = useState(0);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -27,11 +30,17 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([axios.get(SERVER_URL + "/thong-bao", { params: { start: 0, end: 5 } }), axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
-      .then(([news, classificationAndCategoryCounts, totalProjectsCount]) => {
+    Promise.all([
+      axios.get(SERVER_URL + "/thong-bao", { params: { start: 0, end: 5 } }),
+      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
+      axios.get(SERVER_URL + "/getTotalProjectsCount"),
+      axios.get(SERVER_URL + "/getTotalStudentsCount"),
+    ])
+      .then(([news, classificationAndCategoryCounts, totalProjectsCount, totalStudentsCount]) => {
         setNews(news.data.posts);
         setGeneral(classificationAndCategoryCounts.data);
         setTotalFinishedProjects(Number(totalProjectsCount.data));
+        setTotalBeneficialStudents(Number(totalStudentsCount.data));
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -50,9 +59,9 @@ export default function Home() {
 
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
-    <>
+    <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
       {/* News: Tien do du an */}
-      <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -151,7 +160,6 @@ export default function Home() {
 
       {/* Projects: Du an thien nguyen */}
       <Box
-        maxWidth={DESKTOP_WIDTH}
         display={"flex"}
         flexDirection={"column"}
         gap={"24px"}
@@ -210,90 +218,119 @@ export default function Home() {
       </Box>
 
       {/* Projects Statistics */}
-      <Box maxWidth={"100%"} display="flex" flexDirection={"column"} gap={"24px"} bgcolor={"#f2f2f2"} m={"40px auto"} p={isMobile ? "24px" : "40px"}>
-        <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
-          Dự Án Sức Mạnh 2000
-        </Typography>
-
-        <Box maxWidth={"700px"} display={"flex"} gap={"24px"} m={"0 auto"}>
-          <Grid container spacing={3} sx={{ justifyItems: "center", alignItems: "center" }}>
-            <Grid item xs={12} sm={6} sx={{ textAlign: isMobile ? "center" : "right" }} p={isMobile ? "0 8px" : 0}>
-              <Typography variant="h6">
-                Mục tiêu cùng cộng đồng xoá <strong>TOÀN BỘ</strong> điểm trường gỗ, tôn tạm bợ trên <strong>TOÀN QUỐC</strong>. Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
-              <Typography variant="h1" fontWeight={"bold"} color={"red"}>
-                <CountUp start={0} end={totalFinishedProjects} duration={10} />
-              </Typography>
-              <Typography variant="h6" fontWeight={"bold"}>
-                TỔNG DỰ ÁN ĐÃ THỰC HIỆN
-              </Typography>
-            </Grid>
-          </Grid>
+      <Box display="flex" flexDirection={"column"} gap={"24px"} m={"40px auto"} p={isMobile ? "24px 16px" : "40px"}>
+        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={"100%"}>
+          <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
+            Dự Án Sức Mạnh 2000
+          </Typography>
+          <Typography variant="h6" textAlign={"center"} p={isMobile ? "0px" : "0px 80px"}>
+            Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
+            <br />
+            Xây dựng đủ <strong>Khu nội trú</strong>, <strong>Cầu đi học</strong>, và <strong>Nhà hạnh phúc</strong>.
+          </Typography>
         </Box>
 
-        <Grid
-          container
-          spacing={2}
+        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
+          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+            <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
+            <Typography variant="h1" fontWeight={"bold"} color={"red"}>
+              <CountUp start={0} end={totalFinishedProjects} duration={10} />
+            </Typography>
+            <Typography variant="h6" fontWeight={"bold"}>
+              TỔNG DỰ ÁN ĐÃ THỰC HIỆN
+            </Typography>
+          </Box>
+
+          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+            <img src={peopleIcon} alt="people" style={{ width: "100px", height: "100px" }} />
+            <Typography variant="h1" fontWeight={"bold"} color={"red"}>
+              <CountUp start={0} end={totalBeneficialStudents} duration={10} />
+            </Typography>
+            <Typography variant="h6" fontWeight={"bold"}>
+              TỔNG SỐ HỌC SINH HƯỞNG LỢI
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box
           sx={{
             border: "1px solid #fff",
-            paddingBottom: 2,
+            padding: 2,
             borderRadius: 2,
             margin: "16px auto",
             boxShadow: 2,
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            width: isMobile ? "100%" : DESKTOP_WIDTH,
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr",
+            gap: 2,
+            width: "100%",
+            justifyContent: "space-around",
+            alignItems: "center",
           }}
         >
-          <Grid item container xs={12} sm={2.4 * 2}>
-            <Grid item xs={6} sm={6} borderRight={"2px solid #D9D9D9"}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
-              </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Trường học
-              </Typography>
-            </Grid>
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Trường học
+            </Typography>
+          </Box>
 
-            <Grid item xs={6} sm={6} borderRight={isMobile ? "" : "2px solid #D9D9D9"}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
-              </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Khu nội trú
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid item container xs={12} sm={2.4 * 3}>
-            <Grid item xs={4} borderRight={"2px solid #D9D9D9"}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
-              </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Nhà hạnh phúc
-              </Typography>
-            </Grid>
-            <Grid item xs={4} borderRight={"2px solid #D9D9D9"}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
-              </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Cầu đi học
-              </Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <Typography variant="h2" fontWeight={"bold"} color={"red"} textAlign="center">
-                <CountUp start={0} end={general?.classification["wc"]} duration={10} />
-              </Typography>
-              <Typography variant="body1" fontWeight={"bold"} textAlign="center">
-                Nhà vệ sinh
-              </Typography>
-            </Grid>
-          </Grid>
-        </Grid>
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Nhà hạnh phúc
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Cầu đi học
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Khu nội trú
+            </Typography>
+          </Box>
+        </Box>
       </Box>
-    </>
+    </Box>
   );
 }

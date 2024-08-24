@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyledSelectComponent } from "./StyledComponent";
 import { categoryMapping, classificationMapping, totalFundMapping, statusMapping } from "../constants";
 import { provincesAndCities } from "../vietnam-provinces";
 
 const FilterList = (props) => {
   const { categoryFilter, setCategoryFilter, classificationFilter, setClassificationFilter, totalFundFilter, setTotalFundFilter, statusFilter, setStatusFilter, provinceFilter, setProvinceFilter, provinceCount } = props;
+
+  const selectedProvince = useMemo(() => {
+    return provincesAndCities.find((i) => i.province === provinceFilter);
+  }, [provincesAndCities, provinceFilter]);
+
+  const options = useMemo(() => {
+    return provincesAndCities
+      .filter((i) => provinceCount[i.provinceValue] > 0)
+      .sort((a, b) => provinceCount[b.provinceValue] - provinceCount[a.provinceValue])
+      .map((i) => ({
+        label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
+        value: i.provinceValue,
+      }));
+  }, [provincesAndCities, provinceCount]);
 
   return (
     <>
@@ -61,12 +75,9 @@ const FilterList = (props) => {
       {provinceFilter && (
         <StyledSelectComponent
           label="Tỉnh"
-          value={provincesAndCities.find((i) => i.province === provinceFilter) ? { label: provinceFilter, value: provincesAndCities.find((i) => i.province === provinceFilter).provinceValue } : null}
+          value={selectedProvince ? { label: provinceFilter, value: selectedProvince.provinceValue } : null}
           onChange={(option) => setProvinceFilter(option.value === "all" ? "all" : provincesAndCities.find((i) => i.provinceValue === option.value).province)}
-          options={provincesAndCities.map((i) => ({
-            label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
-            value: i.provinceValue,
-          }))}
+          options={options}
         />
       )}
     </>

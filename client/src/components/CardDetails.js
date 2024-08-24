@@ -105,9 +105,10 @@ export default function CardDetails(props) {
       </Box>
 
       {post.donor?.description ? (
-        <Box bgcolor={"#f1f1f1"}>
-          <Box p={"24px"} display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"40px"}>
+        <Box bgcolor={"#f1f1f1"} p={"24px"}>
+          <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography
+              width={isMobile ? "100%" : "80%"}
               color={"#77777"}
               variant="h6"
               dangerouslySetInnerHTML={{ __html: post.donor.description }}
@@ -118,15 +119,11 @@ export default function CardDetails(props) {
               }}
             />
 
-            {post.donor.images.length === 1 && <img src={post.donor.images[0].image} alt={post.donor.name} style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }} />}
-
-            {post.donor.images.length > 1 && (
-              <img
-                src={post.donor.images.find((i) => i.image.toLowerCase().includes("logo"))?.image ?? post.donor.images[0].image}
-                alt={post.donor.name}
-                style={{ width: isMobile ? "50%" : "25%", objectFit: "contain" }}
-              />
-            )}
+            <Box display="flex" flexWrap={"wrap"} width={isMobile ? "100%" : "20%"} gap={"16px"}>
+              {post.donor.images.map((img, idx) => (
+                <img key={idx} src={img.image} alt={post.donor.name} style={{ width: isMobile ? "40%" : "80%", objectFit: "contain" }} />
+              ))}
+            </Box>
           </Box>
         </Box>
       ) : (
@@ -290,13 +287,27 @@ export default function CardDetails(props) {
 
         <Grid item xs={12} sm={3}>
           {post.description && (
-            <Box display={"flex"} flexDirection={"column"} border={"1px solid #000"} borderRadius={"16px"} bgcolor={"#f1f1f1"} mb={"40px"} pb={"16px"} gap={"16px"}>
+            <Box
+              display={"flex"}
+              flexDirection={"column"}
+              border={"1px solid #000"}
+              borderRadius={"16px"}
+              bgcolor={"#f1f1f1"}
+              mb={"40px"}
+              pb={"16px"}
+              gap={"16px"}
+              sx={{
+                width: "100%",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+              }}
+            >
               <img style={{ objectFit: "contain", objectPosition: "center", borderRadius: "16px 16px 0 0" }} alt={post.name} src={post.thumbnail} />
               <Typography variant="body1" fontWeight={"bold"} textAlign={"center"} p={"0 8px"} dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
 
               {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
 
-              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"24px"} p={"0 8px"}>
+              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
                 {post.metadata &&
                   Object.entries(post.metadata)
                     .sort(([keyA], [keyB]) => {
@@ -305,6 +316,7 @@ export default function CardDetails(props) {
                     })
                     .map(
                       ([key, value], index) =>
+                        value &&
                         value !== null && (
                           <Typography key={index} variant="body1" color={"#77777"}>
                             <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}

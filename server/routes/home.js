@@ -46,7 +46,44 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
       res.status(200).send(String(resultData));
     }
   } catch (error) {
-    res.status(500).send({ error: `Failed to fetch data: ${error.message}` });
+    res.status(500).send({ error: `[getTotalProjectsCount] failed: ${error.message}` });
   }
 });
+
+homeRouter.get("/getTotalStudentsCount", async (req, res) => {
+  const cachedKey = `totalStudentsCount`;
+
+  try {
+    const cachedResultData = await getValueInRedis(cachedKey);
+
+    if (cachedResultData) {
+      res.status(200).send(String(cachedResultData));
+    } else {
+      const collections = await firestore.listCollections();
+      const duAnCollections = collections.filter((collection) => collection.id.includes("du-an"));
+
+      const totalStudents = await Promise.all(
+        duAnCollections.map(async (collection) => {
+          const snapshot = await collection.where("status", "in", ["dang-xay-dung", "da-hoan-thanh"]).get();
+          let total = 0;
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.metadata && Number(data.metadata.totalStudents) > 0) {
+              total += data.metadata.totalStudents;
+            }
+          });
+          return total;
+        })
+      );
+
+      const resultData = totalStudents.reduce((a, b) => a + b, 0);
+
+      await setExValueInRedis(cachedKey, resultData, true);
+      res.status(200).send(String(resultData));
+    }
+  } catch (error) {
+    res.status(500).send({ error: `[getTotalStudentsCount] failed: ${error.message}` });
+  }
+});
+
 module.exports = homeRouter;
