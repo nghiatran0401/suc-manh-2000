@@ -276,12 +276,14 @@ describe("getStatsData", () => {
         "can-quyen-gop": 2,
         "dang-xay-dung": 1,
         "da-hoan-thanh": 1,
+        totalFund: NaN,
       },
       B: {
         count: 2,
         "can-quyen-gop": 1,
         "dang-xay-dung": 1,
         "da-hoan-thanh": 0,
+        totalFund: NaN,
       },
     };
     const result = getStatsData(posts);
@@ -301,6 +303,7 @@ describe("getStatsData", () => {
         "can-quyen-gop": 2,
         "dang-xay-dung": 0,
         "da-hoan-thanh": 1,
+        totalFund: NaN,
       },
     };
     const result = getStatsData(posts);
@@ -316,6 +319,7 @@ describe("getStatsData", () => {
         "can-quyen-gop": 0,
         "dang-xay-dung": 0,
         "da-hoan-thanh": 1,
+        totalFund: NaN,
       },
     };
     const result = getStatsData(posts);
@@ -335,18 +339,21 @@ describe("getStatsData", () => {
         "can-quyen-gop": 1,
         "dang-xay-dung": 0,
         "da-hoan-thanh": 0,
+        totalFund: 0,
       },
       B: {
         count: 1,
         "can-quyen-gop": 1,
         "dang-xay-dung": 0,
         "da-hoan-thanh": 0,
+        totalFund: 0,
       },
       C: {
         count: 1,
         "can-quyen-gop": 0,
         "dang-xay-dung": 1,
         "da-hoan-thanh": 0,
+        totalFund: NaN,
       },
     };
     const result = getStatsData(posts);
