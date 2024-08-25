@@ -18,7 +18,7 @@ homeRouter.get("/getClassificationAndCategoryCounts", async (req, res) => {
 
     res.status(200).send({ classification: classificationDoc.data(), category: categoryDoc.data(), province: provinceDoc.data() });
   } catch (error) {
-    res.status(500).send({ error: `Failed to fetch data: ${error.message}` });
+    res.status(500).send({ error: `[getClassificationAndCategoryCounts] failed: ${error.message}` });
   }
 });
 
@@ -36,7 +36,7 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
 
       const counts = await Promise.all(
         duAnCollections.map(async (collection) => {
-          const snapshot = await collection.where("status", "!=", "can-quyen-gop").get();
+          const snapshot = await collection.where("status", "in", ["dang-xay-dung", "da-hoan-thanh"]).get();
           return snapshot.size;
         })
       );

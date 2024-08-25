@@ -224,10 +224,10 @@ export default function PostList() {
                       </Typography>
                       <Typography variant="body1">{label}</Typography>
                       <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                        {statsData[value]["dang-xay-dung"] + statsData[value]["da-hoan-thanh"]} Dự án khởi công
+                        {(statsData[value] ? statsData[value]["dang-xay-dung"] : 0) + (statsData[value] ? statsData[value]["da-hoan-thanh"] : 0)} Dự án khởi công
                       </Typography>
                       <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
-                        {(Number(statsData[value]["totalFund"]) / 1_000_000_000).toFixed(1).toLocaleString()} tỷ Tiền quyên góp
+                        {(Number(statsData[value] ? statsData[value]["totalFund"] : 0) / 1_000_000_000).toFixed(1).toLocaleString()} tỷ Tiền quyên góp
                       </Typography>
                     </Box>
 

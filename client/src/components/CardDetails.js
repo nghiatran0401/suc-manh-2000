@@ -131,7 +131,7 @@ export default function CardDetails(props) {
         </Box>
       </Box>
 
-      {post.donor?.description ? (
+      {isProject && post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography

@@ -262,7 +262,7 @@ export default function Home() {
           <Typography variant="h6" textAlign={"center"} p={isMobile ? "0px" : "0px 80px"}>
             Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
             <br />
-            Xây dựng đủ <strong>Khu nội trú</strong>, <strong>Cầu đi học</strong>, và <strong>Nhà hạnh phúc</strong>.
+            Xây dựng đủ <strong>Nhà hạnh phúc</strong>, <strong>Cầu đi học</strong>, và <strong>Khu nội trú</strong>.
           </Typography>
         </Box>
 
@@ -315,7 +315,7 @@ export default function Home() {
               <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
-              Trường học
+              Điểm trường
             </Typography>
           </Box>
 
