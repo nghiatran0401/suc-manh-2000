@@ -73,7 +73,16 @@ export default function CardDetails(props) {
             {post.publish_date.split("T")[0]}
           </Typography> */}
           {post.classification && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                bgcolor: "rgb(41, 182, 246, 0.2)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
               {classificationMapping[post.classification]}
             </Typography>
           )}
@@ -92,19 +101,37 @@ export default function CardDetails(props) {
             </Typography>
           )}
           {Boolean(post.totalFund) && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(135, 211, 124, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                bgcolor: "rgba(135, 211, 124, 1)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
               {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
             </Typography>
           )}
           {post.location?.province && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgba(255, 153, 204, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                bgcolor: "rgba(255, 153, 204, 1)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
               {post.location?.province}
             </Typography>
           )}
         </Box>
       </Box>
 
-      {post.donor?.description ? (
+      {isProject && post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography
@@ -121,7 +148,15 @@ export default function CardDetails(props) {
 
             <Box display="flex" flexWrap={"wrap"} width={isMobile ? "100%" : "20%"} gap={"16px"}>
               {post.donor.images.map((img, idx) => (
-                <img key={idx} src={img.image} alt={post.donor.name} style={{ width: isMobile ? "40%" : "80%", objectFit: "contain" }} />
+                <img
+                  key={idx}
+                  src={img.image}
+                  alt={post.donor.name}
+                  style={{
+                    width: isMobile ? "40%" : "80%",
+                    objectFit: "contain",
+                  }}
+                />
               ))}
             </Box>
           </Box>
@@ -147,14 +182,26 @@ export default function CardDetails(props) {
         </Grid>
       )}
 
-      <Grid container sx={{ m: "16px 0px", flexDirection: { xs: "column-reverse", sm: "row" } }}>
+      <Grid
+        container
+        sx={{
+          m: "16px 0px",
+          flexDirection: { xs: "column-reverse", sm: "row" },
+        }}
+      >
         <Grid item xs={12} sm={9} p={"0px !important"}>
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
                 post.content.tabs.map((tab, index) => (
                   <Box key={index} display={"flex"} flexDirection={"column"} gap={"16px"}>
-                    <Typography variant="body1" style={{ wordWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: tab.description.replace(/\n/g, "<br>") }} />
+                    <Typography
+                      variant="body1"
+                      style={{ wordWrap: "break-word" }}
+                      dangerouslySetInnerHTML={{
+                        __html: tab.description.replace(/\n/g, "<br>"),
+                      }}
+                    />
 
                     {tab.embedded_url?.length > 0 && (
                       <Box>
@@ -215,11 +262,29 @@ export default function CardDetails(props) {
                   </TabList>
 
                   {post.content.tabs.map((tab, index) => (
-                    <TabPanel key={index} style={{ marginTop: "50px", maxWidth: "720px", width: "100%" }}>
+                    <TabPanel
+                      key={index}
+                      style={{
+                        marginTop: "50px",
+                        maxWidth: "720px",
+                        width: "100%",
+                      }}
+                    >
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                         <Typography
                           variant="body1"
-                          sx={{ wordBreak: "break-word", "& figure": { width: "auto !important" }, "& iframe": { width: "-webkit-fill-available !important" } }}
+                          sx={{
+                            wordBreak: "break-word",
+                            "& figure": { width: "auto !important" },
+                            "& iframe": {
+                              width: "-webkit-fill-available !important",
+                            },
+                            "& table": {
+                              "& th, td": {
+                                verticalAlign: "top",
+                              },
+                            },
+                          }}
                           dangerouslySetInnerHTML={{ __html: tab.description }}
                         />
 
@@ -274,7 +339,13 @@ export default function CardDetails(props) {
 
                       {tab.name === "Nhà hảo tâm" && !tab.description && (!tab.embedded_url || tab.embedded_url?.length === 0) && post?.donor && Object.keys(post?.donor).length > 0 && (
                         <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                          <Typography color={"#77777"} variant="h6" dangerouslySetInnerHTML={{ __html: post.donor.description }} />
+                          <Typography
+                            color={"#77777"}
+                            variant="h6"
+                            dangerouslySetInnerHTML={{
+                              __html: post.donor.description,
+                            }}
+                          />
                         </Box>
                       )}
                     </TabPanel>
@@ -302,8 +373,24 @@ export default function CardDetails(props) {
                 overflowWrap: "break-word",
               }}
             >
-              <img style={{ objectFit: "contain", objectPosition: "center", borderRadius: "16px 16px 0 0" }} alt={post.name} src={post.thumbnail} />
-              <Typography variant="body1" fontWeight={"bold"} textAlign={"center"} p={"0 8px"} dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
+              <img
+                style={{
+                  objectFit: "contain",
+                  objectPosition: "center",
+                  borderRadius: "16px 16px 0 0",
+                }}
+                alt={post.name}
+                src={post.thumbnail}
+              />
+              <Typography
+                variant="body1"
+                fontWeight={"bold"}
+                textAlign={"center"}
+                p={"0 8px"}
+                dangerouslySetInnerHTML={{
+                  __html: capitalizeEachWord(post.name),
+                }}
+              />
 
               {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
 
@@ -369,8 +456,23 @@ export default function CardDetails(props) {
                     }}
                   >
                     <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
-                      <Avatar variant="rounded" src={latestPost.thumbnail} sx={{ width: "50px", height: "50px", objectFit: "cover" }} />
-                      <Typography variant="body2" sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <Avatar
+                        variant="rounded"
+                        src={latestPost.thumbnail}
+                        sx={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         {latestPost.name
                           .replace(/Dự án Sức mạnh 2000|ngày/g, "")
                           .trim()

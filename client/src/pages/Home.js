@@ -12,6 +12,8 @@ import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
 import constructionIcon from "../assets/construction.png";
 import peopleIcon from "../assets/people.png";
+import FilterList from "../components/FilterList";
+import usePostFilter from "../hooks/usePostFilter";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -23,6 +25,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
   const [totalBeneficialStudents, setTotalBeneficialStudents] = useState(0);
+  const { filters, provinceCount, setFilters } = usePostFilter();
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -49,13 +52,13 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab)
+      .get(SERVER_URL + projectTab, { params: { filters } })
       .then((projects) => {
         setProjects(projects.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
-  }, [projectTab]);
+  }, [projectTab, filters]);
 
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
@@ -181,7 +184,18 @@ export default function Home() {
               {PROJECT_LIST.children.map(
                 (child, index) =>
                   !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
-                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
+                    <Tab
+                      key={child.path + index}
+                      onClick={() => {
+                        setProjectTab(child.path);
+                        setFilters({
+                          classification: "all",
+                          totalFund: "all",
+                          status: "all",
+                          province: "all",
+                        });
+                      }}
+                    >
                       <Typography variant="body1">
                         {child.title} ({general?.category[child.path.replace("/", "")]})
                       </Typography>
@@ -190,7 +204,26 @@ export default function Home() {
               )}
             </TabList>
           </div>
-
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "16px",
+              margin: "16px 0",
+            }}
+          >
+            <FilterList
+              classificationFilter={filters.classification}
+              setClassificationFilter={(value) => setFilters({ ...filters, classification: value })}
+              totalFundFilter={filters.totalFund}
+              setTotalFundFilter={(value) => setFilters({ ...filters, totalFund: value })}
+              statusFilter={filters.status}
+              setStatusFilter={(value) => setFilters({ ...filters, status: value })}
+              provinceFilter={filters.province}
+              setProvinceFilter={(value) => setFilters({ ...filters, province: value })}
+              provinceCount={provinceCount}
+            />
+          </div>
           {loading ? (
             <Box minHeight={"500px"} mt={"200px"}>
               <LinearProgress />
@@ -202,6 +235,9 @@ export default function Home() {
                 .map((child, index) => (
                   <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
                     <TabPanel>
+                      <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+                        Số dự án: {projects.length}/{general?.category[child.path.replace("/", "")] ?? 0}
+                      </Typography>
                       <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
                     </TabPanel>
 
@@ -226,7 +262,7 @@ export default function Home() {
           <Typography variant="h6" textAlign={"center"} p={isMobile ? "0px" : "0px 80px"}>
             Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
             <br />
-            Xây dựng đủ <strong>Khu nội trú</strong>, <strong>Cầu đi học</strong>, và <strong>Nhà hạnh phúc</strong>.
+            Xây dựng đủ <strong>Nhà hạnh phúc</strong>, <strong>Cầu đi học</strong>, và <strong>Khu nội trú</strong>.
           </Typography>
         </Box>
 
@@ -279,7 +315,7 @@ export default function Home() {
               <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
-              Trường học
+              Điểm trường
             </Typography>
           </Box>
 
