@@ -10,15 +10,12 @@ const usePostFilter = () => {
     province: "all",
   });
   const [provinceCount, setProvinceCount] = useState({});
+
   useEffect(() => {
     axios
       .get(SERVER_URL + "/getClassificationAndCategoryCounts")
-      .then((res) => {
-        setProvinceCount(res.data.province);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+      .then((res) => setProvinceCount(res.data.province))
+      .catch((e) => console.error(e));
   }, []);
 
   return { filters, setFilters, provinceCount };

@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import {
-  useMediaQuery,
-  Box,
-  Typography,
-  Grid,
-  Card,
-  Link,
-  CardContent,
-  Avatar,
-  LinearProgress,
-  Button,
-} from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -36,12 +25,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
   const [totalBeneficialStudents, setTotalBeneficialStudents] = useState(0);
+  const { filters, provinceCount, setFilters } = usePostFilter();
 
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const { filters, provinceCount, setFilters } = usePostFilter();
 
   useEffect(() => {
     setLoading(true);
@@ -51,55 +39,32 @@ export default function Home() {
       axios.get(SERVER_URL + "/getTotalProjectsCount"),
       axios.get(SERVER_URL + "/getTotalStudentsCount"),
     ])
-      .then(
-        ([
-          news,
-          classificationAndCategoryCounts,
-          totalProjectsCount,
-          totalStudentsCount,
-        ]) => {
-          setNews(news.data.posts);
-          setGeneral(classificationAndCategoryCounts.data);
-          setTotalFinishedProjects(Number(totalProjectsCount.data));
-          setTotalBeneficialStudents(Number(totalStudentsCount.data));
-          setLoading(false);
-        }
-      )
+      .then(([news, classificationAndCategoryCounts, totalProjectsCount, totalStudentsCount]) => {
+        setNews(news.data.posts);
+        setGeneral(classificationAndCategoryCounts.data);
+        setTotalFinishedProjects(Number(totalProjectsCount.data));
+        setTotalBeneficialStudents(Number(totalStudentsCount.data));
+        setLoading(false);
+      })
       .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, {
-        params: {
-          filters,
-        },
-      })
+      .get(SERVER_URL + projectTab, { params: { filters } })
       .then((projects) => {
         setProjects(projects.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
-  }, [projectTab, JSON.stringify(filters)]);
+  }, [projectTab, filters]);
 
-  if (
-    !(
-      news?.length > 0 &&
-      projects?.length > 0 &&
-      Object.keys(general)?.length > 0
-    )
-  )
-    return <LoadingScreen />;
+  if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
       {/* News: Tien do du an */}
-      <Box
-        display={"flex"}
-        flexDirection={"column"}
-        gap={"24px"}
-        m={isMobile ? "24px 16px" : "88px auto 24px"}
-      >
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Cập nhật tiến độ dự án
         </Typography>
@@ -139,10 +104,7 @@ export default function Home() {
                         {news[0].name}
                       </Typography>
                       <Typography variant="body1" color="#fff">
-                        {new Date(news[0].publishDate).toLocaleDateString(
-                          "vi-VN",
-                          { day: "numeric", month: "long", year: "numeric" }
-                        )}
+                        {new Date(news[0].publishDate).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
                   </Box>
@@ -150,20 +112,11 @@ export default function Home() {
               </Link>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Box
-                display={"flex"}
-                flexDirection={"column"}
-                justifyContent={"space-between"}
-              >
+              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
                 {news.map((latestPost, index) => {
                   if (index === 0) return null;
                   return (
-                    <Link
-                      key={index}
-                      component={RouterLink}
-                      to={`/thong-bao/${latestPost.slug}`}
-                      style={{ textDecoration: "none", cursor: "pointer" }}
-                    >
+                    <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
                       <Box
                         display={"flex"}
                         gap={"8px"}
@@ -185,25 +138,13 @@ export default function Home() {
                             objectFit: "cover",
                           }}
                         />
-                        <Box
-                          display={"flex"}
-                          flexDirection={"column"}
-                          gap={"8px"}
-                        >
+                        <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
                           <Typography variant="body2" color="#334862">
-                            {latestPost.name.length > 100
-                              ? `${latestPost.name.substring(0, 100)}...`
-                              : latestPost.name}
+                            {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
                           </Typography>
 
-                          <Typography
-                            variant="body2"
-                            color="#334862"
-                            fontSize={"12px"}
-                          >
-                            {new Date(
-                              latestPost.publishDate
-                            ).toLocaleDateString("vi-VN", {
+                          <Typography variant="body2" color="#334862" fontSize={"12px"}>
+                            {new Date(latestPost.publishDate).toLocaleDateString("vi-VN", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
@@ -256,8 +197,7 @@ export default function Home() {
                       }}
                     >
                       <Typography variant="body1">
-                        {child.title} (
-                        {general?.category[child.path.replace("/", "")]})
+                        {child.title} ({general?.category[child.path.replace("/", "")]})
                       </Typography>
                     </Tab>
                   )
@@ -274,21 +214,13 @@ export default function Home() {
           >
             <FilterList
               classificationFilter={filters.classification}
-              setClassificationFilter={(value) =>
-                setFilters({ ...filters, classification: value })
-              }
+              setClassificationFilter={(value) => setFilters({ ...filters, classification: value })}
               totalFundFilter={filters.totalFund}
-              setTotalFundFilter={(value) =>
-                setFilters({ ...filters, totalFund: value })
-              }
+              setTotalFundFilter={(value) => setFilters({ ...filters, totalFund: value })}
               statusFilter={filters.status}
-              setStatusFilter={(value) =>
-                setFilters({ ...filters, status: value })
-              }
+              setStatusFilter={(value) => setFilters({ ...filters, status: value })}
               provinceFilter={filters.province}
-              setProvinceFilter={(value) =>
-                setFilters({ ...filters, province: value })
-              }
+              setProvinceFilter={(value) => setFilters({ ...filters, province: value })}
               provinceCount={provinceCount}
             />
           </div>
@@ -299,36 +231,18 @@ export default function Home() {
           ) : (
             <>
               {PROJECT_LIST.children
-                .filter(
-                  (child) =>
-                    !["/du-an-2014-2015", "/du-an-2012"].includes(child.path)
-                )
+                .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
                 .map((child, index) => (
-                  <Box
-                    key={child.path + index}
-                    display={"flex"}
-                    flexDirection={"column"}
-                  >
+                  <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
                     <TabPanel>
-                      <Typography
-                        variant="body1"
-                        textAlign={"right"}
-                        mr={"16px"}
-                      >
-                        Số dự án: {projects.length}/
-                        {general?.category[child.path.replace("/", "")] ?? 0}
+                      <Typography variant="body1" textAlign={"right"} mr={"16px"}>
+                        Số dự án: {projects.length}/{general?.category[child.path.replace("/", "")] ?? 0}
                       </Typography>
-                      <CarouselListCard
-                        posts={projects}
-                        category={projectTab.replace("/", "")}
-                      />
+                      <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
                     </TabPanel>
 
                     {projectTab === child.path && (
-                      <Button
-                        variant="contained"
-                        onClick={() => navigate(child.path)}
-                      >
+                      <Button variant="contained" onClick={() => navigate(child.path)}>
                         Xem các {child.title}
                       </Button>
                     )}
@@ -340,57 +254,21 @@ export default function Home() {
       </Box>
 
       {/* Projects Statistics */}
-      <Box
-        display="flex"
-        flexDirection={"column"}
-        gap={"24px"}
-        m={"40px auto"}
-        p={isMobile ? "24px 16px" : "40px"}
-      >
-        <Box
-          display={"flex"}
-          flexDirection={"column"}
-          justifyContent={"center"}
-          width={"100%"}
-        >
-          <Typography
-            variant="h3"
-            fontWeight={"bold"}
-            color={"red"}
-            textAlign={"center"}
-          >
+      <Box display="flex" flexDirection={"column"} gap={"24px"} m={"40px auto"} p={isMobile ? "24px 16px" : "40px"}>
+        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={"100%"}>
+          <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
-          <Typography
-            variant="h6"
-            textAlign={"center"}
-            p={isMobile ? "0px" : "0px 80px"}
-          >
-            Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ,
-            tôn tạm bợ trên toàn quốc.
+          <Typography variant="h6" textAlign={"center"} p={isMobile ? "0px" : "0px 80px"}>
+            Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
             <br />
-            Xây dựng đủ <strong>Khu nội trú</strong>,{" "}
-            <strong>Cầu đi học</strong>, và <strong>Nhà hạnh phúc</strong>.
+            Xây dựng đủ <strong>Khu nội trú</strong>, <strong>Cầu đi học</strong>, và <strong>Nhà hạnh phúc</strong>.
           </Typography>
         </Box>
 
-        <Box
-          display={"flex"}
-          flexDirection={isMobile ? "column" : "row"}
-          alignItems={"center"}
-        >
-          <Box
-            width={isMobile ? "100%" : "50%"}
-            display={"flex"}
-            flexDirection={"column"}
-            alignItems={"center"}
-            justifyContent={"center"}
-          >
-            <img
-              src={constructionIcon}
-              alt="construction"
-              style={{ width: "100px", height: "100px" }}
-            />
+        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
+          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+            <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
             <Typography variant="h1" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalFinishedProjects} duration={10} />
             </Typography>
@@ -399,18 +277,8 @@ export default function Home() {
             </Typography>
           </Box>
 
-          <Box
-            width={isMobile ? "100%" : "50%"}
-            display={"flex"}
-            flexDirection={"column"}
-            alignItems={"center"}
-            justifyContent={"center"}
-          >
-            <img
-              src={peopleIcon}
-              alt="people"
-              style={{ width: "100px", height: "100px" }}
-            />
+          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+            <img src={peopleIcon} alt="people" style={{ width: "100px", height: "100px" }} />
             <Typography variant="h1" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalBeneficialStudents} duration={10} />
             </Typography>
@@ -444,11 +312,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h2" fontWeight="bold" color="red">
-              <CountUp
-                start={0}
-                end={general?.classification["truong-hoc"]}
-                duration={10}
-              />
+              <CountUp start={0} end={general?.classification["truong-hoc"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Trường học
@@ -464,11 +328,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h2" fontWeight="bold" color="red">
-              <CountUp
-                start={0}
-                end={general?.classification["nha-hanh-phuc"]}
-                duration={10}
-              />
+              <CountUp start={0} end={general?.classification["nha-hanh-phuc"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Nhà hạnh phúc
@@ -484,11 +344,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h2" fontWeight="bold" color="red">
-              <CountUp
-                start={0}
-                end={general?.classification["cau-hanh-phuc"]}
-                duration={10}
-              />
+              <CountUp start={0} end={general?.classification["cau-hanh-phuc"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Cầu đi học
@@ -503,11 +359,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h2" fontWeight="bold" color="red">
-              <CountUp
-                start={0}
-                end={general?.classification["khu-noi-tru"]}
-                duration={10}
-              />
+              <CountUp start={0} end={general?.classification["khu-noi-tru"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Khu nội trú

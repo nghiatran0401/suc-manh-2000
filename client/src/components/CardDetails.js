@@ -1,28 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  useMediaQuery,
-  Box,
-  Typography,
-  Avatar,
-  Grid,
-  Breadcrumbs,
-  Link,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
 import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import {
-  DESKTOP_WIDTH,
-  HEADER_DROPDOWN_LIST,
-  categoryMapping,
-  classificationMapping,
-  metadataMapping,
-  statusMapping,
-} from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -63,31 +46,15 @@ export default function CardDetails(props) {
 
   if (loading) return <LoadingScreen />;
   return (
-    <Box
-      maxWidth={DESKTOP_WIDTH}
-      m={"auto"}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"16px"}
-    >
+    <Box maxWidth={DESKTOP_WIDTH} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
       <Breadcrumbs aria-label="breadcrumb">
-        <Link
-          sx={{ color: "#334862", textDecoration: "none" }}
-          component={RouterLink}
-          to="/"
-        >
+        <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
         </Link>
-        <Link
-          sx={{ color: "#334862", textDecoration: "none" }}
-          component={RouterLink}
-          to={`/${category}`}
-        >
+        <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to={`/${category}`}>
           {HEADER_DROPDOWN_LIST.map((item) => {
             if (item.children.length > 0) {
-              const foundChild = item.children.find(
-                (child) => child.path === `/${category}`
-              );
+              const foundChild = item.children.find((child) => child.path === `/${category}`);
               if (foundChild) {
                 return foundChild.title;
               }
@@ -95,25 +62,13 @@ export default function CardDetails(props) {
             return null;
           })}
         </Link>
-        <Typography color="textPrimary">
-          {capitalizeEachWord(post.name)}
-        </Typography>
+        <Typography color="textPrimary">{capitalizeEachWord(post.name)}</Typography>
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }}
-        />
+        <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
 
-        <Box
-          display={"flex"}
-          flexWrap={"wrap"}
-          gap={"16px"}
-          alignContent={"center"}
-          mt={"16px"}
-        >
+        <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
           {/* <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
             {post.publish_date.split("T")[0]}
           </Typography> */}
@@ -136,12 +91,7 @@ export default function CardDetails(props) {
               variant="body2"
               fontWeight={600}
               sx={{
-                bgcolor:
-                  post.status === "can-quyen-gop"
-                    ? "rgba(255, 102, 102, 1)"
-                    : post.status === "dang-xay-dung"
-                    ? "rgba(255, 252, 150, 1)"
-                    : "rgba(210, 238, 130, 1)",
+                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 102, 102, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
                 p: "6px",
                 width: "fit-content",
                 borderRadius: "8px",
@@ -161,9 +111,7 @@ export default function CardDetails(props) {
                 borderRadius: "8px",
               }}
             >
-              {post.totalFund > 0
-                ? Number(post.totalFund).toLocaleString() + " VND"
-                : "Đang xử lý"}
+              {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
             </Typography>
           )}
           {post.location?.province && (
@@ -185,11 +133,7 @@ export default function CardDetails(props) {
 
       {post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
-          <Box
-            display={"flex"}
-            flexDirection={isMobile ? "column-reverse" : "row"}
-            gap={"16px"}
-          >
+          <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography
               width={isMobile ? "100%" : "80%"}
               color={"#77777"}
@@ -202,12 +146,7 @@ export default function CardDetails(props) {
               }}
             />
 
-            <Box
-              display="flex"
-              flexWrap={"wrap"}
-              width={isMobile ? "100%" : "20%"}
-              gap={"16px"}
-            >
+            <Box display="flex" flexWrap={"wrap"} width={isMobile ? "100%" : "20%"} gap={"16px"}>
               {post.donor.images.map((img, idx) => (
                 <img
                   key={idx}
@@ -223,34 +162,15 @@ export default function CardDetails(props) {
           </Box>
         </Box>
       ) : (
-        <Box
-          bgcolor={"#f1f1f1"}
-          height={"100px"}
-          p={"24px"}
-          display={"flex"}
-          alignItems={"center"}
-          justifyContent={"center"}
-        >
+        <Box bgcolor={"#f1f1f1"} height={"100px"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
           <Typography variant="h6">Hiện chưa có Nhà Tài Trợ</Typography>
         </Box>
       )}
 
       {post?.progress && post?.progress?.length > 0 && (
-        <Grid
-          container
-          spacing={3}
-          m={"16px 0px"}
-          width={"100%"}
-          display={"flex"}
-          flexDirection={isMobile ? "column" : "row"}
-        >
+        <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {post?.progress?.map((progress, index) => (
-            <Grid
-              key={index}
-              item
-              xs={4}
-              sx={{ p: "0px !important", maxWidth: "100%" }}
-            >
+            <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
               <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                 <Typography variant="h5" fontWeight="bold" m={"8px"}>
                   {progress.name}
@@ -274,12 +194,7 @@ export default function CardDetails(props) {
             <Box display={"flex"} gap={"10px"}>
               {post.content.tabs.length === 1 &&
                 post.content.tabs.map((tab, index) => (
-                  <Box
-                    key={index}
-                    display={"flex"}
-                    flexDirection={"column"}
-                    gap={"16px"}
-                  >
+                  <Box key={index} display={"flex"} flexDirection={"column"} gap={"16px"}>
                     <Typography
                       variant="body1"
                       style={{ wordWrap: "break-word" }}
@@ -293,12 +208,7 @@ export default function CardDetails(props) {
                         {tab.embedded_url?.map((url, index) => {
                           if (url.includes("momo")) {
                             return (
-                              <Button
-                                href={url}
-                                target="_blank"
-                                variant="contained"
-                                sx={{ bgcolor: "#ed1c24" }}
-                              >
+                              <Button href={url} target="_blank" variant="contained" sx={{ bgcolor: "#ed1c24" }}>
                                 Quỹ Trái Tim Momo
                               </Button>
                             );
@@ -314,16 +224,8 @@ export default function CardDetails(props) {
                                   key={index}
                                   title={tab.name}
                                   width="100%"
-                                  height={
-                                    tab.embedded_url.length === 1
-                                      ? "1000px"
-                                      : "500px"
-                                  }
-                                  src={
-                                    url.includes("youtube")
-                                      ? convertToYoutubeUrl(url)
-                                      : url
-                                  }
+                                  height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
+                                  src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}
                                   frameborder="0"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                   allowfullscreen
@@ -339,19 +241,8 @@ export default function CardDetails(props) {
                     {tab.slide_show?.length > 0 && (
                       <Box maxWidth={"720px"}>
                         {tab.slide_show.map((img, idx) => (
-                          <Box
-                            key={idx}
-                            display={"flex"}
-                            flexDirection={"column"}
-                            gap={"8px"}
-                            alignItems={"center"}
-                            m={"16px"}
-                          >
-                            <img
-                              src={img.image}
-                              alt={img.caption}
-                              style={{ width: "100%", objectFit: "contain" }}
-                            />
+                          <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                            <img src={img.image} alt={img.caption} style={{ width: "100%", objectFit: "contain" }} />
                             <Typography variant="body2" color={"#77777"}>
                               {img.caption}
                             </Typography>
@@ -379,11 +270,7 @@ export default function CardDetails(props) {
                         width: "100%",
                       }}
                     >
-                      <Box
-                        display={"flex"}
-                        flexDirection={"column"}
-                        gap={"16px"}
-                      >
+                      <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                         <Typography
                           variant="body1"
                           sx={{
@@ -406,12 +293,7 @@ export default function CardDetails(props) {
                             {tab.embedded_url?.map((url, index) => {
                               if (url.includes("momo")) {
                                 return (
-                                  <Button
-                                    href={url}
-                                    target="_blank"
-                                    variant="contained"
-                                    sx={{ bgcolor: "#ed1c24" }}
-                                  >
+                                  <Button href={url} target="_blank" variant="contained" sx={{ bgcolor: "#ed1c24" }}>
                                     Quỹ Trái Tim Momo
                                   </Button>
                                 );
@@ -419,10 +301,7 @@ export default function CardDetails(props) {
                                 return (
                                   <>
                                     {isIframeLoading && (
-                                      <Box
-                                        display="flex"
-                                        justifyContent="center"
-                                      >
+                                      <Box display="flex" justifyContent="center">
                                         <CircularProgress />
                                       </Box>
                                     )}
@@ -430,16 +309,8 @@ export default function CardDetails(props) {
                                       key={index}
                                       title={tab.name}
                                       width="100%"
-                                      height={
-                                        tab.embedded_url.length === 1
-                                          ? "1000px"
-                                          : "500px"
-                                      }
-                                      src={
-                                        url.includes("youtube")
-                                          ? convertToYoutubeUrl(url)
-                                          : url
-                                      }
+                                      height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
+                                      src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}
                                       frameborder="0"
                                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                       allowfullscreen
@@ -455,19 +326,8 @@ export default function CardDetails(props) {
                         {tab.slide_show?.length > 0 && (
                           <Box width={isMobile ? "auto" : "720px"}>
                             {tab.slide_show.map((img, idx) => (
-                              <Box
-                                key={idx}
-                                display={"flex"}
-                                flexDirection={"column"}
-                                gap={"8px"}
-                                alignItems={"center"}
-                                m={"16px"}
-                              >
-                                <img
-                                  src={img.image}
-                                  alt={img.caption.split(".")[0]}
-                                  style={{ width: "100%", height: "auto" }}
-                                />
+                              <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                                <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
                                 <Typography variant="body2" color={"#77777"}>
                                   {img.caption.split(".")[0]}
                                 </Typography>
@@ -477,25 +337,17 @@ export default function CardDetails(props) {
                         )}
                       </Box>
 
-                      {tab.name === "Nhà hảo tâm" &&
-                        !tab.description &&
-                        (!tab.embedded_url || tab.embedded_url?.length === 0) &&
-                        post?.donor &&
-                        Object.keys(post?.donor).length > 0 && (
-                          <Box
-                            display={"flex"}
-                            flexDirection={"column"}
-                            gap={"16px"}
-                          >
-                            <Typography
-                              color={"#77777"}
-                              variant="h6"
-                              dangerouslySetInnerHTML={{
-                                __html: post.donor.description,
-                              }}
-                            />
-                          </Box>
-                        )}
+                      {tab.name === "Nhà hảo tâm" && !tab.description && (!tab.embedded_url || tab.embedded_url?.length === 0) && post?.donor && Object.keys(post?.donor).length > 0 && (
+                        <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+                          <Typography
+                            color={"#77777"}
+                            variant="h6"
+                            dangerouslySetInnerHTML={{
+                              __html: post.donor.description,
+                            }}
+                          />
+                        </Box>
+                      )}
                     </TabPanel>
                   ))}
                 </Tabs>
@@ -542,74 +394,42 @@ export default function CardDetails(props) {
 
               {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
 
-              <Box
-                display={"flex"}
-                flexDirection={"column"}
-                gap={"8px"}
-                ml={"8px"}
-                p={"0 8px"}
-              >
+              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
                 {post.metadata &&
                   Object.entries(post.metadata)
                     .sort(([keyA], [keyB]) => {
-                      const order = [
-                        "stage",
-                        "constructionItems",
-                        "progress",
-                        "type",
-                        "totalStudents",
-                        "totalClassrooms",
-                        "totalPublicAffairsRooms",
-                        "totalToilets",
-                        "totalRooms",
-                        "totalKitchens",
-                      ];
+                      const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
                       return order.indexOf(keyA) - order.indexOf(keyB);
                     })
                     .map(
                       ([key, value], index) =>
                         value &&
                         value !== null && (
-                          <Typography
-                            key={index}
-                            variant="body1"
-                            color={"#77777"}
-                          >
-                            <span style={{ fontWeight: "bold" }}>
-                              {metadataMapping[key]}
-                            </span>
-                            : {value}
+                          <Typography key={index} variant="body1" color={"#77777"}>
+                            <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
                           </Typography>
                         )
                     )}
 
                 {post.location?.distanceToHN && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>:{" "}
-                    {post.location?.distanceToHN} km
+                    <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
                   </Typography>
                 )}
                 {post.location?.distanceToHCMC && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>
-                      Cách TP Hồ Chí Minh
-                    </span>
-                    : {post.location?.distanceToHCMC} km
+                    <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
                   </Typography>
                 )}
                 <Box>--------------</Box>
                 {Boolean(post.totalFund) && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>:{" "}
-                    {post.totalFund > 0
-                      ? Number(post.totalFund).toLocaleString() + " VND"
-                      : "Đang xử lý"}
+                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
                   </Typography>
                 )}
                 {post.donors?.length > 0 && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>:{" "}
-                    {post.donors.map((donor) => donor.name).join(", ")}
+                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
                   </Typography>
                 )}
               </Box>
@@ -617,15 +437,7 @@ export default function CardDetails(props) {
           )}
 
           {!isMobile && (
-            <Box
-              position="sticky"
-              top={80}
-              zIndex={1}
-              bgcolor="#fff"
-              boxShadow={1}
-              p={"16px 8px"}
-              borderRadius={4}
-            >
+            <Box position="sticky" top={80} zIndex={1} bgcolor="#fff" boxShadow={1} p={"16px 8px"} borderRadius={4}>
               <Typography variant="h6" fontWeight="bold" align="center">
                 THÔNG BÁO MỚI NHẤT
               </Typography>
@@ -643,14 +455,7 @@ export default function CardDetails(props) {
                       ":hover": { color: "#000" },
                     }}
                   >
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={2}
-                      minHeight="56px"
-                      borderRadius={8}
-                      p={1}
-                    >
+                    <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
                       <Avatar
                         variant="rounded"
                         src={latestPost.thumbnail}
@@ -692,16 +497,8 @@ export default function CardDetails(props) {
         </Box>
       )}
 
-      <Box
-        display={"flex"}
-        gap={isMobile ? "16px" : "40px"}
-        justifyContent={"center"}
-        width={"100%"}
-      >
-        <Button
-          variant="contained"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
+      <Box display={"flex"} gap={isMobile ? "16px" : "40px"} justifyContent={"center"} width={"100%"}>
+        <Button variant="contained" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           Trở lại đầu trang
         </Button>
         <Button variant="outlined" onClick={() => navigate(-1)}>
