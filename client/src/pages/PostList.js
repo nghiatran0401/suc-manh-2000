@@ -159,7 +159,7 @@ export default function PostList() {
                 {totalPosts}
               </Typography>
               <Typography fontSize={"20px"} fontWeight={700} lineHeight={"28px"} color={"#000000E0"}>
-                TỔNG DỰ ÁN ĐÃ KHỞI CÔNG
+                TỔNG DỰ ÁN TRONG NĂM
               </Typography>
 
               <Box

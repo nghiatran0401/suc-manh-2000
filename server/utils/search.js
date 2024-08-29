@@ -1,5 +1,5 @@
 function convertToCleanedName(name) {
-  return removeVietnameseAccents(name)
+  return removeVietnameseAccents(name ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/[-_]/g, "\\$&");

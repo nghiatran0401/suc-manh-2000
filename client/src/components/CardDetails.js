@@ -162,9 +162,12 @@ export default function CardDetails(props) {
           </Box>
         </Box>
       ) : (
-        <Box bgcolor={"#f1f1f1"} height={"100px"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
-          <Typography variant="h6">Hiện chưa có Nhà Tài Trợ</Typography>
-        </Box>
+        isProject &&
+        !post.donor?.description && (
+          <Box bgcolor={"#f1f1f1"} height={"100px"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
+            <Typography variant="h6">Hiện chưa có Nhà Tài Trợ</Typography>
+          </Box>
+        )
       )}
 
       {post?.progress && post?.progress?.length > 0 && (

@@ -210,6 +210,7 @@ export default function Home() {
               justifyContent: "flex-end",
               gap: "16px",
               margin: "16px 0",
+              flexWrap: "wrap",
             }}
           >
             <FilterList
