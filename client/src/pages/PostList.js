@@ -3,139 +3,99 @@ import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH, EXCLUDED_FILTER } from "../constants";
 import CardList from "../components/CardList";
 import { findTitle } from "../helpers";
-import LoadingScreen from "../components/LoadingScreen";
-import CountUp from "react-countup";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FilterList from "../components/FilterList";
+import usePostFilter from "../hooks/usePostFilter";
 
 export default function PostList() {
   const { category } = useParams();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { filters, setFilters } = usePostFilter();
 
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [statsData, setStatsData] = useState({});
-  const [provinceCount, setProvinceCount] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const count = Math.ceil(posts.length / POSTS_PER_PAGE);
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
-
-  const [classificationFilter, setClassificationFilter] = useState("all");
-  const [totalFundFilter, setTotalFundFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [provinceFilter, setProvinceFilter] = useState("all");
+  const [provinceCount, setProvinceCount] = useState({});
 
   const scrollRef = useRef(null);
-
   const isProject = category.includes("du-an");
   const title = findTitle(HEADER_DROPDOWN_LIST, "/" + category);
-  const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
 
   // for applying filters into url params
   useEffect(() => {
-    const status = urlSearchParams.get("statusFilter");
-    const classification = urlSearchParams.get("classificationFilter");
-    const totalFundFilter = urlSearchParams.get("totalFundFilter");
-    const provinceFilter = urlSearchParams.get("provinceFilter");
+    const status = urlSearchParams.get("status");
+    const classification = urlSearchParams.get("classification");
+    const totalFund = urlSearchParams.get("totalFund");
+    const province = urlSearchParams.get("province");
 
-    if (status) setStatusFilter(status);
-    if (classification) setClassificationFilter(classification);
-    if (totalFundFilter) setTotalFundFilter(totalFundFilter);
-    if (provinceFilter) setProvinceFilter(provinceFilter);
+    if (status) setFilters({ ...filters, status: status });
+    if (classification) setFilters({ ...filters, classification: classification });
+    if (totalFund) setFilters({ ...filters, totalFund: totalFund });
+    if (province) setFilters({ ...filters, province: province });
   }, [urlSearchParams]);
-
-  // for scrolling to top when there is no filter
-  useEffect(() => {
-    const status = urlSearchParams.get("statusFilter");
-    const classification = urlSearchParams.get("classificationFilter");
-    const totalFundFilter = urlSearchParams.get("totalFundFilter");
-    const provinceFilter = urlSearchParams.get("provinceFilter");
-    const isScrolling = !(status || classification || totalFundFilter || provinceFilter);
-
-    const timer = setTimeout(() => {
-      if (scrollRef.current && isScrolling) {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [loading, urlSearchParams]);
 
   // for fetching data from server with/without filters
   useEffect(() => {
-    setLoading(true);
-
-    if (classificationFilter === "all") {
-      urlSearchParams.delete("classificationFilter");
-    } else if (classificationFilter) {
-      urlSearchParams.set("classificationFilter", classificationFilter);
+    if (filters.classification === "all") {
+      urlSearchParams.delete("classification");
+    } else if (filters.classification) {
+      urlSearchParams.set("classification", filters.classification);
     }
 
-    if (statusFilter === "all") {
-      urlSearchParams.delete("statusFilter");
-    } else if (statusFilter) {
-      urlSearchParams.set("statusFilter", statusFilter);
+    if (filters.status === "all") {
+      urlSearchParams.delete("status");
+    } else if (filters.status) {
+      urlSearchParams.set("status", filters.status);
     }
 
-    if (totalFundFilter === "all") {
-      urlSearchParams.delete("totalFundFilter");
-    } else if (totalFundFilter) {
-      urlSearchParams.set("totalFundFilter", totalFundFilter);
+    if (filters.totalFund === "all") {
+      urlSearchParams.delete("totalFund");
+    } else if (filters.totalFund) {
+      urlSearchParams.set("totalFund", filters.totalFund);
     }
 
-    if (provinceFilter === "all") {
-      urlSearchParams.delete("provinceFilter");
-    } else if (provinceFilter) {
-      urlSearchParams.set("provinceFilter", provinceFilter);
+    if (filters.province === "all") {
+      urlSearchParams.delete("province");
+    } else if (filters.province) {
+      urlSearchParams.set("province", filters.province);
     }
 
     setUrlSearchParams(urlSearchParams);
-    if (scrollRef.current) {
-      window.scrollTo({
-        top: scrollRef.current.offsetTop - 80,
-        behavior: "smooth",
-      });
-    }
 
-    Promise.all([
-      axios.get(SERVER_URL + "/" + category, {
-        params: {
-          filters: {
-            classification: classificationFilter,
-            totalFund: totalFundFilter,
-            status: statusFilter,
-            province: provinceFilter,
-          },
-        },
-      }),
-      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
-    ])
-      .then(([postsResponse, countsResponse]) => {
+    axios
+      .get(SERVER_URL + "/" + category, { params: { filters } })
+      .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
-        setProvinceCount(countsResponse.data.province);
+        setProvinceCount(postsResponse.data.provinceCount);
         setLoading(false);
       })
       .catch((error) => {
         console.error(error.message);
       });
-  }, [urlSearchParams, category, classificationFilter, totalFundFilter, statusFilter, provinceFilter]);
 
-  if (!posts || !statsData) return <LoadingScreen />;
+    if (scrollRef.current && posts.length > 0) {
+      window.scrollTo({
+        top: scrollRef.current.offsetTop - 80,
+        behavior: "smooth",
+      });
+    }
+  }, [urlSearchParams, category, filters]);
+
   return (
-    <Box m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
+    <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
       <Typography variant="h4" fontWeight="bold" color={"#000"} textAlign={"center"}>
         {title}
       </Typography>
@@ -153,7 +113,7 @@ export default function PostList() {
               </Typography>
             </Box>
 
-            <Box bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
+            <Box bgcolor={"#FFF1F0"} p={"16px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
               <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
                 {/* <CountUp start={0} end={totalPosts} duration={10} /> */}
                 {totalPosts}
@@ -166,22 +126,18 @@ export default function PostList() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: isMobile ? "2px" : "8px",
+                  gap: "2px",
                 }}
               >
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
                 </Typography>
-                {isMobile && (
-                  <>
-                    <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                      {Object.values(statsData).reduce((acc, curr) => acc + curr["da-hoan-thanh"], 0)} Dự án đã hoàn thành
-                    </Typography>
-                    <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                      {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"], 0)} Dự án đang xây dựng
-                    </Typography>
-                  </>
-                )}
+                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                  {Object.values(statsData).reduce((acc, curr) => acc + curr["da-hoan-thanh"], 0)} Dự án đã hoàn thành
+                </Typography>
+                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                  {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"], 0)} Dự án đang xây dựng
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -255,26 +211,17 @@ export default function PostList() {
                               backgroundColor: statusColorHoverMapping[status],
                             },
                           }}
-                          onClick={() => {
-                            setClassificationFilter(value);
-                            setStatusFilter(status);
-                            setTotalFundFilter("all");
-                            setProvinceFilter("all");
-                          }}
+                          onClick={() => setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all" })}
                         />
                       ))}
                     </Box>
+
                     <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
                       <Button
                         variant="outlined"
                         sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
                         endIcon={<ArrowForwardIcon />}
-                        onClick={() => {
-                          setClassificationFilter(value);
-                          setStatusFilter("all");
-                          setTotalFundFilter("all");
-                          setProvinceFilter("all");
-                        }}
+                        onClick={() => setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all" })}
                       >
                         Tất cả
                       </Button>
@@ -289,14 +236,14 @@ export default function PostList() {
       {isProject && (
         <Box ref={scrollRef} display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <FilterList
-            classificationFilter={classificationFilter}
-            setClassificationFilter={setClassificationFilter}
-            totalFundFilter={totalFundFilter}
-            setTotalFundFilter={setTotalFundFilter}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            provinceFilter={provinceFilter}
-            setProvinceFilter={setProvinceFilter}
+            classification={filters.classification}
+            setClassification={(value) => setFilters({ ...filters, classification: value })}
+            totalFund={filters.totalFund}
+            setTotalFund={(value) => setFilters({ ...filters, totalFund: value })}
+            status={filters.status}
+            setStatus={(value) => setFilters({ ...filters, status: value })}
+            province={filters.province}
+            setProvince={(value) => setFilters({ ...filters, province: value })}
             provinceCount={provinceCount}
           />
         </Box>

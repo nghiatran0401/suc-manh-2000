@@ -14,7 +14,15 @@ export const StyledSelectComponent = (props) => {
         {label}
       </Typography>
 
-      <Select placeholder={"Tất cả"} value={value} onChange={onChange} options={[{ label: "Tất cả", value: "all" }, ...options]} styles={{ container: (provided) => ({ ...provided, width: isMobile ? 170 : 180 }) }} />
+      <Select
+        placeholder={"Tất cả"}
+        value={value}
+        onChange={onChange}
+        options={[{ label: "Tất cả", value: "all" }, ...options]}
+        styles={{
+          container: (provided) => ({ ...provided, width: isMobile ? 130 : 180 }),
+        }}
+      />
     </Stack>
   );
 };

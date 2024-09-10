@@ -37,8 +37,6 @@ async function createSearchIndex() {
   try {
     await redis.call("FT.INFO", INDEX_NAME);
     return;
-    // await removeSearchIndexAndDocuments(redis);
-    // await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
   } catch (error) {
     await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
   }
@@ -53,10 +51,8 @@ async function removeSearchIndexAndDocuments() {
 
         await redis.call("FT.DEL", INDEX_NAME, docId);
       }
-
       results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     }
-
     await redis.call("FT.DROPINDEX", INDEX_NAME);
   } catch (error) {
     console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
@@ -107,74 +103,83 @@ async function removeDocumentFromIndex(data) {
 async function redisSearchByName(q, filters) {
   let query = "";
   const args = [];
+  const needAllProjects = !q && Object.keys(filters).length === 0;
+
   args.push("FT.SEARCH");
   args.push(INDEX_NAME);
 
-  if (q) {
-    query += `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`;
-  }
-
-  if (filters.categoryFilter) {
-    query += ` @category:{${escapeSpecialCharacters(filters.categoryFilter)}}`;
-  }
-
-  if (filters.classificationFilter) {
-    query += ` @classification:{${escapeSpecialCharacters(filters.classificationFilter)}}`;
-  }
-
-  if (filters.statusFilter) {
-    query += ` @status:{${escapeSpecialCharacters(filters.statusFilter)}}`;
-  }
-
-  if (filters.totalFundFilter) {
-    switch (filters.totalFundFilter) {
-      case "less-than-100":
-        query += ` @totalFund:[0, 100000000]`;
-        break;
-      case "100-to-200":
-        query += ` @totalFund:[100000000, 200000000]`;
-        break;
-      case "200-to-300":
-        query += ` @totalFund:[200000000, 300000000]`;
-        break;
-      case "300-to-400":
-        query += ` @totalFund:[300000000, 400000000]`;
-        break;
-      case "more-than-400":
-        query += ` @totalFund:[400000000, inf]`;
-        break;
-      default:
-        break;
+  if (needAllProjects) {
+    query = "*";
+  } else {
+    if (q) {
+      query += `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`;
     }
-  }
 
-  if (filters.provinceFilter) {
-    query += ` @province:{${escapeSpecialCharacters(filters.provinceFilter)}}`;
+    if (filters.category && filters.category !== "all") {
+      query += ` @category:{${escapeSpecialCharacters(filters.category)}}`;
+    }
+
+    if (filters.classification && filters.classification !== "all") {
+      query += ` @classification:{${escapeSpecialCharacters(filters.classification)}}`;
+    }
+
+    if (filters.status && filters.status !== "all") {
+      query += ` @status:{${escapeSpecialCharacters(filters.status)}}`;
+    }
+
+    if (filters.totalFund && filters.totalFund !== "all") {
+      switch (filters.totalFund) {
+        case "less-than-100":
+          query += ` @totalFund:[0 100000000]`;
+          break;
+        case "100-to-200":
+          query += ` @totalFund:[100000000 200000000]`;
+          break;
+        case "200-to-300":
+          query += ` @totalFund:[200000000 300000000]`;
+          break;
+        case "300-to-400":
+          query += ` @totalFund:[300000000 400000000]`;
+          break;
+        case "more-than-400":
+          query += ` @totalFund:[400000000 inf]`;
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (filters.province && filters.province !== "all") {
+      query += ` @province:{${escapeSpecialCharacters(filters.province)}}`;
+    }
   }
 
   args.push(query);
   args.push("SORTBY", "category", "DESC");
-  args.push("LIMIT", 0, 10000); // get all results
+  args.push("LIMIT", 0, 10000);
 
   const results = await redis.call(...args);
   const transformedResults = [];
-  const totalCount = results[0];
-
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];
     const fields = results[i + 1];
     const obj = { redisKey };
-
     for (let j = 0; j < fields.length; j += 2) {
       const key = fields[j];
       const value = fields[j + 1];
       obj[key] = value;
     }
-
     transformedResults.push(obj);
   }
 
-  return transformedResults;
+  let statsData = {};
+  let provinceCount = {};
+  if (needAllProjects) {
+    statsData = getStatsData(transformedResults);
+    provinceCount = getProvinceCount(transformedResults);
+  }
+
+  return { cachedResultData: transformedResults, totalValuesLength: transformedResults.length, statsData, provinceCount };
 }
 
 async function getValuesByCategoryInRedis(category, filters, start, end) {
@@ -192,7 +197,7 @@ async function getValuesByCategoryInRedis(category, filters, start, end) {
     if (Array.isArray(filters) && filters[0]) {
       const q = JSON.parse(filters[0]).value;
       if (!q) return { cachedResultData: sortedCategoryPosts, totalValuesLength: sortedCategoryPosts.length };
-      const searchedResults = await redisSearchByName(q, { categoryFilter: category });
+      const searchedResults = await redisSearchByName(q, { category });
       return { cachedResultData: searchedResults, totalValuesLength: searchedResults.length };
     }
 
@@ -203,7 +208,8 @@ async function getValuesByCategoryInRedis(category, filters, start, end) {
     }
 
     const statsData = getStatsData(sortedCategoryPosts);
-    return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData: statsData };
+    const provinceCount = getProvinceCount(sortedCategoryPosts);
+    return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData, provinceCount };
   } catch (error) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
@@ -278,7 +284,6 @@ const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern) => {
 const getStatsData = (posts) => {
   const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
   const statsData = {};
-
   for (const post of posts) {
     if (statsData[post.classification]) {
       statsData[post.classification].count += 1;
@@ -300,8 +305,20 @@ const getStatsData = (posts) => {
       }
     }
   }
-
   return statsData;
+};
+
+const getProvinceCount = (posts) => {
+  const provinceCount = {};
+  for (const post of posts) {
+    if (provinceCount[post.province]) {
+      provinceCount[post.province] += 1;
+    } else {
+      provinceCount[post.province] = 0;
+      provinceCount[post.province] += 1;
+    }
+  }
+  return provinceCount;
 };
 
 const applyFilters = (values, filters) => {

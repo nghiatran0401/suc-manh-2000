@@ -3,18 +3,18 @@ import { useMediaQuery, Typography, Card as MuiCard, CardContent, Chip, Grid, Bo
 import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
-import { capitalizeEachWord } from "../helpers";
+import { standardizeString, truncateCharacters } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import charityMoneyIcon from "../assets/charity-money.png";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./config/styles.css";
 
 const Card = styled(MuiCard)({
-  minHeight: "400px",
+  minHeight: "300px",
   height: "100%",
   display: "flex",
   flexDirection: "column",
@@ -103,13 +103,19 @@ export default function CarouselListCard(props) {
                   )}
                 </div>
 
-                <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between", minHeight: isMobile ? "fit-content" : "175px" }}>
+                <CardContent sx={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%", justifyContent: "space-between" }}>
                   {Boolean(post.totalFund) && (
-                    <Chip icon={<AttachMoneyIcon />} label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`} variant="outlined" color="primary" sx={{ width: "fit-content" }} />
+                    <Chip
+                      icon={<img src={charityMoneyIcon} alt="Money icon" style={{ marginRight: "1px" }} />}
+                      label={`${post.totalFund > 0 ? Number(post.totalFund).toLocaleString() : "Đang xử lý"}`}
+                      variant="outlined"
+                      color="primary"
+                      sx={{ width: "fit-content" }}
+                    />
                   )}
 
                   <Typography variant="body1" mt={"16px"}>
-                    {capitalizeEachWord(post.name)}
+                    {truncateCharacters(standardizeString(post.name), isMobile ? 60 : 70)}
                   </Typography>
 
                   <Box display="flex" flexWrap="wrap" gap={"8px"}>

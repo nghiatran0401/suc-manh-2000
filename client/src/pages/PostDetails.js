@@ -31,5 +31,5 @@ export default function PostDetails() {
 
   if (!(Object.keys(post)?.length > 0 && latestPosts?.length > 0)) return <LoadingScreen />;
 
-  return <Box m={isMobile ? "24px 16px" : "88px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>;
+  return <Box m={isMobile ? "24px 16px" : "24px auto"}>{loading ? <LoadingScreen /> : <CardDetails post={post} latestPosts={latestPosts} />}</Box>;
 }

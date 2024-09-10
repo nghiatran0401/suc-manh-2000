@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, Paper, InputBase } from "@mui/material";
+import { Container, Typography, AppBar, Box, Toolbar, useMediaQuery, Drawer, List, ListItem, ListItemText, Collapse, IconButton, Dialog, Paper, InputBase, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CDropdown, CDropdownMenu, CDropdownItem } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -13,18 +13,22 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
+import FilterList from "./FilterList";
+import usePostFilter from "../hooks/usePostFilter";
 
 export default function HeaderBar() {
   const navigate = useNavigate();
-  const [general, setGeneral] = useState({});
+  const { filters, setFilters } = usePostFilter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const autocompleteRef = useRef();
+
+  const [general, setGeneral] = useState({});
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [totalProjects, setTotalProjects] = useState(0);
-  const autocompleteRef = useRef();
 
   useEffect(() => {
     axios
@@ -37,7 +41,8 @@ export default function HeaderBar() {
           classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
           classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
           classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
-          classificationAndCategoryCounts.data.classification["wc"];
+          classificationAndCategoryCounts.data.classification["wc"] +
+          classificationAndCategoryCounts.data.classification["phong-tin-hoc"];
 
         setTotalProjects(total);
       })
@@ -56,16 +61,26 @@ export default function HeaderBar() {
 
   const onSearch = (e) => {
     if (searchValue) {
-      e.preventDefault();
-      navigate(`/search?q=${searchValue.replace(/\s/g, "+")}`);
-      setOpenSearch(false);
-      setSearchValue("");
+      let q = `/search?q=${searchValue.replace(/\s/g, "+")}`;
+      if (filters.category !== "all") q += `&category=${filters.category}`;
+      if (filters.classification !== "all") q += `&classification=${filters.classification}`;
+      if (filters.status !== "all") q += `&status=${filters.status}`;
+      if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
+      if (filters.province !== "all") q += `&province=${filters.province}`;
+
+      navigate(q);
+    } else {
+      navigate("/search");
     }
+
+    e.preventDefault();
+    setOpenSearch(false);
+    setSearchValue("");
   };
 
-  if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
+  if (Object.keys(general).length <= 0) return <LoadingScreen />;
   return (
-    <AppBar color="inherit" className="bar" position="fixed" sx={{ top: 0, zIndex: 10000, ...(isMobile && { position: "static" }) }}>
+    <AppBar color="inherit" className="bar" position="sticky" sx={{ top: 0, zIndex: 10000 }} height="50px">
       <Container
         sx={{
           maxWidth: "1080px !important",
@@ -75,15 +90,13 @@ export default function HeaderBar() {
         <Toolbar sx={{ padding: "0px !important", margin: "0px !important" }}>
           {isMobile ? (
             <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
+              <IconButton edge="start" color="primary" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)}>
+                <DragHandleSharpIcon sx={{ color: "red" }} />
+              </IconButton>
               <img src={logo} alt="logo" style={{ maxWidth: "60px" }} onClick={() => (window.location.href = "/")} />
-              <Box display={"flex"} gap={"24px"}>
-                <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
-                  <Search />
-                </IconButton>
-                <IconButton edge="end" color="primary" aria-label="menu" onClick={() => setIsDrawerOpen(!isDrawerOpen)}>
-                  <DragHandleSharpIcon />
-                </IconButton>
-              </Box>
+              <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
+                <Search sx={{ color: "red" }} />
+              </IconButton>
             </Box>
           ) : (
             <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
@@ -128,35 +141,98 @@ export default function HeaderBar() {
 
               {/* Right section (search icon) */}
               <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
-                <Search />
+                <Search sx={{ color: "red" }} />
               </IconButton>
             </Box>
           )}
 
           <Dialog open={openSearch} onClose={() => setOpenSearch(false)} fullWidth PaperProps={{ style: { position: "absolute", top: 100 } }}>
+            <Typography variant="h5" fontWeight="bold" color="red" textAlign="center" mt="16px">
+              Tìm kiếm Dự án
+            </Typography>
+
             <Paper
               ref={autocompleteRef}
               component="form"
               sx={{
                 p: "2px 4px",
-                m: "0px auto",
+                m: "16px",
                 display: "flex",
                 alignItems: "center",
-                width: "100%",
                 height: "60px",
               }}
               onSubmit={onSearch}
             >
-              <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
-              <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
-                <SearchIcon />
-              </IconButton>
+              <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Tìm kiếm theo tên Dự án" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             </Paper>
+
+            <Box display={"flex"} gap={"12px"} flexWrap={"wrap"} m={"16px"}>
+              <FilterList
+                category={filters.category}
+                setCategory={(value) => setFilters({ ...filters, category: value })}
+                classification={filters.classification}
+                setClassification={(value) => setFilters({ ...filters, classification: value })}
+                totalFund={filters.totalFund}
+                setTotalFund={(value) => setFilters({ ...filters, totalFund: value })}
+                status={filters.status}
+                setStatus={(value) => setFilters({ ...filters, status: value })}
+                province={filters.province}
+                setProvince={(value) => setFilters({ ...filters, province: value })}
+                provinceCount={general.province}
+              />
+            </Box>
+
+            <Button
+              variant="outlined"
+              endIcon={<SearchIcon />}
+              sx={{
+                color: "#fff",
+                bgcolor: "#FF4747",
+                textTransform: "none",
+                m: "16px",
+                "&:hover": { bgcolor: "#FF4747" },
+              }}
+              onClick={onSearch}
+            >
+              Tìm kiếm
+            </Button>
+
+            <Typography variant="body2" textAlign="center">
+              hoặc
+            </Typography>
+
+            <Box display="flex" justifyContent="center">
+              <Button
+                variant="text"
+                sx={{
+                  color: "red",
+                  width: "fit-content",
+                  textTransform: "none",
+                  m: "16px",
+                  "&:hover": { bgcolor: "#fff" },
+                }}
+                onClick={onSearch}
+              >
+                Xem tất cả Dự án
+              </Button>
+            </Box>
           </Dialog>
         </Toolbar>
       </Container>
 
-      <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
+      <Drawer
+        anchor="left"
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            "@media (max-width: 600px)": {
+              marginTop: "55px",
+              height: "calc(100% - 55px)",
+            },
+          },
+        }}
+      >
         <List>
           {HEADER_DROPDOWN_LIST.map((item, index) => (
             <React.Fragment key={index}>

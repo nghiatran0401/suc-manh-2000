@@ -1,83 +1,62 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { StyledSelectComponent } from "./StyledComponent";
 import { categoryMapping, classificationMapping, totalFundMapping, statusMapping } from "../constants";
-import { provincesAndCities } from "../vietnam-provinces";
 
 const FilterList = (props) => {
-  const { categoryFilter, setCategoryFilter, classificationFilter, setClassificationFilter, totalFundFilter, setTotalFundFilter, statusFilter, setStatusFilter, provinceFilter, setProvinceFilter, provinceCount } = props;
-
-  const selectedProvince = useMemo(() => {
-    return provincesAndCities.find((i) => i.province === provinceFilter);
-  }, [provincesAndCities, provinceFilter]);
-
-  const options = useMemo(() => {
-    return provincesAndCities
-      .filter((i) => provinceCount[i.provinceValue] > 0)
-      .sort((a, b) => provinceCount[b.provinceValue] - provinceCount[a.provinceValue])
-      .map((i) => ({
-        label: i.province + ` (${provinceCount[i.provinceValue] ?? 0})`,
-        value: i.provinceValue,
-      }));
-  }, [provincesAndCities, provinceCount]);
+  const { category, setCategory, classification, setClassification, totalFund, setTotalFund, status, setStatus, province, setProvince, provinceCount } = props;
 
   return (
     <>
-      {categoryFilter && (
+      {category && (
         <StyledSelectComponent
           label="Năm"
-          value={
-            Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)
-              ? { label: Object.entries(categoryMapping).find(([value, label]) => value === categoryFilter)[1], value: categoryFilter }
-              : null
-          }
-          onChange={(option) => setCategoryFilter(option.value)}
+          value={Object.entries(categoryMapping).find(([value, label]) => value === category) ? { label: Object.entries(categoryMapping).find(([value, label]) => value === category)[1], value: category } : null}
+          onChange={(option) => setCategory(option.value)}
           options={Object.entries(categoryMapping)
             .filter(([v, l]) => v.includes("du-an"))
             .map(([value, label]) => ({ label, value }))}
         />
       )}
 
-      {classificationFilter && (
+      {classification && (
         <StyledSelectComponent
           label="Loại dự án"
           value={
-            Object.entries(classificationMapping).find(([value, label]) => value === classificationFilter)
-              ? { label: Object.entries(classificationMapping).find(([value, label]) => value === classificationFilter)[1], value: classificationFilter }
+            Object.entries(classificationMapping).find(([value, label]) => value === classification)
+              ? { label: Object.entries(classificationMapping).find(([value, label]) => value === classification)[1], value: classification }
               : null
           }
-          onChange={(option) => setClassificationFilter(option.value)}
+          onChange={(option) => setClassification(option.value)}
           options={Object.entries(classificationMapping).map(([value, label]) => ({ label, value }))}
         />
       )}
 
-      {totalFundFilter && (
+      {totalFund && (
         <StyledSelectComponent
           label="Khoảng tiền"
-          value={
-            Object.entries(totalFundMapping).find(([value, label]) => value === totalFundFilter)
-              ? { label: Object.entries(totalFundMapping).find(([value, label]) => value === totalFundFilter)[1], value: totalFundFilter }
-              : null
-          }
-          onChange={(option) => setTotalFundFilter(option.value)}
+          value={Object.entries(totalFundMapping).find(([value, label]) => value === totalFund) ? { label: Object.entries(totalFundMapping).find(([value, label]) => value === totalFund)[1], value: totalFund } : null}
+          onChange={(option) => setTotalFund(option.value)}
           options={Object.entries(totalFundMapping).map(([value, label]) => ({ label, value }))}
         />
       )}
 
-      {statusFilter && (
+      {status && (
         <StyledSelectComponent
           label="Tiến độ"
-          value={Object.entries(statusMapping).find(([value, label]) => value === statusFilter) ? { label: Object.entries(statusMapping).find(([value, label]) => value === statusFilter)[1], value: statusFilter } : null}
-          onChange={(option) => setStatusFilter(option.value)}
+          value={Object.entries(statusMapping).find(([value, label]) => value === status) ? { label: Object.entries(statusMapping).find(([value, label]) => value === status)[1], value: status } : null}
+          onChange={(option) => setStatus(option.value)}
           options={Object.entries(statusMapping).map(([value, label]) => ({ label, value }))}
         />
       )}
 
-      {provinceFilter && (
+      {province && (
         <StyledSelectComponent
           label="Tỉnh"
-          value={selectedProvince ? { label: provinceFilter, value: selectedProvince.provinceValue } : null}
-          onChange={(option) => setProvinceFilter(option.value === "all" ? "all" : provincesAndCities.find((i) => i.provinceValue === option.value).province)}
-          options={options}
+          value={Object.entries(provinceCount).find(([p, count]) => p === province) ? { label: province, value: province } : null}
+          onChange={(option) => setProvince(option.value)}
+          options={Object.entries(provinceCount)
+            .sort(([, countA], [, countB]) => countB - countA)
+            .map(([p, count]) => ({ label: `${p} (${count})`, value: p }))}
         />
       )}
     </>

@@ -12,9 +12,9 @@ postRouter.get("/", async (req, res) => {
   const { category } = req.params;
 
   try {
-    const { cachedResultData, totalValuesLength, statsData } = await getValuesByCategoryInRedis(category, filters, start, end);
+    const { cachedResultData, totalValuesLength, statsData, provinceCount } = await getValuesByCategoryInRedis(category, filters, start, end);
 
-    res.status(200).send({ posts: cachedResultData, totalPosts: totalValuesLength, stats: statsData });
+    res.status(200).send({ posts: cachedResultData, totalPosts: totalValuesLength, stats: statsData, provinceCount });
   } catch (error) {
     res.status(404).send({ error: `Error getting all documents: ${error.message}` });
   }
@@ -26,9 +26,7 @@ postRouter.get("/:id", async (req, res) => {
   try {
     const postDocRef = firestore.collection(category).where("slug", "==", id);
     const postDocRefSnapshot = await postDocRef.get();
-    if (postDocRefSnapshot.empty) {
-      res.status(404).json({ error: "Post not found" });
-    }
+    if (postDocRefSnapshot.empty) res.status(404).json({ error: "Post not found" });
 
     const postDocData = postDocRefSnapshot.docs[0].data();
     postDocData.publish_date = postDocData.publish_date?.toDate();
@@ -126,11 +124,7 @@ postRouter.post("/", async (req, res) => {
     // Create a new post doc (in Firestore and Redis)
     const postDocRef = firestore.collection(category).doc(postToSave.id);
     await postDocRef.set(postToSave);
-    await upsertDocumentToIndex({
-      ...postToSave,
-      collection_id: category,
-      doc_id: postToSave.id,
-    });
+    await upsertDocumentToIndex({ ...postToSave, collection_id: category, doc_id: postToSave.id });
 
     // Increase the count of the post's category and classification (in Firestore)
     await updateClassificationAndCategoryCounts(postToSave.classification, postToSave.category, +1);

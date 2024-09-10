@@ -8,7 +8,7 @@ export default function GioiThieu() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} m={isMobile ? "24px 16px" : "88px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+    <Box maxWidth={DESKTOP_WIDTH} m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
         <Typography variant="h5" fontWeight="bold" color={"red"}>
           Về “Sức mạnh 2000” – About The Power of VND 2000

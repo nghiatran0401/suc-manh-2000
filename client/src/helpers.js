@@ -1,4 +1,4 @@
-export function truncate(str, num) {
+export function truncateCharacters(str, num) {
   return str.length > num ? str.slice(0, num) + "..." : str;
 }
 
@@ -28,7 +28,7 @@ export function findTitle(list, title) {
   return null;
 }
 
-export const capitalizeEachWord = (str) => {
+export const standardizeString = (str) => {
   return str
     .split(" ")
     .map((word, index, arr) => {
@@ -37,5 +37,6 @@ export const capitalizeEachWord = (str) => {
       }
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
-    .join(" ");
+    .join(" ")
+    .replace(/,/g, " -");
 };

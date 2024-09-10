@@ -1,24 +1,14 @@
-import { useEffect, useState } from "react";
-import { SERVER_URL } from "../constants";
-import axios from "axios";
+import { useState } from "react";
 
 const usePostFilter = () => {
   const [filters, setFilters] = useState({
+    category: "all",
     classification: "all",
     totalFund: "all",
     status: "all",
     province: "all",
   });
-  const [provinceCount, setProvinceCount] = useState({});
-
-  useEffect(() => {
-    axios
-      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
-      .then((res) => setProvinceCount(res.data.province))
-      .catch((e) => console.error(e));
-  }, []);
-
-  return { filters, setFilters, provinceCount };
+  return { filters, setFilters };
 };
 
 export default usePostFilter;

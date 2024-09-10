@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -10,10 +10,10 @@ import "react-tabs/style/react-tabs.css";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
-import constructionIcon from "../assets/construction.png";
-import peopleIcon from "../assets/people.png";
-import FilterList from "../components/FilterList";
-import usePostFilter from "../hooks/usePostFilter";
+import constructionIcon from "../assets/construction.svg";
+import peopleIcon from "../assets/people.svg";
+import { findTitle, standardizeString } from "../helpers";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -25,7 +25,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
   const [totalBeneficialStudents, setTotalBeneficialStudents] = useState(0);
-  const { filters, provinceCount, setFilters } = usePostFilter();
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -52,22 +51,53 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab, { params: { filters } })
+      .get(SERVER_URL + projectTab)
       .then((projects) => {
         setProjects(projects.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
-  }, [projectTab, filters]);
+  }, [projectTab]);
 
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
       {/* News: Tien do du an */}
-      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "88px auto 24px"}>
-        <Typography variant="h5" fontWeight="bold" color={"red"}>
-          Cập nhật tiến độ dự án
-        </Typography>
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "24px auto"}>
+        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+          <Typography variant="h5" fontWeight="bold" color={"red"}>
+            Cập nhật tiến độ dự án
+          </Typography>
+
+          {isMobile ? (
+            <IconButton
+              sx={{
+                border: "1px solid red",
+                borderRadius: "4px",
+                height: "30px",
+              }}
+              onClick={() => navigate("/thong-bao")}
+            >
+              <ArrowForwardIcon sx={{ color: "red" }} />
+            </IconButton>
+          ) : (
+            <Button
+              variant="outlined"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                color: "red",
+                textTransform: "none",
+                borderColor: "red",
+                "&:hover": {
+                  borderColor: "red",
+                },
+              }}
+              onClick={() => navigate("/thong-bao")}
+            >
+              Xem tất cả
+            </Button>
+          )}
+        </Box>
 
         <Box>
           <Grid container spacing={3} sx={{ alignItems: "center" }}>
@@ -166,7 +196,7 @@ export default function Home() {
         display={"flex"}
         flexDirection={"column"}
         gap={"24px"}
-        m={"40px auto"}
+        m={"40px auto 0px"}
         sx={{
           "@media (max-width: 600px)": {
             m: "16px auto",
@@ -174,28 +204,33 @@ export default function Home() {
           },
         }}
       >
-        <Typography variant="h5" fontWeight="bold" color={"red"}>
-          Dự án thiện nguyện
-        </Typography>
+        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+          <Typography variant="h5" fontWeight="bold" color={"red"}>
+            Dự án thiện nguyện
+          </Typography>
+
+          <Button
+            variant="outlined"
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              color: "red",
+              textTransform: "none",
+              borderColor: "red",
+              "&:hover": { borderColor: "red" },
+            }}
+            onClick={() => navigate(projectTab)}
+          >
+            {isMobile ? projectTab.replace("/du-an-", "") : standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
+          </Button>
+        </Box>
 
         <Tabs>
-          <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap" }}>
             <TabList>
               {PROJECT_LIST.children.map(
                 (child, index) =>
                   !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
-                    <Tab
-                      key={child.path + index}
-                      onClick={() => {
-                        setProjectTab(child.path);
-                        setFilters({
-                          classification: "all",
-                          totalFund: "all",
-                          status: "all",
-                          province: "all",
-                        });
-                      }}
-                    >
+                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
                       <Typography variant="body1">
                         {child.title} ({general?.category[child.path.replace("/", "")]})
                       </Typography>
@@ -203,28 +238,8 @@ export default function Home() {
                   )
               )}
             </TabList>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "16px",
-              margin: "16px 0",
-              flexWrap: "wrap",
-            }}
-          >
-            <FilterList
-              classificationFilter={filters.classification}
-              setClassificationFilter={(value) => setFilters({ ...filters, classification: value })}
-              totalFundFilter={filters.totalFund}
-              setTotalFundFilter={(value) => setFilters({ ...filters, totalFund: value })}
-              statusFilter={filters.status}
-              setStatusFilter={(value) => setFilters({ ...filters, status: value })}
-              provinceFilter={filters.province}
-              setProvinceFilter={(value) => setFilters({ ...filters, province: value })}
-              provinceCount={provinceCount}
-            />
-          </div>
+          </Box>
+
           {loading ? (
             <Box minHeight={"500px"} mt={"200px"}>
               <LinearProgress />
@@ -234,20 +249,9 @@ export default function Home() {
               {PROJECT_LIST.children
                 .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
                 .map((child, index) => (
-                  <Box key={child.path + index} display={"flex"} flexDirection={"column"}>
-                    <TabPanel>
-                      <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-                        Số dự án: {projects.length}/{general?.category[child.path.replace("/", "")] ?? 0}
-                      </Typography>
-                      <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
-                    </TabPanel>
-
-                    {projectTab === child.path && (
-                      <Button variant="contained" onClick={() => navigate(child.path)}>
-                        Xem các {child.title}
-                      </Button>
-                    )}
-                  </Box>
+                  <TabPanel key={child.path + index}>
+                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
+                  </TabPanel>
                 ))}
             </>
           )}
@@ -255,12 +259,12 @@ export default function Home() {
       </Box>
 
       {/* Projects Statistics */}
-      <Box display="flex" flexDirection={"column"} gap={"24px"} m={"40px auto"} p={isMobile ? "24px 16px" : "40px"}>
+      <Box display="flex" flexDirection={"column"} gap={"24px"} p={isMobile ? "24px 16px" : "40px"}>
         <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={"100%"}>
           <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
           </Typography>
-          <Typography variant="h6" textAlign={"center"} p={isMobile ? "0px" : "0px 80px"}>
+          <Typography variant="h6" textAlign={"center"} p={isMobile ? "8px" : "8px 80px"}>
             Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
             <br />
             Xây dựng đủ <strong>Nhà hạnh phúc</strong>, <strong>Cầu đi học</strong>, và <strong>Khu nội trú</strong>.
@@ -270,7 +274,7 @@ export default function Home() {
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
           <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
             <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
-            <Typography variant="h1" fontWeight={"bold"} color={"red"}>
+            <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalFinishedProjects} duration={10} />
             </Typography>
             <Typography variant="h6" fontWeight={"bold"}>
@@ -280,7 +284,7 @@ export default function Home() {
 
           <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
             <img src={peopleIcon} alt="people" style={{ width: "100px", height: "100px" }} />
-            <Typography variant="h1" fontWeight={"bold"} color={"red"}>
+            <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalBeneficialStudents} duration={10} />
             </Typography>
             <Typography variant="h6" fontWeight={"bold"}>
@@ -292,7 +296,6 @@ export default function Home() {
         <Box
           sx={{
             border: "1px solid #fff",
-            padding: 2,
             borderRadius: 2,
             margin: "16px auto",
             boxShadow: 2,

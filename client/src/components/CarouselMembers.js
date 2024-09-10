@@ -177,8 +177,20 @@ export default function CarouselMembers() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
-      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
+    <Box
+      maxWidth={DESKTOP_WIDTH}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"16px"}
+      m={"16px auto"}
+      sx={{
+        "@media (max-width: 600px)": {
+          m: "16px auto",
+          p: "0 16px",
+        },
+      }}
+    >
+      <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đội ngũ vận hành
       </Typography>
 

@@ -183,7 +183,7 @@ describe("search a query with/without filters", () => {
   });
 
   it("should call redisSearchByName function with filters", async () => {
-    const filters = { categoryFilter: "news" };
+    const filters = { category: "news" };
 
     redis.call.mockResolvedValue(mockRedisResults);
     const actualResults = await redisSearchByName(q, filters);
@@ -191,7 +191,7 @@ describe("search a query with/without filters", () => {
     expect(redis.call).toHaveBeenCalledWith(
       "FT.SEARCH",
       INDEX_NAME,
-      `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*) @category:{${escapeSpecialCharacters(filters.categoryFilter)}}`,
+      `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*) @category:{${escapeSpecialCharacters(filters.category)}}`,
       "SORTBY",
       "category",
       "DESC",

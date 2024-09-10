@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
-import { capitalizeEachWord, convertToYoutubeUrl } from "../helpers";
+import { standardizeString, convertToYoutubeUrl } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
@@ -62,11 +62,11 @@ export default function CardDetails(props) {
             return null;
           })}
         </Link>
-        <Typography color="textPrimary">{capitalizeEachWord(post.name)}</Typography>
+        <Typography color="textPrimary">{standardizeString(post.name)}</Typography>
       </Breadcrumbs>
 
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
-        <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: capitalizeEachWord(post.name) }} />
+        <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
 
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
           {/* <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
@@ -391,7 +391,7 @@ export default function CardDetails(props) {
                 textAlign={"center"}
                 p={"0 8px"}
                 dangerouslySetInnerHTML={{
-                  __html: capitalizeEachWord(post.name),
+                  __html: standardizeString(post.name),
                 }}
               />
 

@@ -6,11 +6,11 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./config/styles.css";
 
-import SM2000 from "../assets/companions/SM_2000.png";
-import VVC from "../assets/companions/VVC.png";
-import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.png";
-import NuoiEm from "../assets/companions/Nuoi_em.png";
-import Dentsu from "../assets/companions/Dentsu.png";
+import SM2000 from "../assets/companions/SM2000.svg";
+import VVC from "../assets/companions/VVC.svg";
+import TinhNguyenNiemTin from "../assets/companions/Tinh_nguyen_niem_tin.svg";
+import NuoiEm from "../assets/companions/Nuoi_em.svg";
+import Dentsu from "../assets/companions/Dentsu.svg";
 
 const COMPANIONS = [
   {
@@ -68,8 +68,20 @@ export default function Companion() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"16px"} m={"16px auto"}>
-      <Typography variant="h5" fontWeight="bold" color={"red"} m={"0 16px"}>
+    <Box
+      maxWidth={DESKTOP_WIDTH}
+      display={"flex"}
+      flexDirection={"column"}
+      gap={"16px"}
+      m={"16px auto"}
+      sx={{
+        "@media (max-width: 600px)": {
+          m: "16px auto",
+          p: "0 16px",
+        },
+      }}
+    >
+      <Typography variant="h5" fontWeight="bold" color={"red"}>
         Đơn vị đồng hành
       </Typography>
 

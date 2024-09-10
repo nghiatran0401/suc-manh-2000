@@ -6,12 +6,10 @@
   },
   "scripts": {
     "server": "cp .env.local .env && nodemon index.js",
-    "server:windows": "copy .env.local .env && nodemon index.js",
     "server:local-docker-redis": "docker-compose -f docker-compose.redis.yaml up -d",
     "deploy:server": "cp .env.prod .env && firebase deploy --only functions",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
