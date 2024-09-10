@@ -84,9 +84,10 @@ async function indexFirestoreDocsToRedis() {
 
       await Promise.all(promises);
     }
-  }
 
-  console.log("[indexFirestoreDocsToRedis]: Succeeded!");
+    console.log("[indexFirestoreDocsToRedis]: Succeeded!");
+    process.exit(0);
+  }
 }
 
 // indexFirestoreDocsToRedis();

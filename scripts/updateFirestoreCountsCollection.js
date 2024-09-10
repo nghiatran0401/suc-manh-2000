@@ -1,4 +1,3 @@
-const provincesAndCities = require("./vietnam-provinces");
 const { firestore } = require("./firebase");
 
 async function updateFirestoreCountsCollection() {
@@ -13,7 +12,7 @@ async function updateFirestoreCountsCollection() {
       const data = doc.data();
       const classification = data.classification;
       const category = data.category;
-      const provinceValue = provincesAndCities.find((p) => p.province === data.location?.province)?.provinceValue;
+      const province = data.location?.province;
 
       if (classification) {
         if (!classificationCounts[classification]) {
@@ -29,11 +28,11 @@ async function updateFirestoreCountsCollection() {
         categoryCounts[category]++;
       }
 
-      if (provinceValue) {
-        if (!provinceCounts[provinceValue]) {
-          provinceCounts[provinceValue] = 0;
+      if (province) {
+        if (!provinceCounts[province]) {
+          provinceCounts[province] = 0;
         }
-        provinceCounts[provinceValue]++;
+        provinceCounts[province]++;
       }
     }
   }
@@ -50,6 +49,6 @@ async function updateFirestoreCountsCollection() {
   }
 }
 
-// await updateFirestoreCountsCollection();
+// updateFirestoreCountsCollection();
 
 module.exports = updateFirestoreCountsCollection;

@@ -176,7 +176,8 @@ describe("search a query with/without filters", () => {
     const filters = {};
 
     redis.call.mockResolvedValue(mockRedisResults);
-    const actualResults = await redisSearchByName(q, filters);
+    const { cachedResultData } = await redisSearchByName(q, filters);
+    const actualResults = cachedResultData;
 
     expect(redis.call).toHaveBeenCalledWith("FT.SEARCH", INDEX_NAME, `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`, "SORTBY", "category", "DESC", "LIMIT", 0, 10000);
     expect(actualResults).toEqual(transformedResults);
@@ -186,7 +187,8 @@ describe("search a query with/without filters", () => {
     const filters = { category: "news" };
 
     redis.call.mockResolvedValue(mockRedisResults);
-    const actualResults = await redisSearchByName(q, filters);
+    const { cachedResultData } = await redisSearchByName(q, filters);
+    const actualResults = cachedResultData;
 
     expect(redis.call).toHaveBeenCalledWith(
       "FT.SEARCH",

@@ -42,11 +42,11 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
+      formProps.form?.setFieldValue("province", projectData.location?.province);
       // formProps.form?.setFieldValue("start_date", projectData.start_date ? projectData.start_date.split("T")[0] : "");
       // formProps.form?.setFieldValue("end_date", projectData.end_date ? projectData.end_date.split("T")[0] : "");
-      formProps.form?.setFieldValue("province", projectData.location?.province);
-      formProps.form?.setFieldValue("distanceToHCMC", projectData.location?.distanceToHCMC);
-      formProps.form?.setFieldValue("distanceToHN", projectData.location?.distanceToHN);
+      // formProps.form?.setFieldValue("distanceToHCMC", projectData.location?.distanceToHCMC);
+      // formProps.form?.setFieldValue("distanceToHN", projectData.location?.distanceToHN);
     }
   }, [projectData]);
 
@@ -140,7 +140,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.province")}</span>} name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
             <Select showSearch placeholder="Select or enter a new province">
               {provincesAndCities.map((p) => (
-                <Select.Option key={p.provinceValue} value={p.provinceValue}>
+                <Select.Option key={p.province} value={p.province}>
                   {p.province}
                 </Select.Option>
               ))}
@@ -149,18 +149,18 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Distance to HN */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.distanceToHN")}</span>} name={"distanceToHN"} style={{ width: "40%" }}>
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
-        )}
+        )} */}
 
         {/* Distance to HCMC */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.distanceToHCMC")}</span>} name={"distanceToHCMC"} style={{ width: "40%" }}>
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
-        )}
+        )} */}
 
         {/* Start date */}
         {/* {isProject && (

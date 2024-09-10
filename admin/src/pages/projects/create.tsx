@@ -232,10 +232,10 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
             >
               <span style={{ color: "red" }}>*</span> {translate("post.fields.province")}
             </div>
-            <Form.Item name={"provinceValue"} rules={[{ required: true }]} style={{ width: "40%" }}>
+            <Form.Item name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select showSearch placeholder="Select or enter a new province">
                 {provincesAndCities.map((p) => (
-                  <Select.Option key={p.provinceValue} value={p.provinceValue}>
+                  <Select.Option key={p.province} value={p.province}>
                     {p.province}
                   </Select.Option>
                 ))}
@@ -245,7 +245,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Distance to HN */}
-        {isProject && (
+        {/* {isProject && (
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -261,10 +261,10 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <InputNumber defaultValue={0} style={{ width: "100%" }} />
             </Form.Item>
           </div>
-        )}
+        )} */}
 
         {/* Distance to HCM */}
-        {isProject && (
+        {/* {isProject && (
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -280,7 +280,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <InputNumber defaultValue={0} style={{ width: "100%" }} />
             </Form.Item>
           </div>
-        )}
+        )} */}
 
         {/* Start Date */}
         {/* {isProject && (

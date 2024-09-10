@@ -11,6 +11,10 @@
 client/build
 server/build
 admin/dist
+scripts/credentials.json
+scripts/token.json
+scripts/*.csv
+
 
 .firebase/
 firebase-debug.log

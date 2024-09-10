@@ -3,7 +3,6 @@ const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } = require("../services/redis");
 const { updateClassificationAndCategoryCounts } = require("../utils");
-const provincesAndCities = require("../vietnam-provinces");
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -60,8 +59,7 @@ postRouter.post("/", async (req, res) => {
     status: createdPost.status ?? null,
     totalFund: Number(createdPost.totalFund) * 1000000 ?? null,
     location: {
-      province: provincesAndCities.find((p) => p.provinceValue === createdPost.provinceValue)?.province ?? null,
-      provinceValue: createdPost.provinceValue ?? null,
+      province: createdPost.province ?? null,
       distanceToHCMC: createdPost.distanceToHCMC ?? null,
       distanceToHN: createdPost.distanceToHN ?? null,
     },
@@ -162,8 +160,7 @@ postRouter.patch("/:id", async (req, res) => {
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000 ?? docData.totalFund ?? null,
         location: {
-          province: provincesAndCities.find((p) => p.provinceValue === updatedPost.provinceValue)?.province ?? docData.location?.province ?? null,
-          provinceValue: updatedPost.provinceValue ?? docData.location?.provinceValue ?? null,
+          province: updatedPost.province ?? docData.location?.province ?? null,
           distanceToHCMC: updatedPost.distanceToHCMC ?? docData.location?.distanceToHCMC ?? null,
           distanceToHN: updatedPost.distanceToHN ?? docData.location?.distanceToHN ?? null,
         },
