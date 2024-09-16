@@ -17,13 +17,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an");
 
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
-
   const { tableProps, searchFormProps } = useTable<Sucmanh2000.Post, HttpError, ISearch>({
     syncWithLocation: true,
     pagination: {
@@ -39,11 +32,11 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       };
     },
     onSearch: (data) => {
-      // if (!data.name) {
-      //   const baseUrl = window.location.origin + window.location.pathname;
-      //   window.history.pushState({}, "", baseUrl);
-      //   // window.location.replace(baseUrl);
-      // }
+      if (!data.name) {
+        const baseUrl = window.location.origin + window.location.pathname;
+        window.history.pushState({}, "", baseUrl);
+        // window.location.replace(baseUrl);
+      }
       return [
         {
           field: "name",
@@ -53,6 +46,8 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       ];
     },
   });
+
+  console.log("here", tableProps);
 
   return (
     <List>
