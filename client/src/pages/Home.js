@@ -94,7 +94,7 @@ export default function Home() {
               }}
               onClick={() => navigate("/thong-bao")}
             >
-              Xem tất cả
+              Xem tất cả tin tức
             </Button>
           )}
         </Box>
@@ -220,7 +220,7 @@ export default function Home() {
             }}
             onClick={() => navigate(projectTab)}
           >
-            {isMobile ? projectTab.replace("/du-an-", "") : standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
+            {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
           </Button>
         </Box>
 
@@ -249,8 +249,22 @@ export default function Home() {
               {PROJECT_LIST.children
                 .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
                 .map((child, index) => (
-                  <TabPanel key={child.path + index}>
+                  <TabPanel key={index}>
                     <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
+                    <Button
+                      variant="outlined"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{
+                        color: "red",
+                        textTransform: "none",
+                        borderColor: "red",
+                        "&:hover": { borderColor: "red" },
+                        width: "100%",
+                      }}
+                      onClick={() => navigate(projectTab)}
+                    >
+                      {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
+                    </Button>
                   </TabPanel>
                 ))}
             </>

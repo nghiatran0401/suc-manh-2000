@@ -100,12 +100,10 @@ export default function HeaderBar() {
             </Box>
           ) : (
             <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-              {/* Left section (logo) */}
               <Box display="flex" alignItems="center">
                 <img src={logo} alt="logo" style={{ maxWidth: "60px", cursor: "pointer" }} onClick={() => (window.location.href = "/")} />
               </Box>
 
-              {/* Center section (menu items) */}
               <Box display="flex" gap="24px" flexGrow={1} justifyContent="left">
                 {HEADER_DROPDOWN_LIST.map((item, index) => (
                   <Box key={item.title + index} display="flex" alignItems="center" sx={{ cursor: "pointer" }}>
@@ -118,8 +116,14 @@ export default function HeaderBar() {
                               <ArrowDropDown />
                             </Typography>
                             <CDropdownMenu color="secondary">
+                              {item.name === "du-an" && (
+                                <CDropdownItem href={"/search"}>
+                                  <Typography variant="body1">Tất cả Dự án</Typography>
+                                </CDropdownItem>
+                              )}
+
                               {item.children.map((child, childIndex) => (
-                                <CDropdownItem key={`${child.title}-${childIndex}`} href={child.path}>
+                                <CDropdownItem key={childIndex} href={child.path}>
                                   <Typography variant="body1">
                                     {child.title}
                                     {general?.category[child.path.replace("/", "")] && ` (${general?.category[child.path.replace("/", "")]})`}
@@ -139,7 +143,6 @@ export default function HeaderBar() {
                 ))}
               </Box>
 
-              {/* Right section (search icon) */}
               <IconButton edge="end" color="primary" aria-label="search" onClick={() => setOpenSearch(!openSearch)}>
                 <Search sx={{ color: "red" }} />
               </IconButton>
