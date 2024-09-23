@@ -36,14 +36,6 @@ export default function CardDetails(props) {
       .catch((e) => console.error(e));
   }, [category]);
 
-  // function formatDate(date) {
-  //   const d = new Date(date);
-  //   const day = String(d.getDate()).padStart(2, "0");
-  //   const month = String(d.getMonth() + 1).padStart(2, "0");
-  //   const year = d.getFullYear();
-  //   return `${day}/${month}/${year}`;
-  // }
-
   if (loading) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
@@ -69,9 +61,9 @@ export default function CardDetails(props) {
         <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
 
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
-          {/* <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+          <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
             {post.publish_date.split("T")[0]}
-          </Typography> */}
+          </Typography>
           {post.classification && (
             <Typography
               variant="body2"
@@ -195,6 +187,7 @@ export default function CardDetails(props) {
         <Grid item xs={12} sm={9} p={"0px !important"}>
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
+              {/* News */}
               {post.content.tabs.length === 1 &&
                 post.content.tabs.map((tab, index) => (
                   <Box key={index} display={"flex"} flexDirection={"column"} gap={"16px"}>
@@ -256,6 +249,7 @@ export default function CardDetails(props) {
                   </Box>
                 ))}
 
+              {/* Project */}
               {post.content.tabs.length > 1 && (
                 <Tabs style={{ width: "100%" }}>
                   <TabList>

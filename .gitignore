@@ -15,7 +15,6 @@ scripts/credentials.json
 scripts/token.json
 scripts/*.csv
 
-
 .firebase/
 firebase-debug.log
 firestore-debug.log

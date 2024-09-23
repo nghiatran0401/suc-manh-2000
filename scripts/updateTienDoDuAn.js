@@ -1,8 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
+const { v4: uuidv4 } = require("uuid");
+const marked = require("marked");
+const slugify = require("slugify");
 const { getProjectStatus, standardizeString, extractFolderId } = require("./updateDuAnFromAirtableToWeb");
 const { getProjectProgress } = require("./googledrive");
+const { firestore, firebase } = require("./firebase");
+const { upsertDocumentToIndex } = require("../server/services/redis");
+const { updateClassificationAndCategoryCounts } = require("../server/utils");
 
 const oldProjects = {};
 const newProjects = {};
@@ -68,6 +74,7 @@ function readCSV(filePath, projectMap, requestedYears) {
           isInProgress: trimmedData["Ảnh Tiến độ (check)"] ?? null,
           progressNote: trimmedData["Note tiến độ"] ?? null,
           url: trimmedData["Link Drive"].trim(),
+          year: year,
         };
       })
       .on("end", () => {
@@ -106,13 +113,25 @@ async function compareCSVFiles(requestedYears, attributes) {
     { id: 0, name: "dự án mới khởi công" },
     { id: 1, name: "dự án đã khởi công nhưng chưa có tiến độ" },
     { id: 2, name: "dự án đang được xây dựng" },
-    { id: 3, name: "dự án đã hoàn thành" },
+    // { id: 3, name: "dự án đã hoàn thành" },
   ];
   const sections = {
     0: [],
     1: [],
     2: [],
-    3: [],
+    // 3: [],
+  };
+  const countProjects = {
+    2023: {
+      total: 0,
+      inProgress: 0,
+      completed: 0,
+    },
+    2024: {
+      total: 0,
+      inProgress: 0,
+      completed: 0,
+    },
   };
 
   // Categorize report projects based on the order/sections
@@ -122,83 +141,143 @@ async function compareCSVFiles(requestedYears, attributes) {
       const newProject = newProjects[projectId];
       const differences = compareProjects(oldProject, newProject, attributes);
 
+      if (requestedYears.includes(newProject.year) && ["dang-xay-dung", "da-hoan-thanh"].includes(newProject.status)) {
+        countProjects[newProject.year].total++;
+      }
+
       if (differences.length > 0) {
         if (oldProject.status === "can-quyen-gop" && newProject.status === "dang-xay-dung") {
           sections[0].push({ projectId, name: oldProject.name, differences });
+          countProjects[newProject.year].inProgress++;
           continue;
         }
-        if (oldProject.status === "dang-xay-dung" && newProject.status === "da-hoan-thanh") {
-          sections[3].push({ projectId, name: oldProject.name, differences });
-          continue;
-        }
+        // if (oldProject.status === "dang-xay-dung" && newProject.status === "da-hoan-thanh") {
+        //   sections[3].push({ projectId, name: oldProject.name, differences });
+        //   continue;
+        // }
       }
 
       if (newProject.status === "dang-xay-dung" && newProject.isInProgress === "") {
         sections[1].push({ projectId, name: oldProject.name, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
+        countProjects[newProject.year].inProgress++;
+        continue;
       }
       if (newProject.status === "dang-xay-dung" && newProject.isInProgress === "checked") {
         sections[2].push({ projectId, name: oldProject.name, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
+        countProjects[newProject.year].inProgress++;
+        continue;
       }
     }
   }
 
-  // Generate Markdown content
-  const today = new Date();
-  const last7Days = new Date(today);
-  last7Days.setDate(today.getDate() - 7);
-  let markdownContent = `# Báo cáo tiến độ tuần ${formatDate(last7Days)} - ${formatDate(today)}\n\n`;
+  // Generate HTML content
+  let htmlContent = ``;
+
+  htmlContent += `<p style="font-weight: bold;">Thống kê số liệu</p>`;
+  htmlContent += `<p style="font-weight: bold;">Năm 2023</p>`;
+  htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+  htmlContent += `<li>Tổng dự án đã khởi công: <strong>${countProjects[2023].total - 1}</strong></li>`; // -1 vì abc (hỏi c Yến)
+  htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${countProjects[2023].total - countProjects[2023].inProgress - 1}</strong></li>`;
+  htmlContent += `<li>Tổng dự án đang được xây: <strong>${countProjects[2023].inProgress}</strong></li>`;
+  htmlContent += `</ul>`;
+  htmlContent += `<p style="font-weight: bold;">Năm 2024</p>`;
+  htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+  htmlContent += `<li>Tổng dự án đã khởi công: <strong>${countProjects[2024].total}</strong></li>`;
+  htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${countProjects[2024].total - countProjects[2024].inProgress}</strong></li>`;
+  htmlContent += `<li>Tổng dự án đang được xây: <strong>${countProjects[2024].inProgress}</strong></li>`;
+  htmlContent += `</ul>`;
 
   for (const section of order) {
     if (sections[section.id].length > 0) {
-      markdownContent += `## ${sections[section.id].length} ${section.name}\n`;
-      markdownContent += "\n";
+      htmlContent += `<p style="font-weight: bold;">${sections[section.id].length} ${section.name}</p>`;
 
-      for (let projectIndex = 0; projectIndex < sections[section.id].length; projectIndex++) {
-        const project = sections[section.id][projectIndex];
+      htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+      for (const project of sections[section.id]) {
+        htmlContent += `<li>${project.name} `;
 
-        markdownContent += `- ${project.name} `;
-
-        if ([0, 3].includes(section.id)) {
-          markdownContent += "\n";
+        if (section.id === 0) {
+          htmlContent += `</li>`;
         }
 
         for (const diff of project.differences) {
           if (section.id === 1 && diff.key === "progressNote") {
-            markdownContent += `=> ${diff.newValue} \n`;
+            htmlContent += `=> ${diff.newValue}</li>`;
           } else if (section.id === 2) {
             continue;
           }
         }
 
         if (section.id === 2) {
-          markdownContent += "\n";
+          htmlContent += `</li>`;
         }
       }
-      markdownContent += "\n";
+      htmlContent += `</ul>`;
+
       if (section.id === 2) {
-        markdownContent += `#### (Chi tiết xem từng ảnh phía dưới)\n\n`;
+        htmlContent += `<p style="font-style: italic; text-align: center;">(Chi tiết xem từng ảnh phía dưới)</p>`;
       }
     }
   }
 
   // Generate progress images
-  markdownContent += "\n";
-  for (let projectIndex = 0; projectIndex < sections[2].length; projectIndex++) {
-    const project = sections[2][projectIndex];
-
-    const projectProgress = await getProjectProgress(extractFolderId(newProjects[project.projectId].url));
+  const slideshowImages = [];
+  for (const project of sections[2]) {
+    const projectId = project.projectId;
+    const projectUrl = newProjects[projectId].url;
+    const projectProgress = await getProjectProgress(extractFolderId(projectUrl));
     const tienDoItem = projectProgress.find((p) => p.name === "Ảnh tiến độ");
-    if (tienDoItem.images.length === 0) {
-      console.log(`No progress images found ${project.projectId}`);
+
+    if (!tienDoItem || tienDoItem.images.length === 0) {
+      console.log(`No progress images found ${projectId}`);
       continue;
     }
-    const tienDoImage = tienDoItem.images[0].image + "&sz=w1000";
-    markdownContent += `![${project.projectId}](${tienDoImage})\n`;
-    markdownContent += `**${project.name}**\n\n`;
+
+    const latestImage = tienDoItem.images.reduce((latest, image) => {
+      return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
+    });
+
+    slideshowImages.push({
+      image: `${latestImage.image}&sz=w1000`,
+      caption: project.name,
+    });
   }
 
-  fs.writeFileSync(path.resolve(__dirname, "report.md"), markdownContent);
-  console.log("Markdown content generated successfully.");
+  // Post to Firestore
+  const today = new Date();
+  const last7Days = new Date(today);
+  last7Days.setDate(today.getDate() - 6);
+  const newId = uuidv4().replace(/-/g, "").substring(0, 20);
+  const title = `Dự Án Sức Mạnh 2000 Cập Nhật Tiến Độ Các Dự Án Trong Tuần Từ Ngày ${formatDate(last7Days)} Đến Ngày ${formatDate(today)}`;
+  const category = "thong-bao";
+  const news = {
+    id: newId,
+    name: title,
+    author: "Admin",
+    publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
+    slug: slugify(title, { lower: true, strict: true }),
+    thumbnail: slideshowImages[0].image,
+    category: category,
+    content: {
+      tabs: [
+        {
+          name: "Hoàn cảnh",
+          description: htmlContent,
+          slide_show: slideshowImages,
+        },
+      ],
+    },
+  };
+
+  console.log("Writing to Firestore...");
+  // console.log(news.content.tabs[0]);
+
+  await Promise.all([
+    firestore.collection(category).doc(newId).set(news),
+    upsertDocumentToIndex({ ...news, collection_id: category, doc_id: newId }),
+    updateClassificationAndCategoryCounts(news.classification, news.category, +1),
+  ]);
+
+  console.log("Create post news successfully!!!!");
   process.exit(0);
 }
 

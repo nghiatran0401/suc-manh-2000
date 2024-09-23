@@ -34,6 +34,7 @@ export default function PostList() {
 
   // for applying filters into url params
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
@@ -267,7 +268,7 @@ export default function PostList() {
 
           <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
             <Grid container spacing={3} p={"16px"}>
-              <CardList posts={posts.slice(startIndex, endIndex)} showDescription={false} />
+              <CardList posts={posts.slice(startIndex, endIndex)} />
             </Grid>
           </Box>
 

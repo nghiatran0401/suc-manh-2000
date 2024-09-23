@@ -10,6 +10,7 @@
     "firebase-admin": "^12.1.1",
     "googleapis": "^143.0.0",
     "ioredis": "^5.4.1",
+    "marked": "^14.1.2",
     "slugify": "^1.6.6",
     "uuid": "^10.0.0"
   },

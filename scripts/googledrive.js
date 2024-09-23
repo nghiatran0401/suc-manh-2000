@@ -62,7 +62,7 @@ async function getProjectProgress(folderId) {
       const res = await drive.files.list({
         auth: auth,
         q: `'${folderId}' in parents`,
-        fields: "files(id, name, mimeType, parents)",
+        fields: "files(id, name, mimeType, parents, createdTime)",
       });
 
       const subfolders = res.data.files.filter((file) => file.mimeType === "application/vnd.google-apps.folder");
@@ -97,13 +97,13 @@ async function getProjectProgress(folderId) {
       for (const folder of firstLevelFolders) {
         const files = await checkForSubfolders(folder.id, orderItem, folder.name);
         if (orderItem === "hiện trạng") {
-          anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+          anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name, createdTime: f.createdTime })));
         }
         if (orderItem === "tiến độ") {
-          anhTienDo.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name })));
+          anhTienDo.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name, createdTime: f.createdTime })));
         }
         if (orderItem === "hoàn th") {
-          anhHoanThanh.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name })));
+          anhHoanThanh.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name, createdTime: f.createdTime })));
         }
       }
     } catch (err) {

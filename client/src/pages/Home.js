@@ -218,7 +218,7 @@ export default function Home() {
               borderColor: "red",
               "&:hover": { borderColor: "red" },
             }}
-            onClick={() => navigate(projectTab)}
+            onClick={() => navigate("/search")}
           >
             {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
           </Button>

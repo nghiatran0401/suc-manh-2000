@@ -118,7 +118,7 @@ export default function HeaderBar() {
                             <CDropdownMenu color="secondary">
                               {item.name === "du-an" && (
                                 <CDropdownItem href={"/search"}>
-                                  <Typography variant="body1">Tất cả Dự án</Typography>
+                                  <Typography variant="body1">Tất cả Dự án ({totalProjects})</Typography>
                                 </CDropdownItem>
                               )}
 
