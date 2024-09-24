@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 import { Create, useForm, SaveButton } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select } from "antd";
@@ -6,7 +6,6 @@ import { useLocation } from "react-router-dom";
 import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
-import { generateNewDocumentId } from "../../utils/helpers";
 import { provincesAndCities } from "../../utils/vietnam-provinces";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
@@ -14,7 +13,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an");
-  const ref = useRef(generateNewDocumentId({ collection: collectionName }));
   const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
   const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
@@ -37,7 +35,6 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   });
 
   useEffect(() => {
-    formProps.form?.setFieldValue("id", ref.current);
     formProps.form?.setFieldValue("publish_date", new Date().toISOString().substr(0, 10));
     formProps.form?.setFieldValue("category", collectionName);
     formProps.form?.setFieldValue("classification", "truong-hoc");
@@ -46,100 +43,47 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
 
   return (
     <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="horizontal" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <Form {...formProps} layout="vertical">
         {/* Above save button */}
         <div style={{ width: "100%", textAlign: "right" }}>
           <SaveButton onClick={formProps.form?.submit} style={{ width: "fit-content" }} />
         </div>
 
-        {/* ID */}
-        <div style={{ display: "none" }}>
-          <div
-            style={{
-              width: "20%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              paddingRight: "10px",
-            }}
-          >
-            {translate("post.fields.id")}
-          </div>
-          <Form.Item name={"id"} rules={[{ required: true }]} style={{ width: "80%" }}>
-            <Input disabled />
-          </Form.Item>
-        </div>
-
         {/* Name */}
-        <div style={{ display: "flex" }}>
-          <div
-            style={{
-              width: "20%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              paddingRight: "10px",
-            }}
-          >
-            <span style={{ color: "red" }}>*</span> {translate("post.fields.name")}
-          </div>
-          <Form.Item name={"name"} rules={[{ required: true }]} style={{ width: "80%" }}>
-            <Input autoFocus />
-          </Form.Item>
-        </div>
+        <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.name")}</span>} name={"name"} rules={[{ required: true }]}>
+          <Input autoFocus />
+        </Form.Item>
 
         {/* Thumbnail */}
-        <div style={{ display: "flex" }}>
-          <div
-            style={{
-              width: "20%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              paddingRight: "10px",
+        <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.thumbnail")}</span>} name={"thumbnail"} rules={[{ required: true }]}>
+          <ImageUploader
+            maxCount={1}
+            handleChange={(urls) => {
+              if (urls && urls.length > 0) {
+                formProps.form?.setFieldValue("thumbnail", urls[0].image);
+              }
             }}
-          >
-            <span style={{ color: "red" }}>*</span> {translate("post.fields.thumbnail")}
-          </div>
-          <Form.Item name={"thumbnail"} rules={[{ required: true }]}>
-            <ImageUploader
-              maxCount={1}
-              handleChange={(urls) => {
-                if (urls && urls.length > 0) {
-                  formProps.form?.setFieldValue("thumbnail", urls[0].image);
-                }
-              }}
-            />
-          </Form.Item>
-        </div>
+          />
+        </Form.Item>
 
-        {/* Publish Date */}
-        <div style={{ display: "flex" }}>
-          <div
-            style={{
-              width: "20%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              paddingRight: "10px",
-            }}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+          {/* Publish Date */}
+          <Form.Item
+            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>}
+            name={"publish_date"}
+            rules={[{ required: true }]}
+            style={{ width: "fit-content", minWidth: "150px" }}
           >
-            <span style={{ color: "red" }}>*</span> {translate("post.fields.publish_date")}
-          </div>
-          <Form.Item name={"publish_date"} style={{ width: "40%" }} rules={[{ required: true }]}>
             <Input type="date" />
           </Form.Item>
-        </div>
 
-        {/* Category */}
-        <div style={{ display: "flex" }}>
-          <div
-            style={{
-              width: "20%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              paddingRight: "10px",
-            }}
+          {/* Category */}
+          <Form.Item
+            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>}
+            name={"category"}
+            rules={[{ required: true }]}
+            style={{ width: "fit-content", minWidth: "150px" }}
           >
-            <span style={{ color: "red" }}>*</span> {translate("post.fields.category")}
-          </div>
-          <Form.Item name={"category"} rules={[{ required: true }]} style={{ width: "40%" }}>
             <Select disabled onChange={(value) => formProps.form?.setFieldValue("category", value)}>
               {Object.entries(categoryMapping).map(([value, label]) => (
                 <Select.Option key={value} value={value}>
@@ -148,22 +92,15 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               ))}
             </Select>
           </Form.Item>
-        </div>
 
-        {/* Classification */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
+          {/* Classification */}
+          {isProject && (
+            <Form.Item
+              label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.classification")}</span>}
+              name={"classification"}
+              rules={[{ required: true }]}
+              style={{ width: "fit-content", minWidth: "150px" }}
             >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.classification")}
-            </div>
-            <Form.Item name={"classification"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select>
                 {Object.entries(classificationMapping).map(([value, label]) => (
                   <Select.Option key={value} value={value}>
@@ -172,23 +109,16 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 ))}
               </Select>
             </Form.Item>
-          </div>
-        )}
+          )}
 
-        {/* Status */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
+          {/* Status */}
+          {isProject && (
+            <Form.Item
+              label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.status")}</span>}
+              name={"status"}
+              rules={[{ required: true }]}
+              style={{ width: "fit-content", minWidth: "150px" }}
             >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.status")}
-            </div>
-            <Form.Item name={"status"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <Select>
                 {Object.entries(statusMapping).map(([value, label]) => (
                   <Select.Option key={value} value={value}>
@@ -197,43 +127,29 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 ))}
               </Select>
             </Form.Item>
-          </div>
-        )}
+          )}
 
-        {/* TotalFund */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
+          {/* TotalFund */}
+          {isProject && (
+            <Form.Item
+              label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.totalFund")}</span>}
+              name={"totalFund"}
+              rules={[{ required: true }]}
+              style={{ width: "fit-content", minWidth: "150px" }}
             >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.totalFund")}
-            </div>
-            <Form.Item name={"totalFund"} rules={[{ required: true }]} style={{ width: "40%" }}>
               <InputNumber defaultValue={0} style={{ width: "100%" }} addonAfter={".000.000"} />
             </Form.Item>
-          </div>
-        )}
+          )}
 
-        {/* Location - Province */}
-        {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
+          {/* Location - Province */}
+          {isProject && (
+            <Form.Item
+              label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.province")}</span>}
+              name={"province"}
+              rules={[{ required: true }]}
+              style={{ width: "fit-content", minWidth: "150px" }}
             >
-              <span style={{ color: "red" }}>*</span> {translate("post.fields.province")}
-            </div>
-            <Form.Item name={"province"} rules={[{ required: true }]} style={{ width: "40%" }}>
-              <Select showSearch placeholder="Select or enter a new province">
+              <Select showSearch placeholder="Select">
                 {provincesAndCities.map((p) => (
                   <Select.Option key={p.province} value={p.province}>
                     {p.province}
@@ -241,87 +157,11 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
                 ))}
               </Select>
             </Form.Item>
-          </div>
-        )}
-
-        {/* Distance to HN */}
-        {/* {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              {translate("post.fields.distanceToHN")}
-            </div>
-            <Form.Item name={"distanceToHN"} style={{ width: "40%" }}>
-              <InputNumber defaultValue={0} style={{ width: "100%" }} />
-            </Form.Item>
-          </div>
-        )} */}
-
-        {/* Distance to HCM */}
-        {/* {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              {translate("post.fields.distanceToHCMC")}
-            </div>
-            <Form.Item name={"distanceToHCMC"} style={{ width: "40%" }}>
-              <InputNumber defaultValue={0} style={{ width: "100%" }} />
-            </Form.Item>
-          </div>
-        )} */}
-
-        {/* Start Date */}
-        {/* {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              {translate("post.fields.start_date")}
-            </div>
-            <Form.Item name={"start_date"} style={{ width: "40%" }}>
-              <Input type="date" />
-            </Form.Item>
-          </div>
-        )} */}
-
-        {/* End Date */}
-        {/* {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              {translate("post.fields.end_date")}
-            </div>
-            <Form.Item name={"end_date"} style={{ width: "40%" }}>
-              <Input type="date" />
-            </Form.Item>
-          </div>
-        )} */}
+          )}
+        </div>
 
         {/* Description */}
-        {isProject && (
+        {/* {isProject && (
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -337,210 +177,154 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               <RichTextEditor initialContent={""} onChange={() => {}} />
             </Form.Item>
           </div>
-        )}
+        )} */}
 
         {/* Donor */}
         {isProject && (
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                width: "20%",
-                fontWeight: "bold",
-                fontSize: "16px",
-                paddingRight: "10px",
-              }}
-            >
-              {translate("post.fields.donor.name")}
-            </div>
-
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donor.name")}</span>}>
             <div
               style={{
                 display: "flex",
-                width: "80%",
-                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "16px",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.description")}</div>
-                <Form.Item name={"donor.description"}>
-                  <RichTextEditor initialContent={""} onChange={() => {}} />
-                </Form.Item>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.description")}</span>} name={"donor.description"}>
+                <RichTextEditor initialContent={""} onChange={() => {}} />
+              </Form.Item>
 
-              <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.donor.images")}</div>
-                <Form.Item name={"donor.images"}>
-                  <ImageUploader
-                    handleChange={(urls) => {
-                      if (urls && urls.length > 0) {
-                        formProps.form?.setFieldValue("donor.images", urls);
-                      }
-                    }}
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.images")}</span>} name={"donor.images"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("donor.images", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
             </div>
-          </div>
+          </Form.Item>
         )}
 
         {/* Progress */}
         {isProject && (
-          <div style={{ display: "flex" }}>
-            <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.name")}</div>
-
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.progress.name")}</span>}>
             <div
               style={{
                 display: "flex",
-                width: "80%",
-                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "16px",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images1")}</div>
-                <Form.Item name={"progress.images1"}>
-                  <ImageUploader
-                    handleChange={(urls) => {
-                      if (urls && urls.length > 0) {
-                        formProps.form?.setFieldValue("progress.images1", urls);
-                      }
-                    }}
-                  />
-                </Form.Item>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images2")}</div>
-                <Form.Item name={"progress.images2"}>
-                  <ImageUploader
-                    handleChange={(urls) => {
-                      if (urls && urls.length > 0) {
-                        formProps.form?.setFieldValue("progress.images2", urls);
-                      }
-                    }}
-                  />
-                </Form.Item>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.progress.images3")}</div>
-                <Form.Item name={"progress.images3"}>
-                  <ImageUploader
-                    handleChange={(urls) => {
-                      if (urls && urls.length > 0) {
-                        formProps.form?.setFieldValue("progress.images3", urls);
-                      }
-                    }}
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images1")}</span>} name={"progress.images1"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("progress.images1", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images2")}</span>} name={"progress.images2"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("progress.images2", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images3")}</span>} name={"progress.images3"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("progress.images3", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
             </div>
-          </div>
+          </Form.Item>
         )}
 
-        {/* Tabs content */}
-        <div>
-          <div style={{ display: "flex" }}>
-            <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>{isProject ? `${translate("post.fields.content.name")} (${translate("post.fields.content.section1")})` : "Nội dung"}</div>
+        {/* Hoàn cảnh */}
+        <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{isProject ? translate("post.fields.content.section1") : ""}</span>}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
+            <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description1"}>
+              <RichTextEditor initialContent={""} onChange={() => {}} />
+            </Form.Item>
 
+            <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images1"}>
+              <ImageUploader
+                handleChange={(urls) => {
+                  if (urls && urls.length > 0) {
+                    formProps.form?.setFieldValue("content.images1", urls);
+                  }
+                }}
+              />
+            </Form.Item>
+          </div>
+        </Form.Item>
+
+        {/* Nhà hảo tâm */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section2")}</span>}>
             <div
               style={{
                 display: "flex",
-                width: "80%",
-                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "16px",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                <Form.Item name={"content.description1"}>
-                  <RichTextEditor initialContent={""} onChange={() => {}} />
-                </Form.Item>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description2"}>
+                <RichTextEditor initialContent={""} onChange={() => {}} />
+              </Form.Item>
 
-              <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
-                <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
-                <Form.Item name={"content.images1"}>
-                  <ImageUploader
-                    handleChange={(urls) => {
-                      if (urls && urls.length > 0) {
-                        formProps.form?.setFieldValue("content.images1", urls);
-                      }
-                    }}
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images2"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("content.images2", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
             </div>
-          </div>
+          </Form.Item>
+        )}
 
-          {isProject && (
-            <div style={{ display: "flex" }}>
-              <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>
-                {translate("post.fields.content.name")} ({translate("post.fields.content.section2")})
-              </div>
+        {/* Mô hình xây */}
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section3")}</span>}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+              }}
+            >
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description3"}>
+                <RichTextEditor initialContent={""} onChange={() => {}} />
+              </Form.Item>
 
-              <div
-                style={{
-                  display: "flex",
-                  width: "80%",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
-                  <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                  <Form.Item name={"content.description2"}>
-                    <RichTextEditor initialContent={""} onChange={() => {}} />
-                  </Form.Item>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
-                  <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
-                  <Form.Item name={"content.images2"}>
-                    <ImageUploader
-                      handleChange={(urls) => {
-                        if (urls && urls.length > 0) {
-                          formProps.form?.setFieldValue("content.images2", urls);
-                        }
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-              </div>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images3"}>
+                <ImageUploader
+                  handleChange={(urls) => {
+                    if (urls && urls.length > 0) {
+                      formProps.form?.setFieldValue("content.images3", urls);
+                    }
+                  }}
+                />
+              </Form.Item>
             </div>
-          )}
-
-          {isProject && (
-            <div style={{ display: "flex" }}>
-              <div style={{ width: "20%", fontWeight: "bold", fontSize: "16px" }}>
-                {translate("post.fields.content.name")} ({translate("post.fields.content.section3")})
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  width: "80%",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column", width: "70%" }}>
-                  <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.description")}</div>
-                  <Form.Item name={"content.description3"}>
-                    <RichTextEditor initialContent={""} onChange={() => {}} />
-                  </Form.Item>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", width: "30%" }}>
-                  <div style={{ fontWeight: "bold", fontSize: "16px" }}>{translate("post.fields.content.images")}</div>
-                  <Form.Item name={"content.images3"}>
-                    <ImageUploader
-                      handleChange={(urls) => {
-                        if (urls && urls.length > 0) {
-                          formProps.form?.setFieldValue("content.images3", urls);
-                        }
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </Form.Item>
+        )}
       </Form>
     </Create>
   );

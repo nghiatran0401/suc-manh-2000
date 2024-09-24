@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
 const { v4: uuidv4 } = require("uuid");
-const marked = require("marked");
 const slugify = require("slugify");
 const { getProjectStatus, standardizeString, extractFolderId } = require("./updateDuAnFromAirtableToWeb");
 const { getProjectProgress } = require("./googledrive");
@@ -147,53 +146,65 @@ async function compareCSVFiles(requestedYears, attributes) {
 
       if (differences.length > 0) {
         if (oldProject.status === "can-quyen-gop" && newProject.status === "dang-xay-dung") {
-          sections[0].push({ projectId, name: oldProject.name, differences });
+          sections[0].push({ projectId, name: newProject.name, classification: newProject.classification, differences });
           countProjects[newProject.year].inProgress++;
           continue;
         }
         // if (oldProject.status === "dang-xay-dung" && newProject.status === "da-hoan-thanh") {
-        //   sections[3].push({ projectId, name: oldProject.name, differences });
+        //   sections[3].push({ projectId, name: newProject.name, differences });
         //   continue;
         // }
       }
 
       if (newProject.status === "dang-xay-dung" && newProject.isInProgress === "") {
-        sections[1].push({ projectId, name: oldProject.name, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
+        sections[1].push({ projectId, name: newProject.name, classification: newProject.classification, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
         countProjects[newProject.year].inProgress++;
         continue;
       }
       if (newProject.status === "dang-xay-dung" && newProject.isInProgress === "checked") {
-        sections[2].push({ projectId, name: oldProject.name, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
+        sections[2].push({ projectId, name: newProject.name, classification: newProject.classification, differences: [{ key: "progressNote", newValue: newProject["progressNote"] }] });
         countProjects[newProject.year].inProgress++;
         continue;
       }
     }
   }
 
+  // Sort projects by classification
+  const classificationOrder = ["Trường", "Khu Nội Trú", "Nhà Hạnh Phúc", "Cầu"];
+  for (const sectionId in sections) {
+    sections[sectionId].sort((a, b) => {
+      return classificationOrder.indexOf(a.classification) - classificationOrder.indexOf(b.classification);
+    });
+  }
+
   // Generate HTML content
   let htmlContent = ``;
-
-  htmlContent += `<p style="font-weight: bold;">Thống kê số liệu</p>`;
-  htmlContent += `<p style="font-weight: bold;">Năm 2023</p>`;
+  htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
+  htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
   htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
   htmlContent += `<li>Tổng dự án đã khởi công: <strong>${countProjects[2023].total - 1}</strong></li>`; // -1 vì abc (hỏi c Yến)
   htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${countProjects[2023].total - countProjects[2023].inProgress - 1}</strong></li>`;
   htmlContent += `<li>Tổng dự án đang được xây: <strong>${countProjects[2023].inProgress}</strong></li>`;
   htmlContent += `</ul>`;
-  htmlContent += `<p style="font-weight: bold;">Năm 2024</p>`;
+  htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2024</strong></p>`;
   htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
   htmlContent += `<li>Tổng dự án đã khởi công: <strong>${countProjects[2024].total}</strong></li>`;
   htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${countProjects[2024].total - countProjects[2024].inProgress}</strong></li>`;
   htmlContent += `<li>Tổng dự án đang được xây: <strong>${countProjects[2024].inProgress}</strong></li>`;
   htmlContent += `</ul>`;
-
   for (const section of order) {
     if (sections[section.id].length > 0) {
-      htmlContent += `<p style="font-weight: bold;">${sections[section.id].length} ${section.name}</p>`;
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${sections[section.id].length} ${section.name}</strong></p>`;
 
-      htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+      htmlContent += `<ol style="padding-left: 20px;">`;
+      let oldClassification = "";
       for (const project of sections[section.id]) {
-        htmlContent += `<li>${project.name} `;
+        if (project.classification !== oldClassification) {
+          oldClassification = project.classification;
+          htmlContent += `<p style="margin-top: revert;"><strong>${project.classification}</strong></p>`;
+        }
+
+        htmlContent += `<li>${project.name}`;
 
         if (section.id === 0) {
           htmlContent += `</li>`;
@@ -201,7 +212,7 @@ async function compareCSVFiles(requestedYears, attributes) {
 
         for (const diff of project.differences) {
           if (section.id === 1 && diff.key === "progressNote") {
-            htmlContent += `=> ${diff.newValue}</li>`;
+            htmlContent += ` => ${diff.newValue}</li>`;
           } else if (section.id === 2) {
             continue;
           }
@@ -211,7 +222,7 @@ async function compareCSVFiles(requestedYears, attributes) {
           htmlContent += `</li>`;
         }
       }
-      htmlContent += `</ul>`;
+      htmlContent += `</ol>`;
 
       if (section.id === 2) {
         htmlContent += `<p style="font-style: italic; text-align: center;">(Chi tiết xem từng ảnh phía dưới)</p>`;
@@ -247,14 +258,14 @@ async function compareCSVFiles(requestedYears, attributes) {
   const last7Days = new Date(today);
   last7Days.setDate(today.getDate() - 6);
   const newId = uuidv4().replace(/-/g, "").substring(0, 20);
-  const title = `Dự Án Sức Mạnh 2000 Cập Nhật Tiến Độ Các Dự Án Trong Tuần Từ Ngày ${formatDate(last7Days)} Đến Ngày ${formatDate(today)}`;
+  const title = `Dự án Sức mạnh 2000 cập nhật tiến độ các dự án trong tuần từ ngày ${formatDate(last7Days)} đến ngày ${formatDate(today)}`;
   const category = "thong-bao";
   const news = {
     id: newId,
     name: title,
     author: "Admin",
     publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
-    slug: slugify(title, { lower: true, strict: true }),
+    slug: slugify(formatDate(today), { lower: true, strict: true }),
     thumbnail: slideshowImages[0].image,
     category: category,
     content: {
@@ -269,16 +280,13 @@ async function compareCSVFiles(requestedYears, attributes) {
   };
 
   console.log("Writing to Firestore...");
-  // console.log(news.content.tabs[0]);
-
   await Promise.all([
     firestore.collection(category).doc(newId).set(news),
     upsertDocumentToIndex({ ...news, collection_id: category, doc_id: newId }),
     updateClassificationAndCategoryCounts(news.classification, news.category, +1),
   ]);
-
   console.log("Create post news successfully!!!!");
   process.exit(0);
 }
 
-compareCSVFiles(["2023", "2024"], ["status"]);
+// compareCSVFiles(["2023", "2024"], ["status"]);

@@ -3,6 +3,7 @@ const slugify = require("slugify");
 const { firestore, firebase } = require("../firebase");
 const { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } = require("../services/redis");
 const { updateClassificationAndCategoryCounts } = require("../utils");
+const { v4: uuidv4 } = require("uuid");
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -42,9 +43,10 @@ postRouter.post("/", async (req, res) => {
   const { category } = req.params;
   const createdPost = req.body;
   const isProject = category.includes("du-an");
+  const newId = uuidv4().replace(/-/g, "").substring(0, 20);
 
   const commonPostFields = {
-    id: createdPost.id,
+    id: newId,
     name: createdPost.name,
     author: "Admin",
     publish_date: createdPost.publish_date ? firebase.firestore.Timestamp.fromDate(new Date(createdPost.publish_date)) : firebase.firestore.Timestamp.fromDate(new Date()),
