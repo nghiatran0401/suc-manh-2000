@@ -3,7 +3,8 @@ const path = require("path");
 const csv = require("csv-parser");
 const { v4: uuidv4 } = require("uuid");
 const slugify = require("slugify");
-const { getProjectStatus, standardizeString, extractFolderId } = require("./updateDuAnFromAirtableToWeb");
+const { extractFolderId } = require("./updateDuAnFromAirtableToWeb");
+const { getProjectStatus, standardizeString } = require("./airtable");
 const { getProjectProgress } = require("./googledrive");
 const { firestore, firebase } = require("./firebase");
 const { upsertDocumentToIndex } = require("../server/services/redis");
@@ -71,7 +72,7 @@ function readCSV(filePath, projectMap, requestedYears) {
             end_date: trimmedData["Ngày KT"] ? (trimmedData["Ngày KT"].trim() === "" ? null : trimmedData["Ngày KT"].trim()) : null,
           },
           isInProgress: trimmedData["Ảnh Tiến độ (check)"] ?? null,
-          progressNote: trimmedData["Note tiến độ"] ?? null,
+          progressNote: trimmedData["Note tiến độ Web"] ?? null,
           url: trimmedData["Link Drive"].trim(),
           year: year,
         };
@@ -225,7 +226,7 @@ async function compareCSVFiles(requestedYears, attributes) {
       htmlContent += `</ol>`;
 
       if (section.id === 2) {
-        htmlContent += `<p style="font-style: italic; text-align: center;">(Chi tiết xem từng ảnh phía dưới)</p>`;
+        htmlContent += `<p style="font-style: italic; text-align: center;"><strong>(Chi tiết xem từng ảnh phía dưới)</strong></p>`;
       }
     }
   }
@@ -235,20 +236,11 @@ async function compareCSVFiles(requestedYears, attributes) {
   for (const project of sections[2]) {
     const projectId = project.projectId;
     const projectUrl = newProjects[projectId].url;
-    const projectProgress = await getProjectProgress(extractFolderId(projectUrl));
-    const tienDoItem = projectProgress.find((p) => p.name === "Ảnh tiến độ");
-
-    if (!tienDoItem || tienDoItem.images.length === 0) {
-      console.log(`No progress images found ${projectId}`);
-      continue;
-    }
-
-    const latestImage = tienDoItem.images.reduce((latest, image) => {
-      return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
-    });
-
+    const projectProgressObj = await getProjectProgress(extractFolderId(projectUrl));
+    if (projectProgressObj === undefined) return;
+    const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
     slideshowImages.push({
-      image: `${latestImage.image}&sz=w1000`,
+      image: projectThumbnail,
       caption: project.name,
     });
   }
@@ -279,7 +271,7 @@ async function compareCSVFiles(requestedYears, attributes) {
     },
   };
 
-  console.log("Writing to Firestore...");
+  console.log("Writing to Firestore...", newId);
   await Promise.all([
     firestore.collection(category).doc(newId).set(news),
     upsertDocumentToIndex({ ...news, collection_id: category, doc_id: newId }),

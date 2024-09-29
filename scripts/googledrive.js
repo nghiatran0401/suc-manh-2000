@@ -49,13 +49,18 @@ const auth = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 auth.setCredentials(token);
 
 async function getProjectProgress(folderId) {
-  if (!folderId) return undefined;
+  if (!folderId) {
+    console.error("Sai GD folderId");
+    return undefined;
+  }
 
-  const order = ["hiện trạng", "tiến độ", "hoàn th"];
+  const order = ["hiện trạng", "khởi công", "tiến độ", "hoàn th"];
   const anhTienDo = [];
+  const anhKhoiCong = [];
   const anhHienTrang = [];
   const anhHoanThanh = [];
   const progress = [];
+  let thumbnailImage = "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png";
 
   async function checkForSubfolders(folderId, orderItem, firstLevelFolderName) {
     try {
@@ -80,7 +85,8 @@ async function getProjectProgress(folderId) {
         return files;
       }
     } catch (err) {
-      throw new Error("The API returned an error: " + err);
+      // console.error(`[checkForSubfolders] - ${folderId} - ${orderItem} - error: ` + err);
+      return undefined;
     }
   }
 
@@ -95,19 +101,34 @@ async function getProjectProgress(folderId) {
       const firstLevelFolders = res.data.files.filter((folder) => folder.name.includes(orderItem));
 
       for (const folder of firstLevelFolders) {
-        const files = await checkForSubfolders(folder.id, orderItem, folder.name);
-        if (orderItem === "hiện trạng") {
-          anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name, createdTime: f.createdTime })));
+        const allFiles = await checkForSubfolders(folder.id, orderItem, folder.name);
+        const files = allFiles.filter((f) => ["image/jpeg", "image/png"].includes(f.mimeType));
+
+        if (files.length > 0 && orderItem === "hiện trạng") {
+          const imageObj = files.reduce((latest, image) => {
+            return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
+          });
+          thumbnailImage = `https://drive.google.com/thumbnail?id=${imageObj.id}&sz=w1000`;
         }
-        if (orderItem === "tiến độ") {
-          anhTienDo.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name, createdTime: f.createdTime })));
-        }
-        if (orderItem === "hoàn th") {
-          anhHoanThanh.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}`, caption: f.name, createdTime: f.createdTime })));
+
+        if (files.length > 0) {
+          if (orderItem === "hiện trạng") {
+            anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+          }
+          if (orderItem === "khởi công") {
+            anhKhoiCong.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+          }
+          if (orderItem === "tiến độ") {
+            anhTienDo.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+          }
+          if (orderItem === "hoàn th") {
+            anhHoanThanh.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+          }
         }
       }
     } catch (err) {
-      console.error(`[processFirstLevelFolders] - ${folderId} - ${orderItem} - error: ` + err);
+      // console.error(`[processFirstLevelFolders] - ${folderId} - ${orderItem} - error: ` + err);
+      return undefined;
     }
   }
 
@@ -116,13 +137,16 @@ async function getProjectProgress(folderId) {
   }
 
   progress.push({ name: "Ảnh hiện trạng", images: anhHienTrang });
-  progress.push({ name: "Ảnh tiến độ", images: anhTienDo });
+  progress.push({ name: "Ảnh tiến độ", images: anhTienDo.concat(anhKhoiCong) });
   progress.push({ name: "Ảnh hoàn thiện", images: anhHoanThanh });
-  return progress;
+  return { thumbnailImage, progress };
 }
 
 async function getHoanCanhDescription(folderId) {
-  if (!folderId) return undefined;
+  if (!folderId) {
+    console.error("Sai GD folderId");
+    return undefined;
+  }
 
   try {
     const res = await drive.files.list({
@@ -132,19 +156,22 @@ async function getHoanCanhDescription(folderId) {
     });
 
     const hienTrangFolder = res.data.files.find((folder) => folder.name.includes("hiện trạng"));
-    if (!hienTrangFolder) return null;
-
     const filesRes = await drive.files.list({
       auth: auth,
       q: `'${hienTrangFolder.id}' in parents`,
       fields: "files(id, name, mimeType, parents)",
     });
 
-    const googleDoc = filesRes.data.files.find((file) => file.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    const googleDocObj = filesRes.data.files.find((file) =>
+      ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/vnd.google-apps.document"].includes(file.mimeType)
+    );
 
-    return googleDoc ? googleDoc : null;
+    if (googleDocObj.id) {
+      return `https://docs.google.com/document/d/${googleDocObj.id}/preview`;
+    }
+    return undefined;
   } catch (err) {
-    console.error("[getHoanCanhDescription] error" + err);
+    // console.error(`[getHoanCanhDescription] - ${folderId} - error: ` + err);
     return undefined;
   }
 }

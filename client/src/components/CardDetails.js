@@ -23,6 +23,8 @@ export default function CardDetails(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isProject = category.includes("du-an");
+  const [finalProgress, setFinalProgress] = useState(post.progressNew || post.progress);
+  const [finalTabs, setFinalTabs] = useState(post.contentNew || post.content);
 
   useEffect(() => {
     setLoading(true);
@@ -32,9 +34,49 @@ export default function CardDetails(props) {
       .then((postsResponse) => {
         setProjects(postsResponse.data.posts);
         setLoading(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }, 200);
       })
       .catch((e) => console.error(e));
   }, [category]);
+
+  const IframeComponent = ({ tab }) => {
+    const [iframeStatus, setIframeStatus] = useState("loading");
+
+    if (!tab.description) {
+      return <></>;
+    } else if (tab.name === "Mô hình xây") {
+      return <Typography variant="body1" dangerouslySetInnerHTML={{ __html: tab.description }} />;
+    } else {
+      return (
+        <>
+          {iframeStatus === "loading" && (
+            <Box display="flex" justifyContent="center" alignItems="center" gap={"8px"} mb={"16px"}>
+              <CircularProgress size={18} />
+              Đang tải nội dung
+            </Box>
+          )}
+          <iframe
+            title={tab.name}
+            width="100%"
+            height={"1000px"}
+            src={tab.description}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            onLoad={() => setIframeStatus("loaded")}
+            onError={() => setIframeStatus("error")}
+            style={{
+              border: "2px solid #ccc",
+              borderRadius: "8px",
+            }}
+          />
+        </>
+      );
+    }
+  };
 
   if (loading) return <LoadingScreen />;
   return (
@@ -162,9 +204,9 @@ export default function CardDetails(props) {
         )
       )}
 
-      {post?.progress && post?.progress?.length > 0 && (
+      {finalProgress && finalProgress?.length > 0 && (
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
-          {post?.progress?.map((progress, index) => (
+          {finalProgress?.map((progress, index) => (
             <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
               <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
                 <Typography variant="h5" fontWeight="bold" m={"8px"}>
@@ -250,15 +292,15 @@ export default function CardDetails(props) {
                 ))}
 
               {/* Project */}
-              {post.content.tabs.length > 1 && (
+              {finalTabs?.tabs?.length > 1 && (
                 <Tabs style={{ width: "100%" }}>
                   <TabList>
-                    {post.content.tabs.map((tab, index) => (
+                    {finalTabs.tabs.map((tab, index) => (
                       <Tab key={index}>{tab.name}</Tab>
                     ))}
                   </TabList>
 
-                  {post.content.tabs.map((tab, index) => (
+                  {finalTabs.tabs.map((tab, index) => (
                     <TabPanel
                       key={index}
                       style={{
@@ -268,22 +310,28 @@ export default function CardDetails(props) {
                       }}
                     >
                       <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            wordBreak: "break-word",
-                            "& figure": { width: "auto !important" },
-                            "& iframe": {
-                              width: "-webkit-fill-available !important",
-                            },
-                            "& table": {
-                              "& th, td": {
-                                verticalAlign: "top",
+                        {category === "du-an-2024" ? (
+                          <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
+                            <IframeComponent tab={tab} />
+                          </Box>
+                        ) : (
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              wordBreak: "break-word",
+                              "& figure": { width: "auto !important" },
+                              "& iframe": {
+                                width: "-webkit-fill-available !important",
                               },
-                            },
-                          }}
-                          dangerouslySetInnerHTML={{ __html: tab.description }}
-                        />
+                              "& table": {
+                                "& th, td": {
+                                  verticalAlign: "top",
+                                },
+                              },
+                            }}
+                            dangerouslySetInnerHTML={{ __html: tab.description }}
+                          />
+                        )}
 
                         {tab.embedded_url?.length > 0 && (
                           <Box>

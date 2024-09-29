@@ -21,3 +21,30 @@ async function moveDocument(sourceCollectionName, destinationCollectionName, doc
   console.log(`Moved document with id: ${docId} from ${sourceCollectionName} to ${destinationCollectionName}`);
 }
 // moveDocument("du-an-2023", "du-an-2022", "14275").catch(console.error);
+
+async function findDocumentsWithoutProjectId(collectionName) {
+  try {
+    const snapshot = await firestore.collection(collectionName).get();
+    const documentsWithoutProjectId = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (!data.hasOwnProperty("projectId")) {
+        documentsWithoutProjectId.push({ id: doc.id, data });
+      }
+    });
+
+    if (documentsWithoutProjectId.length > 0) {
+      console.log(`Found ${documentsWithoutProjectId.length}: "${collectionName}":`);
+      documentsWithoutProjectId.forEach((doc) => {
+        console.log(`Document ID: ${doc.id}, name: ${doc.data.name}`);
+      });
+    } else {
+      console.log(`All documents in collection "${collectionName}" have the "projectId" attribute.`);
+    }
+  } catch (error) {
+    console.error(`Error fetching documents from collection "${collectionName}":`, error);
+  }
+}
+
+// findDocumentsWithoutProjectId("du-an-2024").catch(console.error);
