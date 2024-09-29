@@ -1,9 +1,11 @@
 const { firestore } = require("./firebase");
 const { convertToCleanedName } = require("../server/utils/search");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const Redis = require("ioredis");
 const { removeSearchIndexAndDocuments } = require("../server/services/redis");
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_PROD_URL);
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
