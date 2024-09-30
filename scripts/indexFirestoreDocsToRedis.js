@@ -2,7 +2,7 @@ const { firestore } = require("./firebase");
 const { convertToCleanedName } = require("../server/utils/search");
 
 const Redis = require("ioredis");
-const redis = new Redis("localhost:6379");
+const redis = new Redis(process.env.REDIS_URL);
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
@@ -113,6 +113,6 @@ async function indexFirestoreDocsToRedis() {
   }
 }
 
-indexFirestoreDocsToRedis();
+// indexFirestoreDocsToRedis();
 
 module.exports = indexFirestoreDocsToRedis;
