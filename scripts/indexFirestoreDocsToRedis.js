@@ -2,8 +2,7 @@ const { firestore } = require("./firebase");
 const { convertToCleanedName } = require("../server/utils/search");
 
 const Redis = require("ioredis");
-const { removeSearchIndexAndDocuments } = require("../server/services/redis");
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis("localhost:6379");
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
@@ -31,6 +30,23 @@ const INDEX_SCHEMA = [
   "province",
   "TAG",
 ];
+
+async function removeSearchIndexAndDocuments() {
+  try {
+    let results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
+    while (results[0] > 0) {
+      for (let i = 1; i < results.length; i += 2) {
+        const docId = results[i];
+
+        await redis.call("FT.DEL", INDEX_NAME, docId);
+      }
+      results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
+    }
+    await redis.call("FT.DROPINDEX", INDEX_NAME);
+  } catch (error) {
+    console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
+  }
+}
 
 async function createIndexAndDocuments() {
   await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
@@ -97,6 +113,6 @@ async function indexFirestoreDocsToRedis() {
   }
 }
 
-// indexFirestoreDocsToRedis();
+indexFirestoreDocsToRedis();
 
 module.exports = indexFirestoreDocsToRedis;

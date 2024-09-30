@@ -27,7 +27,6 @@ export default function CardList(props) {
     <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
-          {console.log("here", post.thumbnail)}
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
             <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt={standardizeString(post.name)} />
 

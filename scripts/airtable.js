@@ -56,12 +56,12 @@ async function getDonorsFromIds(donorIds) {
   for (const donorId of donorIds) {
     const record = await base(DONOR_TABLE).find(donorId);
     const donor = {
-      name: record.get("Tên Tài Trợ"),
+      name: record.get("Tên Tài Trợ") ?? "",
       totalProjects: record.get("Công trình Total") ? record.get("Công trình Total").length : 0,
-      notes: record.get("Notes"),
-      contact: record.get("Thông tin liên hệ "),
-      intro: record.get("Giới thiệu Cty ( lên MoMo )"),
-      logo: record.get("Logo Drive"),
+      notes: record.get("Notes") ?? "",
+      contact: record.get("Thông tin liên hệ ") ?? "",
+      intro: record.get("Giới thiệu Cty ( lên MoMo )") ?? "",
+      logo: record.get("Logo Drive") ?? "",
     };
     donors.push(donor);
   }
@@ -120,29 +120,29 @@ async function fetchAirtableRecords(requestedYear) {
         name: projectName,
         classification: classification,
         status: projectStatus,
-        totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : undefined,
+        totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : "",
         donors: projectDonors,
         location: {
-          province: record.get("Tỉnh/thành (update)"),
-          district: record.get("Huyện"),
-          commune: record.get("Xã"),
+          province: record.get("Tỉnh/thành (update)") ? record.get("Tỉnh/thành (update)")[0] : "",
+          district: record.get("Huyện") ? record.get("Huyện").trim() : "",
+          commune: record.get("Xã") ? record.get("Xã").trim() : "",
         },
         metadata: {
           constructionItems: record.get("Hạng mục công trình") ? record.get("Hạng mục công trình").trim() : "",
           type: record.get("Hạng mục") ? record.get("Hạng mục").trim() : "",
           stage: record.get("Cấp") ? record.get("Cấp").trim() : "",
-          totalStudents: Number(record.get("Số HS")) ?? 0,
-          totalClassrooms: Number(record.get("Số PH")) ?? 0,
-          totalPublicAffairsRooms: Number(record.get("Số CV")) ?? 0,
-          totalRooms: Number(record.get("Số p.ở")) ?? 0,
-          totalKitchens: Number(record.get("Số bếp")) ?? 0,
-          totalToilets: Number(record.get("Số WC")) ?? 0,
+          totalStudents: record.get("Số HS") ? record.get("Số HS") : "",
+          totalClassrooms: record.get("Số PH") ? record.get("Số PH") : "",
+          totalPublicAffairsRooms: record.get("Số CV") ? record.get("Số CV") : "",
+          totalRooms: record.get("Số p.ở") ? record.get("Số p.ở") : "",
+          totalKitchens: record.get("Số bếp") ? record.get("Số bếp") : "",
+          totalToilets: record.get("Số WC") ? record.get("Số WC") : "",
           start_date: record.get("Ngày KC") ? record.get("Ngày KC").trim() : "",
           end_date: record.get("Ngày KT") ? record.get("Ngày KT").trim() : "",
         },
         progressImagesUrl: progressImagesUrl,
         financialStatementUrl: record.get("Link sao kê") ? record.get("Link sao kê").trim() : "",
-        trelloCardUrl: record.get("Link Trello") ? record.get("Link Trello").trim() : undefined,
+        trelloCardUrl: record.get("Link Trello") ? record.get("Link Trello").trim() : "",
       };
 
       groupedRecords[requestedYear][classification].push(airtableData);

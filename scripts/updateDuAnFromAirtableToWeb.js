@@ -43,6 +43,19 @@ function getProjectClassification(classification) {
   }
 }
 
+function vietnameseProjectStatus(status) {
+  switch (status) {
+    case "can-quyen-gop":
+      return "Cần quyên góp";
+    case "dang-xay-dung":
+      return "Đang xây dựng";
+    case "da-hoan-thanh":
+      return "Đã hoàn thành";
+    default:
+      return status;
+  }
+}
+
 async function updateDuAnFromAirtableToWeb(requestedYear) {
   // Report issues/bugs
   const noHoanCanhDescription = [];
@@ -111,15 +124,16 @@ async function updateDuAnFromAirtableToWeb(requestedYear) {
         author: "Admin",
         publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
         slug: slugify(projectName, { lower: true, strict: true }),
-        thumbnail: projectThumbnail,
-        description: null,
+        thumbnail: projectThumbnail, // TODO: team web fix manually
+        description: null, // TODO: team web fix manually
         category: collectionName,
         classification: projectClassification,
         status: projectStatus,
         totalFund: airtableData.totalFund,
-        location: { ...airtableData.location },
+        location: airtableData.location,
         donors: airtableData.donors,
         progress: projectProgress,
+        metadata: airtableData.metadata,
         content: {
           tabs: [
             {
@@ -139,88 +153,80 @@ async function updateDuAnFromAirtableToWeb(requestedYear) {
             },
           ],
         },
-        metadata: { ...airtableData.metadata },
       };
 
       // case 1: new project
       if (querySnapshot.empty) {
         const newId = uuidv4().replace(/-/g, "").substring(0, 20);
         const postDocRef = firestore.collection(collectionName).doc(newId);
-        // await Promise.all([
-        //   postDocRef.set({ ...project, id: newId }),
-        //   upsertDocumentToIndex({ ...project, doc_id: newId, collection_id: collectionName }),
-        //   updateClassificationAndCategoryCounts(project.classification, project.category, +1),
-        // ]);
+        await Promise.all([
+          postDocRef.set({ ...project, id: newId }),
+          upsertDocumentToIndex({ ...project, doc_id: newId, collection_id: collectionName }),
+          updateClassificationAndCategoryCounts(project.classification, project.category, +1),
+        ]);
 
         report["new"].push(projectName);
       }
       // case 2: existing project
       else {
         const docId = querySnapshot.docs[0].id;
-        await collection.doc(docId).update({
-          thumbnailNew: project.thumbnail,
-          contentNew: project.content,
-          progressNew: project.progress,
-          metadata: project.metadata,
-        });
-
         const docData = querySnapshot.docs[0].data();
-        const oldProjectProgress = docData.progress.find((p) => p.name === "Ảnh tiến độ").images.length;
-        const newProjectProgress = project.progress.find((p) => p.name === "Ảnh tiến độ").images.length;
-        const oldProjectFinished = docData.progress.find((p) => p.name === "Ảnh hoàn thiện").images.length;
-        const newProjectFinished = project.progress.find((p) => p.name === "Ảnh hoàn thiện").images.length;
+        await Promise.all([collection.doc(docId).update({ ...project }), upsertDocumentToIndex({ ...project, doc_id: docId, collection_id: collectionName })]);
 
         if (docData.status !== project.status) {
-          const statusUpdate = `${projectName}: ${docData.status} > ${project.status}`;
+          const statusUpdate = `${projectName}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(project.status)}`;
           report["status"].push(statusUpdate);
         }
 
-        if (Number(oldProjectProgress) < Number(newProjectProgress)) {
-          const progressUpdate = `${projectName}: Drive có ${Number(newProjectProgress)} ảnh - Web có ${Number(oldProjectProgress)} ảnh`;
-          report["progress"].push(progressUpdate);
-        }
+        // const oldProjectProgress = docData.progress.find((p) => p.name === "Ảnh tiến độ").images.length;
+        // const newProjectProgress = project.progress.find((p) => p.name === "Ảnh tiến độ").images.length;
+        // const oldProjectFinished = docData.progress.find((p) => p.name === "Ảnh hoàn thiện").images.length;
+        // const newProjectFinished = project.progress.find((p) => p.name === "Ảnh hoàn thiện").images.length;
 
-        if (Number(oldProjectFinished) < Number(newProjectFinished)) {
-          const finishedUpdate = `${projectName}: Drive có ${Number(newProjectFinished)} ảnh - Web có ${Number(oldProjectFinished)} ảnh`;
-          report["finished"].push(finishedUpdate);
-        }
+        // if (Number(oldProjectProgress) < Number(newProjectProgress)) {
+        //   const progressUpdate = `${projectName}: Drive có ${Number(newProjectProgress)} ảnh - Web có ${Number(oldProjectProgress)} ảnh`;
+        //   report["progress"].push(progressUpdate);
+        // }
 
-        // await Promise.all([collection.doc(docId).update({ ...project }), upsertDocumentToIndex({ ...project, doc_id: docId, collection_id: collectionName })]);
+        // if (Number(oldProjectFinished) < Number(newProjectFinished)) {
+        //   const finishedUpdate = `${projectName}: Drive có ${Number(newProjectFinished)} ảnh - Web có ${Number(oldProjectFinished)} ảnh`;
+        //   report["finished"].push(finishedUpdate);
+        // }
       }
     });
     await Promise.all(promises);
 
     // Report issues/bugs
-    // if (noHoanCanhDescription.length > 0) console.log(`No khao sat files: ${noHoanCanhDescription.length}`, noHoanCanhDescription);
-    // if (noHoanCanhImages.length > 0) console.log(`No hoan canh images: ${noHoanCanhImages.length}`, noHoanCanhImages);
+    if (noHoanCanhDescription.length > 0) console.log(`No khao sat files: ${noHoanCanhDescription.length}`, noHoanCanhDescription);
+    if (noHoanCanhImages.length > 0) console.log(`No hoan canh images: ${noHoanCanhImages.length}`, noHoanCanhImages);
     // if (trelloLinkIssues.length > 0) console.log(`No trello links: ${trelloLinkIssues.length}`, trelloLinkIssues);
 
     // Append to markdown file
     const markdownContent = [
-      `## Tạo mới dự án:`,
+      `## ✅ Tạo mới ${report["new"].length} dự án:`,
       ...report["new"].map((projectId) => `- ${projectId}`),
       ``,
-      `## Cập nhật trạng thái dự án:`,
+      `## ✅ Cập nhật ${report["status"].length} trạng thái dự án:`,
       ...report["status"].map((status) => `- ${status}`),
       ``,
-      `## Cập nhật ảnh tiến độ dự án:`,
-      ...report["progress"].map((progress) => `- ${progress}`),
-      ``,
-      `## Cập nhật ảnh hoàn thiện dự án:`,
-      ...report["finished"].map((finished) => `- ${finished}`),
+      // `## Cập nhật ảnh tiến độ dự án:`,
+      // ...report["progress"].map((progress) => `- ${progress}`),
+      // ``,
+      // `## Cập nhật ảnh hoàn thiện dự án:`,
+      // ...report["finished"].map((finished) => `- ${finished}`),
       ``,
     ].join("\n");
     deleteExistingMarkdownFile();
     appendToMarkdownFile(markdownContent);
 
     console.log("----------------------------------------");
-    console.log("Done writing to markdown file");
+    console.log("Done!");
     process.exit(0);
   } catch (error) {
     console.error(error);
   }
 }
 
-// updateDuAnFromAirtableToWeb("2024");
+updateDuAnFromAirtableToWeb("2024");
 
 module.exports = { extractFolderId, getProjectClassification, deleteExistingMarkdownFile, appendToMarkdownFile };

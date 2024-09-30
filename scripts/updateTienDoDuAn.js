@@ -281,4 +281,4 @@ async function compareCSVFiles(requestedYears, attributes) {
   process.exit(0);
 }
 
-compareCSVFiles(["2023", "2024"], ["status"]);
+// compareCSVFiles(["2023", "2024"], ["status"]);

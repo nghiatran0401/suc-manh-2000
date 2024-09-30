@@ -199,6 +199,8 @@ export const metadataMapping = {
   totalToilets: "Số WC",
   totalRooms: "Số phòng ở",
   totalKitchens: "Số bếp",
+  start_date: "Ngày khởi công",
+  end_date: "Ngày hoàn thành",
 };
 
 export const statusColorMapping = {

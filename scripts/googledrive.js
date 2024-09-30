@@ -55,9 +55,9 @@ async function getProjectProgress(folderId) {
   }
 
   const order = ["hiện trạng", "khởi công", "tiến độ", "hoàn th"];
-  const anhTienDo = [];
-  const anhKhoiCong = [];
   const anhHienTrang = [];
+  const anhKhoiCong = [];
+  const anhTienDo = [];
   const anhHoanThanh = [];
   const progress = [];
   let thumbnailImage = "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png";
@@ -104,13 +104,6 @@ async function getProjectProgress(folderId) {
         const allFiles = await checkForSubfolders(folder.id, orderItem, folder.name);
         const files = allFiles.filter((f) => ["image/jpeg", "image/png"].includes(f.mimeType));
 
-        if (files.length > 0 && orderItem === "hiện trạng") {
-          const imageObj = files.reduce((latest, image) => {
-            return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
-          });
-          thumbnailImage = `https://drive.google.com/thumbnail?id=${imageObj.id}&sz=w1000`;
-        }
-
         if (files.length > 0) {
           if (orderItem === "hiện trạng") {
             anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
@@ -139,6 +132,17 @@ async function getProjectProgress(folderId) {
   progress.push({ name: "Ảnh hiện trạng", images: anhHienTrang });
   progress.push({ name: "Ảnh tiến độ", images: anhTienDo.concat(anhKhoiCong) });
   progress.push({ name: "Ảnh hoàn thiện", images: anhHoanThanh });
+
+  const imageArrays = [anhHoanThanh, anhTienDo.concat(anhKhoiCong), anhHienTrang];
+  for (const imageArray of imageArrays) {
+    if (imageArray.length > 0) {
+      const imageObj = imageArray.reduce((latest, image) => {
+        return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
+      });
+      thumbnailImage = imageObj.image;
+      break;
+    }
+  }
   return { thumbnailImage, progress };
 }
 

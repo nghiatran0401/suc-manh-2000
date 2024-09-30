@@ -402,84 +402,93 @@ export default function CardDetails(props) {
         </Grid>
 
         <Grid item xs={12} sm={3}>
-          {post.description && (
-            <Box
-              display={"flex"}
-              flexDirection={"column"}
-              border={"1px solid #000"}
-              borderRadius={"16px"}
-              bgcolor={"#f1f1f1"}
-              mb={"40px"}
-              pb={"16px"}
-              gap={"16px"}
-              sx={{
-                width: "100%",
-                wordWrap: "break-word",
-                overflowWrap: "break-word",
+          <Box
+            display={"flex"}
+            flexDirection={"column"}
+            border={"1px solid #000"}
+            borderRadius={"16px"}
+            bgcolor={"#f1f1f1"}
+            mb={"40px"}
+            pb={"16px"}
+            gap={"16px"}
+            sx={{
+              width: "100%",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+            }}
+          >
+            <img
+              style={{
+                objectFit: "contain",
+                objectPosition: "center",
+                borderRadius: "16px 16px 0 0",
               }}
-            >
-              <img
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  borderRadius: "16px 16px 0 0",
-                }}
-                alt={post.name}
-                src={post.thumbnail}
-              />
-              <Typography
-                variant="body1"
-                fontWeight={"bold"}
-                textAlign={"center"}
-                p={"0 8px"}
-                dangerouslySetInnerHTML={{
-                  __html: standardizeString(post.name),
-                }}
-              />
+              alt={post.name}
+              src={post.thumbnail}
+            />
+            <Typography
+              variant="body1"
+              fontWeight={"bold"}
+              textAlign={"center"}
+              p={"0 8px"}
+              dangerouslySetInnerHTML={{
+                __html: standardizeString(post.name),
+              }}
+            />
 
-              {/* <Typography padding={"16px"} variant="body2" color={"#77777"} textAlign={"center"} dangerouslySetInnerHTML={{ __html: post.description }} /> */}
+            <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
+              {post.metadata &&
+                Object.entries(post.metadata)
+                  .sort(([keyA], [keyB]) => {
+                    const order = [
+                      "stage",
+                      "constructionItems",
+                      "progress",
+                      "type",
+                      "totalStudents",
+                      "totalClassrooms",
+                      "totalPublicAffairsRooms",
+                      "totalToilets",
+                      "totalRooms",
+                      "totalKitchens",
+                      "start_date",
+                      "end_date",
+                    ];
+                    return order.indexOf(keyA) - order.indexOf(keyB);
+                  })
+                  .map(
+                    ([key, value], index) =>
+                      metadataMapping[key] &&
+                      value && (
+                        <Typography key={index} variant="body1" color={"#77777"}>
+                          <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                        </Typography>
+                      )
+                  )}
 
-              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
-                {post.metadata &&
-                  Object.entries(post.metadata)
-                    .sort(([keyA], [keyB]) => {
-                      const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
-                      return order.indexOf(keyA) - order.indexOf(keyB);
-                    })
-                    .map(
-                      ([key, value], index) =>
-                        value &&
-                        value !== null && (
-                          <Typography key={index} variant="body1" color={"#77777"}>
-                            <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
-                          </Typography>
-                        )
-                    )}
-
-                {post.location?.distanceToHN && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
-                  </Typography>
-                )}
-                {post.location?.distanceToHCMC && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
-                  </Typography>
-                )}
-                <Box>--------------</Box>
-                {Boolean(post.totalFund) && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
-                  </Typography>
-                )}
-                {post.donors?.length > 0 && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
-                  </Typography>
-                )}
-              </Box>
+              {post.location?.distanceToHN && (
+                <Typography variant="body1" color={"#77777"}>
+                  <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
+                </Typography>
+              )}
+              {post.location?.distanceToHCMC && (
+                <Typography variant="body1" color={"#77777"}>
+                  <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
+                </Typography>
+              )}
+              <Box>--------------</Box>
+              {Boolean(post.totalFund) && (
+                <Typography variant="body1" color={"#77777"}>
+                  <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+                </Typography>
+              )}
+              {post.donors?.length > 0 && (
+                <Typography variant="body1" color={"#77777"}>
+                  <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
+                </Typography>
+              )}
             </Box>
-          )}
+          </Box>
 
           {!isMobile && (
             <Box position="sticky" top={80} zIndex={1} bgcolor="#fff" boxShadow={1} p={"16px 8px"} borderRadius={4}>
