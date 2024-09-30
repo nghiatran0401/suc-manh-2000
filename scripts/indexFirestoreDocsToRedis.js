@@ -64,7 +64,7 @@ async function indexFirestoreDocsToRedis() {
         "publishDate",
         data.publish_date?.toDate(),
         "thumbnail",
-        data.thumbnailNew ? data.thumbnailNew : data.thumbnail,
+        data.thumbnail,
         "category",
         data.category,
         "classification",
