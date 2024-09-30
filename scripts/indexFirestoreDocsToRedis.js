@@ -31,24 +31,8 @@ const INDEX_SCHEMA = [
   "TAG",
 ];
 
-async function removeSearchIndexAndDocuments() {
-  try {
-    let results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
-    while (results[0] > 0) {
-      for (let i = 1; i < results.length; i += 2) {
-        const docId = results[i];
-
-        await redis.call("FT.DEL", INDEX_NAME, docId);
-      }
-      results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
-    }
-    await redis.call("FT.DROPINDEX", INDEX_NAME);
-  } catch (error) {
-    console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
-  }
-}
-
-async function createIndexAndDocuments() {
+async function indexFirestoreDocsToRedis() {
+  await redis.call("FLUSHALL");
   await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
 
   const collections = await firestore.listCollections();
@@ -99,18 +83,6 @@ async function createIndexAndDocuments() {
 
   console.log("[indexFirestoreDocsToRedis]: Succeeded!");
   process.exit(0);
-}
-
-async function indexFirestoreDocsToRedis() {
-  try {
-    // if index exists, remove it and create new
-    await redis.call("FT.INFO", INDEX_NAME);
-    await removeSearchIndexAndDocuments();
-    await createIndexAndDocuments();
-  } catch (error) {
-    // if index does not exist, create new
-    await createIndexAndDocuments();
-  }
 }
 
 // indexFirestoreDocsToRedis();

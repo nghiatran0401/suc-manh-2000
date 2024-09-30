@@ -227,6 +227,6 @@ async function updateDuAnFromAirtableToWeb(requestedYear) {
   }
 }
 
-updateDuAnFromAirtableToWeb("2024");
+// updateDuAnFromAirtableToWeb("2024");
 
 module.exports = { extractFolderId, getProjectClassification, deleteExistingMarkdownFile, appendToMarkdownFile };
