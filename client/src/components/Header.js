@@ -34,16 +34,9 @@ export default function HeaderBar() {
     axios
       .get(SERVER_URL + "/getClassificationAndCategoryCounts")
       .then((classificationAndCategoryCounts) => {
+        const total = Object.values(classificationAndCategoryCounts.data.classification).reduce((acc, value) => acc + value, 0);
+
         setGeneral(classificationAndCategoryCounts.data);
-
-        const total =
-          classificationAndCategoryCounts.data.classification["truong-hoc"] +
-          classificationAndCategoryCounts.data.classification["khu-noi-tru"] +
-          classificationAndCategoryCounts.data.classification["nha-hanh-phuc"] +
-          classificationAndCategoryCounts.data.classification["cau-hanh-phuc"] +
-          classificationAndCategoryCounts.data.classification["wc"] +
-          classificationAndCategoryCounts.data.classification["phong-tin-hoc"];
-
         setTotalProjects(total);
       })
       .catch((e) => console.error(e));
