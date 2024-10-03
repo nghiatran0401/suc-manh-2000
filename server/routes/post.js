@@ -170,7 +170,7 @@ postRouter.patch("/:id", async (req, res) => {
         end_date: updatedPost.end_date ? firebase.firestore.Timestamp.fromDate(new Date(updatedPost.end_date)) : docData.end_date ?? null,
         donor: {
           description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
-          images: updatedPost["donor.images"] ?? docData.donor.images ?? null,
+          images: updatedPost["donor.images"] ?? docData.donor?.images ?? null,
         },
         progress: [
           {
