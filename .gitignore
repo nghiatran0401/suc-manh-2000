@@ -5,12 +5,9 @@
 **/node_modules
 **/package-lock.json
 **/yarn.lock
-**/savvy-serenity-424116-g1-c96d21178642.json
 **/build
 **/dist
 **/coverage
-
-server/secrets/*
 
 .firebase/
 firebase-debug.log
