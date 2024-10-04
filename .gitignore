@@ -1,23 +1,18 @@
-*/.DS_Store
-.DS_Store
-*/.env
-*/.env.local
-*/.env.prod
-*/node_modules
-*/package-lock.json
-*/yarn.lock
-*/savvy-serenity-424116-g1-c96d21178642.json
+**/.DS_Store
+**/.env
+**/.env.local
+**/.env.prod
+**/node_modules
+**/package-lock.json
+**/yarn.lock
+**/savvy-serenity-424116-g1-c96d21178642.json
+**/build
+**/dist
+**/coverage
 
-client/build
-server/build
-admin/dist
-scripts/credentials.json
-scripts/token.json
-scripts/*.csv
+server/secrets/*
 
 .firebase/
 firebase-debug.log
 firestore-debug.log
-.kai_prettierrc.json
-
-server/coverage
+firestore-ui.log

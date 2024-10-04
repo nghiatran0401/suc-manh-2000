@@ -11,8 +11,6 @@ const AIRTABLE_VIEW = "Nghia Web";
 
 // Create a limiter with a max rate of 5 requests per second
 const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 200 });
-
-// Wrap the Airtable API call function with the limiter
 const limitedSelect = limiter.wrap((tableName, options) => {
   return new Promise((resolve, reject) => {
     base(tableName)
@@ -38,7 +36,7 @@ function getProjectStatus(statusFull) {
   }
 }
 
-function standardizeString(str) {
+function standardizePostTitle(str) {
   return str
     .split(" ")
     .map((word, index, arr) => {
@@ -84,31 +82,28 @@ async function fetchAirtableRecords(requestedYear) {
     const groupedRecords = {};
     for (const record of records) {
       const classification = record.get("Phân loại công trình").trim();
-      if (!groupedRecords[requestedYear]) {
-        groupedRecords[requestedYear] = {};
-      }
-      if (!groupedRecords[requestedYear][classification]) {
-        groupedRecords[requestedYear][classification] = [];
+      if (!groupedRecords[classification]) {
+        groupedRecords[classification] = [];
       }
 
       if (record.get("Tên công trình").includes("❌") || !record.get("DA")) {
-        cancelledProjects.push(record.get("DA"));
+        cancelledProjects.push(record.get("Tên công trình"));
         continue;
       }
 
       const projectId = record.get("DA").trim();
       const projectInitName = record.get("Tên công trình").trim();
-      const projectName = standardizeString(`${projectId} - ${projectInitName}`);
+      const projectName = standardizePostTitle(`${projectId} - ${projectInitName}`);
 
       const projectStatus = record.get("Follow up Step") ? getProjectStatus(record.get("Follow up Step").trim()) : undefined;
       if (projectStatus === undefined) {
-        noStatusProjects.push(projectId);
+        noStatusProjects.push(projectName);
         continue;
       }
 
       const progressImagesUrl = record.get("Link Drive") ? record.get("Link Drive").trim() : undefined;
       if (!progressImagesUrl) {
-        noGoogleDriveUrls.push(projectId);
+        noGoogleDriveUrls.push(projectName);
         continue;
       }
 
@@ -143,27 +138,22 @@ async function fetchAirtableRecords(requestedYear) {
         progressImagesUrl: progressImagesUrl,
         financialStatementUrl: record.get("Link sao kê") ? record.get("Link sao kê").trim() : "",
         trelloCardUrl: record.get("Link Trello") ? record.get("Link Trello").trim() : "",
+        isInProgress: record.get("Ảnh Tiến độ (check)") ? true : false,
+        progressNoteWeb: record.get("Note tiến độ Web") ? record.get("Note tiến độ Web") : "",
+        progressNoteZalo: record.get("Note tiến độ") ? record.get("Note tiến độ") : "",
       };
 
-      groupedRecords[requestedYear][classification].push(airtableData);
+      groupedRecords[classification].push(airtableData);
     }
 
-    const totalAirtableData = Object.values(groupedRecords[requestedYear]).flat();
+    const totalAirtableDataList = Object.values(groupedRecords).flat();
+    const totalAirtableErrors = { "DA hủy": cancelledProjects, "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls };
 
-    // Report issues/bugs
-    console.log("Year: ", requestedYear);
-    console.log("Total: ", totalAirtableData.length);
-    console.log("----------------------------------------");
-    // if (cancelledProjects.length > 0) console.log(`Cancelled: ${cancelledProjects.length}`, cancelledProjects);
-    if (noStatusProjects.length > 0) console.log(`No status: ${noStatusProjects.length}`, noStatusProjects);
-    if (noGoogleDriveUrls.length > 0) console.log(`No GD links: ${noGoogleDriveUrls.length}`, noGoogleDriveUrls);
-    console.log("----------------------------------------");
-
-    return totalAirtableData;
+    return { totalAirtableDataList, totalAirtableErrors };
   } catch (err) {
     console.error("[fetchAirtableRecords] - error: ", err);
     return [];
   }
 }
 
-module.exports = { getProjectStatus, standardizeString, fetchAirtableRecords };
+module.exports = { getProjectStatus, standardizePostTitle, fetchAirtableRecords };

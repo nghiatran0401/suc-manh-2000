@@ -28,16 +28,13 @@ export default function HeaderBar() {
   const [openIndex, setOpenIndex] = useState(null);
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [totalProjects, setTotalProjects] = useState(0);
+  const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
 
   useEffect(() => {
-    axios
-      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
-      .then((classificationAndCategoryCounts) => {
-        const total = Object.values(classificationAndCategoryCounts.data.classification).reduce((acc, value) => acc + value, 0);
-
-        setGeneral(classificationAndCategoryCounts.data);
-        setTotalProjects(total);
+    Promise.all([axios.get(SERVER_URL + "/getTotalStatisticsCount"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
+      .then(([totalStatisticsCount, totalProjectsCount]) => {
+        setGeneral(totalStatisticsCount.data);
+        setTotalFinishedProjects(totalProjectsCount.data);
       })
       .catch((e) => console.error(e));
   }, []);
@@ -71,7 +68,7 @@ export default function HeaderBar() {
     setSearchValue("");
   };
 
-  if (Object.keys(general).length <= 0) return <LoadingScreen />;
+  if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
   return (
     <AppBar color="inherit" className="bar" position="sticky" sx={{ top: 0, zIndex: 10000 }} height="50px">
       <Container
@@ -105,13 +102,13 @@ export default function HeaderBar() {
                         {item.children.length > 0 ? (
                           <CDropdown alignment={{ xs: "end", lg: "start" }} className="hover-dropdown">
                             <Typography display="flex" alignItems="center" variant="body1" fontWeight="bold" color="#666666D9" style={{ fontSize: "1rem" }}>
-                              {item.title} {item.name === "du-an" && `(${totalProjects})`}
+                              {item.title} {item.name === "du-an" && `(${totalFinishedProjects})`}
                               <ArrowDropDown />
                             </Typography>
                             <CDropdownMenu color="secondary">
                               {item.name === "du-an" && (
                                 <CDropdownItem href={"/search"}>
-                                  <Typography variant="body1">Tất cả Dự án ({totalProjects})</Typography>
+                                  <Typography variant="body1">Tất cả Dự án ({totalFinishedProjects})</Typography>
                                 </CDropdownItem>
                               )}
 
@@ -244,7 +241,7 @@ export default function HeaderBar() {
                     }
                   }}
                 >
-                  <ListItemText primary={item.name === "du-an" ? `${item.title} (${totalProjects})` : item.title} />
+                  <ListItemText primary={item.name === "du-an" ? `${item.title} (${totalFinishedProjects})` : item.title} />
                   {item.children.length > 0 ? openIndex === index ? <ExpandLess /> : <ExpandMore /> : null}
                 </ListItem>
               )}

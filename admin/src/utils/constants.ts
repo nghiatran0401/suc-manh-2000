@@ -27,7 +27,6 @@ export const POSTS_PER_PAGE = 12;
 
 export const categoryMapping = {
   "thong-bao": "Tiến độ",
-  "bao-cao-tai-chinh": "BCTC",
   "du-an-2024": "DA 24",
   "du-an-2023": "DA 23",
   "du-an-2022": "DA 22",
@@ -39,12 +38,13 @@ export const categoryMapping = {
   "du-an-2016": "DA 16",
   "du-an-2014-2015": "DA 14-15",
   "du-an-2012": "DA 12",
-  // "tien-do-xay-dung": "Tiến độ xây dựng",
+  "bao-cao-tai-chinh": "BCTC",
   "bao-chi-truyen-hinh": "Truyền thông",
   "cau-chuyen": "Câu chuyện",
-  // "gay-quy": "Gây quỹ",
   "tai-tro": "Tài trợ",
-  "phong-tin-hoc-2023": "PTH-23",
+  // "tien-do-xay-dung": "Tiến độ xây dựng",
+  // "gay-quy": "Gây quỹ",
+  // "phong-tin-hoc-2023": "PTH-23",
 };
 
 export const classificationMapping = {

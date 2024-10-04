@@ -1,5 +1,5 @@
 const firebase = require("firebase-admin");
-const serviceAccount = require("./savvy-serenity-424116-g1-c96d21178642.json");
+const serviceAccount = require("./secrets/savvy-serenity-424116-g1-c96d21178642.json");
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),

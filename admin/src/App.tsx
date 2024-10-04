@@ -11,7 +11,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { authProvider } from "./utils/authProvider";
 import Header from "./components/Header";
 import { Login } from "./pages/auth";
-import { ProjectCreate, ProjectEdit, ProjectShow, ProjectList } from "./pages/projects";
+import { ProjectCreate, ProjectEdit, ProjectList } from "./pages/projects";
 import { auth } from "./firebase/client";
 import { User } from "firebase/auth";
 import { SERVER_URL, categoryMapping, icons } from "./utils/constants";
@@ -37,9 +37,9 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(SERVER_URL + "/getClassificationAndCategoryCounts")
-      .then((classificationAndCategoryCounts) => {
-        setGeneral(classificationAndCategoryCounts.data);
+      .get(SERVER_URL + "/getTotalStatisticsCount")
+      .then((totalStatisticsCount) => {
+        setGeneral(totalStatisticsCount.data);
         setLoading(false);
       })
       .catch((e) => {
@@ -106,7 +106,6 @@ function App() {
                   <Route index element={<ProjectList />} />
                   <Route path="create" element={<ProjectCreate />} />
                   <Route path="edit/:id" element={<ProjectEdit />} />
-                  {/* <Route path="show/:id" element={<ProjectShow />} /> */}
                 </Route>
               ))}
               <Route path="*" element={<ErrorComponent />} />

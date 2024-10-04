@@ -19,7 +19,7 @@ export const provincesAndCities = [
   },
   {
     city: "Vũng Tàu",
-    province: " Vũng Tàu",
+    province: "Vũng Tàu",
     distanceToHCMC: 125,
     distanceToHN: 1749,
   },

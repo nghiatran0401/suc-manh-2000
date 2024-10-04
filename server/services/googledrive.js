@@ -1,58 +1,34 @@
 const { google } = require("googleapis");
 const drive = google.drive("v3");
-const fs = require("fs");
-const readline = require("readline");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+const { client_secret, client_id, redirect_uris } = require("../secrets/credentials.json").installed;
 
-// fs.readFile("./scripts/credentials.json", (err, content) => {
-//   if (err) return console.log("Error loading client secret file:", err);
-//   authorize(JSON.parse(content), getProjectProgress);
-// });
-
-// function authorize(credentials, callback) {
-//   const { client_secret, client_id, redirect_uris } = credentials.installed;
-//   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-
-//   fs.readFile("token.json", (err, token) => {
-//     if (err) return getAccessToken(oAuth2Client, callback);
-//     oAuth2Client.setCredentials(JSON.parse(token));
-//     callback(oAuth2Client);
-//   });
-// }
-
-// function getAccessToken(oAuth2Client, callback) {
-//   const authUrl = oAuth2Client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: ["https://www.googleapis.com/auth/drive.metadata.readonly"],
-//   });
-//   console.log("Authorize this app by visiting this url:", authUrl);
-//   const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout,
-//   });
-//   rl.question("Enter the code from that page here: ", (code) => {
-//     rl.close();
-//     oAuth2Client.getToken(code, (err, token) => {
-//       if (err) return console.error("Error retrieving access token", err);
-//       oAuth2Client.setCredentials(token);
-//       fs.writeFile("./scripts/token.json", JSON.stringify(token), (err) => {
-//         if (err) return console.error(err);
-//         console.log("Token stored to", "token.json");
-//       });
-//       callback(oAuth2Client);
-//     });
-//   });
-// }
-
-const { client_secret, client_id, redirect_uris } = require("./credentials.json").installed;
-const token = require("./token.json");
 const auth = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-auth.setCredentials(token);
+async function ensureRefreshToken() {
+  const refreshToken = process.env.GOOGLE_API_REFRESH_TOKEN;
+
+  if (refreshToken) {
+    auth.setCredentials({ refresh_token: refreshToken });
+
+    try {
+      const newToken = await auth.getAccessToken();
+      auth.setCredentials({ access_token: newToken.token, refresh_token: refreshToken });
+    } catch (err) {
+      console.error("Failed to refresh access token: ", err);
+    }
+  } else {
+    console.error("No refresh token available. Cannot obtain a new access token.");
+  }
+}
 
 async function getProjectProgress(folderId) {
   if (!folderId) {
     console.error("Sai GD folderId");
     return undefined;
   }
+
+  await ensureRefreshToken();
 
   const order = ["hiện trạng", "khởi công", "tiến độ", "hoàn th"];
   const anhHienTrang = [];
@@ -85,7 +61,7 @@ async function getProjectProgress(folderId) {
         return files;
       }
     } catch (err) {
-      // console.error(`[checkForSubfolders] - ${folderId} - ${orderItem} - error: ` + err);
+      console.error(`[checkForSubfolders] - ${folderId} - ${orderItem} - error: ` + err);
       return undefined;
     }
   }
@@ -120,7 +96,7 @@ async function getProjectProgress(folderId) {
         }
       }
     } catch (err) {
-      // console.error(`[processFirstLevelFolders] - ${folderId} - ${orderItem} - error: ` + err);
+      console.error(`[processFirstLevelFolders] - ${folderId} - ${orderItem} - error: ` + err);
       return undefined;
     }
   }
@@ -152,6 +128,8 @@ async function getHoanCanhDescription(folderId) {
     return undefined;
   }
 
+  await ensureRefreshToken();
+
   try {
     const res = await drive.files.list({
       auth: auth,
@@ -170,12 +148,12 @@ async function getHoanCanhDescription(folderId) {
       ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/vnd.google-apps.document"].includes(file.mimeType)
     );
 
-    if (googleDocObj.id) {
+    if (googleDocObj?.id) {
       return `https://docs.google.com/document/d/${googleDocObj.id}/preview`;
     }
     return undefined;
   } catch (err) {
-    // console.error(`[getHoanCanhDescription] - ${folderId} - error: ` + err);
+    console.error(`[getHoanCanhDescription] - ${folderId} - error: ` + err);
     return undefined;
   }
 }

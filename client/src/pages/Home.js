@@ -34,15 +34,15 @@ export default function Home() {
     setLoading(true);
     Promise.all([
       axios.get(SERVER_URL + "/thong-bao", { params: { start: 0, end: 5 } }),
-      axios.get(SERVER_URL + "/getClassificationAndCategoryCounts"),
+      axios.get(SERVER_URL + "/getTotalStatisticsCount"),
       axios.get(SERVER_URL + "/getTotalProjectsCount"),
       axios.get(SERVER_URL + "/getTotalStudentsCount"),
     ])
-      .then(([news, classificationAndCategoryCounts, totalProjectsCount, totalStudentsCount]) => {
+      .then(([news, totalStatisticsCount, totalProjectsCount, totalStudentsCount]) => {
         setNews(news.data.posts);
-        setGeneral(classificationAndCategoryCounts.data);
-        setTotalFinishedProjects(Number(totalProjectsCount.data));
-        setTotalBeneficialStudents(Number(totalStudentsCount.data));
+        setGeneral(totalStatisticsCount.data);
+        setTotalFinishedProjects(totalProjectsCount.data);
+        setTotalBeneficialStudents(totalStudentsCount.data);
         setLoading(false);
       })
       .catch((e) => console.error(e));

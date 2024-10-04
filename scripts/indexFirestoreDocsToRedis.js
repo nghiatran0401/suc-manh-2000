@@ -1,5 +1,5 @@
 const { firestore } = require("./firebase");
-const { convertToCleanedName } = require("../server/utils/search");
+const { convertToCleanedName } = require("./utils");
 
 const Redis = require("ioredis");
 const redis = new Redis(process.env.REDIS_URL);
