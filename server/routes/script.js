@@ -55,61 +55,65 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
       }
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
-      // Prepare data
-      const promises = totalAirtableDataList.map(async (airtableData) => {
-        const collectionName = `du-an-${requestedYear}`;
-        const collection = firestore.collection(collectionName);
-        const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+      // Batch processing
+      const BATCH_SIZE = 25; // Set batch size
+      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
+        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-        if (projectProgressObj === undefined) return;
+        const promises = batch.map(async (airtableData) => {
+          const collectionName = `du-an-${requestedYear}`;
+          const collection = firestore.collection(collectionName);
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
-        const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-          requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
-          // return;
-        }
+          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          if (projectProgressObj === undefined) return;
 
-        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-        if (hoanCanhDescription === undefined) {
-          requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
-          // return;
-        }
-
-        if (querySnapshot.empty) {
-          // 1. Dự án mới khởi công
-          if (!orders[1].list[airtableData.classification]) return;
-          orders[1].list[airtableData.classification].push({ name: airtableData.name });
-          return;
-        } else {
-          if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
-
-          // 2. Dự án đã khởi công nhưng chưa có tiến độ
-          if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
-            if (!orders[2].list[airtableData.classification]) return;
-            orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
-            orders[0].list[requestedYear].inProgress++;
-            return;
+          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
+          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
           }
 
-          // 3. Dự án đang được xây dựng
-          if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
-            if (!orders[3].list[airtableData.classification]) return;
-            orders[3].list[airtableData.classification].push({ name: airtableData.name });
-            orders[0].list[requestedYear].inProgress++;
-            return;
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          if (hoanCanhDescription === undefined) {
+            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
           }
 
-          // 4. Dự án đã hoàn thành
-          const docData = querySnapshot.docs[0].data();
-          if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
-            if (!orders[4].list[airtableData.classification]) return;
-            orders[4].list[airtableData.classification].push({ name: airtableData.name });
+          if (querySnapshot.empty) {
+            // 1. Dự án mới khởi công
+            if (!orders[1].list[airtableData.classification]) return;
+            orders[1].list[airtableData.classification].push({ name: airtableData.name });
             return;
+          } else {
+            if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
+
+            // 2. Dự án đã khởi công nhưng chưa có tiến độ
+            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
+              if (!orders[2].list[airtableData.classification]) return;
+              orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
+              orders[0].list[requestedYear].inProgress++;
+              return;
+            }
+
+            // 3. Dự án đang được xây dựng
+            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
+              if (!orders[3].list[airtableData.classification]) return;
+              orders[3].list[airtableData.classification].push({ name: airtableData.name });
+              orders[0].list[requestedYear].inProgress++;
+              return;
+            }
+
+            // 4. Dự án đã hoàn thành
+            const docData = querySnapshot.docs[0].data();
+            if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
+              if (!orders[4].list[airtableData.classification]) return;
+              orders[4].list[airtableData.classification].push({ name: airtableData.name });
+              return;
+            }
           }
-        }
-      });
-      await Promise.all(promises);
+        });
+
+        await Promise.all(promises); // Wait for all promises in the batch to complete
+      }
 
       orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
     }
@@ -233,6 +237,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
   };
   let htmlContent = ``;
   const slideshowImages = [];
+  const BATCH_SIZE = 25; // Set batch size
 
   try {
     for (const requestedYear of requestedYears) {
@@ -241,42 +246,47 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
 
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
-      // Prepare data
-      const promises = totalAirtableDataList.map(async (airtableData) => {
-        const collectionName = `du-an-${requestedYear}`;
-        const collection = firestore.collection(collectionName);
-        const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+      // Process data in batches
+      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
+        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-        if (projectProgressObj === undefined) return;
-        const { thumbnailImage: projectThumbnail } = projectProgressObj;
+        const promises = batch.map(async (airtableData) => {
+          const collectionName = `du-an-${requestedYear}`;
+          const collection = firestore.collection(collectionName);
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
-        if (querySnapshot.empty) {
-          // 1. Dự án mới khởi công
-          if (!orders[1].list[airtableData.classification]) return;
-          orders[1].list[airtableData.classification].push({ name: airtableData.name });
-          return;
-        } else {
-          if (airtableData.isInProgress === undefined || airtableData.progressNoteWeb === undefined) return;
+          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          if (projectProgressObj === undefined) return;
+          const { thumbnailImage: projectThumbnail } = projectProgressObj;
 
-          // 2. Dự án đã khởi công nhưng chưa có tiến độ
-          if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
-            if (!orders[2].list[airtableData.classification]) return;
-            orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteWeb: airtableData.progressNoteWeb });
-            orders[0].list[requestedYear].inProgress++;
+          if (querySnapshot.empty) {
+            // 1. Dự án mới khởi công
+            if (!orders[1].list[airtableData.classification]) return;
+            orders[1].list[airtableData.classification].push({ name: airtableData.name });
             return;
-          }
+          } else {
+            if (airtableData.isInProgress === undefined || airtableData.progressNoteWeb === undefined) return;
 
-          // 3. Dự án đang được xây dựng
-          if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
-            if (!orders[3].list[airtableData.classification]) return;
-            orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
-            orders[0].list[requestedYear].inProgress++;
-            return;
+            // 2. Dự án đã khởi công nhưng chưa có tiến độ
+            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
+              if (!orders[2].list[airtableData.classification]) return;
+              orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteWeb: airtableData.progressNoteWeb });
+              orders[0].list[requestedYear].inProgress++;
+              return;
+            }
+
+            // 3. Dự án đang được xây dựng
+            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
+              if (!orders[3].list[airtableData.classification]) return;
+              orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
+              orders[0].list[requestedYear].inProgress++;
+              return;
+            }
           }
-        }
-      });
-      await Promise.all(promises);
+        });
+
+        await Promise.all(promises); // Wait for all promises in the batch to complete
+      }
 
       orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
     }
@@ -339,15 +349,10 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
           htmlContent += `<ol style="padding-left: 20px;">`;
           for (const project of projectList) {
             htmlContent += `<li>${project.name}</li>`;
-            slideshowImages.push({
-              image: project.projectThumbnail,
-              caption: project.name,
-            });
           }
           htmlContent += `</ol>`;
         }
       }
-      htmlContent += `<p style="font-style: italic; text-align: center;"><strong>(Chi tiết xem từng ảnh phía dưới)</strong></p>`;
     }
 
     // Create a News Post
@@ -363,7 +368,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
       author: "Admin",
       publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
       slug: slugify(formatDate(today), { lower: true, strict: true }),
-      thumbnail: slideshowImages[0].image,
+      thumbnail: slideshowImages[0]?.image || "", // Ensure there's a fallback
       category: category,
       content: {
         tabs: [
@@ -405,6 +410,7 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
     "DA không có phiếu khảo sát": [],
     "DA không có ảnh hiện trạng": [],
   };
+  const BATCH_SIZE = 25; // Set batch size
 
   try {
     for (const requestedYear of requestedYears) {
@@ -415,44 +421,47 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
         errors = { ...totalAirtableErrors, ...errors };
       }
 
-      // Prepare data
-      const promises = totalAirtableDataList.map(async (airtableData) => {
-        const collectionName = `du-an-${requestedYear}`;
-        const collection = firestore.collection(collectionName);
-        const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+      // Process data in batches
+      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
+        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-        if (projectProgressObj === undefined) return;
+        const promises = batch.map(async (airtableData) => {
+          const collectionName = `du-an-${requestedYear}`;
+          const collection = firestore.collection(collectionName);
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
-        const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-          requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
-          // return;
-        }
+          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          if (projectProgressObj === undefined) return;
 
-        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-        if (hoanCanhDescription === undefined) {
-          hoanCanhDescription = "";
-          requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
-          // return;
-        }
+          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
+          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
+          }
 
-        // 1. Dự án mới
-        if (querySnapshot.empty) {
-          orders[1].list.push(airtableData.name);
-          return;
-        }
-        // 2. Dự án đổi trạng thái
-        else {
-          const docData = querySnapshot.docs[0].data();
-          if (docData.status !== airtableData.status) {
-            const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
-            orders[2].list.push(statusUpdate);
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          if (hoanCanhDescription === undefined) {
+            hoanCanhDescription = "";
+            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
+          }
+
+          // 1. Dự án mới
+          if (querySnapshot.empty) {
+            orders[1].list.push(airtableData.name);
             return;
           }
-        }
-      });
-      await Promise.all(promises);
+          // 2. Dự án đổi trạng thái
+          else {
+            const docData = querySnapshot.docs[0].data();
+            if (docData.status !== airtableData.status) {
+              const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
+              orders[2].list.push(statusUpdate);
+              return;
+            }
+          }
+        });
+
+        await Promise.all(promises); // Wait for all promises in the batch to complete
+      }
     }
 
     // Generate HTML content
@@ -497,86 +506,92 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
 
 scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
   const requestedYears = ["2024"];
+  const BATCH_SIZE = 25; // Set batch size
 
   try {
     for (const requestedYear of requestedYears) {
       const { totalAirtableDataList } = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      // Prepare data
-      const promises = totalAirtableDataList.map(async (airtableData) => {
-        const collectionName = `du-an-${requestedYear}`;
-        const collection = firestore.collection(collectionName);
-        const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+      // Process data in batches
+      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
+        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-        if (projectProgressObj === undefined) return;
+        const promises = batch.map(async (airtableData) => {
+          const collectionName = `du-an-${requestedYear}`;
+          const collection = firestore.collection(collectionName);
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
-        const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-          // return;
-        }
+          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          if (projectProgressObj === undefined) return;
 
-        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-        if (hoanCanhDescription === undefined) {
-          hoanCanhDescription = "";
-          // return;
-        }
+          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
+          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+            // Handle the case where there are no images
+          }
 
-        const project = {
-          projectId: airtableData.projectId,
-          name: airtableData.name,
-          author: "Admin",
-          publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
-          slug: slugify(airtableData.projectId, { lower: true, strict: true }),
-          thumbnail: projectThumbnail,
-          description: null, // TODO: team web fix manually - hien tai chua co
-          category: collectionName,
-          classification: getProjectClassification(airtableData.classification),
-          status: airtableData.status,
-          totalFund: airtableData.totalFund,
-          location: airtableData.location,
-          donors: airtableData.donors,
-          progress: projectProgress,
-          metadata: airtableData.metadata,
-          content: {
-            tabs: [
-              {
-                name: "Hoàn cảnh",
-                description: hoanCanhDescription,
-                slide_show: [],
-              },
-              {
-                name: "Nhà hảo tâm",
-                description: airtableData.financialStatementUrl,
-                slide_show: [],
-              },
-              {
-                name: "Mô hình xây",
-                description: airtableData.metadata.constructionItems,
-                slide_show: [],
-              },
-            ],
-          },
-        };
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          if (hoanCanhDescription === undefined) {
+            hoanCanhDescription = "";
+            // Handle the case where the description is undefined
+          }
 
-        // 1. Dự án mới
-        if (querySnapshot.empty) {
-          const newId = uuidv4().replace(/-/g, "").substring(0, 20);
-          const postDocRef = firestore.collection(collectionName).doc(newId);
-          return await Promise.all([
-            postDocRef.set({ ...project, id: newId }),
-            upsertDocumentToIndex({ ...project, doc_id: newId, collection_id: collectionName }),
-            updateClassificationAndCategoryCounts(project.classification, project.category, +1),
-          ]);
-        }
-        // 2. Dự án đổi trạng thái
-        else {
-          const docId = querySnapshot.docs[0].id;
-          return await Promise.all([collection.doc(docId).update({ ...project }), upsertDocumentToIndex({ ...project, doc_id: docId, collection_id: collectionName })]);
-        }
-      });
-      await Promise.all(promises);
+          const project = {
+            projectId: airtableData.projectId,
+            name: airtableData.name,
+            author: "Admin",
+            publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
+            slug: slugify(airtableData.projectId, { lower: true, strict: true }),
+            thumbnail: projectThumbnail,
+            description: null, // TODO: team web fix manually - hiện tại chưa có
+            category: collectionName,
+            classification: getProjectClassification(airtableData.classification),
+            status: airtableData.status,
+            totalFund: airtableData.totalFund,
+            location: airtableData.location,
+            donors: airtableData.donors,
+            progress: projectProgress,
+            metadata: airtableData.metadata,
+            content: {
+              tabs: [
+                {
+                  name: "Hoàn cảnh",
+                  description: hoanCanhDescription,
+                  slide_show: [],
+                },
+                {
+                  name: "Nhà hảo tâm",
+                  description: airtableData.financialStatementUrl,
+                  slide_show: [],
+                },
+                {
+                  name: "Mô hình xây",
+                  description: airtableData.metadata.constructionItems,
+                  slide_show: [],
+                },
+              ],
+            },
+          };
+
+          // 1. Dự án mới
+          if (querySnapshot.empty) {
+            const newId = uuidv4().replace(/-/g, "").substring(0, 20);
+            const postDocRef = firestore.collection(collectionName).doc(newId);
+            return await Promise.all([
+              postDocRef.set({ ...project, id: newId }),
+              upsertDocumentToIndex({ ...project, doc_id: newId, collection_id: collectionName }),
+              updateClassificationAndCategoryCounts(project.classification, project.category, +1),
+            ]);
+          }
+          // 2. Dự án đổi trạng thái
+          else {
+            const docId = querySnapshot.docs[0].id;
+            return await Promise.all([collection.doc(docId).update({ ...project }), upsertDocumentToIndex({ ...project, doc_id: docId, collection_id: collectionName })]);
+          }
+        });
+
+        await Promise.all(promises); // Wait for all promises in the batch to complete
+      }
     }
 
     res.header("Access-Control-Allow-Origin", "*");
