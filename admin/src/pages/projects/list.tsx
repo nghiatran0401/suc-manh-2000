@@ -69,7 +69,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
                     {Object.entries(res.data.errors as Record<any, any>).map(([key, value]) => (
                       <div key={key}>
                         <p>
-                          <strong>{key}:</strong> {value.length === 0 && "None"}
+                          <strong>{key}:</strong> {value.length === 0 && "Không có"}
                         </p>
                         {value.length > 0 && (
                           <ul>
@@ -105,7 +105,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
                     {Object.entries(res.data.errors as Record<any, any>).map(([key, value]) => (
                       <div key={key}>
                         <p>
-                          <strong>{key}:</strong> {value.length === 0 && "None"}
+                          <strong>{key}:</strong> {value.length === 0 && "Không có"}
                         </p>
                         {value.length > 0 && (
                           <ul>

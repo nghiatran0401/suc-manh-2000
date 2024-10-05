@@ -40,14 +40,19 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     4: { name: "Dự án đã hoàn thành", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
-  let errors = {};
+  let errors = {
+    "DA không có phiếu khảo sát": [],
+    "DA không có ảnh hiện trạng": [],
+  };
 
   try {
     for (const requestedYear of requestedYears) {
       const { totalAirtableDataList, totalAirtableErrors } = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      errors = totalAirtableErrors;
+      if (requestedYear === "2024") {
+        errors = { ...totalAirtableErrors, ...errors };
+      }
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
       // Prepare data
@@ -55,6 +60,21 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
         const collectionName = `du-an-${requestedYear}`;
         const collection = firestore.collection(collectionName);
         const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+
+        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+        if (projectProgressObj === undefined) return;
+
+        const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
+        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+          requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
+          // return;
+        }
+
+        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+        if (hoanCanhDescription === undefined) {
+          requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
+          // return;
+        }
 
         if (querySnapshot.empty) {
           // 1. Dự án mới khởi công
@@ -174,14 +194,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
       }
     }
 
-    // Create a News Post
-    const news = {
+    // Create report
+    const report = {
       name: `Báo cáo tiến độ group Zalo`,
       content: htmlContent,
       errors: errors,
     };
 
-    res.status(200).send(news);
+    res.status(200).send(report);
   } catch (error) {
     console.error("[createProjectProgressReportZalo]: ", error.message);
     res.status(500).send("[createProjectProgressReportZalo]: ", error.message);
@@ -226,6 +246,10 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
         const collection = firestore.collection(collectionName);
         const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
+        const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+        if (projectProgressObj === undefined) return;
+        const { thumbnailImage: projectThumbnail } = projectProgressObj;
+
         if (querySnapshot.empty) {
           // 1. Dự án mới khởi công
           if (!orders[1].list[airtableData.classification]) return;
@@ -244,9 +268,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
 
           // 3. Dự án đang được xây dựng
           if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
-            const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-            if (projectProgressObj === undefined) return;
-            const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
             if (!orders[3].list[airtableData.classification]) return;
             orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
             orders[0].list[requestedYear].inProgress++;
@@ -387,7 +408,9 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
       const { totalAirtableDataList, totalAirtableErrors } = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      errors = { ...errors, ...totalAirtableErrors };
+      if (requestedYear === "2024") {
+        errors = { ...totalAirtableErrors, ...errors };
+      }
 
       // Prepare data
       const promises = totalAirtableDataList.map(async (airtableData) => {
@@ -400,14 +423,15 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
 
         const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
         if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-          errors["No anh hien trang"].push(airtableData.name);
-          return;
+          requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
+          // return;
         }
 
-        const hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
         if (hoanCanhDescription === undefined) {
-          errors["No phieu khao sat"].push(airtableData.name);
-          return;
+          hoanCanhDescription = "";
+          requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
+          // return;
         }
 
         // 1. Dự án mới
@@ -485,10 +509,15 @@ scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
         if (projectProgressObj === undefined) return;
 
         const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) return;
+        if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+          // return;
+        }
 
-        const hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-        if (hoanCanhDescription === undefined) return;
+        let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+        if (hoanCanhDescription === undefined) {
+          hoanCanhDescription = "";
+          // return;
+        }
 
         const project = {
           projectId: airtableData.projectId,

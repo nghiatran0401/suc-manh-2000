@@ -102,7 +102,7 @@ async function fetchAirtableRecords(requestedYear) {
       }
 
       const progressImagesUrl = record.get("Link Drive") ? record.get("Link Drive").trim() : undefined;
-      if (!progressImagesUrl) {
+      if (progressImagesUrl === undefined) {
         noGoogleDriveUrls.push(projectName);
         continue;
       }

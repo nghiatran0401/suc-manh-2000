@@ -140,7 +140,7 @@ async function getHoanCanhDescription(folderId) {
     const hienTrangFolder = res.data.files.find((folder) => folder.name.includes("hiện trạng"));
     const filesRes = await drive.files.list({
       auth: auth,
-      q: `'${hienTrangFolder.id}' in parents`,
+      q: `'${hienTrangFolder?.id}' in parents`,
       fields: "files(id, name, mimeType, parents)",
     });
 
@@ -149,7 +149,7 @@ async function getHoanCanhDescription(folderId) {
     );
 
     if (googleDocObj?.id) {
-      return `https://docs.google.com/document/d/${googleDocObj.id}/preview`;
+      return `https://docs.google.com/document/d/${googleDocObj?.id}/preview`;
     }
     return undefined;
   } catch (err) {
