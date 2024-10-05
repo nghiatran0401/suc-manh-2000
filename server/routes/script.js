@@ -201,6 +201,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
       errors: errors,
     };
 
+    res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send(report);
   } catch (error) {
     console.error("[createProjectProgressReportZalo]: ", error.message);
@@ -380,6 +381,8 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
       upsertDocumentToIndex({ ...news, collection_id: category, doc_id: newId }),
       updateClassificationAndCategoryCounts(news.classification, news.category, +1),
     ]);
+
+    res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
   } catch (error) {
     console.error("[createProjectProgressReportWeb]: ", error.message);
@@ -484,6 +487,7 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
       errors: errors,
     };
 
+    res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send(report);
   } catch (error) {
     console.error("[createWebUpdateReport]: ", error.message);
@@ -575,6 +579,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
       await Promise.all(promises);
     }
 
+    res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
   } catch (error) {
     console.error("[syncAirtableAndWeb]: ", error.message);
