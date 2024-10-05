@@ -2,9 +2,8 @@ const { google } = require("googleapis");
 const drive = google.drive("v3");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-const { client_secret, client_id, redirect_uris } = require("../secrets/credentials.json").installed;
 
-const auth = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL);
 async function ensureRefreshToken() {
   const refreshToken = process.env.GOOGLE_API_REFRESH_TOKEN;
 
