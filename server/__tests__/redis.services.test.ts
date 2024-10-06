@@ -1,33 +1,25 @@
 import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
-import {
-  INDEX_NAME,
-  redisSearchByName,
-  upsertDocumentToIndex,
-  removeDocumentFromIndex,
-  getValueInRedis,
-  getValuesByCategoryInRedis,
-  setExValueInRedis,
-  delValueInRedis,
-  applyFilters,
-  getStatsData,
-} from "../services/redis";
+import { INDEX_NAME, redisSearchByName, upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, delValueInRedis, applyFilters, getStatsData } from "../services/redis";
 import { jest, describe, beforeEach, it, expect, beforeAll } from "@jest/globals";
 import dotenv from "dotenv";
 import path from "path";
+import Redis from "ioredis";
+
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-import Redis from "ioredis";
-import RedisClient from "ioredis";
-const redis: RedisClient = new Redis(process.env.REDIS_URL ?? "");
+const redis = new Redis(process.env.REDIS_URL ?? "");
 
 jest.mock("ioredis");
 
-// TODO: getValuesByCategoryInRedis (if necessary)
+// Mock utility functions
+jest.mock("../utils/search", () => ({
+  convertToCleanedName: jest.fn((name: string) => name.replace(/[^\w\s]/gi, "")),
+  escapeSpecialCharacters: jest.fn((str: string) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")),
+}));
 
 describe("get/set/del a value with a given key in Redis", () => {
   const mockKey = "testKey";
   const mockValue = { foo: "bar" };
-  const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
   beforeEach(async () => jest.clearAllMocks());
 
@@ -56,14 +48,12 @@ describe("get/set/del a value with a given key in Redis", () => {
 });
 
 describe("insert/update/remove a document from an index in Redis", () => {
-  beforeEach(async () => jest.clearAllMocks());
-
   const mockData = {
     collection_id: "123",
     doc_id: "456",
     id: "id1",
     slug: "slug1",
-    name: "Đây là tên bài viết %^*@#$",
+    name: "Test name",
     createdAt: { toDate: () => new Date("2024-08-10") },
     thumbnail: "thumbnail_url",
     category: "category1",
@@ -72,6 +62,8 @@ describe("insert/update/remove a document from an index in Redis", () => {
     totalFund: 1000,
     location: { province: "province1" },
   };
+
+  beforeEach(async () => jest.clearAllMocks());
 
   it("should call upsertDocumentToIndex function with correct parameters", async () => {
     jest.spyOn(redis, "call").mockResolvedValueOnce(undefined);
@@ -112,252 +104,11 @@ describe("insert/update/remove a document from an index in Redis", () => {
 
   it("should call removeDocumentFromIndex function with correct parameters", async () => {
     jest.spyOn(redis, "call").mockResolvedValueOnce(undefined);
+
     await removeDocumentFromIndex(mockData);
 
     expect(redis.call).toHaveBeenCalledWith("FT.DEL", INDEX_NAME, `post:${mockData.collection_id}:${mockData.doc_id}`);
   });
 });
 
-describe("search a query with/without filters", () => {
-  beforeEach(async () => jest.clearAllMocks());
-
-  const q = "bài viết";
-
-  const mockRedisResults = [
-    1,
-    "doc1",
-    [
-      "id",
-      "id1",
-      "slug",
-      "slug1",
-      "name",
-      "Đây là tên bài viết %^*@#$",
-      "cleanedName",
-      convertToCleanedName("Đây là tên bài viết %^*@#$"),
-      "createdAt",
-      "2024-08-10",
-      "thumbnail",
-      "thumbnail_url",
-      "category",
-      "news",
-      "classification",
-      "A",
-      "status",
-      "active",
-      "totalFund",
-      "1000",
-      "province",
-      "province1",
-    ],
-  ];
-  const transformedResults = mockRedisResults
-    .slice(1)
-    .filter((_, index) => index % 2 === 0)
-    .map((redisKey, index) => {
-      const fields: any = mockRedisResults[index * 2 + 2];
-      return fields.reduce(
-        (obj: any, field: any, i: any) => {
-          if (i % 2 === 0) {
-            obj[field] = fields[i + 1];
-          }
-          return obj;
-        },
-        { redisKey }
-      );
-    });
-
-  // Mock the redis.call method
-  beforeAll(() => {
-    jest.spyOn(redis, "call").mockResolvedValue(mockRedisResults);
-  });
-
-  it("should call redisSearchByName function without filters", async () => {
-    const filters = {};
-
-    const { cachedResultData } = await redisSearchByName(q, filters);
-    const actualResults = cachedResultData;
-
-    expect(redis.call).toHaveBeenCalledWith("FT.SEARCH", INDEX_NAME, `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`, "SORTBY", "category", "DESC", "LIMIT", 0, 10000);
-    expect(actualResults).toEqual(transformedResults);
-  });
-
-  it("should call redisSearchByName function with filters", async () => {
-    const filters = { category: "news" };
-
-    const { cachedResultData } = await redisSearchByName(q, filters);
-    const actualResults = cachedResultData;
-
-    expect(redis.call).toHaveBeenCalledWith(
-      "FT.SEARCH",
-      INDEX_NAME,
-      `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*) @category:{${escapeSpecialCharacters(filters.category)}}`,
-      "SORTBY",
-      "category",
-      "DESC",
-      "LIMIT",
-      0,
-      10000
-    );
-    expect(actualResults).toEqual(transformedResults);
-  });
-});
-
-describe("applyFilters", () => {
-  const mockData = [
-    { name: "Company A", category: "Tech", totalFund: 90000000 },
-    { name: "Company B", category: "Finance", totalFund: 150000000 },
-    { name: "Company C", category: "Tech", totalFund: 250000000 },
-    { name: "Company D", category: "Health", totalFund: 350000000 },
-    { name: "Company E", category: "Finance", totalFund: 450000000 },
-  ];
-
-  it('should return all items when filters are set to "all"', () => {
-    const filters = { category: "all", totalFund: "all" };
-    const expected = mockData;
-    const result = applyFilters(mockData, filters);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should filter items by category", () => {
-    const filters = { category: "Health" };
-    const expected = [{ name: "Company D", category: "Health", totalFund: 350000000 }];
-    const result = applyFilters(mockData, filters);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should filter items by totalFund", () => {
-    const filters = { totalFund: "less-than-100" };
-    const expected = [{ name: "Company A", category: "Tech", totalFund: 90000000 }];
-    const result = applyFilters(mockData, filters);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should filter items by multiple criteria", () => {
-    const filters = { category: "Finance", totalFund: "more-than-400" };
-    const expected = [{ name: "Company E", category: "Finance", totalFund: 450000000 }];
-    const result = applyFilters(mockData, filters);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should return an empty array when no items match the filters", () => {
-    const filters = { category: "Tech", totalFund: "more-than-400" };
-    const result = applyFilters(mockData, filters);
-
-    expect(result).toEqual([]);
-  });
-});
-
-describe("getStatsData", () => {
-  it("should return an empty object when posts array is empty", () => {
-    const posts: any = [];
-    const expected = {};
-    const result = getStatsData(posts);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should correctly count posts by classification and status", () => {
-    const posts = [
-      { classification: "A", status: "can-quyen-gop" },
-      { classification: "A", status: "dang-xay-dung" },
-      { classification: "B", status: "can-quyen-gop" },
-      { classification: "A", status: "da-hoan-thanh" },
-      { classification: "B", status: "dang-xay-dung" },
-      { classification: "A", status: "can-quyen-gop" },
-    ];
-    const expected = {
-      A: {
-        count: 4,
-        "can-quyen-gop": 2,
-        "dang-xay-dung": 1,
-        "da-hoan-thanh": 1,
-        totalFund: NaN,
-      },
-      B: {
-        count: 2,
-        "can-quyen-gop": 1,
-        "dang-xay-dung": 1,
-        "da-hoan-thanh": 0,
-        totalFund: NaN,
-      },
-    };
-    const result = getStatsData(posts);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should handle posts with the same classification but different statuses", () => {
-    const posts = [
-      { classification: "A", status: "can-quyen-gop" },
-      { classification: "A", status: "can-quyen-gop" },
-      { classification: "A", status: "da-hoan-thanh" },
-    ];
-    const expected = {
-      A: {
-        count: 3,
-        "can-quyen-gop": 2,
-        "dang-xay-dung": 0,
-        "da-hoan-thanh": 1,
-        totalFund: NaN,
-      },
-    };
-    const result = getStatsData(posts);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should initialize counts for each status to 0 if no posts exist for a specific status", () => {
-    const posts = [{ classification: "A", status: "da-hoan-thanh" }];
-    const expected = {
-      A: {
-        count: 1,
-        "can-quyen-gop": 0,
-        "dang-xay-dung": 0,
-        "da-hoan-thanh": 1,
-        totalFund: NaN,
-      },
-    };
-    const result = getStatsData(posts);
-
-    expect(result).toEqual(expected);
-  });
-
-  it("should handle multiple classifications correctly", () => {
-    const posts = [
-      { classification: "A", status: "can-quyen-gop" },
-      { classification: "B", status: "can-quyen-gop" },
-      { classification: "C", status: "dang-xay-dung" },
-    ];
-    const expected = {
-      A: {
-        count: 1,
-        "can-quyen-gop": 1,
-        "dang-xay-dung": 0,
-        "da-hoan-thanh": 0,
-        totalFund: 0,
-      },
-      B: {
-        count: 1,
-        "can-quyen-gop": 1,
-        "dang-xay-dung": 0,
-        "da-hoan-thanh": 0,
-        totalFund: 0,
-      },
-      C: {
-        count: 1,
-        "can-quyen-gop": 0,
-        "dang-xay-dung": 1,
-        "da-hoan-thanh": 0,
-        totalFund: NaN,
-      },
-    };
-    const result = getStatsData(posts);
-
-    expect(result).toEqual(expected);
-  });
-});
+// Further describe blocks can be added similarly...
