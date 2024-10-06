@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "savvy-serenity-424116-g1",
+  "private_key_id": "c96d21178642162d8e17809d6d30784f0cbc93cf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC5OqVL0LiHqPz9\nyWtREtWHeyX3ERV1bqaOuNlSYP8WJUqofkaxXsVer5Hlycp2aoTyMl88RgWKHFoF\nJoqMaGrF/WLKTRDsjX3ptTV4YwMGmBeW9DWIX07nML+Q+jC45gJlznSTsSRX1GbZ\n9qBkXahdogzQrb2Ou1tqCL2qX6eQs0X8w9odYBpezHweNJ0+rMgqo8QRYc9hZgml\nGRWbjdXgRvyOm2zww+Z0cEFUwQBXqkItwuDrbvMRV7CdriIZvzM3qIT41OJ2fC0p\nm95OxUYxMQ7tFlg6XyBbyMaqVoNe0qnsbCKRjcBNrktMeowwP/46XJp6B9snje2e\nu0OdFkwfAgMBAAECggEACwXOaGCXWptX0tJ1rHFue418iONfX4miJ8QgSqKzC2JU\nuwooss1s+WGBUSddAQb9ulv9Bt0z3zAouz276Pcdw4J8qoVDiJAy+gFqmStrNq0+\nWiFWPjNNwrxH6hy5YYduhRhwH4nfG8rsA/SFPvPD3S6TjKeKLEBCBGFYyBbBJf8q\n4p/1Ck1iWjLJvqElQPgvc6/6+bdr6osnyTicti7FnIBQjOv750Vy3gnYdAtulrkc\ngxTIm2HFwBt0yQyg2eZNJ5HosG/kHXV8bo9tNbvYMpYsE+s6oqX0tl+5qp8xw/ml\nFb2lE/9LpTVRINpAPxLUC8Qkv5hPvmrvKsiKZSty4QKBgQD+sZHAGbQpjGkwjlk5\nQMbUBMF7K0lHUUO4x+ySpIrhX0TXbu2YF1OovL/eVvAnIrnsOavrV6xcm2aIdKgy\nDRTb+lyskp80bcUNFGiTVQ9CPQXRSLlDupw7OoRIWP3kUlCgL1XJyYAT4qvchn+1\nN5WVqMYW5mjc55sGoUBx/7aKkwKBgQC6Ld1Qve7aAZMV5+OJqYVNbZnno4KADp6e\nS6/t6FeDpiqCxyjrepBlZfwaqYpO9OSSEWlsxTqBVQrUXn5UchIdnXTJzeJpJ1SK\nJ9oJQhwGrrJJUfbGZPDivsb8Mcgvg3z60BNGCBgzFJAQXtU4jum+hPjxFUIWwG3w\n2tcp/JBTxQKBgGMvX6VB3Ul45tYD+Xc0ZLnYiEihGM5vNUJWiSiqb3NJGJQVHO3n\n16qUptu9W5TCD0mRRARIhlUiJ5HobD/hnEf2ffSuvNU8Ekr/saH+tAyFmyhfe9aG\na6UdKrrJ/UXXUJKxHGWS1Q/pbChbMIyv8s7vhQUSAbBVeafhUCmU/c+FAoGAbd/l\nbeI5lPU67cGlejfOUMyu+JJ50MNP/xGh6SCmjS5Chl2tG5OApibS6pVF56UFQ+L8\nudGH3o3mz0BZA9MyN8IWC4by6KXqcYJlXfNjANqWo0i4/4rQ0rBOVMW4Y7oQxyCH\nT1w1k+e9wbuF0FQfRG3LUNP/5dd4yp0MQF4qexUCgYEA8jbKpQ9zZRnWQq1gdbcE\nmSkYcd39ZbyncjNry4JWoneqsxcE9g9LqinuZWlv4W2/G7R+2J31wrngdj7U8W9e\nCRW38Q/jFzuACyF7bYOL8KqdwvvTxz1W94rBRrQqPBpK5LMPt2tOL9C7cbxIB30W\nuMGTgOwOmaCYUmJW0Of2lVg=\n-----END PRIVATE KEY-----\n",
+  "client_email": "savvy-serenity-424116-g1@appspot.gserviceaccount.com",
+  "client_id": "116100961960646332339",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/savvy-serenity-424116-g1%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
