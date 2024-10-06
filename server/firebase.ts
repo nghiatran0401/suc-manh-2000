@@ -1,5 +1,10 @@
-import * as firebase from "firebase-admin";
-const serviceAccount = require("./savvy-serenity-424116-g1-c96d21178642.json");
+import firebase, { ServiceAccount } from "firebase-admin";
+import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
+
+const serviceAccountPath = process.env.SERVICE_ACCOUNT_PATH as string;
+const serviceAccount: ServiceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),

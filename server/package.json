@@ -4,10 +4,11 @@
   "engines": {
     "node": "20"
   },
+  "main": "dist/index.js",
   "scripts": {
     "server": "cp .env.local .env && npx nodemon --exec ts-node index.ts",
     "server:local-docker-redis": "docker-compose -f docker-compose.redis.yaml up -d",
-    "deploy:server": "cp .env.prod .env && firebase deploy --only functions",
+    "deploy:server": "cp .env.prod .env && tsc && firebase deploy --only functions",
     "test": "jest",
     "test:watch": "jest --watch"
   },

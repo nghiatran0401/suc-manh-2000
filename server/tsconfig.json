@@ -11,9 +11,10 @@
     "isolatedModules": true, // Ensures that each file is treated as an isolated module
     "types": ["jest", "node"], // Include types for Jest and Node.js
     "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./",
     "allowJs": true, // Allow JavaScript files to be compiled
     "noImplicitAny": true // Disallow implicit 'any' types
   },
-  "include": ["src/**/*", "tests/**/*", "__mocks__/**/*"], // Include necessary folders
-  "exclude": ["node_modules", "dist"] // Exclude node_modules and dist folders
+  "include": ["src/**/*", "tests/**/*", "__mocks__/**/*", "__tests__/**/*", "index.ts"], // Include necessary folders
+  "exclude": ["node_modules"]
 }

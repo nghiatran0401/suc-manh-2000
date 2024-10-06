@@ -1,6 +1,6 @@
-import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
-import { INDEX_NAME, redisSearchByName, upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, delValueInRedis, applyFilters, getStatsData } from "../services/redis";
-import { jest, describe, beforeEach, it, expect, beforeAll } from "@jest/globals";
+import { convertToCleanedName } from "../utils/search";
+import { INDEX_NAME, upsertDocumentToIndex, removeDocumentFromIndex, getValueInRedis, delValueInRedis } from "../services/redis";
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 import dotenv from "dotenv";
 import path from "path";
 import Redis from "ioredis";
