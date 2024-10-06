@@ -1,7 +1,7 @@
 import axios from "axios";
 import path from "path";
 import dotenv from "dotenv";
-dotenv.config({ path: path.resolve(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 async function getTrelloCardAttachmentsData(trelloCardId: string) {
   const url = `https://api.trello.com/1/cards/${trelloCardId}?key=${process.env.TRELLO_API_KEY}&token=${process.env.TRELLO_API_TOKEN}`;

@@ -1,4 +1,5 @@
-const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
+import { describe, it, expect } from "@jest/globals";
+import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
 
 describe("convertToCleanedName", () => {
   it("should convert and clean a Vietnamese name", () => {

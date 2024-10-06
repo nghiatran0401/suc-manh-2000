@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 const firestoreMock = {
   collection: jest.fn().mockReturnThis(),
   doc: jest.fn().mockReturnThis(),

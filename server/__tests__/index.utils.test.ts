@@ -1,3 +1,5 @@
+import { jest, describe, beforeEach, it, expect } from "@jest/globals";
+
 jest.mock("firebase-admin"); // Mock Firebase Admin
 
 const { updateClassificationAndCategoryCounts } = require("../utils/index");
@@ -7,7 +9,7 @@ describe("updateClassificationAndCategoryCounts", () => {
   const mockGet = firestore().collection().doc().get;
   const mockSet = firestore().collection().doc().set;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(async () => jest.clearAllMocks());
 
   it("should update classification counts when classification exists", async () => {
     const classificationDocData = { classificationA: 1 };

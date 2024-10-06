@@ -2,7 +2,7 @@ import path from "path";
 import dotenv from "dotenv";
 import Airtable from "airtable";
 import Bottleneck from "bottleneck";
-dotenv.config({ path: path.resolve(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 Airtable.configure({ endpointUrl: "https://api.airtable.com", apiKey: process.env.AIRTABLE_API_KEY });
 const base = Airtable.base("appWc36BLa58SIqi8");

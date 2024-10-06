@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 const mockRedisInstance = {
   type: jest.fn(),
   get: jest.fn(),

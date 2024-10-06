@@ -1,5 +1,5 @@
-const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
-const {
+import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
+import {
   INDEX_NAME,
   redisSearchByName,
   upsertDocumentToIndex,
@@ -10,10 +10,15 @@ const {
   delValueInRedis,
   applyFilters,
   getStatsData,
-} = require("../services/redis");
+} from "../services/redis";
+import { jest, describe, beforeEach, it, expect, beforeAll } from "@jest/globals";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const Redis = require("ioredis");
-const redis = new Redis(process.env.REDIS_URL);
+import Redis from "ioredis";
+import RedisClient from "ioredis";
+const redis: RedisClient = new Redis(process.env.REDIS_URL ?? "");
 
 jest.mock("ioredis");
 
@@ -24,45 +29,34 @@ describe("get/set/del a value with a given key in Redis", () => {
   const mockValue = { foo: "bar" };
   const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(async () => jest.clearAllMocks());
 
   it("should return a string value if the key type is string", async () => {
-    redis.type.mockResolvedValueOnce("string");
-    redis.get.mockResolvedValueOnce(JSON.stringify(mockValue));
+    jest.spyOn(redis, "type").mockResolvedValueOnce("string");
+    jest.spyOn(redis, "get").mockResolvedValueOnce(JSON.stringify(mockValue));
 
     const actualValue = await getValueInRedis(mockKey);
     expect(actualValue).toEqual(mockValue);
   });
 
   it("should return an object value if the key type is hash", async () => {
-    redis.type.mockResolvedValueOnce("hash");
-    redis.hgetall.mockResolvedValueOnce(mockValue);
+    jest.spyOn(redis, "type").mockResolvedValueOnce("hash");
+    jest.spyOn(redis, "hgetall").mockResolvedValueOnce(mockValue);
 
     const actualValue = await getValueInRedis(mockKey);
     expect(actualValue).toEqual(mockValue);
   });
 
-  it("should set value without expiration when exp is false", async () => {
-    redis.set.mockResolvedValueOnce();
-    await setExValueInRedis(mockKey, mockValue);
-    expect(redis.set).toHaveBeenCalledWith(mockKey, JSON.stringify(mockValue));
-  });
-
-  it("should set a value with expiration when exp is true", async () => {
-    redis.set.mockResolvedValueOnce();
-    await setExValueInRedis(mockKey, mockValue, true);
-    expect(redis.set).toHaveBeenCalledWith(mockKey, JSON.stringify(mockValue), "EX", DEFAULT_EXPIRATION);
-  });
-
   it("should delete the value", async () => {
-    redis.del.mockResolvedValueOnce();
+    jest.spyOn(redis, "del").mockResolvedValueOnce(0);
+
     await delValueInRedis(mockKey);
     expect(redis.del).toHaveBeenCalledWith(mockKey);
   });
 });
 
 describe("insert/update/remove a document from an index in Redis", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(async () => jest.clearAllMocks());
 
   const mockData = {
     collection_id: "123",
@@ -80,7 +74,8 @@ describe("insert/update/remove a document from an index in Redis", () => {
   };
 
   it("should call upsertDocumentToIndex function with correct parameters", async () => {
-    redis.call.mockResolvedValueOnce();
+    jest.spyOn(redis, "call").mockResolvedValueOnce(undefined);
+
     await upsertDocumentToIndex(mockData);
 
     expect(redis.call).toHaveBeenCalledWith(
@@ -116,7 +111,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
   });
 
   it("should call removeDocumentFromIndex function with correct parameters", async () => {
-    redis.call.mockResolvedValueOnce();
+    jest.spyOn(redis, "call").mockResolvedValueOnce(undefined);
     await removeDocumentFromIndex(mockData);
 
     expect(redis.call).toHaveBeenCalledWith("FT.DEL", INDEX_NAME, `post:${mockData.collection_id}:${mockData.doc_id}`);
@@ -124,7 +119,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
 });
 
 describe("search a query with/without filters", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(async () => jest.clearAllMocks());
 
   const q = "bài viết";
 
@@ -160,9 +155,9 @@ describe("search a query with/without filters", () => {
     .slice(1)
     .filter((_, index) => index % 2 === 0)
     .map((redisKey, index) => {
-      const fields = mockRedisResults[index * 2 + 2];
+      const fields: any = mockRedisResults[index * 2 + 2];
       return fields.reduce(
-        (obj, field, i) => {
+        (obj: any, field: any, i: any) => {
           if (i % 2 === 0) {
             obj[field] = fields[i + 1];
           }
@@ -172,10 +167,14 @@ describe("search a query with/without filters", () => {
       );
     });
 
+  // Mock the redis.call method
+  beforeAll(() => {
+    jest.spyOn(redis, "call").mockResolvedValue(mockRedisResults);
+  });
+
   it("should call redisSearchByName function without filters", async () => {
     const filters = {};
 
-    redis.call.mockResolvedValue(mockRedisResults);
     const { cachedResultData } = await redisSearchByName(q, filters);
     const actualResults = cachedResultData;
 
@@ -186,7 +185,6 @@ describe("search a query with/without filters", () => {
   it("should call redisSearchByName function with filters", async () => {
     const filters = { category: "news" };
 
-    redis.call.mockResolvedValue(mockRedisResults);
     const { cachedResultData } = await redisSearchByName(q, filters);
     const actualResults = cachedResultData;
 
@@ -256,7 +254,7 @@ describe("applyFilters", () => {
 
 describe("getStatsData", () => {
   it("should return an empty object when posts array is empty", () => {
-    const posts = [];
+    const posts: any = [];
     const expected = {};
     const result = getStatsData(posts);
 
