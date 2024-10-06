@@ -9,14 +9,14 @@ const resources = {
         name: "Tên dự án",
         search: "Tìm kiếm",
         category: "Danh mục",
-        publish_date: "Ngày đăng bài",
+        createdAt: "Ngày đăng bài",
         actions: "Tùy chọn",
       },
       post: {
         fields: {
           id: "ID",
           author: "Tác giả",
-          publish_date: "Ngày đăng bài",
+          createdAt: "Ngày đăng bài",
           name: "Tên dự án",
           url: "Link",
           slug: "Slug",

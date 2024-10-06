@@ -8,6 +8,7 @@ import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } fro
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
 import { provincesAndCities } from "../../utils/vietnam-provinces";
+import { ProjectPost } from "../../../../index";
 
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -35,13 +36,13 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  const projectData = queryResult?.data?.data as Sucmanh2000.Post;
+  const projectData = queryResult?.data?.data as ProjectPost;
   const isLoading = queryResult?.isFetching || queryResult?.isLoading;
 
   useEffect(() => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
-      formProps.form?.setFieldValue("publish_date", projectData.publish_date ? projectData.publish_date.split("T")[0] : "");
+      // formProps.form?.setFieldValue("createdAt", projectData.createdAt ? projectData.createdAt.split("T")[0] : "");
       formProps.form?.setFieldValue("province", projectData.location?.province);
     }
   }, [projectData]);
@@ -84,14 +85,14 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           {/* Publish date */}
-          <Form.Item
-            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>}
-            name={"publish_date"}
+          {/* <Form.Item
+            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.createdAt")}</span>}
+            name={"createdAt"}
             rules={[{ required: true }]}
             style={{ width: "fit-content", minWidth: "150px" }}
           >
             <Input type="date" />
-          </Form.Item>
+          </Form.Item> */}
 
           {/* Category */}
           <Form.Item

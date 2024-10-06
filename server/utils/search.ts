@@ -1,13 +1,13 @@
-function convertToCleanedName(name) {
+function convertToCleanedName(name: string) {
   return removeVietnameseAccents(name ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/[-_]/g, "\\$&");
 }
 
-function removeVietnameseAccents(str) {
+function removeVietnameseAccents(str: any) {
   // Convert accented characters to their non-accented counterparts
-  const map = {
+  const map: any = {
     à: "a",
     á: "a",
     ả: "a",
@@ -144,11 +144,11 @@ function removeVietnameseAccents(str) {
     Đ: "D",
   };
 
-  return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched) => map[matched]);
+  return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched: any) => map[matched]);
 }
 
-function escapeSpecialCharacters(str) {
+function escapeSpecialCharacters(str: string) {
   return str.replace(/[-_]/g, "\\$&");
 }
 
-module.exports = { convertToCleanedName, escapeSpecialCharacters };
+export { convertToCleanedName, escapeSpecialCharacters };

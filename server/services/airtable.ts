@@ -1,7 +1,8 @@
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-const Airtable = require("airtable");
-const Bottleneck = require("bottleneck");
+import path from "path";
+import dotenv from "dotenv";
+import Airtable from "airtable";
+import Bottleneck from "bottleneck";
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 Airtable.configure({ endpointUrl: "https://api.airtable.com", apiKey: process.env.AIRTABLE_API_KEY });
 const base = Airtable.base("appWc36BLa58SIqi8");
@@ -11,7 +12,7 @@ const AIRTABLE_VIEW = "Nghia Web";
 
 // Create a limiter with a max rate of 5 requests per second
 const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 200 });
-const limitedSelect = limiter.wrap((tableName, options) => {
+const limitedSelect = limiter.wrap((tableName: any, options: any) => {
   return new Promise((resolve, reject) => {
     base(tableName)
       .select(options)
@@ -21,7 +22,7 @@ const limitedSelect = limiter.wrap((tableName, options) => {
   });
 });
 
-function getProjectStatus(statusFull) {
+function getProjectStatus(statusFull: any) {
   if (!statusFull.match(/^\d+/)) return undefined;
 
   const statusNumber = parseInt(statusFull.match(/^\d+/)[0], 10);
@@ -36,7 +37,7 @@ function getProjectStatus(statusFull) {
   }
 }
 
-function standardizePostTitle(str) {
+function standardizePostTitle(str: string) {
   return str
     .split(" ")
     .map((word, index, arr) => {
@@ -49,13 +50,13 @@ function standardizePostTitle(str) {
     .replace(/,/g, " -");
 }
 
-async function getDonorsFromIds(donorIds) {
+async function getDonorsFromIds(donorIds: any) {
   const donors = [];
   for (const donorId of donorIds) {
     const record = await base(DONOR_TABLE).find(donorId);
     const donor = {
       name: record.get("Tên Tài Trợ") ?? "",
-      totalProjects: record.get("Công trình Total") ? record.get("Công trình Total").length : 0,
+      totalProjects: record.get("Công trình Total") ? (record.get("Công trình Total") as any).length : 0,
       notes: record.get("Notes") ?? "",
       contact: record.get("Thông tin liên hệ ") ?? "",
       intro: record.get("Giới thiệu Cty ( lên MoMo )") ?? "",
@@ -66,20 +67,20 @@ async function getDonorsFromIds(donorIds) {
   return donors;
 }
 
-async function fetchAirtableRecords(requestedYear) {
+async function fetchAirtableRecords(requestedYear: string) {
   // Report issues/bugs
   const cancelledProjects = [];
   const noStatusProjects = [];
   const noGoogleDriveUrls = [];
 
   try {
-    const records = await limitedSelect(PROJECT_TABLE, {
+    const records: any = await limitedSelect(PROJECT_TABLE, {
       view: AIRTABLE_VIEW,
       filterByFormula: `{Năm thực hiện} = '${requestedYear}'`,
       sort: [{ field: "DA", direction: "asc" }],
     });
 
-    const groupedRecords = {};
+    const groupedRecords: any = {};
     for (const record of records) {
       const classification = record.get("Phân loại công trình").trim();
       if (!groupedRecords[classification]) {
@@ -146,7 +147,7 @@ async function fetchAirtableRecords(requestedYear) {
       groupedRecords[classification].push(airtableData);
     }
 
-    const totalAirtableDataList = Object.values(groupedRecords).flat();
+    const totalAirtableDataList = (Object.values(groupedRecords) as any).flat();
     const totalAirtableErrors = { "DA hủy": cancelledProjects, "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls };
 
     return { totalAirtableDataList, totalAirtableErrors };
@@ -156,4 +157,4 @@ async function fetchAirtableRecords(requestedYear) {
   }
 }
 
-module.exports = { getProjectStatus, standardizePostTitle, fetchAirtableRecords };
+export { getProjectStatus, standardizePostTitle, fetchAirtableRecords };

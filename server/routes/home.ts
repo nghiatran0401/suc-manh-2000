@@ -1,10 +1,11 @@
-const express = require("express");
-const { firestore } = require("../firebase");
-const { getValueInRedis, setExValueInRedis } = require("../services/redis");
+import express from "express";
+import { Request, Response } from "express";
+import { firestore } from "../firebase";
+import { getValueInRedis, setExValueInRedis } from "../services/redis";
 
 const homeRouter = express.Router();
 
-homeRouter.get("/getTotalStatisticsCount", async (req, res) => {
+homeRouter.get("/getTotalStatisticsCount", async (req: Request, res: Response) => {
   const cachedKey = `totalStatisticsCount`;
 
   try {
@@ -27,12 +28,12 @@ homeRouter.get("/getTotalStatisticsCount", async (req, res) => {
       await setExValueInRedis(cachedKey, resultData, true);
       res.status(200).send(JSON.stringify(resultData));
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).send({ error: `[getTotalStatisticsCount] failed: ${error.message}` });
   }
 });
 
-homeRouter.get("/getTotalProjectsCount", async (req, res) => {
+homeRouter.get("/getTotalProjectsCount", async (req: Request, res: Response) => {
   const cachedKey = `totalProjectsCount`;
 
   try {
@@ -55,12 +56,12 @@ homeRouter.get("/getTotalProjectsCount", async (req, res) => {
       await setExValueInRedis(cachedKey, resultData, true);
       res.status(200).send(JSON.stringify(resultData));
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).send({ error: `[getTotalProjectsCount] failed: ${error.message}` });
   }
 });
 
-homeRouter.get("/getTotalStudentsCount", async (req, res) => {
+homeRouter.get("/getTotalStudentsCount", async (req: Request, res: Response) => {
   const cachedKey = `totalStudentsCount`;
 
   try {
@@ -91,9 +92,9 @@ homeRouter.get("/getTotalStudentsCount", async (req, res) => {
       await setExValueInRedis(cachedKey, resultData, true);
       res.status(200).send(JSON.stringify(resultData));
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).send({ error: `[getTotalStudentsCount] failed: ${error.message}` });
   }
 });
 
-module.exports = homeRouter;
+export default homeRouter;

@@ -1,8 +1,9 @@
-const { google } = require("googleapis");
-const drive = google.drive("v3");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+import { google } from "googleapis";
+import path from "path";
+import dotenv from "dotenv";
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
+const drive = google.drive("v3");
 const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL);
 async function ensureRefreshToken() {
   const refreshToken = process.env.GOOGLE_API_REFRESH_TOKEN;
@@ -21,7 +22,7 @@ async function ensureRefreshToken() {
   }
 }
 
-async function getProjectProgress(folderId) {
+async function getProjectProgress(folderId: string) {
   if (!folderId) {
     console.error("Sai GD folderId");
     return undefined;
@@ -30,30 +31,30 @@ async function getProjectProgress(folderId) {
   await ensureRefreshToken();
 
   const order = ["hiện trạng", "khởi công", "tiến độ", "hoàn th"];
-  const anhHienTrang = [];
-  const anhKhoiCong = [];
-  const anhTienDo = [];
-  const anhHoanThanh = [];
+  const anhHienTrang: any = [];
+  const anhKhoiCong: any = [];
+  const anhTienDo: any = [];
+  const anhHoanThanh: any = [];
   const progress = [];
   let thumbnailImage = "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png";
 
-  async function checkForSubfolders(folderId, orderItem, firstLevelFolderName) {
+  async function checkForSubfolders(folderId: any, orderItem: any, firstLevelFolderName: any) {
     try {
-      const res = await drive.files.list({
+      const res: any = await drive.files.list({
         auth: auth,
         q: `'${folderId}' in parents`,
         fields: "files(id, name, mimeType, parents, createdTime)",
       });
 
-      const subfolders = res.data.files.filter((file) => file.mimeType === "application/vnd.google-apps.folder");
-      const files = res.data.files.filter((file) => file.mimeType !== "application/vnd.google-apps.folder");
+      const subfolders = res.data.files.filter((file: any) => file.mimeType === "application/vnd.google-apps.folder");
+      const files = res.data.files.filter((file: any) => file.mimeType !== "application/vnd.google-apps.folder");
 
       if (subfolders.length) {
-        const subfolderPromises = subfolders.map((folder) => {
+        const subfolderPromises = subfolders.map((folder: any) => {
           return checkForSubfolders(folder.id, orderItem, firstLevelFolderName);
         });
 
-        const results = await Promise.all(subfolderPromises);
+        const results: any = await Promise.all(subfolderPromises);
         const allFiles = results.flat().concat(files);
         return allFiles;
       } else {
@@ -65,32 +66,32 @@ async function getProjectProgress(folderId) {
     }
   }
 
-  async function processFirstLevelFolders(folderId, orderItem) {
+  async function processFirstLevelFolders(folderId: any, orderItem: any) {
     try {
-      const res = await drive.files.list({
+      const res: any = await drive.files.list({
         auth: auth,
         q: `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
         fields: "files(id, name, mimeType, parents)",
       });
 
-      const firstLevelFolders = res.data.files.filter((folder) => folder.name.includes(orderItem));
+      const firstLevelFolders = res.data.files.filter((folder: any) => folder.name.includes(orderItem));
 
       for (const folder of firstLevelFolders) {
         const allFiles = await checkForSubfolders(folder.id, orderItem, folder.name);
-        const files = allFiles.filter((f) => ["image/jpeg", "image/png"].includes(f.mimeType));
+        const files = allFiles.filter((f: any) => ["image/jpeg", "image/png"].includes(f.mimeType));
 
         if (files.length > 0) {
           if (orderItem === "hiện trạng") {
-            anhHienTrang.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+            anhHienTrang.push(...files.map((f: any) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
           }
           if (orderItem === "khởi công") {
-            anhKhoiCong.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+            anhKhoiCong.push(...files.map((f: any) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
           }
           if (orderItem === "tiến độ") {
-            anhTienDo.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+            anhTienDo.push(...files.map((f: any) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
           }
           if (orderItem === "hoàn th") {
-            anhHoanThanh.push(...files.map((f) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
+            anhHoanThanh.push(...files.map((f: any) => ({ image: `https://drive.google.com/thumbnail?id=${f.id}&sz=w1000`, caption: f.name })));
           }
         }
       }
@@ -111,7 +112,7 @@ async function getProjectProgress(folderId) {
   const imageArrays = [anhHoanThanh, anhTienDo.concat(anhKhoiCong), anhHienTrang];
   for (const imageArray of imageArrays) {
     if (imageArray.length > 0) {
-      const imageObj = imageArray.reduce((latest, image) => {
+      const imageObj = imageArray.reduce((latest: any, image: any) => {
         return new Date(image.createdTime) > new Date(latest.createdTime) ? image : latest;
       });
       thumbnailImage = imageObj.image;
@@ -121,7 +122,7 @@ async function getProjectProgress(folderId) {
   return { thumbnailImage, progress };
 }
 
-async function getHoanCanhDescription(folderId) {
+async function getHoanCanhDescription(folderId: string) {
   if (!folderId) {
     console.error("Sai GD folderId");
     return undefined;
@@ -130,20 +131,20 @@ async function getHoanCanhDescription(folderId) {
   await ensureRefreshToken();
 
   try {
-    const res = await drive.files.list({
+    const res: any = await drive.files.list({
       auth: auth,
       q: `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name, mimeType, parents)",
     });
 
-    const hienTrangFolder = res.data.files.find((folder) => folder.name.includes("hiện trạng"));
-    const filesRes = await drive.files.list({
+    const hienTrangFolder = res.data.files.find((folder: any) => folder.name.includes("hiện trạng"));
+    const filesRes: any = await drive.files.list({
       auth: auth,
       q: `'${hienTrangFolder?.id}' in parents`,
       fields: "files(id, name, mimeType, parents)",
     });
 
-    const googleDocObj = filesRes.data.files.find((file) =>
+    const googleDocObj = filesRes.data.files.find((file: any) =>
       ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/vnd.google-apps.document"].includes(file.mimeType)
     );
 
@@ -157,4 +158,4 @@ async function getHoanCanhDescription(folderId) {
   }
 }
 
-module.exports = { getProjectProgress, getHoanCanhDescription };
+export { getProjectProgress, getHoanCanhDescription };

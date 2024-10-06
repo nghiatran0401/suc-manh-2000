@@ -1,9 +1,11 @@
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-const { convertToCleanedName, escapeSpecialCharacters } = require("../utils/search");
-const Redis = require("ioredis");
+import path from "path";
+import dotenv from "dotenv";
+import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
+import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL);
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+const redis = new Redis(process.env.REDIS_URL || "");
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
@@ -16,7 +18,7 @@ const INDEX_SCHEMA = [
   "TEXT",
   "cleanedName",
   "TEXT",
-  "publishDate",
+  "createdAt",
   "TEXT",
   "thumbnail",
   "TEXT",
@@ -44,7 +46,7 @@ async function createSearchIndex() {
 
 async function removeSearchIndexAndDocuments() {
   try {
-    let results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
+    let results: any = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     while (results[0] > 0) {
       for (let i = 1; i < results.length; i += 2) {
         const docId = results[i];
@@ -54,12 +56,12 @@ async function removeSearchIndexAndDocuments() {
       results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
     }
     await redis.call("FT.DROPINDEX", INDEX_NAME);
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
   }
 }
 
-async function upsertDocumentToIndex(data) {
+async function upsertDocumentToIndex(data: any) {
   try {
     await redis.call(
       "FT.ADD",
@@ -76,8 +78,8 @@ async function upsertDocumentToIndex(data) {
       data.name,
       "cleanedName",
       convertToCleanedName(data.name),
-      "publishDate",
-      data.publish_date?.toDate(),
+      "createdAt",
+      data.createdAt?.toDate(),
       "thumbnail",
       data.thumbnail,
       "category",
@@ -91,16 +93,16 @@ async function upsertDocumentToIndex(data) {
       "province",
       data.location?.province
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);
   }
 }
 
-async function removeDocumentFromIndex(data) {
+async function removeDocumentFromIndex(data: any) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
 }
 
-async function redisSearchByName(q, filters) {
+async function redisSearchByName(q: any, filters: any) {
   let query = "";
   const args = [];
   const needAllProjects = !q && Object.keys(filters).length === 0;
@@ -158,12 +160,12 @@ async function redisSearchByName(q, filters) {
   args.push("SORTBY", "category", "DESC");
   args.push("LIMIT", 0, 10000);
 
-  const results = await redis.call(...args);
+  const results: any = await redis.call(...(args as [string, ...any[]]));
   const transformedResults = [];
   for (let i = 1; i < results.length; i += 2) {
     const redisKey = results[i];
     const fields = results[i + 1];
-    const obj = { redisKey };
+    const obj: any = { redisKey };
     for (let j = 0; j < fields.length; j += 2) {
       const key = fields[j];
       const value = fields[j + 1];
@@ -182,7 +184,7 @@ async function redisSearchByName(q, filters) {
   return { cachedResultData: transformedResults, totalValuesLength: transformedResults.length, statsData, provinceCount };
 }
 
-async function getValuesByCategoryInRedis(category, filters, start, end) {
+async function getValuesByCategoryInRedis(category: any, filters: any, start: any, end: any) {
   try {
     const categoryPostsKeyPattern = `post:${category}:*`;
     const sortedCategoryPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
@@ -210,13 +212,13 @@ async function getValuesByCategoryInRedis(category, filters, start, end) {
     const statsData = getStatsData(sortedCategoryPosts);
     const provinceCount = getProvinceCount(sortedCategoryPosts);
     return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData, provinceCount };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
   }
 }
 
-async function getValueInRedis(key) {
+async function getValueInRedis(key: string) {
   try {
     const type = await redis.type(key);
     let value;
@@ -231,59 +233,59 @@ async function getValueInRedis(key) {
     }
 
     return value;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting value from Redis:", error.message);
     throw error;
   }
 }
 
-async function setExValueInRedis(key, value, exp = false) {
+async function setExValueInRedis(key: string, value: any, exp = false) {
   try {
     if (exp) {
       await redis.set(key, JSON.stringify(value), "EX", DEFAULT_EXPIRATION);
     } else {
       await redis.set(key, JSON.stringify(value));
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error setting value in Redis:", error.message);
     throw error;
   }
 }
 
-async function delValueInRedis(key) {
+async function delValueInRedis(key: string) {
   try {
     await redis.del(key);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting value from Redis:", error.message);
     throw error;
   }
 }
 
-const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern) => {
+const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string) => {
   const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
 
   const pipeline = redis.pipeline();
   categoryPostKeys.forEach((key) => pipeline.hgetall(key));
-  const results = await pipeline.exec();
+  const results: any = await pipeline.exec();
 
   const posts = results
-    .map(([err, postData]) => {
+    .map(([err, postData]: [any, any]) => {
       if (err) {
         console.error(`Error fetching data for key: ${err}`);
         return null;
       }
       return postData;
     })
-    .filter((post) => post !== null);
+    .filter((post: any) => post !== null);
 
-  posts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+  posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return posts;
 };
 
-const getStatsData = (posts) => {
+const getStatsData = (posts: any) => {
   const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
-  const statsData = {};
+  const statsData: any = {};
   for (const post of posts) {
     if (statsData[post.classification]) {
       statsData[post.classification].count += 1;
@@ -308,8 +310,8 @@ const getStatsData = (posts) => {
   return statsData;
 };
 
-const getProvinceCount = (posts) => {
-  const provinceCount = {};
+const getProvinceCount = (posts: any) => {
+  const provinceCount: any = {};
   for (const post of posts) {
     if (provinceCount[post.province]) {
       provinceCount[post.province] += 1;
@@ -321,10 +323,10 @@ const getProvinceCount = (posts) => {
   return provinceCount;
 };
 
-const applyFilters = (values, filters) => {
-  const getNestedValue = (obj, path) => path.split(".").reduce((acc, part) => acc && acc[part], obj);
+const applyFilters = (values: any, filters: any) => {
+  const getNestedValue = (obj: any, path: any) => path.split(".").reduce((acc: any, part: any) => acc && acc[part], obj);
 
-  return values.filter((item) => {
+  return values.filter((item: any) => {
     return Object.keys(filters).every((key) => {
       const filterValue = filters[key];
       if (filterValue === "all") return true;
@@ -353,7 +355,7 @@ const applyFilters = (values, filters) => {
   });
 };
 
-module.exports = {
+export {
   INDEX_NAME,
   INDEX_SCHEMA,
   redisSearchByName,

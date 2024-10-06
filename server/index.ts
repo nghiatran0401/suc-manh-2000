@@ -1,12 +1,14 @@
-const express = require("express");
-require("dotenv").config();
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { setGlobalOptions } = require("firebase-functions/v2");
-const { onRequest } = require("firebase-functions/v2/https");
-const routes = require("./routes");
+import express from "express";
+import { Express } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { setGlobalOptions } from "firebase-functions/v2";
+import { onRequest } from "firebase-functions/v2/https";
+import routes from "./routes";
 
-const app = express();
+dotenv.config(); 
+const app: Express = express();
 app.use(cors());
 app.use(bodyParser.json());
 routes(app);

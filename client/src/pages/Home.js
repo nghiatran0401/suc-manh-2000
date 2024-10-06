@@ -134,7 +134,7 @@ export default function Home() {
                         {news[0].name}
                       </Typography>
                       <Typography variant="body1" color="#fff">
-                        {new Date(news[0].publishDate).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                        {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
                   </Box>
@@ -174,7 +174,7 @@ export default function Home() {
                           </Typography>
 
                           <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.publishDate).toLocaleDateString("vi-VN", {
+                            {new Date(latestPost.createdAt).toLocaleDateString("vi-VN", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",

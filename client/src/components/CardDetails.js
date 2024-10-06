@@ -103,9 +103,16 @@ export default function CardDetails(props) {
         <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
 
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
-          <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-            {post.publish_date.split("T")[0]}
-          </Typography>
+          {!isProject && (
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {new Date(post.createdAt).toLocaleDateString("vi-VN")}
+            </Typography>
+          )}
+          {!isProject && (
+            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+              {post.author}
+            </Typography>
+          )}
           {post.classification && (
             <Typography
               variant="body2"
@@ -229,180 +236,82 @@ export default function CardDetails(props) {
         <Grid item xs={12} sm={9} p={"0px !important"}>
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
-              {/* News */}
-              {post.content.tabs.length === 1 &&
-                post.content.tabs.map((tab, index) => (
-                  <Box key={index} display={"flex"} flexDirection={"column"} gap={"16px"}>
-                    <Typography
-                      variant="body1"
-                      style={{ wordWrap: "break-word" }}
-                      dangerouslySetInnerHTML={{
-                        __html: tab.description.replace(/\n/g, "<br>"),
-                      }}
-                    />
-
-                    {tab.embedded_url?.length > 0 && (
-                      <Box>
-                        {tab.embedded_url?.map((url, index) => {
-                          if (url.includes("momo")) {
-                            return (
-                              <Button href={url} target="_blank" variant="contained" sx={{ bgcolor: "#ed1c24" }}>
-                                Quỹ Trái Tim Momo
-                              </Button>
-                            );
-                          } else {
-                            return (
-                              <>
-                                {isIframeLoading && (
-                                  <Box display="flex" justifyContent="center">
-                                    <CircularProgress />
-                                  </Box>
-                                )}
-                                <iframe
-                                  key={index}
-                                  title={tab.name}
-                                  width="100%"
-                                  height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
-                                  src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}
-                                  frameborder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowfullscreen
-                                  onLoad={() => setIsIframeLoading(false)}
-                                />
-                              </>
-                            );
-                          }
-                        })}
-                      </Box>
-                    )}
-
-                    {tab.slide_show?.length > 0 && (
-                      <Box maxWidth={"720px"}>
-                        {tab.slide_show.map((img, idx) => (
-                          <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                            <img src={img.image} alt={img.caption} style={{ width: "100%", objectFit: "contain" }} />
-                            <Typography variant="body2" color={"#77777"}>
-                              {img.caption}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                  </Box>
-                ))}
-
-              {/* Project */}
-              {finalTabs?.tabs?.length > 1 && (
-                <Tabs style={{ width: "100%" }}>
+              <Tabs style={{ width: "100%" }}>
+                {finalTabs?.tabs?.length > 1 && (
                   <TabList>
                     {finalTabs.tabs.map((tab, index) => (
                       <Tab key={index}>{tab.name}</Tab>
                     ))}
                   </TabList>
+                )}
 
-                  {finalTabs.tabs.map((tab, index) => (
-                    <TabPanel
-                      key={index}
-                      style={{
-                        marginTop: "50px",
-                        maxWidth: "720px",
-                        width: "100%",
-                      }}
-                    >
-                      <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                        {category === "du-an-2024" ? (
-                          <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
-                            <IframeComponent tab={tab} />
-                          </Box>
-                        ) : (
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              wordBreak: "break-word",
-                              "& figure": { width: "auto !important" },
-                              "& iframe": {
-                                width: "-webkit-fill-available !important",
+                {finalTabs.tabs.map((tab, index) => (
+                  <TabPanel
+                    key={index}
+                    style={{
+                      marginTop: isProject ? "50px" : "0px",
+                      maxWidth: "720px",
+                      width: "100%",
+                    }}
+                  >
+                    <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+                      {category === "du-an-2024" ? (
+                        <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
+                          <IframeComponent tab={tab} />
+                        </Box>
+                      ) : (
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            wordBreak: "break-word",
+                            "& figure": { width: "auto !important" },
+                            "& iframe": {
+                              width: "-webkit-fill-available !important",
+                            },
+                            "& table": {
+                              "& th, td": {
+                                verticalAlign: "top",
                               },
-                              "& table": {
-                                "& th, td": {
-                                  verticalAlign: "top",
-                                },
-                              },
-                            }}
-                            dangerouslySetInnerHTML={{ __html: tab.description }}
-                          />
-                        )}
+                            },
+                          }}
+                          dangerouslySetInnerHTML={{ __html: tab.description }}
+                        />
+                      )}
 
-                        {tab.embedded_url?.length > 0 && (
-                          <Box>
-                            {tab.embedded_url?.map((url, index) => {
-                              if (url.includes("momo")) {
-                                return (
-                                  <Button href={url} target="_blank" variant="contained" sx={{ bgcolor: "#ed1c24" }}>
-                                    Quỹ Trái Tim Momo
-                                  </Button>
-                                );
-                              } else {
-                                return (
-                                  <>
-                                    {isIframeLoading && (
-                                      <Box display="flex" justifyContent="center">
-                                        <CircularProgress />
-                                      </Box>
-                                    )}
-                                    <iframe
-                                      key={index}
-                                      title={tab.name}
-                                      width="100%"
-                                      height={tab.embedded_url.length === 1 ? "1000px" : "500px"}
-                                      src={url.includes("youtube") ? convertToYoutubeUrl(url) : url}
-                                      frameborder="0"
-                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                      allowfullscreen
-                                      onLoad={() => setIsIframeLoading(false)}
-                                    />
-                                  </>
-                                );
-                              }
-                            })}
-                          </Box>
-                        )}
-
-                        {tab.slide_show?.length > 0 && (
-                          <Box width={isMobile ? "auto" : "720px"}>
-                            {tab.slide_show.map((img, idx) => (
-                              <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
-                                <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
-                                <Typography variant="body2" color={"#77777"}>
-                                  {img.caption.split(".")[0]}
-                                </Typography>
-                              </Box>
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-
-                      {tab.name === "Nhà hảo tâm" && !tab.description && (!tab.embedded_url || tab.embedded_url?.length === 0) && post?.donor && Object.keys(post?.donor).length > 0 && (
-                        <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                          <Typography
-                            color={"#77777"}
-                            variant="h6"
-                            dangerouslySetInnerHTML={{
-                              __html: post.donor.description,
-                            }}
-                          />
+                      {tab.slide_show?.length > 0 && (
+                        <Box width={isMobile ? "auto" : "720px"}>
+                          {tab.slide_show.map((img, idx) => (
+                            <Box key={idx} display={"flex"} flexDirection={"column"} gap={"8px"} alignItems={"center"} m={"16px"}>
+                              <img src={img.image} alt={img.caption.split(".")[0]} style={{ width: "100%", height: "auto" }} />
+                              <Typography variant="body2" color={"#77777"}>
+                                {img.caption.split(".")[0]}
+                              </Typography>
+                            </Box>
+                          ))}
                         </Box>
                       )}
-                    </TabPanel>
-                  ))}
-                </Tabs>
-              )}
+                    </Box>
+
+                    {tab.name === "Nhà hảo tâm" && !tab.description && (!tab.embedded_url || tab.embedded_url?.length === 0) && post?.donor && Object.keys(post?.donor).length > 0 && (
+                      <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+                        <Typography
+                          color={"#77777"}
+                          variant="h6"
+                          dangerouslySetInnerHTML={{
+                            __html: post.donor.description,
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </TabPanel>
+                ))}
+              </Tabs>
             </Box>
           </Box>
         </Grid>
 
         <Grid item xs={12} sm={3}>
-          {isMobile && (
+          {isProject && (
             <Box
               display={"flex"}
               flexDirection={"column"}

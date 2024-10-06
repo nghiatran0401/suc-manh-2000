@@ -7,6 +7,7 @@ import { CLIENT_URL, categoryMapping, classificationMapping, statusMapping } fro
 import RichTextEditor from "../../components/RichTextEditor";
 import ImageUploader from "../../components/ImageUploader";
 import { provincesAndCities } from "../../utils/vietnam-provinces";
+import { ProjectPost } from "../../../../index";
 
 export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
@@ -15,7 +16,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   const isProject = collectionName.includes("du-an");
   const HtmlContent = ({ html }: { html: any }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
-  const { formProps, saveButtonProps } = useForm<Sucmanh2000.Post>({
+  const { formProps, saveButtonProps } = useForm<ProjectPost>({
     errorNotification(error) {
       return {
         description: error?.message ?? "Lỗi ở server",
@@ -35,7 +36,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
   });
 
   useEffect(() => {
-    formProps.form?.setFieldValue("publish_date", new Date().toISOString().substr(0, 10));
+    // formProps.form?.setFieldValue("createdAt", new Date().toISOString().substr(0, 10));
     formProps.form?.setFieldValue("category", collectionName);
     formProps.form?.setFieldValue("classification", "truong-hoc");
     formProps.form?.setFieldValue("status", "can-quyen-gop");
@@ -68,14 +69,14 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           {/* Publish Date */}
-          <Form.Item
-            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.publish_date")}</span>}
-            name={"publish_date"}
+          {/* <Form.Item
+            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.createdAt")}</span>}
+            name={"createdAt"}
             rules={[{ required: true }]}
             style={{ width: "fit-content", minWidth: "150px" }}
           >
             <Input type="date" />
-          </Form.Item>
+          </Form.Item> */}
 
           {/* Category */}
           <Form.Item

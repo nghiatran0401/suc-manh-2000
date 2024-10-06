@@ -1,11 +1,13 @@
-const express = require("express");
-const { v4: uuidv4 } = require("uuid");
-const slugify = require("slugify");
-const { firestore, firebase } = require("../firebase");
-const { fetchAirtableRecords } = require("../services/airtable");
-const { getProjectProgress, getHoanCanhDescription } = require("../services/googledrive");
-const { upsertDocumentToIndex } = require("../services/redis");
-const { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } = require("../utils/index");
+import express from "express";
+import { Request, Response } from "express";
+import { NewsPost, ProjectPost } from "../../index";
+import { v4 as uuidv4 } from "uuid";
+import slugify from "slugify";
+import { firestore, firebase } from "../firebase";
+import { fetchAirtableRecords } from "../services/airtable";
+import { getProjectProgress, getHoanCanhDescription } from "../services/googledrive";
+import { upsertDocumentToIndex } from "../services/redis";
+import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
 const scriptRouter = express.Router();
 
@@ -16,9 +18,13 @@ const scriptRouter = express.Router();
 // 3. Dự án đang được xây dựng
 // 4. Dự án đã hoàn thành
 
-scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
+type Errors = {
+  [key: string]: string[];
+};
+
+scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: Response) => {
   const requestedYears = ["2023", "2024"];
-  const orders = {
+  const orders: any = {
     0: {
       name: "Thống kê số liệu",
       list: {
@@ -40,14 +46,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     4: { name: "Dự án đã hoàn thành", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
-  let errors = {
+  let errors: Errors = {
     "DA không có phiếu khảo sát": [],
     "DA không có ảnh hiện trạng": [],
   };
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors } = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
       if (requestedYear === "2024") {
@@ -55,12 +61,11 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
       }
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
-      // Batch processing
-      const BATCH_SIZE = 25; // Set batch size
+      const BATCH_SIZE = 25;
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData) => {
+        const promises = batch.map(async (airtableData: any) => {
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
@@ -68,9 +73,9 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
-          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
+          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
+          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name);
           }
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
@@ -112,7 +117,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
           }
         });
 
-        await Promise.all(promises); // Wait for all promises in the batch to complete
+        await Promise.all(promises);
       }
 
       orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
@@ -135,10 +140,10 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     htmlContent += `</ul>`;
 
     // 1. Dự án mới khởi công
-    if (Object.values(orders[1].list).flat().length > 0) {
+    if ((Object.values(orders[1].list) as any).flat().length > 0) {
       const section1 = orders[1];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section1.list).flat().length} ${section1.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section1.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section1.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -151,10 +156,10 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     }
 
     // 2. Dự án đã khởi công nhưng chưa có tiến độ
-    if (Object.values(orders[2].list).flat().length > 0) {
+    if ((Object.values(orders[2].list) as any).flat().length > 0) {
       const section2 = orders[2];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section2.list).flat().length} ${section2.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section2.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section2.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -167,10 +172,10 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     }
 
     // 3. Dự án đang được xây dựng
-    if (Object.values(orders[3].list).flat().length > 0) {
+    if ((Object.values(orders[3].list) as any).flat().length > 0) {
       const section3 = orders[3];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section3.list).flat().length} ${section3.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section3.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section3.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -183,10 +188,10 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
     }
 
     // 4. Dự án đã hoàn thành
-    if (Object.values(orders[4].list).flat().length > 0) {
+    if ((Object.values(orders[4].list) as any).flat().length > 0) {
       const section4 = orders[4];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section4.list).flat().length} ${section4.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section4.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section4.list) as any).flat().length} ${section4.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section4.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -207,15 +212,15 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req, res) => {
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send(report);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[createProjectProgressReportZalo]: ", error.message);
-    res.status(500).send("[createProjectProgressReportZalo]: ", error.message);
+    res.status(500).send(`[createProjectProgressReportZalo]: ${error.message}`);
   }
 });
 
-scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
+scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: Response) => {
   const requestedYears = ["2023", "2024"];
-  const orders = {
+  const orders: any = {
     0: {
       name: "Thống kê số liệu",
       list: {
@@ -236,21 +241,20 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     3: { name: "Dự án đang được xây dựng", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
-  const slideshowImages = [];
-  const BATCH_SIZE = 25; // Set batch size
+  const slideshowImages: any = [];
+  const BATCH_SIZE = 25;
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList } = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
-      // Process data in batches
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData) => {
+        const promises = batch.map(async (airtableData: any) => {
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
@@ -285,7 +289,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
           }
         });
 
-        await Promise.all(promises); // Wait for all promises in the batch to complete
+        await Promise.all(promises);
       }
 
       orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
@@ -308,10 +312,10 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     htmlContent += `</ul>`;
 
     // 1. Dự án mới khởi công
-    if (Object.values(orders[1].list).flat().length > 0) {
+    if ((Object.values(orders[1].list) as any).flat().length > 0) {
       const section1 = orders[1];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section1.list).flat().length} ${section1.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section1.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section1.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -324,10 +328,10 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     }
 
     // 2. Dự án đã khởi công nhưng chưa có tiến độ
-    if (Object.values(orders[2].list).flat().length > 0) {
+    if ((Object.values(orders[2].list) as any).flat().length > 0) {
       const section2 = orders[2];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section2.list).flat().length} ${section2.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section2.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section2.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -340,10 +344,10 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     }
 
     // 3. Dự án đang được xây dựng
-    if (Object.values(orders[3].list).flat().length > 0) {
+    if ((Object.values(orders[3].list) as any).flat().length > 0) {
       const section3 = orders[3];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${Object.values(section3.list).flat().length} ${section3.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section3.list)) {
+      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
+      for (const [classification, projectList] of Object.entries(section3.list) as any) {
         if (projectList.length > 0) {
           htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
           htmlContent += `<ol style="padding-left: 20px;">`;
@@ -362,13 +366,14 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     const newId = uuidv4().replace(/-/g, "").substring(0, 20);
     const title = `Dự án Sức mạnh 2000 cập nhật tiến độ các dự án trong tuần từ ngày ${formatDate(last7Days)} đến ngày ${formatDate(today)}`;
     const category = "thong-bao";
-    const news = {
+    const newsPost: NewsPost = {
       id: newId,
       name: title,
       author: "Admin",
-      publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
       slug: slugify(formatDate(today), { lower: true, strict: true }),
-      thumbnail: slideshowImages[0]?.image || "", // Ensure there's a fallback
+      createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      thumbnail: slideshowImages[0].image,
       category: category,
       content: {
         tabs: [
@@ -382,16 +387,16 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
     };
 
     await Promise.all([
-      firestore.collection(category).doc(newId).set(news),
-      upsertDocumentToIndex({ ...news, collection_id: category, doc_id: newId }),
-      updateClassificationAndCategoryCounts(news.classification, news.category, +1),
+      firestore.collection(category).doc(newId).set(newsPost),
+      upsertDocumentToIndex({ ...newsPost, collection_id: category, doc_id: newId }),
+      updateClassificationAndCategoryCounts(undefined, newsPost.category, +1),
     ]);
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
-  } catch (error) {
+  } catch (error: any) {
     console.error("[createProjectProgressReportWeb]: ", error.message);
-    res.status(500).send("[createProjectProgressReportWeb]: ", error.message);
+    res.status(500).send(`[createProjectProgressReportWeb]: ${error.message}`);
   }
 });
 
@@ -399,22 +404,22 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req, res) => {
 // 1. Dự án mới
 // 2. Dự án đổi trạng thái
 
-scriptRouter.post("/createWebUpdateReport", async (req, res) => {
+scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) => {
   const requestedYears = ["2024"];
-  const orders = {
+  const orders: any = {
     1: { name: "Dự án mới", list: [] },
     2: { name: "Dự án đổi trạng thái", list: [] },
   };
   let htmlContent = ``;
-  let errors = {
+  let errors: Errors = {
     "DA không có phiếu khảo sát": [],
     "DA không có ảnh hiện trạng": [],
   };
-  const BATCH_SIZE = 25; // Set batch size
+  const BATCH_SIZE = 25;
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors } = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
       if (requestedYear === "2024") {
@@ -425,7 +430,7 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData) => {
+        const promises = batch.map(async (airtableData: any) => {
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
@@ -433,8 +438,8 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
-          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
+          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
             requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
           }
 
@@ -460,7 +465,7 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
           }
         });
 
-        await Promise.all(promises); // Wait for all promises in the batch to complete
+        await Promise.all(promises);
       }
     }
 
@@ -498,26 +503,26 @@ scriptRouter.post("/createWebUpdateReport", async (req, res) => {
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send(report);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[createWebUpdateReport]: ", error.message);
-    res.status(500).send("[createWebUpdateReport]: ", error.message);
+    res.status(500).send(`[createWebUpdateReport]: ${error.message}`);
   }
 });
 
-scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
+scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => {
   const requestedYears = ["2024"];
-  const BATCH_SIZE = 25; // Set batch size
+  const BATCH_SIZE = 25;
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList } = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
       // Process data in batches
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData) => {
+        const promises = batch.map(async (airtableData: any) => {
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
@@ -525,8 +530,8 @@ scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
-          const { thumbnailImage: projectThumbnail, progress: projectProgress } = projectProgressObj;
-          if (projectProgress.find((p) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
+          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
             // Handle the case where there are no images
           }
 
@@ -536,70 +541,76 @@ scriptRouter.post("/syncAirtableAndWeb", async (req, res) => {
             // Handle the case where the description is undefined
           }
 
-          const project = {
-            projectId: airtableData.projectId,
-            name: airtableData.name,
-            author: "Admin",
-            publish_date: firebase.firestore.Timestamp.fromDate(new Date()),
-            slug: slugify(airtableData.projectId, { lower: true, strict: true }),
-            thumbnail: projectThumbnail,
-            description: null, // TODO: team web fix manually - hiện tại chưa có
-            category: collectionName,
-            classification: getProjectClassification(airtableData.classification),
-            status: airtableData.status,
-            totalFund: airtableData.totalFund,
-            location: airtableData.location,
-            donors: airtableData.donors,
-            progress: projectProgress,
-            metadata: airtableData.metadata,
-            content: {
-              tabs: [
-                {
-                  name: "Hoàn cảnh",
-                  description: hoanCanhDescription,
-                  slide_show: [],
-                },
-                {
-                  name: "Nhà hảo tâm",
-                  description: airtableData.financialStatementUrl,
-                  slide_show: [],
-                },
-                {
-                  name: "Mô hình xây",
-                  description: airtableData.metadata.constructionItems,
-                  slide_show: [],
-                },
-              ],
-            },
-          };
-
           // 1. Dự án mới
           if (querySnapshot.empty) {
             const newId = uuidv4().replace(/-/g, "").substring(0, 20);
             const postDocRef = firestore.collection(collectionName).doc(newId);
+            const newProjectPost: ProjectPost = {
+              id: newId,
+              projectId: airtableData.projectId,
+              name: airtableData.name,
+              author: "Admin",
+              slug: slugify(airtableData.projectId, { lower: true, strict: true }),
+              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              thumbnail: projectThumbnail,
+              category: collectionName,
+              classification: getProjectClassification(airtableData.classification),
+              status: airtableData.status,
+              totalFund: airtableData.totalFund,
+              location: airtableData.location,
+              description: "", // TODO: team web fix manually - hiện tại chưa có
+              donors: airtableData.donors,
+              progress: projectProgress,
+              metadata: airtableData.metadata,
+              content: {
+                tabs: [
+                  {
+                    name: "Hoàn cảnh",
+                    description: hoanCanhDescription,
+                    slide_show: [],
+                  },
+                  {
+                    name: "Nhà hảo tâm",
+                    description: airtableData.financialStatementUrl,
+                    slide_show: [],
+                  },
+                  {
+                    name: "Mô hình xây",
+                    description: airtableData.metadata.constructionItems,
+                    slide_show: [],
+                  },
+                ],
+              },
+            };
+
             return await Promise.all([
-              postDocRef.set({ ...project, id: newId }),
-              upsertDocumentToIndex({ ...project, doc_id: newId, collection_id: collectionName }),
-              updateClassificationAndCategoryCounts(project.classification, project.category, +1),
+              postDocRef.set(newProjectPost),
+              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
             ]);
           }
           // 2. Dự án đổi trạng thái
           else {
             const docId = querySnapshot.docs[0].id;
-            return await Promise.all([collection.doc(docId).update({ ...project }), upsertDocumentToIndex({ ...project, doc_id: docId, collection_id: collectionName })]);
+            const docData = querySnapshot.docs[0].data();
+            if (docData.status !== airtableData.status) {
+              const updatedProjectPost: ProjectPost = { ...(docData as ProjectPost), status: airtableData.status, updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) };
+              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+            }
           }
         });
 
-        await Promise.all(promises); // Wait for all promises in the batch to complete
+        await Promise.all(promises);
       }
     }
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
-  } catch (error) {
+  } catch (error: any) {
     console.error("[syncAirtableAndWeb]: ", error.message);
-    res.status(500).send("[syncAirtableAndWeb]: ", error.message);
+    res.status(500).send(`[syncAirtableAndWeb]: ${error.message}`);
   }
 });
 
-module.exports = scriptRouter;
+export default scriptRouter;

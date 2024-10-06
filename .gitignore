@@ -13,3 +13,5 @@
 firebase-debug.log
 firestore-debug.log
 firestore-ui.log
+
+scripts/index.js

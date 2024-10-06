@@ -8,6 +8,7 @@ import { SearchOutlined, SketchOutlined, BulbOutlined, RadarChartOutlined, Profi
 import { capitalizeEachWord } from "../../utils/helpers";
 import axios from "axios";
 import RichTextEditor from "../../components/RichTextEditor";
+import { ProjectPost } from "../../../../index";
 
 interface ISearch {
   name: string;
@@ -20,7 +21,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const isProject = collectionName.includes("du-an");
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  const { tableProps, searchFormProps } = useTable<Sucmanh2000.Post, HttpError, ISearch>({
+  const { tableProps, searchFormProps } = useTable<ProjectPost, HttpError, ISearch>({
     syncWithLocation: true,
     pagination: {
       mode: "server",
@@ -59,7 +60,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
         try {
           if (service === "zalo") {
+            console.time("Project Progress Report Request");
             const res = await axios.post(SERVER_URL + "/script/createProjectProgressReportZalo");
+            console.timeEnd("Project Progress Report Request");
+
             if (res.status === 200) {
               Modal.success({
                 width: 900,
@@ -215,7 +219,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             </Space>
           )}
         />
-        <Table.Column title={translate("post.fields.publish_date")} dataIndex="publish_date" render={(_, record: BaseRecord) => <Space>{new Date(record.publishDate).toLocaleDateString("vi-VN")}</Space>} />
+        <Table.Column title={translate("post.fields.createdAt")} dataIndex="createdAt" render={(_, record: BaseRecord) => <Space>{new Date(record.createdAt).toLocaleDateString("vi-VN")}</Space>} />
 
         <Table.Column
           title={translate("table.actions")}
@@ -223,7 +227,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
           render={(_, record: BaseRecord) => (
             <Space>
               <EditButton hideText size="small" recordItemId={record.slug} />
-              {/* <ShowButton hideText size="small" recordItemId={record.slug} /> */}
               <DeleteButton hideText size="small" recordItemId={record.slug} />
             </Space>
           )}
