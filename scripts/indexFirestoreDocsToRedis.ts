@@ -1,8 +1,9 @@
-const { firestore } = require("./firebase");
-const { convertToCleanedName } = require("./utils");
-
-const Redis = require("ioredis");
-const redis = new Redis(process.env.REDIS_URL);
+import { firestore } from "./firebase";
+import { convertToCleanedName } from "./utils";
+import dotenv from "dotenv";
+dotenv.config();
+import Redis from "ioredis";
+const redis = new Redis(process.env.REDIS_URL as string);
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
@@ -40,7 +41,7 @@ async function indexFirestoreDocsToRedis() {
     const snapshot = await collection.get();
 
     const promises = snapshot.docs.map(async (doc) => {
-      const data = {
+      const data: any = {
         ...doc.data(),
         collection_id: collection.id,
         doc_id: doc.id,
@@ -87,4 +88,4 @@ async function indexFirestoreDocsToRedis() {
 
 // indexFirestoreDocsToRedis();
 
-module.exports = indexFirestoreDocsToRedis;
+export default indexFirestoreDocsToRedis;

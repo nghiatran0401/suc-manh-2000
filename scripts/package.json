@@ -4,11 +4,14 @@
   "private": true,
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.1",
     "ioredis": "^5.4.1",
-    "dotenv": "^16.4.5"
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
   },
   "scripts": {
-    "githubWorkflow": "node githubWorkflow.js"
+    "githubWorkflow": "npx nodemon --exec ts-node githubWorkflow.ts"
   }
 }

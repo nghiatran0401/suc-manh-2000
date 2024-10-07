@@ -1,4 +1,4 @@
-const { firestore } = require("./firebase");
+import { firestore } from "./firebase";
 
 async function updateFirestoreCountsCollection() {
   let classificationCounts = {};
@@ -51,4 +51,4 @@ async function updateFirestoreCountsCollection() {
 
 // updateFirestoreCountsCollection();
 
-module.exports = updateFirestoreCountsCollection;
+export default updateFirestoreCountsCollection;

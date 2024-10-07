@@ -1,5 +1,5 @@
-const updateFirestoreCountsCollection = require("./updateFirestoreCountsCollection");
-const indexFirestoreDocsToRedis = require("./indexFirestoreDocsToRedis");
+import updateFirestoreCountsCollection from "./updateFirestoreCountsCollection";
+import indexFirestoreDocsToRedis from "./indexFirestoreDocsToRedis";
 
 (async () => {
   try {
