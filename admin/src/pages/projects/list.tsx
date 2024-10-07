@@ -53,8 +53,8 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
   const handleButtonClick = (service: any) => {
     Modal.confirm({
-      title: "Nhớ check kĩ data trên Airtable trước khi nhấn nút nhé!",
-      content: "Code chạy hơi lâu ta cùng đứng lên tập thể dục xíu nào...",
+      title: "Check kĩ data trên Airtable trước khi nhấn nút!",
+      content: "Lưu ý: Chỉ chạy báo cáo vào định kì mỗi chủ nhật hằng tuần. Nếu k báo cáo sẽ bị thiếu/sai so với lần báo cáo trước.",
       onOk: async () => {
         setConfirmLoading(true);
 
