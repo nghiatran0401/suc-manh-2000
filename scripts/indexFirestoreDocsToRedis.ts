@@ -1,7 +1,5 @@
 import { firestore } from "./firebase";
 import { convertToCleanedName } from "./utils";
-import dotenv from "dotenv";
-dotenv.config();
 
 import Redis from "ioredis";
 const redis = new Redis(process.env.REDIS_URL as string);
