@@ -49,6 +49,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   let errors: Errors = {
     "DA không có phiếu khảo sát": [],
     "DA không có ảnh hiện trạng": [],
+    "DA chưa có trên Web": [],
   };
 
   try {
@@ -69,13 +70,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
           const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
           if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name);
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
           }
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
@@ -84,11 +86,15 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           }
 
           if (querySnapshot.empty) {
-            // 1. Dự án mới khởi công
-            if (!orders[1].list[airtableData.classification]) return;
-            orders[1].list[airtableData.classification].push({ name: airtableData.name });
-            return;
+            errors["DA chưa có trên Web"].push(airtableData.name);
           } else {
+            // 1. Dự án mới khởi công
+            if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
+              if (!orders[1].list[airtableData.classification]) return;
+              orders[1].list[airtableData.classification].push({ name: airtableData.name });
+              return;
+            }
+
             if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
@@ -108,7 +114,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             }
 
             // 4. Dự án đã hoàn thành
-            const docData = querySnapshot.docs[0].data();
             if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
               if (!orders[4].list[airtableData.classification]) return;
               orders[4].list[airtableData.classification].push({ name: airtableData.name });
@@ -258,17 +263,21 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
           const { thumbnailImage: projectThumbnail } = projectProgressObj;
 
           if (querySnapshot.empty) {
-            // 1. Dự án mới khởi công
-            if (!orders[1].list[airtableData.classification]) return;
-            orders[1].list[airtableData.classification].push({ name: airtableData.name });
-            return;
           } else {
+            // 1. Dự án mới khởi công
+            if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
+              if (!orders[1].list[airtableData.classification]) return;
+              orders[1].list[airtableData.classification].push({ name: airtableData.name });
+              return;
+            }
+
             if (airtableData.isInProgress === undefined || airtableData.progressNoteWeb === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
@@ -434,6 +443,7 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
@@ -456,7 +466,6 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
           }
           // 2. Dự án đổi trạng thái
           else {
-            const docData = querySnapshot.docs[0].data();
             if (docData.status !== airtableData.status) {
               const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
               orders[2].list.push(statusUpdate);
