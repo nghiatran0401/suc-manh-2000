@@ -41,6 +41,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run workflow scripts
+        run: npm run githubWorkflow
         working-directory: ./scripts
         env:
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
@@ -48,4 +49,3 @@ jobs:
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
-        run: npm run githubWorkflow
