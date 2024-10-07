@@ -7,10 +7,14 @@
     "firebase-admin": "^12.1.1",
     "ioredis": "^5.4.1",
     "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
   },
   "scripts": {
-    "githubWorkflow": "nodemon --loader ts-node/esm --exec ts-node --transpile-only githubWorkflow.ts"
+    "build": "tsc",
+    "githubWorkflow": "npx tsx githubWorkflow.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.1"
   }
 }

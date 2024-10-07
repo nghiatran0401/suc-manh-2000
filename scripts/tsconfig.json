@@ -9,9 +9,12 @@
     "skipLibCheck": true, // Skip type checking of declaration files
     "moduleResolution": "node", // Use Node.js module resolution strategy
     "isolatedModules": true, // Ensures that each file is treated as an isolated module
+    "types": ["node"], // Include types for Node.js
+    "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./",
     "allowJs": true, // Allow JavaScript files to be compiled
     "noImplicitAny": true // Disallow implicit 'any' types
   },
-  "include": ["**/*"],
+  "include": ["src/**/*", "tests/**/*", "__mocks__/**/*", "__tests__/**/*", "index.ts"], // Include necessary folders
   "exclude": ["node_modules"]
 }
