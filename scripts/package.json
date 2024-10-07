@@ -11,6 +11,6 @@
     "typescript": "^5.6.2"
   },
   "scripts": {
-    "githubWorkflow": "nodemon --exec ts-node --transpile-only githubWorkflow.ts"
+    "githubWorkflow": "nodemon --loader ts-node/esm --exec ts-node --transpile-only githubWorkflow.ts"
   }
 }
