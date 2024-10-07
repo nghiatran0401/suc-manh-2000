@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2016", // ES2016 as target
+    "module": "commonjs", // CommonJS module system for Node.js
+    "resolveJsonModule": true, // Allows importing JSON files
+    "esModuleInterop": true, // Enables compatibility between CommonJS and ES6 modules
+    "forceConsistentCasingInFileNames": true, // Enforce case sensitivity
+    "strict": true, // Enable strict type checking
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "moduleResolution": "node", // Use Node.js module resolution strategy
+    "isolatedModules": true, // Ensures that each file is treated as an isolated module
+    "allowJs": true, // Allow JavaScript files to be compiled
+    "noImplicitAny": true // Disallow implicit 'any' types
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
+}
