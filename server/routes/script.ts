@@ -70,7 +70,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
-          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
@@ -88,6 +87,8 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           if (querySnapshot.empty) {
             errors["DA chưa có trên Web"].push(airtableData.name);
           } else {
+            const docData = querySnapshot.docs[0].data();
+
             // 1. Dự án mới khởi công
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
@@ -263,7 +264,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
-          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
@@ -271,6 +271,8 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
           if (querySnapshot.empty) {
           } else {
+            const docData = querySnapshot.docs[0].data();
+
             // 1. Dự án mới khởi công
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
@@ -443,7 +445,6 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
           const collectionName = `du-an-${requestedYear}`;
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
-          const docData = querySnapshot.docs[0].data();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
@@ -459,13 +460,13 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
             requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
           }
 
-          // 1. Dự án mới
           if (querySnapshot.empty) {
+            // 1. Dự án mới
             orders[1].list.push(airtableData.name);
             return;
-          }
-          // 2. Dự án đổi trạng thái
-          else {
+          } else {
+            // 2. Dự án đổi trạng thái
+            const docData = querySnapshot.docs[0].data();
             if (docData.status !== airtableData.status) {
               const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
               orders[2].list.push(statusUpdate);
