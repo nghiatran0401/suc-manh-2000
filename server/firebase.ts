@@ -1,14 +1,16 @@
 import firebase, { ServiceAccount } from "firebase-admin";
-import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
-const serviceAccountPath = process.env.SERVICE_ACCOUNT_PATH as string;
-const serviceAccount: ServiceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+const serviceAccount: ServiceAccount = {
+  projectId: process.env.FIREBASE_PROJECT_ID as string,
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL as string,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n") as string,
+};
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
-  storageBucket: "gs://savvy-serenity-424116-g1.appspot.com",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 const firestore = firebase.firestore();
 const auth = firebase.auth();
