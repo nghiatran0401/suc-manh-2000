@@ -44,8 +44,8 @@ jobs:
         run: npm run githubWorkflow
         working-directory: ./scripts
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.MY_FIREBASE_PROJECT_ID }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.MY_FIREBASE_PRIVATE_KEY }}
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.MY_FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.MY_FIREBASE_STORAGE_BUCKET }}
+          MY_FIREBASE_PROJECT_ID: ${{ secrets.MY_FIREBASE_PROJECT_ID }}
+          MY_FIREBASE_PRIVATE_KEY: ${{ secrets.MY_FIREBASE_PRIVATE_KEY }}
+          MY_FIREBASE_CLIENT_EMAIL: ${{ secrets.MY_FIREBASE_CLIENT_EMAIL }}
+          MY_FIREBASE_STORAGE_BUCKET: ${{ secrets.MY_FIREBASE_STORAGE_BUCKET }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
