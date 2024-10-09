@@ -4,7 +4,7 @@ import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev
 import { Table, Space, Input, Form, Modal } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, POSTS_PER_PAGE, SERVER_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
-import { SearchOutlined, SketchOutlined, BulbOutlined, RadarChartOutlined, ProfileOutlined } from "@ant-design/icons";
+import { SearchOutlined, SketchOutlined, BulbOutlined, RadarChartOutlined, ProfileOutlined, AlertOutlined } from "@ant-design/icons";
 import { capitalizeEachWord } from "../../utils/helpers";
 import axios from "axios";
 import RichTextEditor from "../../components/RichTextEditor";
@@ -53,87 +53,126 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
   const handleButtonClick = (service: any) => {
     Modal.confirm({
-      title: "Check kĩ data trên Airtable trước khi nhấn nút!",
-      content: "Lưu ý: Chỉ chạy báo cáo vào định kì mỗi chủ nhật hằng tuần. Nếu k báo cáo sẽ bị thiếu/sai so với lần báo cáo trước.",
+      title: service,
+      content: (
+        <div>
+          <strong>Lưu ý:</strong>
+          <br />
+          - Check kĩ data trên Airtable trước khi chạy
+          <br />- Chỉ chạy báo cáo định kì vào mỗi chủ nhật hằng tuần, nếu không báo cáo sẽ bị thiếu/sai so với lần báo cáo trước
+        </div>
+      ),
       onOk: async () => {
         setConfirmLoading(true);
 
         try {
-          if (service === "zalo") {
-            console.time("Project Progress Report Request");
-            const res = await axios.post(SERVER_URL + "/script/createProjectProgressReportZalo");
-            console.timeEnd("Project Progress Report Request");
+          switch (service) {
+            case "Tạo báo cáo lỗi Airtable":
+              console.time("findAirtableErrors");
+              const resAirErrors = await axios.post(SERVER_URL + "/script/findAirtableErrors");
+              console.timeEnd("findAirtableErrors");
 
-            if (res.status === 200) {
-              Modal.success({
-                width: 900,
-                title: res.data.name,
-                content: (
-                  <div>
-                    {Object.entries(res.data.errors as Record<any, any>).map(([key, value]) => (
-                      <div key={key}>
-                        <p>
-                          <strong>{key}:</strong> {value.length === 0 && "Không có"}
-                        </p>
-                        {value.length > 0 && (
-                          <ul>
-                            {value.map((v: any) => (
-                              <li>{v}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                    <br />
-                    <RichTextEditor initialContent={res.data.content} onChange={() => {}} />
-                  </div>
-                ),
-              });
-            }
-          } else if (service === "web") {
-            const res = await axios.post(SERVER_URL + "/script/createProjectProgressReportWeb");
-            if (res.status === 200) {
-              Modal.success({
-                title: "Xong ròi bạn ơi!!",
-                onOk: () => window.location.reload(),
-              });
-            }
-          } else if (service === "report") {
-            const res = await axios.post(SERVER_URL + "/script/createWebUpdateReport");
-            if (res.status === 200) {
-              Modal.success({
-                width: 900,
-                title: res.data.name,
-                content: (
-                  <div>
-                    {Object.entries(res.data.errors as Record<any, any>).map(([key, value]) => (
-                      <div key={key}>
-                        <p>
-                          <strong>{key}:</strong> {value.length === 0 && "Không có"}
-                        </p>
-                        {value.length > 0 && (
-                          <ul>
-                            {value.map((v: any) => (
-                              <li>{v}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                    <br />
-                    <RichTextEditor initialContent={res.data.content} onChange={() => {}} />
-                  </div>
-                ),
-              });
-            }
-          } else if (service === "sync") {
-            const res = await axios.post(SERVER_URL + "/script/syncAirtableAndWeb");
-            if (res.status === 200) {
-              Modal.success({
-                title: "Xong ròi bạn ơi!!",
-                onOk: () => window.location.reload(),
-              });
-            }
+              if (resAirErrors.status === 200) {
+                Modal.success({
+                  width: 900,
+                  title: resAirErrors.data.name,
+                  content: (
+                    <div>
+                      {Object.entries(resAirErrors.data.errors as Record<any, any>).map(([key, value]) => (
+                        <div key={key}>
+                          <p>
+                            <strong>{key}:</strong> {value.length === 0 && "Không có"}
+                          </p>
+                          {Array.isArray(value) && value.length > 0 && (
+                            <ul>
+                              {value.map((v: string, idx: number) => (
+                                <li key={idx}>{v}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0 && (
+                            <>
+                              {Object.values(value)
+                                .flat()
+                                .map((v: any, idx) => (
+                                  <ul>
+                                    <li key={idx} dangerouslySetInnerHTML={{ __html: v }} />
+                                  </ul>
+                                ))}
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ),
+                });
+              }
+              break;
+
+            case "Tạo báo cáo tiến độ nội bộ":
+              console.time("tienDoZalo");
+              const resZalo = await axios.post(SERVER_URL + "/script/createProjectProgressReportZalo");
+              console.timeEnd("tienDoZalo");
+
+              if (resZalo.status === 200) {
+                Modal.success({
+                  width: 900,
+                  title: resZalo.data.name,
+                  content: (
+                    <div>
+                      <RichTextEditor initialContent={resZalo.data.content} onChange={() => {}} />
+                    </div>
+                  ),
+                });
+              }
+              break;
+
+            case "Tạo báo cáo tiến độ Web":
+              console.time("tienDoweb");
+              const resWeb = await axios.post(SERVER_URL + "/script/createProjectProgressReportWeb");
+              console.timeEnd("tienDoweb");
+
+              if (resWeb.status === 200) {
+                Modal.success({
+                  title: "Done!!!",
+                  onOk: () => window.location.reload(),
+                });
+              }
+              break;
+
+            case "Tạo báo cáo up web nội bộ":
+              console.time("webReport");
+              const resWebReport = await axios.post(SERVER_URL + "/script/createWebUpdateReport");
+              console.timeEnd("webReport");
+
+              if (resWebReport.status === 200) {
+                Modal.success({
+                  width: 900,
+                  title: resWebReport.data.name,
+                  content: (
+                    <div>
+                      <RichTextEditor initialContent={resWebReport.data.content} onChange={() => {}} />
+                    </div>
+                  ),
+                });
+              }
+              break;
+
+            case "Đồng bộ Airtable và Web":
+              console.time("syncAirAndWeb");
+              const resSync = await axios.post(SERVER_URL + "/script/syncAirtableAndWeb");
+              console.timeEnd("syncAirAndWeb");
+
+              if (resSync.status === 200) {
+                Modal.success({
+                  title: "Done!!!",
+                  onOk: () => window.location.reload(),
+                });
+              }
+              break;
+
+            default:
+              throw new Error("Wrong service!!!");
           }
         } catch (error) {
           console.error(error);
@@ -158,10 +197,31 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-          <SaveButton icon={<SketchOutlined />} loading={confirmLoading} disabled={confirmLoading} onClick={() => handleButtonClick("zalo")} style={{ backgroundColor: "#FFBF00", borderColor: "#FFBF00", color: "white" }}>
-            Tạo báo cáo tiến độ Zalo
+          <SaveButton
+            icon={<AlertOutlined />}
+            loading={confirmLoading}
+            disabled={confirmLoading}
+            onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
+            style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
+          >
+            Tạo báo cáo lỗi Airtable
           </SaveButton>
-          <SaveButton icon={<BulbOutlined />} loading={confirmLoading} disabled={confirmLoading} onClick={() => handleButtonClick("web")} style={{ backgroundColor: "#B4C424", borderColor: "#B4C424", color: "white" }}>
+          <SaveButton
+            icon={<SketchOutlined />}
+            loading={confirmLoading}
+            disabled={confirmLoading}
+            onClick={() => handleButtonClick("Tạo báo cáo tiến độ nội bộ")}
+            style={{ backgroundColor: "#FFBF00", borderColor: "#FFBF00", color: "white" }}
+          >
+            Tạo báo cáo tiến độ nội bộ
+          </SaveButton>
+          <SaveButton
+            icon={<BulbOutlined />}
+            loading={confirmLoading}
+            disabled={confirmLoading}
+            onClick={() => handleButtonClick("Tạo báo cáo tiến độ Web")}
+            style={{ backgroundColor: "#B4C424", borderColor: "#B4C424", color: "white" }}
+          >
             Tạo báo cáo tiến độ Web
           </SaveButton>
         </div>
@@ -173,16 +233,16 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             icon={<RadarChartOutlined />}
             loading={confirmLoading}
             disabled={confirmLoading}
-            onClick={() => handleButtonClick("report")}
+            onClick={() => handleButtonClick("Tạo báo cáo up web nội bộ")}
             style={{ backgroundColor: "#00CCCC", borderColor: "#00CCCC", color: "white" }}
           >
-            Tạo báo cáo up web
+            Tạo báo cáo up web nội bộ
           </SaveButton>
           <SaveButton
             icon={<ProfileOutlined />}
             loading={confirmLoading}
             disabled={confirmLoading}
-            onClick={() => handleButtonClick("sync")}
+            onClick={() => handleButtonClick("Đồng bộ Airtable và Web")}
             style={{ backgroundColor: "#CC0066", borderColor: "#CC0066", color: "white" }}
           >
             Đồng bộ Airtable và Web

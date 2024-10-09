@@ -11,16 +11,130 @@ import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, get
 
 const scriptRouter = express.Router();
 
-// Bao cao tien do Zalo - Web:
+// Báo cáo tiến độ
 // 0. Thống kê số liệu
 // 1. Dự án mới khởi công
 // 2. Dự án đã khởi công nhưng chưa có tiến độ
 // 3. Dự án đang được xây dựng
 // 4. Dự án đã hoàn thành
 
-type Errors = {
-  [key: string]: string[];
-};
+scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => {
+  const requestedYears = ["2023", "2024"];
+  let errors: any = {
+    "DA sai link GD": [],
+    "DA không có phiếu khảo sát": [],
+    "DA không có ảnh hiện trạng": [],
+    Khác: {},
+  };
+  const BATCH_SIZE = 25;
+
+  try {
+    for (const requestedYear of requestedYears) {
+      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
+      if (totalAirtableDataList.length <= 0) continue;
+
+      if (requestedYear === "2024") {
+        errors = { ...totalAirtableErrors, ...errors };
+      }
+
+      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
+        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
+
+        const promises = batch.map(async (airtableData: any) => {
+          const collectionName = `du-an-${requestedYear}`;
+          const collection = firestore.collection(collectionName);
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+
+          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          if (projectProgressObj === undefined) {
+            requestedYear === "2024" && errors["DA sai link GD"].push(airtableData?.name ?? airtableData?.projectId);
+            return;
+          }
+
+          const { progress: projectProgress }: any = projectProgressObj;
+          if (projectProgress.find((p: any) => p?.name === "Ảnh hiện trạng")?.images?.length <= 0) {
+            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData?.name ?? airtableData?.projectId);
+          }
+
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          if (hoanCanhDescription === undefined) {
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name ?? airtableData?.projectId);
+          }
+
+          if (!querySnapshot.empty && requestedYear === "2024") {
+            const docData = querySnapshot.docs[0].data();
+            if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
+
+            const attributesToCompare = [
+              "projectId",
+              "name",
+              "classification",
+              "totalFund",
+              "location.province",
+              "location.district",
+              "location.commune",
+              "metadata.constructionItems",
+              "metadata.type",
+              "metadata.stage",
+              "metadata.totalStudents",
+              "metadata.totalClassrooms",
+              "metadata.totalRooms",
+              "metadata.totalPublicAffairsRooms",
+              "metadata.totalKitchens",
+              "metadata.totalToilets",
+              "metadata.start_date",
+              "metadata.end_date",
+            ];
+
+            const classificationMapping: any = {
+              "truong-hoc": "Trường học",
+              "nha-hanh-phuc": "Nhà hạnh phúc",
+              "khu-noi-tru": "Khu nội trú",
+              "cau-hanh-phuc": "Cầu hạnh phúc",
+              wc: "WC",
+              "loai-khac": "Loại khác",
+              "phong-tin-hoc": "Phòng tin học",
+            };
+
+            attributesToCompare.map((key) => {
+              if (key === "classification") {
+                const airClassification = getProjectClassification(airtableData[key]);
+                if (airClassification !== docData[key]) {
+                  if (!errors["Khác"][key]) {
+                    errors["Khác"][key] = [];
+                  }
+                  errors["Khác"][key].push(
+                    `<p><strong>${airtableData.name}:</strong></p> <p><strong> - Web:</strong> ${classificationMapping[docData[key]]}</p> <p><strong> - Air:</strong> ${classificationMapping[airClassification]}</p>`
+                  );
+                }
+              } else {
+                if (airtableData[key] !== docData[key]) {
+                  if (!errors["Khác"][key]) {
+                    errors["Khác"][key] = [];
+                  }
+                  errors["Khác"][key].push(`<p><strong>${airtableData.name}:</strong></p> <p><strong> - Web:</strong> ${docData[key]}</p> <p><strong> - Air:</strong> ${airtableData[key]}`);
+                }
+              }
+            });
+          }
+        });
+        await Promise.all(promises);
+      }
+    }
+
+    // Create report
+    const report = {
+      name: `Báo cáo lỗi Airtable`,
+      errors: errors,
+    };
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.status(200).send(report);
+  } catch (error: any) {
+    console.error("[findAirtableErrors]: ", error.message);
+    res.status(500).send(`[findAirtableErrors]: ${error.message}`);
+  }
+});
 
 scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: Response) => {
   const requestedYears = ["2023", "2024"];
@@ -46,23 +160,15 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     4: { name: "Dự án đã hoàn thành", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
-  let errors: Errors = {
-    "DA không có phiếu khảo sát": [],
-    "DA không có ảnh hiện trạng": [],
-    "DA chưa có trên Web": [],
-  };
+  const BATCH_SIZE = 25;
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      if (requestedYear === "2024") {
-        errors = { ...totalAirtableErrors, ...errors };
-      }
       orders[0].list[requestedYear].total = totalAirtableDataList.length;
 
-      const BATCH_SIZE = 25;
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
@@ -71,22 +177,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
-          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-          if (projectProgressObj === undefined) return;
-
-          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
-          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
-          }
-
-          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-          if (hoanCanhDescription === undefined) {
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
-          }
-
-          if (querySnapshot.empty) {
-            errors["DA chưa có trên Web"].push(airtableData.name);
-          } else {
+          if (!querySnapshot.empty) {
             const docData = querySnapshot.docs[0].data();
 
             // 1. Dự án mới khởi công
@@ -146,66 +237,58 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     htmlContent += `</ul>`;
 
     // 1. Dự án mới khởi công
-    if ((Object.values(orders[1].list) as any).flat().length > 0) {
-      const section1 = orders[1];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section1.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section1 = orders[1];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section1.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
     // 2. Dự án đã khởi công nhưng chưa có tiến độ
-    if ((Object.values(orders[2].list) as any).flat().length > 0) {
-      const section2 = orders[2];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section2.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name} => ${project.progressNoteZalo}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section2 = orders[2];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section2.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name} => ${project.progressNoteZalo}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
     // 3. Dự án đang được xây dựng
-    if ((Object.values(orders[3].list) as any).flat().length > 0) {
-      const section3 = orders[3];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section3.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section3 = orders[3];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section3.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
     // 4. Dự án đã hoàn thành
-    if ((Object.values(orders[4].list) as any).flat().length > 0) {
-      const section4 = orders[4];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section4.list) as any).flat().length} ${section4.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section4.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section4 = orders[4];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section4.list) as any).flat().length} ${section4.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section4.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
@@ -213,7 +296,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     const report = {
       name: `Báo cáo tiến độ group Zalo`,
       content: htmlContent,
-      errors: errors,
     };
 
     res.header("Access-Control-Allow-Origin", "*");
@@ -247,7 +329,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
     3: { name: "Dự án đang được xây dựng", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
-  const slideshowImages: any = [];
+  const slideshowImages: { image: string; caption: string }[] = [];
   const BATCH_SIZE = 25;
 
   try {
@@ -269,8 +351,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
           if (projectProgressObj === undefined) return;
           const { thumbnailImage: projectThumbnail } = projectProgressObj;
 
-          if (querySnapshot.empty) {
-          } else {
+          if (!querySnapshot.empty) {
             const docData = querySnapshot.docs[0].data();
 
             // 1. Dự án mới khởi công
@@ -324,53 +405,47 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
     htmlContent += `</ul>`;
 
     // 1. Dự án mới khởi công
-    if ((Object.values(orders[1].list) as any).flat().length > 0) {
-      const section1 = orders[1];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section1.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section1 = orders[1];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section1.list) as any).flat().length} ${section1.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section1.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
     // 2. Dự án đã khởi công nhưng chưa có tiến độ
-    if ((Object.values(orders[2].list) as any).flat().length > 0) {
-      const section2 = orders[2];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section2.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name} => ${project.progressNoteWeb}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section2 = orders[2];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section2.list) as any).flat().length} ${section2.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section2.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name} => ${project.progressNoteWeb}</li>`;
         }
+        htmlContent += `</ol>`;
       }
     }
 
     // 3. Dự án đang được xây dựng
-    if ((Object.values(orders[3].list) as any).flat().length > 0) {
-      const section3 = orders[3];
-      htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
-      for (const [classification, projectList] of Object.entries(section3.list) as any) {
-        if (projectList.length > 0) {
-          htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-          htmlContent += `<ol style="padding-left: 20px;">`;
-          for (const project of projectList) {
-            htmlContent += `<li>${project.name}</li>`;
-          }
-          htmlContent += `</ol>`;
+    const section3 = orders[3];
+    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section3.list) as any).flat().length} ${section3.name}</strong></p>`;
+    for (const [classification, projectList] of Object.entries(section3.list) as any) {
+      if (projectList.length > 0) {
+        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
+        htmlContent += `<ol style="padding-left: 20px;">`;
+        for (const project of projectList) {
+          htmlContent += `<li>${project.name}</li>`;
         }
+        htmlContent += `</ol>`;
       }
-      htmlContent += `<p style="font-size: 1.5rem; text-align: center;"><strong>(Xem ảnh chi tiết phía dưới)</strong></p>`;
     }
+    htmlContent += `<p style="font-style: italic; text-align: center;"><strong>(Xem ảnh chi tiết phía dưới)</strong></p>`;
 
     // Create a News Post
     const today = new Date();
@@ -413,31 +488,29 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
   }
 });
 
-// Bao cao up Web:
+// BÁo cáo up web
 // 1. Dự án mới
-// 2. Dự án đổi trạng thái
+// 2. Dự án thay đổi trạng thái
+// 3. Dự án cập nhật thêm ảnh
+// 4. Dự án cập nhật ảnh đại diện
+// 5. Dự án cập nhật phiếu khảo sát
 
 scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) => {
   const requestedYears = ["2024"];
   const orders: any = {
     1: { name: "Dự án mới", list: [] },
-    2: { name: "Dự án đổi trạng thái", list: [] },
+    2: { name: "Dự án thay đổi trạng thái", list: [] },
+    3: { name: "Dự án cập nhật thêm ảnh", list: [] },
+    4: { name: "Dự án cập nhật ảnh đại diện", list: [] },
+    5: { name: "Dự án cập nhật phiếu khảo sát", list: [] },
   };
   let htmlContent = ``;
-  let errors: Errors = {
-    "DA không có phiếu khảo sát": [],
-    "DA không có ảnh hiện trạng": [],
-  };
   const BATCH_SIZE = 25;
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
-
-      if (requestedYear === "2024") {
-        errors = { ...totalAirtableErrors, ...errors };
-      }
 
       // Process data in batches
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
@@ -450,29 +523,45 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
-
-          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
-          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
-          }
+          const { thumbnailImage: projectThumbnail, progress: airtableProjectProgress } = projectProgressObj;
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
             hoanCanhDescription = "";
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData.name);
           }
 
+          // 1. Dự án mới
           if (querySnapshot.empty) {
-            // 1. Dự án mới
             orders[1].list.push(airtableData.name);
-            return;
           } else {
-            // 2. Dự án đổi trạng thái
             const docData = querySnapshot.docs[0].data();
+
+            // 2. Dự án thay đổi trạng thái
             if (docData.status !== airtableData.status) {
               const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
               orders[2].list.push(statusUpdate);
-              return;
+            }
+
+            // 3. Dự án cập nhật thêm ảnh
+            const webProjectProgress = docData.progressNew ?? docData.progress;
+            airtableProjectProgress.map((airSection) => {
+              const webSection = webProjectProgress.find((s: any) => s.name === airSection.name);
+              if (airSection.images.length > webSection.images.length) {
+                const imagesUpdate = `${airtableData.name} (${airSection.name}): Web ${webSection.images.length} <> Air ${airSection.images.length}`;
+                orders[3].list.push(imagesUpdate);
+              }
+            });
+
+            // 4. Dự án cập nhật ảnh đại diện
+            if (docData.thumbnail === "" && projectThumbnail !== "") {
+              orders[4].list.push(airtableData.name);
+            }
+
+            // 5. Dự án cập nhật phiếu khảo sát
+            const webProjectContent = docData.contentNew ?? docData.content;
+            const webHoanCanhDescription = webProjectContent.tabs.find((t: any) => t.name === "Hoàn cảnh").description;
+            if (webHoanCanhDescription === "" && hoanCanhDescription !== "") {
+              orders[5].list.push(airtableData.name);
             }
           }
         });
@@ -483,34 +572,59 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 
     // Generate HTML content
     // 1. Dự án mới
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>${orders[1].list.length} Dự án mới</strong></p>`;
     if (orders[1].list.length > 0) {
-      htmlContent += `<p style="font-size: 1.2rem;"><strong>✅ Tạo mới ${orders[1].list.length} dự án</strong></p>`;
       htmlContent += `<ol style="padding-left: 20px;">`;
       for (const project of orders[1].list) {
         htmlContent += `<li>${project}</li>`;
       }
       htmlContent += `</ol>`;
-    } else {
-      htmlContent += `<p style="font-size: 1.2rem;"><strong>Hiện tại không có dự án mới nào</strong></p>`;
     }
 
-    // 2. Dự án đổi trạng thái
+    // 2. Dự án thay đổi trạng thái
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>${orders[2].list.length} Dự án thay đổi trạng thái</strong></p>`;
     if (orders[2].list.length > 0) {
-      htmlContent += `<p style="font-size: 1.2rem;"><strong>✅ Cập nhật ${orders[2].list.length} trạng thái dự án</strong></p>`;
       htmlContent += `<ol style="padding-left: 20px;">`;
       for (const project of orders[2].list) {
         htmlContent += `<li>${project}</li>`;
       }
       htmlContent += `</ol>`;
-    } else {
-      htmlContent += `<p style="font-size: 1.2rem;"><strong>Hiện tại không có dự án nào đổi trạng thái</strong></p>`;
+    }
+
+    // 3. Dự án cập nhật thêm ảnh
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>${orders[3].list.length} Dự án cập nhật thêm ảnh</strong></p>`;
+    if (orders[3].list.length > 0) {
+      htmlContent += `<ol style="padding-left: 20px;">`;
+      for (const project of orders[3].list) {
+        htmlContent += `<li>${project}</li>`;
+      }
+      htmlContent += `</ol>`;
+    }
+
+    // 4.Dự án cập nhật ảnh đại diện
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>${orders[4].list.length} Dự án cập nhật ảnh đại diện</strong></p>`;
+    if (orders[4].list.length > 0) {
+      htmlContent += `<ol style="padding-left: 20px;">`;
+      for (const project of orders[4].list) {
+        htmlContent += `<li>${project}</li>`;
+      }
+      htmlContent += `</ol>`;
+    }
+
+    // 5. Dự án cập nhật phiếu khảo sát
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>${orders[5].list.length} Dự án cập nhật phiếu khảo sát</strong></p>`;
+    if (orders[5].list.length > 0) {
+      htmlContent += `<ol style="padding-left: 20px;">`;
+      for (const project of orders[5].list) {
+        htmlContent += `<li>${project}</li>`;
+      }
+      htmlContent += `</ol>`;
     }
 
     // Create report
     const report = {
-      name: `Báo cáo up Web`,
+      name: `Báo cáo up web nội bộ`,
       content: htmlContent,
-      errors: errors,
     };
 
     res.header("Access-Control-Allow-Origin", "*");
@@ -542,15 +656,11 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
-          const { thumbnailImage: projectThumbnail, progress: projectProgress }: any = projectProgressObj;
-          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            // Handle the case where there are no images
-          }
+          const { thumbnailImage: projectThumbnail, progress: airtableProjectProgress }: any = projectProgressObj;
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
             hoanCanhDescription = "";
-            // Handle the case where the description is undefined
           }
 
           // 1. Dự án mới
@@ -573,7 +683,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               location: airtableData.location,
               description: "", // TODO: team web fix manually - hiện tại chưa có
               donors: airtableData.donors,
-              progress: projectProgress,
+              progress: airtableProjectProgress,
               metadata: airtableData.metadata,
               content: {
                 tabs: [
@@ -596,19 +706,65 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               },
             };
 
-            return await Promise.all([
-              postDocRef.set(newProjectPost),
-              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
-              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
-            ]);
+            // return await Promise.all([
+            //   postDocRef.set(newProjectPost),
+            //   upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+            //   updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
+            // ]);
           } else {
             const docId = querySnapshot.docs[0].id;
             const docData = querySnapshot.docs[0].data();
 
-            // 2. Dự án đổi trạng thái
+            // 2. Dự án thay đổi trạng thái
             if (docData.status !== airtableData.status) {
               const updatedProjectPost: ProjectPost = { ...(docData as ProjectPost), status: airtableData.status, updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) };
-              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+            }
+
+            // 3. Dự án cập nhật thêm ảnh
+            const webProjectProgress = docData.progressNew ?? docData.progress;
+            for (let airSection of airtableProjectProgress) {
+              const webSection = webProjectProgress.find((s: any) => s.name === airSection.name);
+              if (airSection.images.length > webSection.images.length) {
+                const updatedProjectPost: ProjectPost = {
+                  ...(docData as ProjectPost),
+                  progressNew: airtableProjectProgress,
+                  updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                };
+                // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+              }
+            }
+
+            // 4. Dự án cập nhật ảnh đại diện
+            if (docData.thumbnail === "" && projectThumbnail !== "") {
+              const updatedProjectPost: ProjectPost = {
+                ...(docData as ProjectPost),
+                thumbnail: projectThumbnail,
+                updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              };
+              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+            }
+
+            // 5. Dự án cập nhật phiếu khảo sát
+            const webProjectContent = docData.contentNew ?? docData.content;
+            const webHoanCanhDescription = webProjectContent.tabs.find((t: any) => t.name === "Hoàn cảnh").description;
+            if (webHoanCanhDescription === "" && hoanCanhDescription !== "") {
+              const updatedProjectPost: ProjectPost = {
+                ...(docData as ProjectPost),
+                contentNew: {
+                  tabs: webProjectContent.tabs.map((t: any) =>
+                    t.name === "Hoàn cảnh"
+                      ? {
+                          name: "Hoàn cảnh",
+                          description: hoanCanhDescription,
+                          slide_show: [],
+                        }
+                      : t
+                  ),
+                },
+                updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              };
+              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
             }
           }
         });

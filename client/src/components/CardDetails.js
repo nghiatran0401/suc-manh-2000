@@ -334,7 +334,7 @@ export default function CardDetails(props) {
                   borderRadius: "16px 16px 0 0",
                 }}
                 alt={post.name}
-                src={post.thumbnail}
+                src={post.thumbnail ? post.thumbnail : "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png"}
               />
               <Typography
                 variant="body1"
@@ -423,7 +423,7 @@ export default function CardDetails(props) {
                     <Box display="flex" alignItems="center" gap={2} minHeight="56px" borderRadius={8} p={1}>
                       <Avatar
                         variant="rounded"
-                        src={latestPost.thumbnail}
+                        src={latestPost.thumbnail ? latestPost.thumbnail : "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png"}
                         sx={{
                           width: "50px",
                           height: "50px",

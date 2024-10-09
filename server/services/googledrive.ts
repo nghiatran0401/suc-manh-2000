@@ -24,7 +24,7 @@ async function ensureRefreshToken() {
 
 async function getProjectProgress(folderId: string) {
   if (!folderId) {
-    console.error("Sai GD folderId");
+    console.error(`Sai GD folderId: ${folderId}`);
     return undefined;
   }
 
@@ -36,7 +36,7 @@ async function getProjectProgress(folderId: string) {
   const anhTienDo: any = [];
   const anhHoanThanh: any = [];
   const progress = [];
-  let thumbnailImage = "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png";
+  let thumbnailImage = "";
 
   async function checkForSubfolders(folderId: any, orderItem: any, firstLevelFolderName: any) {
     try {
@@ -124,7 +124,7 @@ async function getProjectProgress(folderId: string) {
 
 async function getHoanCanhDescription(folderId: string) {
   if (!folderId) {
-    console.error("Sai GD folderId");
+    console.error(`Sai GD folderId: ${folderId}`);
     return undefined;
   }
 

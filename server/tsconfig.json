@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es2016", // ES2016 as target
-    "module": "commonjs", // CommonJS module system for Node.js
-    "resolveJsonModule": true, // Allows importing JSON files
-    "esModuleInterop": true, // Enables compatibility between CommonJS and ES6 modules
-    "forceConsistentCasingInFileNames": true, // Enforce case sensitivity
-    "strict": true, // Enable strict type checking
-    "skipLibCheck": true, // Skip type checking of declaration files
-    "moduleResolution": "node", // Use Node.js module resolution strategy
-    "isolatedModules": true, // Ensures that each file is treated as an isolated module
-    "types": ["jest", "node"], // Include types for Jest and Node.js
-    "outDir": "./dist", // Output directory for compiled files
+    "target": "es2020",
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "types": ["jest", "node"],
+    "outDir": "./dist",
     "rootDir": "./",
-    "allowJs": true, // Allow JavaScript files to be compiled
-    "noImplicitAny": true // Disallow implicit 'any' types
+    "allowJs": true,
+    "noImplicitAny": true
   },
-  "include": ["src/**/*", "tests/**/*", "__mocks__/**/*", "__tests__/**/*", "index.ts"], // Include necessary folders
+  "include": ["src/**/*", "tests/**/*", "__mocks__/**/*", "__tests__/**/*", "index.ts"],
   "exclude": ["node_modules"]
 }

@@ -29,5 +29,4 @@ const fetchDocumentWithMetadata = async () => {
     }
   }
 };
-
 // fetchDocumentWithMetadata();

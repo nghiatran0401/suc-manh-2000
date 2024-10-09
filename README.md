@@ -14,6 +14,7 @@
 - Install package dependency `npm install`
 - Start backend server `npm run server`
 - Initialize backend local docker redis (one time only) `npm run server:local-docker-redis`
+- Sync index Firestore and Redis (optional) `node scripts/indexFirestoreDocsToRedis`
 
 3. Admin
 
@@ -23,5 +24,5 @@
 
 Note:
 
-- Ask Nghia for env files + service account file
-- Create PR with at least 1 approval before any deployments
+- Ask for env files
+- Create PR for any new feat / bug fixes / maintenance

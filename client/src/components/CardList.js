@@ -28,7 +28,11 @@ export default function CardList(props) {
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail} alt={standardizeString(post.name)} />
+            <img
+              style={{ width: "100%", height: "225px", objectFit: "cover" }}
+              src={post.thumbnail ? post.thumbnail : "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png"}
+              alt={standardizeString(post.name)}
+            />
 
             {post.status && (
               <div
