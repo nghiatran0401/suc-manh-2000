@@ -1,9 +1,7 @@
 import React from "react";
-import { Typography, Box, Card, CardContent, CardMedia, Grid } from "@mui/material";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import Carousel from "react-material-ui-carousel";
 import "./config/styles.css";
+import { useMediaQuery, useTheme, Grid, Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
 
 import HoangHoaTrung from "../assets/team/Hoang_Hoa_Trung.png";
 import DoThiKimHoa from "../assets/team/Do_Thi_Kim_Hoa.png";
@@ -145,37 +143,17 @@ export const MEMBERS = [
 ];
 
 export default function CarouselMembers() {
-  const settings = {
-    autoplay: true,
-    dots: true,
-    autoplaySpeed: 4000,
-    speed: 2000,
-    rows: 1,
-    responsive: [
-      {
-        breakpoint: 3000,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 4,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 3,
-        },
-      },
-      {
-        breakpoint: 464,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-        },
-      },
-    ],
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Determine the number of items per slide based on screen size
+  const itemsPerSlide = isMobile ? 1 : 4;
+
+  // Split items into chunks based on the number of items per slide
+  const chunkedItems = [];
+  for (let i = 0; i < MEMBERS.length; i += itemsPerSlide) {
+    chunkedItems.push(MEMBERS.slice(i, i + itemsPerSlide));
+  }
   return (
     <Box
       maxWidth={DESKTOP_WIDTH}
@@ -195,38 +173,42 @@ export default function CarouselMembers() {
       </Typography>
 
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
-        <Slider {...settings}>
-          {MEMBERS.map((item, index) => (
-            <Grid key={index}>
-              <Card className="card-contanier" sx={{ margin: "10px" }}>
-                <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
-                <CardContent
-                  sx={{
-                    minHeight: "270px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  {item.name && item.role && (
-                    <>
-                      <Typography align="center" variant="h6" fontWeight={"bold"}>
-                        {item.name}
-                      </Typography>
+        <Carousel indicators={false}>
+          {chunkedItems.map((chunk, index) => (
+            <Grid container spacing={2} key={index}>
+              {chunk.map((item, idx) => (
+                <Grid item xs={12} sm={3} key={idx}>
+                  <Card className="card-container" sx={{ margin: "10px" }}>
+                    <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+                    <CardContent
+                      sx={{
+                        minHeight: "270px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {item.name && item.role && (
+                        <>
+                          <Typography align="center" variant="h6" fontWeight={"bold"}>
+                            {item.name}
+                          </Typography>
 
-                      <Typography align="center" variant="body2" fontWeight={"bold"}>
-                        {item.role}
-                      </Typography>
+                          <Typography align="center" variant="body2" fontWeight={"bold"}>
+                            {item.role}
+                          </Typography>
 
-                      <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }} />
-                    </>
-                  )}
-                </CardContent>
-              </Card>
+                          <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
           ))}
-        </Slider>
+        </Carousel>
       </div>
     </Box>
   );

@@ -136,10 +136,10 @@ export const HEADER_DROPDOWN_LIST = [
     path: "#",
     title: "Phòng Tin Học Cho Em",
     children: [
-      {
-        path: "/phong-tin-hoc-2023",
-        title: "Phòng tin học 2023",
-      },
+      // {
+      //   path: "/phong-tin-hoc-2023",
+      //   title: "Phòng tin học 2023",
+      // },
     ],
   },
 ];

@@ -255,15 +255,16 @@ export default function Home() {
                       variant="outlined"
                       endIcon={<ArrowForwardIcon />}
                       sx={{
+                        marginTop: "16px",
                         color: "red",
                         textTransform: "none",
                         borderColor: "red",
-                        "&:hover": { borderColor: "red" },
+                        "&:hover": { borderColor: "red", bgcolor: "#ff474c", color: "#fff" },
                         width: "100%",
                       }}
                       onClick={() => navigate(projectTab)}
                     >
-                      {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
+                      Xem tất cả {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
                     </Button>
                   </TabPanel>
                 ))}

@@ -1,10 +1,7 @@
 import React from "react";
-import { Box, Grid, Typography } from "@mui/material";
 import { DESKTOP_WIDTH } from "../constants";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import "./config/styles.css";
+import Carousel from "react-material-ui-carousel";
+import { useMediaQuery, useTheme, Box, Grid, Typography } from "@mui/material";
 
 import SM2000 from "../assets/companions/SM2000.svg";
 import VVC from "../assets/companions/VVC.svg";
@@ -36,36 +33,8 @@ const COMPANIONS = [
 ];
 
 export default function Companion() {
-  const settings = {
-    autoplay: true,
-    // dots: true,
-    autoplaySpeed: 4000,
-    speed: 2000,
-    rows: 1,
-    responsive: [
-      {
-        breakpoint: 3000,
-        settings: {
-          slidesToShow: 5,
-          slidesToScroll: 5,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 3,
-        },
-      },
-      {
-        breakpoint: 464,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-        },
-      },
-    ],
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -85,10 +54,10 @@ export default function Companion() {
         Đơn vị đồng hành
       </Typography>
 
-      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
-        <Slider {...settings}>
-          {COMPANIONS.map((d, index) => (
-            <Grid key={index} m={"24px auto"}>
+      <div style={{ maxWidth: "100vw", width: "100%", margin: "24px auto" }}>
+        <Grid container spacing={2}>
+          {COMPANIONS.map((d, idx) => (
+            <Grid item xs={6} sm={12 / COMPANIONS.length} key={idx}>
               <img
                 src={d.url}
                 alt={d.name}
@@ -100,7 +69,7 @@ export default function Companion() {
               />
             </Grid>
           ))}
-        </Slider>
+        </Grid>
       </div>
     </Box>
   );
