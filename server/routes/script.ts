@@ -721,57 +721,38 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             const docId = querySnapshot.docs[0].id;
             const docData = querySnapshot.docs[0].data();
 
-            // 2. Dự án thay đổi trạng thái
-            if (docData.status !== airtableData.status) {
-              const updatedProjectPost: ProjectPost = { ...(docData as ProjectPost), status: airtableData.status, updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) };
-              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
-            }
-
-            // 3. Dự án cập nhật thêm ảnh
             const webProjectProgress = docData.progressNew ?? docData.progress;
-            for (let airSection of airtableProjectProgress) {
-              const webSection = webProjectProgress.find((s: any) => s.name === airSection.name);
-              if (airSection.images.length > webSection.images.length) {
-                const updatedProjectPost: ProjectPost = {
-                  ...(docData as ProjectPost),
-                  progressNew: airtableProjectProgress,
-                  updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-                };
-                return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
-              }
-            }
-
-            // 4. Dự án cập nhật ảnh đại diện
-            if (docData.thumbnail === "" && projectThumbnail !== "") {
-              const updatedProjectPost: ProjectPost = {
-                ...(docData as ProjectPost),
-                thumbnail: projectThumbnail,
-                updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-              };
-              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
-            }
-
-            // 5. Dự án cập nhật phiếu khảo sát
+            const isImagesUpdated = airtableProjectProgress.some((a: any) => a.images.length > webProjectProgress.find((w: any) => w.name === a.name).images.length);
             const webProjectContent = docData.contentNew ?? docData.content;
             const webHoanCanhDescription = webProjectContent.tabs.find((t: any) => t.name === "Hoàn cảnh").description;
-            if (webHoanCanhDescription === "" && hoanCanhDescription !== "") {
-              const updatedProjectPost: ProjectPost = {
-                ...(docData as ProjectPost),
-                contentNew: {
-                  tabs: webProjectContent.tabs.map((t: any) =>
-                    t.name === "Hoàn cảnh"
-                      ? {
-                          name: "Hoàn cảnh",
-                          description: hoanCanhDescription,
-                          slide_show: [],
-                        }
-                      : t
-                  ),
-                },
-                updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-              };
-              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
-            }
+
+            const updatedProjectPost: ProjectPost = {
+              ...(docData as ProjectPost),
+              // 2. Dự án thay đổi trạng thái
+              status: docData.status !== airtableData.status ? airtableData.status : docData.status,
+              // 3. Dự án cập nhật thêm ảnh
+              progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
+              // 4. Dự án cập nhật ảnh đại diện
+              thumbnail: docData.thumbnail === "" && projectThumbnail !== "" ? projectThumbnail : docData.thumbnail,
+              // 5. Dự án cập nhật phiếu khảo sát
+              contentNew: {
+                tabs:
+                  webHoanCanhDescription === "" && hoanCanhDescription !== ""
+                    ? webProjectContent.tabs.map((t: any) =>
+                        t.name === "Hoàn cảnh"
+                          ? {
+                              name: "Hoàn cảnh",
+                              description: hoanCanhDescription,
+                              slide_show: [],
+                            }
+                          : t
+                      )
+                    : webProjectContent.tabs,
+              },
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+            };
+
+            return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
           }
         });
 

@@ -215,9 +215,11 @@ export default function CardDetails(props) {
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {finalProgress?.map((progress, index) => (
             <Grid key={index} item xs={4} sx={{ p: "0px !important", maxWidth: "100%" }}>
-              <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
+              <Box display={"flex"} flexDirection={"column"} gap={"16px"} alignItems={"center"}>
                 <Typography variant="h5" fontWeight="bold" m={"8px"}>
-                  {progress.name}
+                  {progress.name === "Ảnh hiện trạng" && "Album hiện trạng"}
+                  {progress.name === "Ảnh tiến độ" && "Album tiến độ"}
+                  {progress.name === "Ảnh hoàn thiện" && "Album hoàn thiện"}
                 </Typography>
                 <CarouselSlide items={progress.images} />
               </Box>
