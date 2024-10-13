@@ -47,18 +47,18 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) {
-            requestedYear === "2024" && errors["DA sai link GD"].push(airtableData?.name ?? airtableData?.projectId);
+            requestedYear === "2024" && errors["DA sai link GD"].push(airtableData.name);
             return;
           }
 
           const { progress: projectProgress }: any = projectProgressObj;
-          if (projectProgress.find((p: any) => p?.name === "Ảnh hiện trạng")?.images?.length <= 0) {
-            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData?.name ?? airtableData?.projectId);
+          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
+            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
           }
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name ?? airtableData?.projectId);
+            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name);
           }
 
           if (!querySnapshot.empty && requestedYear === "2024") {
@@ -488,7 +488,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
   }
 });
 
-// BÁo cáo up web
+// Báo cáo up web
 // 1. Dự án mới
 // 2. Dự án thay đổi trạng thái
 // 3. Dự án cập nhật thêm ảnh
@@ -706,11 +706,11 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               },
             };
 
-            // return await Promise.all([
-            //   postDocRef.set(newProjectPost),
-            //   upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
-            //   updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
-            // ]);
+            return await Promise.all([
+              postDocRef.set(newProjectPost),
+              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
+            ]);
           } else {
             const docId = querySnapshot.docs[0].id;
             const docData = querySnapshot.docs[0].data();
@@ -718,7 +718,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             // 2. Dự án thay đổi trạng thái
             if (docData.status !== airtableData.status) {
               const updatedProjectPost: ProjectPost = { ...(docData as ProjectPost), status: airtableData.status, updatedAt: firebase.firestore.Timestamp.fromDate(new Date()) };
-              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
             }
 
             // 3. Dự án cập nhật thêm ảnh
@@ -731,7 +731,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                   progressNew: airtableProjectProgress,
                   updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
                 };
-                // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+                return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
               }
             }
 
@@ -742,7 +742,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                 thumbnail: projectThumbnail,
                 updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
               };
-              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
             }
 
             // 5. Dự án cập nhật phiếu khảo sát
@@ -764,7 +764,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                 },
                 updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
               };
-              // return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
+              return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
             }
           }
         });
