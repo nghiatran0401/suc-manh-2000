@@ -167,14 +167,19 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
       const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      orders[0].list[requestedYear].total = totalAirtableDataList.length;
+      const collectionName = `du-an-${requestedYear}`;
+      const collection = firestore.collection(collectionName);
+      if (orders[0].list[requestedYear].completed === 0 && orders[0].list[requestedYear].inProgress === 0) {
+        const querySnapshotFinished = await collection.where("status", "==", "da-hoan-thanh").get();
+        orders[0].list[requestedYear].completed = querySnapshotFinished.size;
+        const querySnapshotInProgress = await collection.where("status", "==", "dang-xay-dung").get();
+        orders[0].list[requestedYear].inProgress = querySnapshotInProgress.size;
+      }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
-          const collectionName = `du-an-${requestedYear}`;
-          const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           if (!querySnapshot.empty) {
@@ -193,7 +198,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
-              orders[0].list[requestedYear].inProgress++;
               return;
             }
 
@@ -201,7 +205,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name });
-              orders[0].list[requestedYear].inProgress++;
               return;
             }
 
@@ -217,7 +220,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
         await Promise.all(promises);
       }
 
-      orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
+      orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
 
     // Generate HTML content
@@ -225,7 +228,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
     htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
     htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
-    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total - 1}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total}</strong></li>`;
     htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2023"].completed}</strong></li>`;
     htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2023"].inProgress}</strong></li>`;
     htmlContent += `</ul>`;
@@ -337,14 +340,19 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
       const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      orders[0].list[requestedYear].total = totalAirtableDataList.length;
+      const collectionName = `du-an-${requestedYear}`;
+      const collection = firestore.collection(collectionName);
+      if (orders[0].list[requestedYear].completed === 0 && orders[0].list[requestedYear].inProgress === 0) {
+        const querySnapshotFinished = await collection.where("status", "==", "da-hoan-thanh").get();
+        orders[0].list[requestedYear].completed = querySnapshotFinished.size;
+        const querySnapshotInProgress = await collection.where("status", "==", "dang-xay-dung").get();
+        orders[0].list[requestedYear].inProgress = querySnapshotInProgress.size;
+      }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
-          const collectionName = `du-an-${requestedYear}`;
-          const collection = firestore.collection(collectionName);
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
@@ -367,7 +375,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteWeb: airtableData.progressNoteWeb });
-              orders[0].list[requestedYear].inProgress++;
               return;
             }
 
@@ -375,7 +382,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
-              orders[0].list[requestedYear].inProgress++;
               slideshowImages.push({ caption: airtableData.name, image: projectThumbnail });
               return;
             }
@@ -385,7 +391,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
         await Promise.all(promises);
       }
 
-      orders[0].list[requestedYear].completed = orders[0].list[requestedYear].total - orders[0].list[requestedYear].inProgress;
+      orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
 
     // Generate HTML content
@@ -393,7 +399,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
     htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
     htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
-    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total - 1}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total}</strong></li>`;
     htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2023"].completed}</strong></li>`;
     htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2023"].inProgress}</strong></li>`;
     htmlContent += `</ul>`;

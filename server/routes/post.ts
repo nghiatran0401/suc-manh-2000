@@ -148,82 +148,84 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
     const docData = querySnapshot.docs[0].data();
     const projectId = updatedPost.name.split(" - ") ? updatedPost.name.split(" - ")[0] : "";
 
-    const projectPost: ProjectPost = {
-      id: updatedPost.id ?? docData.id,
-      projectId: projectId,
-      name: updatedPost.name ?? docData.name,
-      author: updatedPost.author ?? docData.author,
-      slug: docData.slug,
-      createdAt: docData.createdAt,
-      updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
-      category: updatedPost.category ?? docData.category,
-      description: updatedPost.description ?? docData.description ?? null,
-      classification: updatedPost.classification ?? docData.classification ?? null,
-      status: updatedPost.status ?? docData.status ?? null,
-      totalFund: Number(updatedPost.totalFund) * 1000000,
-      location: {
-        province: updatedPost.province ?? docData.location?.province,
-      },
-      donor: {
-        description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
-        images: updatedPost["donor.images"] ?? docData.donor?.images ?? null,
-      },
-      progress: [
-        {
-          name: "Ảnh hiện trạng",
-          images: updatedPost["progress.images1"] ?? docData.progress.find((p: any) => p.name === "Ảnh hiện trạng")?.images ?? [],
+    let postToSave: ProjectPost | NewsPost;
+    if (isProject) {
+      postToSave = {
+        id: updatedPost.id ?? docData.id,
+        projectId: projectId,
+        name: updatedPost.name ?? docData.name,
+        author: updatedPost.author ?? docData.author,
+        slug: docData.slug,
+        createdAt: docData.createdAt,
+        updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+        thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
+        category: updatedPost.category ?? docData.category,
+        description: updatedPost.description ?? docData.description ?? null,
+        classification: updatedPost.classification ?? docData.classification ?? null,
+        status: updatedPost.status ?? docData.status ?? null,
+        totalFund: Number(updatedPost.totalFund) * 1000000,
+        location: {
+          province: updatedPost.province ?? docData.location?.province,
         },
-        {
-          name: "Ảnh tiến độ",
-          images: updatedPost["progress.images2"] ?? docData.progress.find((p: any) => p.name === "Ảnh tiến độ")?.images ?? [],
+        donor: {
+          description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
+          images: updatedPost["donor.images"] ?? docData.donor?.images ?? null,
         },
-        {
-          name: "Ảnh hoàn thiện",
-          images: updatedPost["progress.images3"] ?? docData.progress.find((p: any) => p.name === "Ảnh hoàn thiện")?.images ?? [],
-        },
-      ],
-      content: {
-        tabs: [
+        progress: [
           {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            name: "Ảnh hiện trạng",
+            images: updatedPost["progress.images1"] ?? docData.progress?.find((p: any) => p.name === "Ảnh hiện trạng")?.images ?? [],
           },
           {
-            name: "Nhà hảo tâm",
-            description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.description ?? null,
-            slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            name: "Ảnh tiến độ",
+            images: updatedPost["progress.images2"] ?? docData.progress?.find((p: any) => p.name === "Ảnh tiến độ")?.images ?? [],
           },
           {
-            name: "Mô hình xây",
-            description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.description ?? null,
-            slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.slide_show ?? [],
+            name: "Ảnh hoàn thiện",
+            images: updatedPost["progress.images3"] ?? docData.progress?.find((p: any) => p.name === "Ảnh hoàn thiện")?.images ?? [],
           },
         ],
-      },
-    };
-    const newsPost: NewsPost = {
-      id: updatedPost.id ?? docData.id,
-      name: updatedPost.name ?? docData.name,
-      author: updatedPost.author ?? docData.author,
-      slug: docData.slug,
-      createdAt: docData.createdAt,
-      updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
-      category: updatedPost.category ?? docData.category,
-      content: {
-        tabs: [
-          {
-            name: "Hoàn cảnh",
-            description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.description ?? null,
-            slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.slide_show ?? [],
-          },
-        ],
-      },
-    };
-
-    const postToSave = isProject ? projectPost : newsPost;
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+            {
+              name: "Nhà hảo tâm",
+              description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.description ?? null,
+              slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
+            },
+            {
+              name: "Mô hình xây",
+              description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.description ?? null,
+              slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    } else {
+      postToSave = {
+        id: updatedPost.id ?? docData.id,
+        name: updatedPost.name ?? docData.name,
+        author: updatedPost.author ?? docData.author,
+        slug: docData.slug,
+        createdAt: docData.createdAt,
+        updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+        thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
+        category: updatedPost.category ?? docData.category,
+        content: {
+          tabs: [
+            {
+              name: "Hoàn cảnh",
+              description: updatedPost["content.description1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.description ?? null,
+              slide_show: updatedPost["content.images1"] ?? docData.content?.tabs?.find((t: any) => t.name === "Hoàn cảnh")?.slide_show ?? [],
+            },
+          ],
+        },
+      };
+    }
 
     if (querySnapshot.empty) {
       res.status(500).send({ error: `There's no document with id: ${id}` });
