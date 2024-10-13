@@ -174,9 +174,9 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             default:
               throw new Error("Wrong service!!!");
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(error);
-          Modal.error({ content: "Móa nó bị lỗi gì rồi. Nhắn Nghĩa gấpp!!" });
+          Modal.error({ content: `Lỗi: ${error.mesage}` });
         } finally {
           setConfirmLoading(false);
         }
