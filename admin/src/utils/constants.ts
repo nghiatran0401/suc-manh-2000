@@ -51,7 +51,7 @@ export const classificationMapping = {
   "truong-hoc": "Trường học",
   "nha-hanh-phuc": "Nhà hạnh phúc",
   "khu-noi-tru": "Khu nội trú",
-  "cau-hanh-phuc": "Cầu hạnh phúc",
+  "cau-hanh-phuc": "Cầu đi học",
   wc: "WC",
   "loai-khac": "Loại khác",
   "phong-tin-hoc": "Phòng tin học",

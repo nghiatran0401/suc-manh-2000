@@ -301,7 +301,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Mô hình xây */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section3")}</span>}>
             <div
               style={{
@@ -325,7 +325,7 @@ export const ProjectCreate: React.FC<IResourceComponentsProps> = () => {
               </Form.Item>
             </div>
           </Form.Item>
-        )}
+        )} */}
       </Form>
     </Create>
   );

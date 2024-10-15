@@ -30,3 +30,25 @@ const fetchDocumentWithMetadata = async () => {
   }
 };
 // fetchDocumentWithMetadata();
+
+const updateThumbnails = async () => {
+  const collections = await firestore.listCollections();
+
+  for (const collection of collections) {
+    const querySnapshot = await collection.get();
+
+    if (!querySnapshot.empty) {
+      for (const doc of querySnapshot.docs) {
+        const data = doc.data();
+        if (data.thumbnail && typeof data.thumbnail === "string" && data.thumbnail.includes("?GoogleAccessId")) {
+          const updatedThumbnail = data.thumbnail.split("?GoogleAccessId")[0];
+          await doc.ref.update({ thumbnail: updatedThumbnail });
+          console.log(`Updated document ${doc.id} in collection ${collection.id}`);
+        }
+      }
+    }
+  }
+};
+
+// Call the function
+updateThumbnails();

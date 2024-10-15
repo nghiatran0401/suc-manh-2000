@@ -85,7 +85,7 @@ export default function CardList(props) {
                   {["truong-hoc"].includes(post.classification) && "Trường học"}
                   {["nha-hanh-phuc"].includes(post.classification) && "Nhà hạnh phúc"}
                   {["khu-noi-tru"].includes(post.classification) && "Khu nội trú"}
-                  {["cau-hanh-phuc"].includes(post.classification) && "Cầu hạnh phúc"}
+                  {["cau-hanh-phuc"].includes(post.classification) && "Cầu đi học"}
                   {["phong-tin-hoc"].includes(post.classification) && "Phòng tin học"}
                   {["wc"].includes(post.classification) && "WC"}
                   {["loai-khac"].includes(post.classification) && "Loại khác"}

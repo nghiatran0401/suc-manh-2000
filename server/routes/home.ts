@@ -25,7 +25,7 @@ homeRouter.get("/getTotalStatisticsCount", async (req: Request, res: Response) =
       }
       const resultData = { classification: classificationDoc.data(), category: categoryDoc.data(), province: provinceDoc.data() };
 
-      await setExValueInRedis(cachedKey, resultData, true);
+      await setExValueInRedis(cachedKey, resultData, false);
       res.status(200).send(JSON.stringify(resultData));
     }
   } catch (error: any) {

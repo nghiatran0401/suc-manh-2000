@@ -240,13 +240,7 @@ export default function CardDetails(props) {
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
               <Tabs style={{ width: "100%" }}>
-                {finalTabs?.tabs?.length > 1 && (
-                  <TabList>
-                    {finalTabs.tabs.map((tab, index) => (
-                      <Tab key={index}>{tab.name}</Tab>
-                    ))}
-                  </TabList>
-                )}
+                {finalTabs?.tabs?.length > 1 && <TabList>{finalTabs.tabs.map((tab, index) => tab.name !== "Mô hình xây" && <Tab key={index}>{tab.name}</Tab>)}</TabList>}
 
                 {finalTabs.tabs.map((tab, index) => (
                   <TabPanel
@@ -374,7 +368,15 @@ export default function CardDetails(props) {
                         metadataMapping[key] &&
                         value && (
                           <Typography key={index} variant="body1" color={"#77777"}>
-                            <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                            {["start_date", "end_date"].includes(key) ? (
+                              <>
+                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {new Date(value).toLocaleDateString("vi-VN")}
+                              </>
+                            ) : (
+                              <>
+                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                              </>
+                            )}
                           </Typography>
                         )
                     )}

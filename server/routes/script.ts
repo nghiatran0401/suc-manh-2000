@@ -4,9 +4,9 @@ import { NewsPost, ProjectPost } from "../../index";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
-import { fetchAirtableRecords } from "../services/airtable";
+import { fetchAirtableRecords, standardizePostTitle } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription } from "../services/googledrive";
-import { upsertDocumentToIndex } from "../services/redis";
+import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
 const scriptRouter = express.Router();
@@ -34,7 +34,8 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
       if (totalAirtableDataList.length <= 0) continue;
 
       if (requestedYear === "2024") {
-        errors = { ...totalAirtableErrors, ...errors };
+        const newTotalAirtableErrors = totalAirtableErrors.map((error: any) => standardizePostTitle(`${error.projectId} - ${error.projectInitName}`));
+        errors = { ...newTotalAirtableErrors, ...errors };
       }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
@@ -90,7 +91,7 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
               "truong-hoc": "Trường học",
               "nha-hanh-phuc": "Nhà hạnh phúc",
               "khu-noi-tru": "Khu nội trú",
-              "cau-hanh-phuc": "Cầu hạnh phúc",
+              "cau-hanh-phuc": "Cầu đi học",
               wc: "WC",
               "loai-khac": "Loại khác",
               "phong-tin-hoc": "Phòng tin học",
@@ -195,14 +196,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
-            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
+            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
               return;
             }
 
             // 3. Dự án đang được xây dựng
-            if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
+            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name });
               return;
@@ -500,6 +501,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 // 3. Dự án cập nhật thêm ảnh
 // 4. Dự án cập nhật ảnh đại diện
 // 5. Dự án cập nhật phiếu khảo sát
+// 6. Dự án hủy -> xóa trên web
 
 scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) => {
   const requestedYears = ["2024"];
@@ -509,6 +511,7 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
     3: { name: "Dự án cập nhật thêm ảnh", list: [] },
     4: { name: "Dự án cập nhật ảnh đại diện", list: [] },
     5: { name: "Dự án cập nhật phiếu khảo sát", list: [] },
+    6: { name: "Dự án hủy Air -> xóa trên Web", list: [] },
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
@@ -647,16 +650,16 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList }: any = await fetchAirtableRecords(requestedYear);
+      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      // Process data in batches
+      const collectionName = `du-an-${requestedYear}`;
+      const collection = firestore.collection(collectionName);
+
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData: any) => {
-          const collectionName = `du-an-${requestedYear}`;
-          const collection = firestore.collection(collectionName);
+        const projectsPromises = batch.map(async (airtableData: any) => {
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
@@ -703,11 +706,11 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                     description: airtableData.financialStatementUrl,
                     slide_show: [],
                   },
-                  {
-                    name: "Mô hình xây",
-                    description: airtableData.metadata.constructionItems,
-                    slide_show: [],
-                  },
+                  // {
+                  //   name: "Mô hình xây",
+                  //   description: airtableData.metadata.constructionItems,
+                  //   slide_show: [],
+                  // },
                 ],
               },
             };
@@ -717,7 +720,9 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
               updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
             ]);
-          } else {
+          }
+          // Cập nhật dự án hiện tại
+          else {
             const docId = querySnapshot.docs[0].id;
             const docData = querySnapshot.docs[0].data();
 
@@ -755,9 +760,26 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
           }
         });
-
-        await Promise.all(promises);
+        await Promise.all(projectsPromises);
       }
+
+      // 6. Dự án hủy -> xóa trên web
+      const cancelledProjectsPromises = totalAirtableErrors["DA hủy"].map(async (p: any) => {
+        if (p["projectId"] !== null) {
+          const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
+          if (!querySnapshot.empty) {
+            const docRef = querySnapshot.docs[0].ref;
+            const docData = querySnapshot.docs[0].data();
+
+            return await Promise.all([
+              docRef.delete(),
+              removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
+              updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
+            ]);
+          }
+        }
+      });
+      await Promise.all(cancelledProjectsPromises);
     }
 
     res.header("Access-Control-Allow-Origin", "*");

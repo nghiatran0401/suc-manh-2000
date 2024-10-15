@@ -93,11 +93,11 @@ postRouter.post("/", async (req: Request, res: Response) => {
           description: createdPost["content.description2"] ?? null,
           slide_show: createdPost["content.images2"] ?? [],
         },
-        {
-          name: "Mô hình xây",
-          description: createdPost["content.description3"] ?? null,
-          slide_show: createdPost["content.images3"] ?? [],
-        },
+        // {
+        //   name: "Mô hình xây",
+        //   description: createdPost["content.description3"] ?? null,
+        //   slide_show: createdPost["content.images3"] ?? [],
+        // },
       ],
     },
   };
@@ -197,11 +197,11 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
               description: updatedPost["content.description2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.description ?? null,
               slide_show: updatedPost["content.images2"] ?? docData.content?.tabs?.find((t: any) => t.name === "Nhà hảo tâm")?.slide_show ?? [],
             },
-            {
-              name: "Mô hình xây",
-              description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.description ?? null,
-              slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.slide_show ?? [],
-            },
+            // {
+            //   name: "Mô hình xây",
+            //   description: updatedPost["content.description3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.description ?? null,
+            //   slide_show: updatedPost["content.images3"] ?? docData.content?.tabs?.find((t: any) => t.name === "Mô hình xây")?.slide_show ?? [],
+            // },
           ],
         },
       };

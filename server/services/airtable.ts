@@ -88,7 +88,7 @@ async function fetchAirtableRecords(requestedYear: string) {
       }
 
       if (record.get("Tên công trình").includes("❌") || !record.get("DA")) {
-        cancelledProjects.push(record.get("Tên công trình"));
+        cancelledProjects.push({ projectInitName: record.get("Tên công trình"), projectId: record.get("DA") ? record.get("DA") : null });
         continue;
       }
 
@@ -98,13 +98,13 @@ async function fetchAirtableRecords(requestedYear: string) {
 
       const projectStatus = record.get("Follow up Step") ? getProjectStatus(record.get("Follow up Step").trim()) : undefined;
       if (projectStatus === undefined) {
-        noStatusProjects.push(projectName);
+        noStatusProjects.push({ projectInitName: projectInitName, projectId: projectId });
         continue;
       }
 
       const progressImagesUrl = record.get("Link Drive") ? record.get("Link Drive").trim() : undefined;
       if (progressImagesUrl === undefined) {
-        noGoogleDriveUrls.push(projectName);
+        noGoogleDriveUrls.push({ projectInitName: projectInitName, projectId: projectId });
         continue;
       }
 
