@@ -225,4 +225,4 @@ export const publicLogoUrl = "https://web.sucmanh2000.com/static/media/logo-head
 
 export const COMMON_SEO_DESCRIPTION = "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
 
-export const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac"];
+export const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac", "gieng-nuoc"];

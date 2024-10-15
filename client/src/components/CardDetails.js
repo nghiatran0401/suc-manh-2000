@@ -16,7 +16,6 @@ export default function CardDetails(props) {
   const { category } = useParams();
   const navigate = useNavigate();
   const { post, latestPosts } = props;
-  const [isIframeLoading, setIsIframeLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -47,8 +46,6 @@ export default function CardDetails(props) {
 
     if (!tab.description) {
       return <></>;
-    } else if (tab.name === "Mô hình xây") {
-      return <Typography variant="body1" dangerouslySetInnerHTML={{ __html: tab.description }} />;
     } else {
       return (
         <>
