@@ -34,7 +34,14 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
       if (totalAirtableDataList.length <= 0) continue;
 
       if (requestedYear === "2024") {
-        const newTotalAirtableErrors = totalAirtableErrors.map((error: any) => standardizePostTitle(`${error.projectId} - ${error.projectInitName}`));
+        const newTotalAirtableErrors = Object.keys(totalAirtableErrors).map((key) => {
+          const error: { projectId: string; projectInitName: string } = totalAirtableErrors[key];
+          if (error.projectId && error.projectInitName) {
+            return {
+              [key]: standardizePostTitle(`${error.projectId} - ${error.projectInitName}`),
+            };
+          }
+        });
         errors = { ...newTotalAirtableErrors, ...errors };
       }
 
@@ -93,6 +100,7 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
               "khu-noi-tru": "Khu nội trú",
               "cau-hanh-phuc": "Cầu đi học",
               wc: "WC",
+              "gieng-nuoc": "Giếng nước",
               "loai-khac": "Loại khác",
               "phong-tin-hoc": "Phòng tin học",
             };

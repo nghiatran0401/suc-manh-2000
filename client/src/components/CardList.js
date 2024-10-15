@@ -88,6 +88,7 @@ export default function CardList(props) {
                   {["cau-hanh-phuc"].includes(post.classification) && "Cầu đi học"}
                   {["phong-tin-hoc"].includes(post.classification) && "Phòng tin học"}
                   {["wc"].includes(post.classification) && "WC"}
+                  {["gieng-nuoc"].includes(post.classification) && "Giếng nước"}
                   {["loai-khac"].includes(post.classification) && "Loại khác"}
                 </Typography>
               )}

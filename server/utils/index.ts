@@ -42,6 +42,8 @@ function getProjectClassification(classification: string) {
       return "cau-hanh-phuc";
     case "WC":
       return "wc";
+    case "Giếng nước":
+      return "gieng-nuoc";
     default:
       return "loai-khac";
   }

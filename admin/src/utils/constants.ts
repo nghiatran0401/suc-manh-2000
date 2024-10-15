@@ -53,6 +53,7 @@ export const classificationMapping = {
   "khu-noi-tru": "Khu nội trú",
   "cau-hanh-phuc": "Cầu đi học",
   wc: "WC",
+  "gieng-nuoc": "Giếng nước",
   "loai-khac": "Loại khác",
   "phong-tin-hoc": "Phòng tin học",
 };

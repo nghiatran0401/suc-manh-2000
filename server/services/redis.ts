@@ -276,9 +276,7 @@ const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string) => {
       }
       return postData;
     })
-    .filter((post: any) => post !== null);
-
-  posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return posts;
 };

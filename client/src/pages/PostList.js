@@ -105,7 +105,7 @@ export default function PostList() {
       {isProject && (
         <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-            <Box bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
+            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"230px"}>
               <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
                 {Number(Object.values(statsData).reduce((acc, curr) => acc + curr["totalFund"], 0)).toLocaleString()} VND
               </Typography>
@@ -114,7 +114,7 @@ export default function PostList() {
               </Typography>
             </Box>
 
-            <Box bgcolor={"#FFF1F0"} p={"16px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"200px"}>
+            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"16px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"230px"}>
               <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
                 {/* <CountUp start={0} end={totalPosts} duration={10} /> */}
                 {totalPosts}
@@ -138,6 +138,9 @@ export default function PostList() {
                 </Typography>
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"], 0)} Dự án đang xây dựng
+                </Typography>
+                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                  {Object.values(statsData).reduce((acc, curr) => acc + curr["can-quyen-gop"], 0)} Dự án cần quyên góp
                 </Typography>
               </Box>
             </Box>

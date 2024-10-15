@@ -107,6 +107,7 @@ export default function CarouselListCard(props) {
                             {["cau-hanh-phuc", "cauhanhphuc"].includes(post.classification) && "Cầu đi học"}
                             {["phong-tin-hoc", "phongtinhoc"].includes(post.classification) && "Phòng tin học"}
                             {["wc"].includes(post.classification) && "WC"}
+                            {["gieng-nuoc"].includes(post.classification) && "Giếng nước"}
                             {["loai-khac", "loaikhac"].includes(post.classification) && "Loại khác"}
                           </Typography>
                         )}
