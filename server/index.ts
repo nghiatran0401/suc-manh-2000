@@ -17,5 +17,5 @@ if (process.env.CURRENT_ENV === "Development") {
   app.listen("4000", () => console.log(`Server running on port 4000`));
 } else if (process.env.CURRENT_ENV === "Production") {
   setGlobalOptions({ region: "asia-southeast1" });
-  exports.app = onRequest({ timeoutSeconds: 240, minInstances: 1 }, app);
+  exports.app = onRequest({ memory: "512MiB", timeoutSeconds: 360, concurrency: 100, minInstances: 1 }, app);
 }
