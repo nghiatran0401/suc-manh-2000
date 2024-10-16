@@ -113,6 +113,7 @@ async function fetchAirtableRecords(requestedYear: string) {
 
       const airtableData = {
         projectId: projectId,
+        projectInitName: projectInitName,
         name: projectName,
         classification: classification,
         status: projectStatus,

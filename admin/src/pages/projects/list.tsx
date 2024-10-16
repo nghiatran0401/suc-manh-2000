@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
 import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev/antd";
-import { Table, Space, Input, Form, Modal } from "antd";
+import { Table, Space, Input, Form, Modal, Typography } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, POSTS_PER_PAGE, SERVER_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import { SearchOutlined, SketchOutlined, BulbOutlined, RadarChartOutlined, ProfileOutlined, AlertOutlined } from "@ant-design/icons";
@@ -12,6 +12,19 @@ import { ProjectPost } from "../../../../index";
 
 interface ISearch {
   name: string;
+}
+
+function standardizePostTitle(str: string) {
+  return str
+    .split(" ")
+    .map((word, index, arr) => {
+      if (word.includes("DA")) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ")
+    .replace(/,/g, " -");
 }
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
@@ -78,31 +91,29 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
                   title: resAirErrors.data.name,
                   content: (
                     <div>
-                      {Object.entries(resAirErrors.data.errors as Record<any, any>).map(([key, value]) => (
-                        <div key={key}>
-                          <p>
-                            <strong>{key}:</strong> {value.length === 0 && "Không có"}
-                          </p>
-                          {Array.isArray(value) && value.length > 0 && (
-                            <ul>
-                              {value.map((v: string, idx: number) => (
-                                <li key={idx}>{v}</li>
-                              ))}
-                            </ul>
-                          )}
-                          {typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0 && (
-                            <>
-                              {Object.values(value)
-                                .flat()
-                                .map((v: any, idx) => (
-                                  <ul>
-                                    <li key={idx} dangerouslySetInnerHTML={{ __html: v }} />
-                                  </ul>
+                      {Object.entries(resAirErrors.data.errors as Record<string, { projectInitName: string; projectId: string; web?: string; air?: string }[]>).map(
+                        ([key, value]) =>
+                          value.length > 0 && (
+                            <div key={key}>
+                              <p>
+                                <strong>{key}</strong>
+                              </p>
+                              <ul>
+                                {value.map((v) => (
+                                  <div key={v.projectId}>
+                                    <li>{standardizePostTitle(`${v.projectId} - ${v.projectInitName}`)}</li>
+                                    {v.web && v.air && (
+                                      <ul>
+                                        <li>Web: {v.web}</li>
+                                        <li>Air: {v.air}</li>
+                                      </ul>
+                                    )}
+                                  </div>
                                 ))}
-                            </>
-                          )}
-                        </div>
-                      ))}
+                              </ul>
+                            </div>
+                          )
+                      )}
                     </div>
                   ),
                 });

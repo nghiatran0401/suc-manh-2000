@@ -24,7 +24,6 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
     "DA sai link GD": [],
     "DA không có phiếu khảo sát": [],
     "DA không có ảnh hiện trạng": [],
-    Khác: {},
   };
   const BATCH_SIZE = 25;
 
@@ -33,17 +32,7 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
       const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
       if (totalAirtableDataList.length <= 0) continue;
 
-      if (requestedYear === "2024") {
-        const newTotalAirtableErrors = Object.keys(totalAirtableErrors).map((key) => {
-          const error: { projectId: string; projectInitName: string } = totalAirtableErrors[key];
-          if (error.projectId && error.projectInitName) {
-            return {
-              [key]: standardizePostTitle(`${error.projectId} - ${error.projectInitName}`),
-            };
-          }
-        });
-        errors = { ...newTotalAirtableErrors, ...errors };
-      }
+      if (requestedYear === "2024") errors = { ...totalAirtableErrors, ...errors };
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
@@ -54,19 +43,25 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
-          if (projectProgressObj === undefined) {
-            requestedYear === "2024" && errors["DA sai link GD"].push(airtableData.name);
+          if (!projectProgressObj) {
+            if (requestedYear === "2024") {
+              errors["DA sai link GD"].push({ projectInitName: airtableData.projectInitName, projectId: airtableData.projectId });
+            }
             return;
           }
 
           const { progress: projectProgress }: any = projectProgressObj;
-          if (projectProgress.find((p: any) => p.name === "Ảnh hiện trạng").images.length <= 0) {
-            requestedYear === "2024" && errors["DA không có ảnh hiện trạng"].push(airtableData.name);
+          if (!projectProgress.some((p: any) => p.name === "Ảnh hiện trạng" && p.images.length > 0)) {
+            if (requestedYear === "2024") {
+              errors["DA không có ảnh hiện trạng"].push({ projectInitName: airtableData.projectInitName, projectId: airtableData.projectId });
+            }
           }
 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
-          if (hoanCanhDescription === undefined) {
-            requestedYear === "2024" && errors["DA không có phiếu khảo sát"].push(airtableData?.name);
+          if (!hoanCanhDescription) {
+            if (requestedYear === "2024") {
+              errors["DA không có phiếu khảo sát"].push({ projectInitName: airtableData.projectInitName, projectId: airtableData.projectId });
+            }
           }
 
           if (!querySnapshot.empty && requestedYear === "2024") {
@@ -105,28 +100,25 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
               "phong-tin-hoc": "Phòng tin học",
             };
 
-            attributesToCompare.map((key) => {
+            attributesToCompare.forEach((key) => {
+              if (!errors[key]) {
+                errors[key] = [];
+              }
+
               if (key === "classification") {
                 const airClassification = getProjectClassification(airtableData[key]);
                 if (airClassification !== docData[key]) {
-                  if (!errors["Khác"][key]) {
-                    errors["Khác"][key] = [];
-                  }
-                  errors["Khác"][key].push(
-                    `<p><strong>${airtableData.name}:</strong></p> <p><strong> - Web:</strong> ${classificationMapping[docData[key]]}</p> <p><strong> - Air:</strong> ${classificationMapping[airClassification]}</p>`
-                  );
+                  errors[key].push({ projectInitName: airtableData.projectInitName, projectId: airtableData.projectId, web: classificationMapping[docData[key]], air: classificationMapping[airClassification] });
                 }
               } else {
                 if (airtableData[key] !== docData[key]) {
-                  if (!errors["Khác"][key]) {
-                    errors["Khác"][key] = [];
-                  }
-                  errors["Khác"][key].push(`<p><strong>${airtableData.name}:</strong></p> <p><strong> - Web:</strong> ${docData[key]}</p> <p><strong> - Air:</strong> ${airtableData[key]}`);
+                  errors[key].push({ projectInitName: airtableData.projectInitName, projectId: airtableData.projectId, web: docData[key], air: airtableData[key] });
                 }
               }
             });
           }
         });
+
         await Promise.all(promises);
       }
     }
