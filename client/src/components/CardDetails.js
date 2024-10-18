@@ -249,7 +249,7 @@ export default function CardDetails(props) {
                     }}
                   >
                     <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                      {category === "du-an-2024" ? (
+                      {["du-an-2024", "du-an-2023"].includes(category) ? (
                         <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
                           <IframeComponent tab={tab} />
                         </Box>
