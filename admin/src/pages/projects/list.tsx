@@ -194,7 +194,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       },
     });
   };
-
+  // /uploads%2F2024%2F07%2FSakura.png
   return (
     <List>
       <Form {...searchFormProps} layout="inline" style={{ marginBottom: "24px" }}>
@@ -208,20 +208,24 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-          <SaveButton
-            icon={<AlertOutlined />}
-            loading={confirmLoading}
-            disabled={confirmLoading}
-            onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
-            style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
-          >
-            Tạo báo cáo lỗi Airtable
-          </SaveButton>
+          {/* @ts-ignore */}
+          {import.meta.env.VITE_CURRENT_ENV && (
+            <SaveButton
+              icon={<AlertOutlined />}
+              loading={confirmLoading}
+              disabled={confirmLoading}
+              onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
+              style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
+            >
+              Tạo báo cáo lỗi Airtable
+            </SaveButton>
+          )}
+
           <SaveButton
             icon={<SketchOutlined />}
             loading={confirmLoading}
             disabled={confirmLoading}
-            onClick={() => handleButtonClick("Tạo báo cáo tiến độ nội bộ")}
+            onClick={() => handleButtonClick("Tạo báo cáo tiến độ Zalo")}
             style={{ backgroundColor: "#FFBF00", borderColor: "#FFBF00", color: "white" }}
           >
             Tạo báo cáo tiến độ nội bộ
@@ -244,7 +248,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             icon={<RadarChartOutlined />}
             loading={confirmLoading}
             disabled={confirmLoading}
-            onClick={() => handleButtonClick("Tạo báo cáo up web nội bộ")}
+            onClick={() => handleButtonClick("Tạo báo cáo up web Zalo")}
             style={{ backgroundColor: "#00CCCC", borderColor: "#00CCCC", color: "white" }}
           >
             Tạo báo cáo up web nội bộ

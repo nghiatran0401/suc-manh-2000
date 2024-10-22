@@ -2,11 +2,46 @@ import { google } from "googleapis";
 import * as path from "path";
 import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-// import * as readline from "readline";
-// import * as fs from "fs";
+import * as readline from "readline";
+import * as fs from "fs";
 
 const drive = google.drive("v3");
 const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL);
+
+function initiateReauthentication() {
+  const authUrl = auth.generateAuthUrl({
+    access_type: "offline",
+    scope: ["https://www.googleapis.com/auth/drive"],
+  });
+
+  console.log("Authorize this app by visiting this url:", authUrl);
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  rl.question("Enter the authorization code here: ", async (code) => {
+    rl.close();
+    try {
+      const { tokens } = await auth.getToken(code);
+      auth.setCredentials(tokens);
+      console.log("Access Token:", tokens.access_token);
+      console.log("Refresh Token:", tokens.refresh_token);
+
+      const tokenPath = path.join(__dirname, "tokens.json");
+      fs.writeFile(tokenPath, JSON.stringify(tokens, null, 2), (err) => {
+        if (err) {
+          console.error("Error saving tokens to file:", err);
+        } else {
+          console.log("Tokens saved to", tokenPath);
+        }
+      });
+    } catch (err: any) {
+      console.error("Failed to exchange authorization code for tokens: ", err.response ? err.response.data : err.message);
+    }
+  });
+}
 
 async function ensureRefreshToken() {
   const refreshToken = process.env.GOOGLE_API_REFRESH_TOKEN;
@@ -24,7 +59,7 @@ async function ensureRefreshToken() {
     } catch (err: any) {
       if (err.response && err.response.data.error === "invalid_grant") {
         console.error("Refresh token expired or revoked. Initiating reauthentication.");
-        // initiateReauthentication();
+        initiateReauthentication();
       } else {
         console.error("Failed to refresh access token: ", err.response ? err.response.data : err.message);
       }
@@ -33,41 +68,6 @@ async function ensureRefreshToken() {
     console.error("No refresh token available. Cannot obtain a new access token.");
   }
 }
-
-// function initiateReauthentication() {
-//   const authUrl = auth.generateAuthUrl({
-//     access_type: "offline",
-//     scope: ["https://www.googleapis.com/auth/drive"],
-//   });
-
-//   console.log("Authorize this app by visiting this url:", authUrl);
-
-//   const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout,
-//   });
-
-//   rl.question("Enter the authorization code here: ", async (code) => {
-//     rl.close();
-//     try {
-//       const { tokens } = await auth.getToken(code);
-//       auth.setCredentials(tokens);
-//       console.log("Access Token:", tokens.access_token);
-//       console.log("Refresh Token:", tokens.refresh_token);
-
-//       const tokenPath = path.join(__dirname, "tokens.json");
-//       fs.writeFile(tokenPath, JSON.stringify(tokens, null, 2), (err) => {
-//         if (err) {
-//           console.error("Error saving tokens to file:", err);
-//         } else {
-//           console.log("Tokens saved to", tokenPath);
-//         }
-//       });
-//     } catch (err: any) {
-//       console.error("Failed to exchange authorization code for tokens: ", err.response ? err.response.data : err.message);
-//     }
-//   });
-// }
 
 async function getProjectProgress(folderId: string) {
   if (!folderId) {

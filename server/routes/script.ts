@@ -170,11 +170,9 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
-      if (orders[0].list[requestedYear].completed === 0 && orders[0].list[requestedYear].inProgress === 0) {
+      if (orders[0].list[requestedYear].completed === 0) {
         const querySnapshotFinished = await collection.where("status", "==", "da-hoan-thanh").get();
         orders[0].list[requestedYear].completed = querySnapshotFinished.size;
-        const querySnapshotInProgress = await collection.where("status", "==", "dang-xay-dung").get();
-        orders[0].list[requestedYear].inProgress = querySnapshotInProgress.size;
       }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
@@ -190,6 +188,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
               orders[1].list[airtableData.classification].push({ name: airtableData.name });
+              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -199,6 +198,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
+              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -206,6 +206,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name });
+              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 

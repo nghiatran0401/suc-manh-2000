@@ -1,4 +1,5 @@
-import { firestore, firebase } from "./firebase";
+import { firestore } from "./firebase";
+import axios from "axios";
 
 const fetchDocumentWithMetadata = async () => {
   const collections = await firestore.listCollections();
@@ -30,3 +31,53 @@ const fetchDocumentWithMetadata = async () => {
   }
 };
 // fetchDocumentWithMetadata();
+
+async function updateImageUrlWithToken(image: string) {
+  const uploadsIndex = image.indexOf("/uploads");
+  if (uploadsIndex !== -1) {
+    try {
+      const response = await axios.get(image, { params: { alt: "json" } });
+      const metadata = response.data;
+
+      if (metadata.downloadTokens) {
+        return `${image}?alt=media&token=${metadata.downloadTokens}`;
+      } else {
+        console.error(`No download token found for file`);
+        return image;
+      }
+    } catch (error) {
+      console.error(`Failed to retrieve metadata for file`);
+      return image;
+    }
+  }
+}
+const updateThumbnails = async () => {
+  const projectCollections = await firestore.listCollections();
+  const collections = projectCollections.filter((collection) => collection.id.includes("du-an"));
+
+  for (const collection of collections) {
+    const querySnapshot = await collection.get();
+
+    if (!querySnapshot.empty) {
+      for (const doc of querySnapshot.docs) {
+        const data = doc.data();
+        if (data.donor?.images?.length > 0) {
+          // Use Promise.all to resolve all promises returned by the map function
+          const updatedImages = await Promise.all(
+            data.donor.images.map(async (imageObj: any) => {
+              if (typeof imageObj.image === "string" && imageObj.image.includes("%2F")) {
+                const updatedImage = await updateImageUrlWithToken(imageObj.image);
+                imageObj.image = updatedImage;
+              }
+              return imageObj;
+            })
+          );
+          await doc.ref.update({ donor: { ...data.donor, images: updatedImages } });
+          console.log("Updated:", collection.id, data.projectId);
+        }
+      }
+    }
+  }
+};
+// Call the function
+updateThumbnails();

@@ -149,7 +149,7 @@ async function fetchAirtableRecords(requestedYear: string) {
     }
 
     const totalAirtableDataList = (Object.values(groupedRecords) as any).flat();
-    const totalAirtableErrors = { "DA hủy": cancelledProjects, "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls };
+    const totalAirtableErrors = { "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls }; // "DA hủy": cancelledProjects
 
     return { totalAirtableDataList, totalAirtableErrors };
   } catch (err) {
