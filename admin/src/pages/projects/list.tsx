@@ -192,6 +192,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
           setConfirmLoading(false);
         }
       },
+      onCancel: () => window.location.reload(),
     });
   };
   // /uploads%2F2024%2F07%2FSakura.png

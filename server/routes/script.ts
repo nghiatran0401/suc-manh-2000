@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
 import { fetchAirtableRecords, standardizePostTitle } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription } from "../services/googledrive";
-import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
+import { getValueInRedis, removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
 const scriptRouter = express.Router();
@@ -162,6 +162,10 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
+  const cachedKey = `totalProjectsCount`;
+  const cachedResultData = await getValueInRedis(cachedKey);
+  console.log("here", Number(cachedResultData), (Object.values(orders[1].list) as any).flat().length);
+  const totalKhoiCongProjects = Number(cachedResultData) + (Object.values(orders[1].list) as any).flat().length;
 
   try {
     for (const requestedYear of requestedYears) {
@@ -228,6 +232,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     // Generate HTML content
     // 0. Thống kê số liệu
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>Tổng số dự án đã khởi công từ 2012 đến nay: </strong> ${totalKhoiCongProjects}</p>`;
     htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
     htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
     htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total}</strong></li>`;
@@ -744,7 +749,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               contentNew: {
                 tabs:
                   webHoanCanhDescription === "" && hoanCanhDescription !== ""
-                    ? webProjectContent.tabs.map((t: any) =>
+                    ? webProjectContent?.tabs?.map((t: any) =>
                         t.name === "Hoàn cảnh"
                           ? {
                               name: "Hoàn cảnh",
