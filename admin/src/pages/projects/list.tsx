@@ -120,7 +120,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               }
               break;
 
-            case "Tạo báo cáo tiến độ nội bộ":
+            case "Tạo báo cáo tiến độ Zalo":
               console.time("tienDoZalo");
               const resZalo = await axios.post(SERVER_URL + "/script/createProjectProgressReportZalo");
               console.timeEnd("tienDoZalo");
@@ -151,7 +151,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               }
               break;
 
-            case "Tạo báo cáo up web nội bộ":
+            case "Tạo báo cáo up web Zalo":
               console.time("webReport");
               const resWebReport = await axios.post(SERVER_URL + "/script/createWebUpdateReport");
               console.timeEnd("webReport");
@@ -228,7 +228,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             onClick={() => handleButtonClick("Tạo báo cáo tiến độ Zalo")}
             style={{ backgroundColor: "#FFBF00", borderColor: "#FFBF00", color: "white" }}
           >
-            Tạo báo cáo tiến độ nội bộ
+            Tạo báo cáo tiến độ Zalo
           </SaveButton>
           <SaveButton
             icon={<BulbOutlined />}
@@ -251,7 +251,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             onClick={() => handleButtonClick("Tạo báo cáo up web Zalo")}
             style={{ backgroundColor: "#00CCCC", borderColor: "#00CCCC", color: "white" }}
           >
-            Tạo báo cáo up web nội bộ
+            Tạo báo cáo up web Zalo
           </SaveButton>
           <SaveButton
             icon={<ProfileOutlined />}
