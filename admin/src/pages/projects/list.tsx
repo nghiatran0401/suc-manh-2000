@@ -209,7 +209,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
           {/* @ts-ignore */}
-          {import.meta.env.VITE_CURRENT_ENV && (
+          {import.meta.env.VITE_CURRENT_ENV === "Development" && (
             <SaveButton
               icon={<AlertOutlined />}
               loading={confirmLoading}
