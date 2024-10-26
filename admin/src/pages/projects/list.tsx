@@ -195,7 +195,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       onCancel: () => window.location.reload(),
     });
   };
-  // /uploads%2F2024%2F07%2FSakura.png
+
   return (
     <List>
       <Form {...searchFormProps} layout="inline" style={{ marginBottom: "24px" }}>

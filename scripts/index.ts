@@ -1,5 +1,6 @@
 import { firestore } from "./firebase";
 import axios from "axios";
+import slugify from "slugify";
 
 const fetchDocumentWithMetadata = async () => {
   const collections = await firestore.listCollections();
@@ -80,4 +81,29 @@ const updateThumbnails = async () => {
   }
 };
 // Call the function
-updateThumbnails();
+// updateThumbnails();
+
+async function updateSlugsInCollection() {
+  const collectionRef = firestore.collection("du-an-2020");
+  const querySnapshot = await collectionRef.get();
+
+  if (!querySnapshot.empty) {
+    const updatePromises = querySnapshot.docs.map(async (doc) => {
+      const docData = doc.data();
+      if (docData.projectId) {
+        const newSlug = slugify(docData.projectId, { lower: true, strict: true });
+        await doc.ref.update({ slug: newSlug });
+        console.log(`Updated slug for document ID: ${doc.id} to ${newSlug}`);
+      } else {
+        console.warn(`Document ID: ${doc.id} does not have a projectId`);
+      }
+    });
+
+    await Promise.all(updatePromises);
+  } else {
+    console.log("No documents found in collection: du-an-2023");
+  }
+}
+
+// Call the function
+updateSlugsInCollection();
