@@ -7,6 +7,7 @@ import { standardizeString } from "../helpers";
 import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
+import SM2000 from "../assets/companions/SM2000.svg";
 
 const Card = styled(MuiCard)({
   minHeight: "300px",
@@ -28,11 +29,7 @@ export default function CardList(props) {
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img
-              style={{ width: "100%", height: "225px", objectFit: "cover" }}
-              src={post.thumbnail ? post.thumbnail : "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png"}
-              alt={standardizeString(post.name)}
-            />
+            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ? post.thumbnail : SM2000} alt={standardizeString(post.name)} />
 
             {post.status && (
               <div

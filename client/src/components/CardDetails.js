@@ -11,6 +11,7 @@ import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
+import SM2000 from "../assets/companions/SM2000.svg";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -328,7 +329,7 @@ export default function CardDetails(props) {
                   borderRadius: "16px 16px 0 0",
                 }}
                 alt={post.name}
-                src={post.thumbnail ? post.thumbnail : "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png"}
+                src={post.thumbnail ? post.thumbnail : SM2000}
               />
               <Typography
                 variant="body1"
