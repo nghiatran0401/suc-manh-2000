@@ -80,7 +80,6 @@ const updateThumbnails = async () => {
     }
   }
 };
-// Call the function
 // updateThumbnails();
 
 async function updateSlugsInCollection() {
@@ -104,6 +103,4 @@ async function updateSlugsInCollection() {
     console.log("No documents found in collection: du-an-2023");
   }
 }
-
-// Call the function
-updateSlugsInCollection();
+// updateSlugsInCollection();

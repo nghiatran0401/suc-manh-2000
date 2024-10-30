@@ -26,17 +26,7 @@ function initiateReauthentication() {
     try {
       const { tokens } = await auth.getToken(code);
       auth.setCredentials(tokens);
-      console.log("Access Token:", tokens.access_token);
       console.log("Refresh Token:", tokens.refresh_token);
-
-      const tokenPath = path.join(__dirname, "tokens.json");
-      fs.writeFile(tokenPath, JSON.stringify(tokens, null, 2), (err) => {
-        if (err) {
-          console.error("Error saving tokens to file:", err);
-        } else {
-          console.log("Tokens saved to", tokenPath);
-        }
-      });
     } catch (err: any) {
       console.error("Failed to exchange authorization code for tokens: ", err.response ? err.response.data : err.message);
     }
@@ -204,5 +194,9 @@ async function getHoanCanhDescription(folderId: string) {
     return undefined;
   }
 }
+
+// getProjectProgress("19nwDFNisLjZb5g0YLFLmJ65QiGaq73zn").then((res) => {
+//   console.log("Done!", res?.thumbnailImage);
+// });
 
 export { getProjectProgress, getHoanCanhDescription };

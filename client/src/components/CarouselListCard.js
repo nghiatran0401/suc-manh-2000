@@ -47,7 +47,7 @@ export default function CarouselListCard(props) {
                     <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
                       <img
                         style={{ width: "100%", height: "225px", objectFit: "cover" }}
-                        src={post.thumbnail ? post.thumbnail : "https://www.selfdriveeastafrica.com/wp-content/uploads/woocommerce-placeholder.png"}
+                        src={post.thumbnail ? post.thumbnail : "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png"}
                         alt={post.name}
                       />
 

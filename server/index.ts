@@ -8,7 +8,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import routes from "./routes";
 
 dotenv.config();
-const app: Express = express();
+export const app: Express = express();
 app.use(cors());
 app.use(bodyParser.json());
 routes(app);

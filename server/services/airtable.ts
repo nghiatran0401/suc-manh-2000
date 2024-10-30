@@ -88,7 +88,7 @@ async function fetchAirtableRecords(requestedYear: string) {
       }
 
       if (record.get("Tên công trình").includes("❌") || !record.get("DA")) {
-        cancelledProjects.push({ projectInitName: record.get("Tên công trình"), projectId: record.get("DA") ? record.get("DA") : null });
+        cancelledProjects.push({ projectInitNe: record.get("Tên công trình"), projectId: record.get("DA") ? record.get("DA") : null });
         continue;
       }
 
@@ -116,6 +116,7 @@ async function fetchAirtableRecords(requestedYear: string) {
         projectInitName: projectInitName,
         name: projectName,
         classification: classification,
+        rawStatus: record.get("Follow up Step").trim(),
         status: projectStatus,
         totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : "",
         donors: projectDonors,

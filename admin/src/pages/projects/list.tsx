@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
-import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev/antd";
-import { Table, Space, Input, Form, Modal, Typography } from "antd";
+import { useTable, List, EditButton, DeleteButton, SaveButton, useEditableTable } from "@refinedev/antd";
+import { Table, Space, Input, Form, Modal, Checkbox, Steps } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, POSTS_PER_PAGE, SERVER_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
 import { SearchOutlined, SketchOutlined, BulbOutlined, RadarChartOutlined, ProfileOutlined, AlertOutlined } from "@ant-design/icons";
@@ -12,6 +12,37 @@ import { ProjectPost } from "../../../../index";
 
 interface ISearch {
   name: string;
+}
+
+function CustomFieldsCheckbox(props: { onChange: any }) {
+  const [checkedValues, setCheckedValues] = useState<string[]>([]);
+
+  useEffect(() => {
+    props.onChange(checkedValues);
+  }, [checkedValues]);
+
+  return (
+    <Checkbox.Group value={checkedValues} onChange={(checkedList: any) => setCheckedValues(checkedList)} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div>
+        <Checkbox value="1">Dự án mới</Checkbox>
+      </div>
+      <div>
+        <Checkbox value="2">Dự án thay đổi trạng thái</Checkbox>
+      </div>
+      <div>
+        <Checkbox value="3">Dự án cập nhật thêm ảnh</Checkbox>
+      </div>
+      <div>
+        <Checkbox value="4">Dự án cập nhật ảnh đại diện</Checkbox>
+      </div>
+      <div>
+        <Checkbox value="5">Dự án cập nhật phiếu khảo sát</Checkbox>
+      </div>
+      <div>
+        <Checkbox value="6">Dự án hủy → xóa trên web</Checkbox>
+      </div>
+    </Checkbox.Group>
+  );
 }
 
 function standardizePostTitle(str: string) {
@@ -33,6 +64,11 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an");
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const checkedValuesRef = useRef<string[]>([]);
+
+  const handleCheckedValuesChange = (updatedValues: string[]) => {
+    checkedValuesRef.current = updatedValues;
+  };
 
   const { tableProps, searchFormProps } = useTable<ProjectPost, HttpError, ISearch>({
     syncWithLocation: true,
@@ -170,16 +206,32 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               break;
 
             case "Đồng bộ Airtable và Web":
-              console.time("syncAirAndWeb");
-              const resSync = await axios.post(SERVER_URL + "/script/syncAirtableAndWeb");
-              console.timeEnd("syncAirAndWeb");
+              Modal.success({
+                title: "Chọn các fields cần đồng bộ",
+                content: (
+                  <div>
+                    <CustomFieldsCheckbox onChange={handleCheckedValuesChange} />
+                  </div>
+                ),
+                onOk: async () => {
+                  if (checkedValuesRef.current.length === 0) {
+                    window.alert("Phải chọn ít nhất 1 field để update");
+                    return;
+                  }
 
-              if (resSync.status === 200) {
-                Modal.success({
-                  title: "Done!!!",
-                  onOk: () => window.location.reload(),
-                });
-              }
+                  console.time("syncAirAndWeb");
+                  const resSync = await axios.post(SERVER_URL + "/script/syncAirtableAndWeb", { checkedValues: checkedValuesRef.current });
+                  console.timeEnd("syncAirAndWeb");
+
+                  if (resSync.status === 200) {
+                    Modal.success({
+                      title: "Done!!!",
+                      onOk: () => window.location.reload(),
+                    });
+                  }
+                },
+                onCancel: () => {},
+              });
               break;
 
             default:
@@ -192,7 +244,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
           setConfirmLoading(false);
         }
       },
-      onCancel: () => window.location.reload(),
+      onCancel: () => {},
     });
   };
 
