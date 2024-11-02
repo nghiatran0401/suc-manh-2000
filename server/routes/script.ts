@@ -700,7 +700,6 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 });
 
 scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => {
-  const checkedValues = req.body.checkedValues;
   const requestedYears = ["2024"];
   const BATCH_SIZE = 25;
 
@@ -729,7 +728,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
           }
 
           // 1. Dự án mới
-          if (querySnapshot.empty && checkedValues.includes("1")) {
+          if (querySnapshot.empty) {
             const newId = uuidv4().replace(/-/g, "").substring(0, 20);
             const postDocRef = firestore.collection(collectionName).doc(newId);
             const newProjectPost: ProjectPost = {
@@ -790,15 +789,15 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             const updatedProjectPost: ProjectPost = {
               ...(docData as ProjectPost),
               // 2. Dự án thay đổi trạng thái
-              status: checkedValues.includes("2") && docData.status !== airtableData.status ? airtableData.status : docData.status,
+              status: docData.status !== airtableData.status ? airtableData.status : docData.status,
               // 3. Dự án cập nhật thêm ảnh
-              progressNew: checkedValues.includes("3") && isImagesUpdated ? airtableProjectProgress : webProjectProgress,
+              progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
               // 4. Dự án cập nhật ảnh đại diện
-              thumbnail: checkedValues.includes("4") && docData.status !== airtableData.status ? projectThumbnail : docData.thumbnail,
+              thumbnail: docData.status !== airtableData.status ? projectThumbnail : docData.thumbnail,
               // 5. Dự án cập nhật phiếu khảo sát
               contentNew: {
                 tabs:
-                  checkedValues.includes("5") && webHoanCanhDescription === "" && hoanCanhDescription !== ""
+                  webHoanCanhDescription === "" && hoanCanhDescription !== ""
                     ? webProjectContent?.tabs?.map((t: any) =>
                         t.name === "Hoàn cảnh"
                           ? {
@@ -810,7 +809,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                       )
                     : webProjectContent.tabs,
               },
-              updatedAt: checkedValues.length > 0 ? firebase.firestore.Timestamp.fromDate(new Date()) : docData.updatedAt,
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
@@ -821,7 +820,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
       // 6. Dự án hủy -> xóa trên web
       const cancelledProjectsPromises = totalAirtableErrors["DA hủy"].map(async (p: any) => {
-        if (checkedValues.includes("6") && p["projectId"] !== null) {
+        if (p["projectId"] !== null) {
           const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
           if (!querySnapshot.empty) {
             const docRef = querySnapshot.docs[0].ref;
