@@ -794,7 +794,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               // 3. Dự án cập nhật thêm ảnh
               progressNew: checkedValues.includes("3") && isImagesUpdated ? airtableProjectProgress : webProjectProgress,
               // 4. Dự án cập nhật ảnh đại diện
-              thumbnail: checkedValues.includes("4") && docData.thumbnail === "" && projectThumbnail !== "" ? projectThumbnail : docData.thumbnail,
+              thumbnail: checkedValues.includes("4") && docData.status !== airtableData.status ? projectThumbnail : docData.thumbnail,
               // 5. Dự án cập nhật phiếu khảo sát
               contentNew: {
                 tabs:
