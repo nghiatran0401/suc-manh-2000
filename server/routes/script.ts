@@ -4,9 +4,9 @@ import { NewsPost, ProjectPost } from "../../index";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
-import { fetchAirtableRecords, standardizePostTitle } from "../services/airtable";
+import { fetchAirtableRecords} from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription } from "../services/googledrive";
-import { getValueInRedis, removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
+import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
 const scriptRouter = express.Router();
@@ -165,9 +165,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
-  const cachedKey = `totalProjectsCount`;
-  const cachedResultData = await getValueInRedis(cachedKey);
-  const totalKhoiCongProjects = Number(cachedResultData) + (Object.values(orders[1].list) as any).flat().length;
+  const totalKhoiCongProjects = 486 + (Object.values(orders[1].list) as any).flat().length;
 
   try {
     for (const requestedYear of requestedYears) {
@@ -364,9 +362,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
   let htmlContent = ``;
   const slideshowImages: { image: string; caption: string }[] = [];
   const BATCH_SIZE = 25;
-  const cachedKey = `totalProjectsCount`;
-  const cachedResultData = await getValueInRedis(cachedKey);
-  const totalKhoiCongProjects = Number(cachedResultData) + (Object.values(orders[1].list) as any).flat().length;
+  const totalKhoiCongProjects = 486 + (Object.values(orders[1].list) as any).flat().length;
 
   try {
     for (const requestedYear of requestedYears) {
