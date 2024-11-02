@@ -185,6 +185,20 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
             images: updatedPost["progress.images3"] ?? docData.progress?.find((p: any) => p.name === "Ảnh hoàn thiện")?.images ?? [],
           },
         ],
+        progressNew: [
+          {
+            name: "Ảnh hiện trạng",
+            images: updatedPost["progressNew.images1"] ?? docData.progressNew?.find((p: any) => p.name === "Ảnh hiện trạng")?.images ?? [],
+          },
+          {
+            name: "Ảnh tiến độ",
+            images: updatedPost["progressNew.images2"] ?? docData.progressNew?.find((p: any) => p.name === "Ảnh tiến độ")?.images ?? [],
+          },
+          {
+            name: "Ảnh hoàn thiện",
+            images: updatedPost["progressNew.images3"] ?? docData.progressNew?.find((p: any) => p.name === "Ảnh hoàn thiện")?.images ?? [],
+          },
+        ],
         content: {
           tabs: [
             {

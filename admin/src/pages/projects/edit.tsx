@@ -10,6 +10,8 @@ import ImageUploader from "../../components/ImageUploader";
 import { provincesAndCities } from "../../utils/vietnam-provinces";
 import { ProjectPost } from "../../../../index";
 
+const progressNewCollection = ["du-an-2024", "du-an-2023"];
+
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
   const { pathname } = useLocation();
@@ -222,32 +224,43 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 gap: "16px",
               }}
             >
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images1")}</span>} name={"progress.images1"}>
+              <Form.Item
+                label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images1")}</span>}
+                name={progressNewCollection.includes(collectionName) ? "progressNew.images1" : "progress.images1"}
+              >
                 <ImageUploader
-                  initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images1"))?.images}
+                  initialImages={projectData[progressNewCollection.includes(collectionName) ? "progressNew" : "progress"]?.find((p: any) => p.name === translate("post.fields.progress.images1"))?.images}
                   handleChange={(urls) => {
                     if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("progress.images1", urls);
+                      formProps.form?.setFieldValue(progressNewCollection.includes(collectionName) ? "progressNew.images1" : "progress.images1", urls);
                     }
                   }}
                 />
               </Form.Item>
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images2")}</span>} name={"progress.images2"}>
+
+              <Form.Item
+                label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images2")}</span>}
+                name={progressNewCollection.includes(collectionName) ? "progressNew.images2" : "progress.images2"}
+              >
                 <ImageUploader
-                  initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images2"))?.images}
+                  initialImages={projectData[progressNewCollection.includes(collectionName) ? "progressNew" : "progress"]?.find((p: any) => p.name === translate("post.fields.progress.images2"))?.images}
                   handleChange={(urls) => {
                     if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("progress.images2", urls);
+                      formProps.form?.setFieldValue(progressNewCollection.includes(collectionName) ? "progressNew.images2" : "progress.images2", urls);
                     }
                   }}
                 />
               </Form.Item>
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images3")}</span>} name={"progress.images3"}>
+
+              <Form.Item
+                label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.progress.images3")}</span>}
+                name={progressNewCollection.includes(collectionName) ? "progressNew.images3" : "progress.images3"}
+              >
                 <ImageUploader
-                  initialImages={projectData.progress?.find((p) => p.name === translate("post.fields.progress.images3"))?.images}
+                  initialImages={projectData[progressNewCollection.includes(collectionName) ? "progressNew" : "progress"]?.find((p: any) => p.name === translate("post.fields.progress.images3"))?.images}
                   handleChange={(urls) => {
                     if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("progress.images3", urls);
+                      formProps.form?.setFieldValue(progressNewCollection.includes(collectionName) ? "progressNew.images3" : "progress.images3", urls);
                     }
                   }}
                 />
