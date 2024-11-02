@@ -165,7 +165,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
-  const totalKhoiCongProjects = 486 + (Object.values(orders[1].list) as any).flat().length;
 
   try {
     for (const requestedYear of requestedYears) {
@@ -235,6 +234,8 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
 
       orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
+
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total
 
     // Generate HTML content
     // 0. Thống kê số liệu
@@ -362,7 +363,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
   let htmlContent = ``;
   const slideshowImages: { image: string; caption: string }[] = [];
   const BATCH_SIZE = 25;
-  const totalKhoiCongProjects = 486 + (Object.values(orders[1].list) as any).flat().length;
 
   try {
     for (const requestedYear of requestedYears) {
@@ -423,6 +423,8 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
       orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
+
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total
 
     // Generate HTML content
     // 0. Thống kê số liệu
