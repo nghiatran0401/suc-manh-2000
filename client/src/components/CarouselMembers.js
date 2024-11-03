@@ -47,7 +47,7 @@ export const MEMBERS = [
       <ul style="margin-left: -24px;">
         <li>Phó Tổng Marketing Biti's</li>
         <li>Tổng Giám Đốc điều hành Dentsu Redder</li>
-        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - ĐH Fulbright Việt Nam</li>
+        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - Fulbright VN</li>
       </ul>`,
     image: HungVo,
   },
@@ -123,7 +123,7 @@ export const MEMBERS = [
   },
   {
     name: "NGUYỄN THỊ ANH ĐÀO",
-    role: "Vận Hành Dự án Nuôi Em 500 thuộc Nhà Hạnh Phúc",
+    role: "Phụ Trách Nuôi Em 500 - Nhà Hạnh Phúc",
     description: `
       <ul style="margin-left: -24px;">
         <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
@@ -143,12 +143,12 @@ export const MEMBERS = [
   },
   {
     name: "ĐỖ VĂN LÂM",
-    role: "TBD",
+    role: "Phụ Trách Thiết Kế - Truyền Thông",
     description: `
       <ul style="margin-left: -24px;">
-        <li>3+ năm hoạt động CTXH và phụ trách thiết kế, truyền thông cho dự án</li>
+        <li>3+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Founder Pha chế dễ òm</li>
-        <li>Giám đốc khu vực tại công ty TNHH Minh Đức</li>
+        <li>Giám đốc khu vực công ty TNHH Minh Đức</li>
       </ul>`,
     image: DoVanLam,
   },
