@@ -15,6 +15,7 @@ import VoThiTuyetMinh from "../assets/team/Vo_Thi_Tuyet_Minh.png";
 import PhamNgocCham from "../assets/team/Pham_Ngoc_Cham.png";
 import NguyenThiAnhDao from "../assets/team/Nguyen_Thi_Anh_Dao.png";
 import TranHuuNghia from "../assets/team/Tran_Huu_Nghia.png";
+import DoVanLam from "../assets/team/Do_Van_Lam.png";
 import { DESKTOP_WIDTH } from "../constants";
 
 export const MEMBERS = [
@@ -46,7 +47,7 @@ export const MEMBERS = [
       <ul style="margin-left: -24px;">
         <li>Phó Tổng Marketing Biti's</li>
         <li>Tổng Giám Đốc điều hành Dentsu Redder</li>
-        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - ĐH Fulbright Việt Nam</li>
+        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - Fulbright VN</li>
       </ul>`,
     image: HungVo,
   },
@@ -122,7 +123,7 @@ export const MEMBERS = [
   },
   {
     name: "NGUYỄN THỊ ANH ĐÀO",
-    role: "Vận Hành Dự án Nuôi Em 500 thuộc Nhà Hạnh Phúc",
+    role: "Phụ Trách Nuôi Em 500 - Nhà Hạnh Phúc",
     description: `
       <ul style="margin-left: -24px;">
         <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
@@ -136,9 +137,20 @@ export const MEMBERS = [
     description: `
       <ul style="margin-left: -24px;">
         <li>1+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-        <li>Hiện đang là Software Engineer cho công ty Startup tại Singapore<Eli>
+        <li>Hiện đang là Software Engineer cho công ty Startup tại Singapore</li>
       </ul>`,
     image: TranHuuNghia,
+  },
+  {
+    name: "ĐỖ VĂN LÂM",
+    role: "Phụ Trách Thiết Kế - Truyền Thông",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>3+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
+        <li>Founder Pha chế dễ òm</li>
+        <li>Giám đốc khu vực công ty TNHH Minh Đức</li>
+      </ul>`,
+    image: DoVanLam,
   },
 ];
 
