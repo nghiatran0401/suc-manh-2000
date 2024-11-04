@@ -4,7 +4,7 @@ import { NewsPost, ProjectPost } from "../../index";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
-import { fetchAirtableRecords} from "../services/airtable";
+import { fetchAirtableRecords } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription } from "../services/googledrive";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
@@ -146,8 +146,8 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
       name: "Thống kê số liệu",
       list: {
         2023: {
-          total: 0,
-          inProgress: 0,
+          total: -1,
+          inProgress: -1,
           completed: 0,
         },
         2024: {
@@ -173,17 +173,24 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
-      if (orders[0].list[requestedYear].completed === 0) {
-        const querySnapshotFinished = await collection.where("status", "==", "da-hoan-thanh").get();
-        orders[0].list[requestedYear].completed = querySnapshotFinished.size;
-      }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          if (!airtableData["rawStatus"].match(/^\d+/)) return;
+          const statusNumber = parseInt(airtableData["rawStatus"].match(/^\d+/)[0], 10);
+          if (statusNumber >= 11 && statusNumber <= 17) {
+            orders[0].list[requestedYear].total += 1;
+          }
+          if (statusNumber >= 13 && statusNumber <= 17) {
+            orders[0].list[requestedYear].completed += 1;
+          }
+          if (statusNumber >= 11 && statusNumber <= 12) {
+            orders[0].list[requestedYear].inProgress += 1;
+          }
 
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
           if (!querySnapshot.empty) {
             const docData = querySnapshot.docs[0].data();
 
@@ -191,7 +198,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
               orders[1].list[airtableData.classification].push({ name: airtableData.name });
-              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -201,7 +207,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
-              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -209,7 +214,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name });
-              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -220,7 +224,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
               return;
             }
 
-            // 4. Dự án đã khánh thành
+            // 5. Dự án đã khánh thành
             if (docData.status === "dang-xay-dung" && airtableData.rawStatus === "14. Hoàn công + chuyển tiền L2 NTT") {
               if (!orders[5].list[airtableData.classification]) return;
               orders[5].list[airtableData.classification].push({ name: airtableData.name });
@@ -231,16 +235,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
 
         await Promise.all(promises);
       }
-
-      orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
 
-    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total;
 
     // Generate HTML content
     // 0. Thống kê số liệu
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
-    htmlContent += `<p style="font-size: 1.2rem;"><strong>Tổng số dự án đã khởi công từ 2012 đến nay: </strong> ${totalKhoiCongProjects}</p>`;
+    htmlContent += `<p style="font-size: 1.2rem;">Tổng số dự án đã khởi công từ 2012 đến nay: <strong>${totalKhoiCongProjects}</strong></p>`;
     htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
     htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
     htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total}</strong></li>`;
@@ -371,17 +373,24 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
-      if (orders[0].list[requestedYear].completed === 0) {
-        const querySnapshotFinished = await collection.where("status", "==", "da-hoan-thanh").get();
-        orders[0].list[requestedYear].completed = querySnapshotFinished.size;
-      }
 
       for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          if (!airtableData["rawStatus"].match(/^\d+/)) return;
+          const statusNumber = parseInt(airtableData["rawStatus"].match(/^\d+/)[0], 10);
+          if (statusNumber >= 11 && statusNumber <= 17) {
+            orders[0].list[requestedYear].total += 1;
+          }
+          if (statusNumber >= 13 && statusNumber <= 17) {
+            orders[0].list[requestedYear].completed += 1;
+          }
+          if (statusNumber >= 11 && statusNumber <= 12) {
+            orders[0].list[requestedYear].inProgress += 1;
+          }
 
+          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
           const { thumbnailImage: projectThumbnail } = projectProgressObj;
@@ -393,7 +402,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
               orders[1].list[airtableData.classification].push({ name: airtableData.name });
-              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -403,7 +411,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteWeb: airtableData.progressNoteWeb });
-              orders[0].list[requestedYear].inProgress += 1;
               return;
             }
 
@@ -411,7 +418,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
-              orders[0].list[requestedYear].inProgress += 1;
               slideshowImages.push({ caption: airtableData.name, image: projectThumbnail });
               return;
             }
@@ -420,16 +426,14 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
         await Promise.all(promises);
       }
-
-      orders[0].list[requestedYear].total = orders[0].list[requestedYear].completed + orders[0].list[requestedYear].inProgress;
     }
 
-    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total;
 
     // Generate HTML content
     // 0. Thống kê số liệu
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
-    htmlContent += `<p style="font-size: 1.2rem;"><strong>Tổng số dự án đã khởi công từ 2012 đến nay: </strong> ${totalKhoiCongProjects}</p>`;
+    htmlContent += `<p style="font-size: 1.2rem;">Tổng số dự án đã khởi công từ 2012 đến nay: <strong>${totalKhoiCongProjects}</strong></p>`;
     htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2023</strong></p>`;
     htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
     htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2023"].total}</strong></li>`;
