@@ -10,7 +10,7 @@ import ImageUploader from "../../components/ImageUploader";
 import { provincesAndCities } from "../../utils/vietnam-provinces";
 import { ProjectPost } from "../../../../index";
 
-const progressNewCollection = ["du-an-2024", "du-an-2023"];
+const progressNewCollection = ["du-an-2024", "du-an-2023", "du-an-2022"];
 
 export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();

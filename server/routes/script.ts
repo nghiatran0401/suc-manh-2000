@@ -786,7 +786,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             const webProjectProgress = docData.progressNew ?? docData.progress;
             const isImagesUpdated = airtableProjectProgress.some((a: any) => a.images.length > webProjectProgress.find((w: any) => w.name === a.name).images.length);
             const webProjectContent = docData.contentNew ?? docData.content;
-            const webHoanCanhDescription = webProjectContent.tabs.find((t: any) => t.name === "Hoàn cảnh").description;
+            const webHoanCanhDescription = webProjectContent.tabs.find((t: any) => t.name === "Hoàn cảnh")?.description ?? "";
 
             const updatedProjectPost: ProjectPost = {
               ...(docData as ProjectPost),
