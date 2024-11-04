@@ -147,13 +147,13 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
       list: {
         2023: {
           total: -1,
-          inProgress: -1,
-          completed: 0,
+          completed: -1,
+          inProgress: 0,
         },
         2024: {
           total: 0,
-          inProgress: 0,
           completed: 0,
+          inProgress: 0,
         },
       },
     },
@@ -347,9 +347,9 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
       name: "Thống kê số liệu",
       list: {
         2023: {
-          total: 0,
+          total: -1,
+          completed: -1,
           inProgress: 0,
-          completed: 0,
         },
         2024: {
           total: 0,
