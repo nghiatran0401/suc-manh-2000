@@ -400,17 +400,15 @@ const applySorting = (data: any[], sortField: string): any[] => {
 }
 
 const applySortByInRedis = (args: string[], sortField?: string) => {
-  args.push('SORTBY', 'category', 'DESC');
+  if (!sortField) {
+    args.push('SORTBY', 'category', 'DESC');
+    return args;
+  }
 
-  if (!sortField) return args;
-  
-  args.push('SORTBY');
-  if (sortField === 'createdAt') {
-    args.push(sortField, 'DESC');
-  } else if (sortField === 'totalFund') {
-    args.push(sortField, 'ASC')
-  } else if (sortField === 'status') {
-    args.push(sortField, 'ASC')
+  if (!args.includes('SORTBY')) {
+    const sortDirection = (sortField === 'createdAt') ? 'DESC' : 'ASC';
+
+    args.push('SORTBY', sortField, sortDirection);
   }
 
   return args;
