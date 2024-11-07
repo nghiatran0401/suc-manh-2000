@@ -102,7 +102,11 @@ async function removeDocumentFromIndex(data: any) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
 }
 
-async function redisSearchByName(q: any, filters: any) {
+async function redisSearchByName(
+  q: any,
+  filters: any,
+  sortField?: any,
+) {
   let query = "";
   const args = [];
   const needAllProjects = !q && Object.keys(filters).length === 0;
@@ -157,7 +161,10 @@ async function redisSearchByName(q: any, filters: any) {
   }
 
   args.push(query);
-  args.push("SORTBY", "category", "DESC");
+
+  // Apply sorting
+  applySortByInRedis(args, sortField);
+
   args.push("LIMIT", 0, 10000);
 
   const results: any = await redis.call(...(args as [string, ...any[]]));
@@ -184,34 +191,47 @@ async function redisSearchByName(q: any, filters: any) {
   return { cachedResultData: transformedResults, totalValuesLength: transformedResults.length, statsData, provinceCount };
 }
 
-async function getValuesByCategoryInRedis(category: any, filters: any, start: any, end: any) {
+async function getValuesByCategoryInRedis(
+  category: any,
+  filters: any,
+  start: any,
+  end: any,
+  sortField: any,
+) {
   try {
     const categoryPostsKeyPattern = `post:${category}:*`;
-    const sortedCategoryPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
+    let sortedPosts: any = [];
+    if (sortField) {
+      sortedPosts = await getRedisDataWithKeyPattern(
+        categoryPostsKeyPattern, sortField
+      );
+    } else {
+      sortedPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
+    }
 
     // Scenario 1: Return a sorted array from start to end point
     if (start !== undefined && end !== undefined) {
-      const parsedItems = sortedCategoryPosts.slice(start, end);
+      const parsedItems = sortedPosts.slice(start, end);
       return { cachedResultData: parsedItems, totalValuesLength: parsedItems.length };
     }
 
     // Scenario 2: Return a searched values array in admin
     if (Array.isArray(filters) && filters[0]) {
       const q = JSON.parse(filters[0]).value;
-      if (!q) return { cachedResultData: sortedCategoryPosts, totalValuesLength: sortedCategoryPosts.length };
+      if (!q) return { cachedResultData: sortedPosts, totalValuesLength: sortedPosts.length };
       const searchedResults = await redisSearchByName(q, { category });
       return searchedResults; // { cachedResultData: searchedResults, totalValuesLength: searchedResults.length };
     }
 
     // Scenario 3: Return a sorted array with the stats and/or filters operations
-    let filteredValues = [...sortedCategoryPosts];
+    let filteredValues = [...sortedPosts];
     if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {
-      filteredValues = applyFilters(sortedCategoryPosts, filters);
+      filteredValues = applyFilters(sortedPosts, filters);
     }
 
-    const statsData = getStatsData(sortedCategoryPosts);
-    const provinceCount = getProvinceCount(sortedCategoryPosts);
-    return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData, provinceCount };
+    const statsData = getStatsData(sortedPosts);
+    const provinceCount = getProvinceCount(sortedPosts);
+    return { cachedResultData: filteredValues, totalValuesLength: sortedPosts.length, statsData, provinceCount };
   } catch (error: any) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
@@ -261,7 +281,10 @@ async function delValueInRedis(key: string) {
   }
 }
 
-const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string) => {
+const getRedisDataWithKeyPattern = async (
+  categoryPostsKeyPattern: string,
+  sortField?: string,
+) => {
   const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
 
   const pipeline = redis.pipeline();
@@ -275,8 +298,11 @@ const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string) => {
         return null;
       }
       return postData;
-    })
-    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    });
+
+  if (sortField) {
+    return applySorting(posts, sortField);
+  }
 
   return posts;
 };
@@ -352,6 +378,43 @@ const applyFilters = (values: any, filters: any) => {
     });
   });
 };
+
+const applySorting = (data: any[], sortField: string): any[] => {
+  return data.sort((a, b) => {
+    if (sortField === 'createdAt') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sortField === 'totalFund') {
+      return a.totalFund - b.totalFund;
+    } else if (sortField === 'status') {
+      const orderMap: Record<string, number> = {
+        'can-quyen-gop': 1,
+        'dang-xay-dung': 2,
+        'da-hoan-thanh': 3
+      };
+
+      return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
+    } else {
+      return 0;
+    }
+  })
+}
+
+const applySortByInRedis = (args: string[], sortField?: string) => {
+  args.push('SORTBY', 'category', 'DESC');
+
+  if (!sortField) return args;
+  
+  args.push('SORTBY');
+  if (sortField === 'createdAt') {
+    args.push(sortField, 'DESC');
+  } else if (sortField === 'totalFund') {
+    args.push(sortField, 'ASC')
+  } else if (sortField === 'status') {
+    args.push(sortField, 'ASC')
+  }
+
+  return args;
+}
 
 export {
   INDEX_NAME,
