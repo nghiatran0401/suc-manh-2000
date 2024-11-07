@@ -10,11 +10,11 @@ import { v4 as uuidv4 } from "uuid";
 const postRouter = express.Router({ mergeParams: true });
 
 postRouter.get("/", async (req: Request, res: Response) => {
-  const { filters, start, end } = req.query;
+  const { filters, start, end, sortField } = req.query;
   const { category } = req.params;
 
   try {
-    const { cachedResultData, totalValuesLength, statsData, provinceCount } = await getValuesByCategoryInRedis(category, filters, start, end);
+    const { cachedResultData, totalValuesLength, statsData, provinceCount } = await getValuesByCategoryInRedis(category, filters, start, end, sortField);
 
     res.status(200).send({ posts: cachedResultData, totalPosts: totalValuesLength, stats: statsData, provinceCount });
   } catch (error: any) {
