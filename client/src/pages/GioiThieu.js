@@ -34,7 +34,7 @@ export default function GioiThieu() {
               <li>Hoàng Hoa Trung 0975302307</li>
               <li>Nguyễn Thị Hiền 0986832256</li>
             </ul>
-          <br /> <strong>Email:</strong> 
+          <strong>Email:</strong> 
             <ul>
               <li>duansucmanh2000@gmail.com</li>
               <li>niemtingroup@gmail.com</li>
@@ -59,8 +59,16 @@ export default function GioiThieu() {
           <br />
           Donate to The Power of VND 2000 (regardless of value) at:
           <br /> <strong>Website:</strong> http://sucmanh2000.com/
-          <br /> <strong>Hotline:</strong> Hoang Hoa Trung +84 975302307
-          <br /> <strong>Email:</strong> Sucmanh2000.doingoai@gmail.com
+          <br /> <strong>Hotline:</strong> 
+            <ul>
+              <li>Hoang Hoa Trung +84 975302307</li>
+              <li>Nguyen Thi Hien +84 986832256</li>
+            </ul>
+          <strong>Email:</strong> 
+            <ul>
+              <li>duansucmanh2000@gmail.com</li>
+              <li>niemtingroup@gmail.com</li>
+            </ul>
           <br />
           <br />
           Program schedule and participant list are updated daily and displayed publicly on the website.
