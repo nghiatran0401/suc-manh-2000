@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
 import { fetchAirtableRecords } from "../services/airtable";
-import { getProjectProgress, getHoanCanhDescription, getAllFileNames, createGoogleSheet } from "../services/googledrive";
+import { getProjectProgress, getHoanCanhDescription, getAllFileNames } from "../services/googledrive";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
@@ -857,19 +857,6 @@ scriptRouter.post("/chamPhamTool", async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("[chamPhamTool]: ", error.message);
     res.status(500).send(`[chamPhamTool]: ${error.message}`);
-  }
-});
-
-scriptRouter.post("/createGoogleSheetFile", async (req: Request, res: Response) => {
-  const { allFileNames } = req.body;
-
-  try {
-    const spreadsheetUrl = await createGoogleSheet(allFileNames);
-    res.header("Access-Control-Allow-Origin", "*");
-    res.status(200).send(spreadsheetUrl);
-  } catch (error: any) {
-    console.error("[createGoogleSheetFile]: ", error.message);
-    res.status(500).send(`[createGoogleSheetFile]: ${error.message}`);
   }
 });
 

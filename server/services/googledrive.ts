@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 import * as readline from "readline";
 import * as fs from "fs";
+import * as XLSX from "xlsx";
 
 const drive = google.drive("v3");
 const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL);
@@ -237,69 +238,8 @@ async function getAllFileNames(folderId: string) {
   return allFileNames;
 }
 
-async function createGoogleSheet(allFileNames: any[]) {
-  const sheets = google.sheets("v4");
-
-  const data: any = [];
-  for (let key in allFileNames) {
-    if (key !== "files") {
-      const tempArr = allFileNames[key]["files"].map((o: any) => ({ folder: key, ...o }));
-      data.push(tempArr);
-    }
-  }
-
-  const now = new Date();
-  const formattedDateTime = now
-    .toLocaleString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-    .replace(/[/,]/g, "-")
-    .replace(/ /g, "_");
-
-  try {
-    const request = {
-      auth: auth,
-      resource: {
-        properties: {
-          title: formattedDateTime,
-        },
-        sheets: [
-          {
-            data: [
-              {
-                rowData: [
-                  {
-                    values: [{ userEnteredValue: { stringValue: "Folder ID" } }, { userEnteredValue: { stringValue: "Name" } }, { userEnteredValue: { stringValue: "Image URL" } }],
-                  },
-                  ...data.flat().map((row: any) => ({
-                    values: Object.values(row).map((value) => ({
-                      userEnteredValue: { stringValue: String(value) },
-                    })),
-                  })),
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    };
-
-    const response = await sheets.spreadsheets.create(request);
-    return response.data.spreadsheetUrl;
-  } catch (error) {
-    console.error("Error creating Google Sheet:", error);
-    throw error;
-  }
-}
-
 // getProjectProgress("19nwDFNisLjZb5g0YLFLmJ65QiGaq73zn").then((res) => {
 //   console.log("Done!", res?.thumbnailImage);
 // });
 
-export { getProjectProgress, getHoanCanhDescription, getAllFileNames, createGoogleSheet };
+export { getProjectProgress, getHoanCanhDescription, getAllFileNames };

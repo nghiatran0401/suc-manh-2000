@@ -3,6 +3,7 @@ import { Box, Paper, InputBase, IconButton, Table, TableBody, TableCell, TableCo
 import SearchIcon from "@mui/icons-material/Search";
 import { DESKTOP_WIDTH, SERVER_URL } from "../constants";
 import axios from "axios";
+import * as XLSX from "xlsx";
 
 function extractFolderId(ggDriveUrl) {
   const match = ggDriveUrl.match(/\/folders\/([a-zA-Z0-9_-]+)/);
@@ -14,8 +15,6 @@ export default function ChamPhamTool() {
   const [ggDriveUrl, setGgDriveUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [allFileNames, setAllFileNames] = useState([]);
-  const [isGgSheetCreated, setIsGgSheetCreated] = useState("");
-  const [loading2, setLoading2] = useState(false);
 
   const onSearch = async (e) => {
     setLoading(true);
@@ -31,16 +30,24 @@ export default function ChamPhamTool() {
     }
   };
 
-  const createSheet = async () => {
-    setLoading2(true);
-    try {
-      const res = await axios.post(SERVER_URL + "/script/createGoogleSheetFile", { allFileNames });
-      setIsGgSheetCreated(res.data);
-      console.log("here", res.data);
-      setLoading2(false);
-    } catch (error) {
-      console.error("Error creating Google Sheet:", error);
-    }
+  const downloadXlsx = () => {
+    const data = [];
+
+    Object.entries(allFileNames).forEach(([folderName, folderContent]) => {
+      if (folderName !== "files" && folderContent.files) {
+        folderContent.files.forEach((file) => {
+          data.push({ folder: folderName, ...file });
+        });
+      }
+    });
+
+    const worksheetData = [[...Object.keys(data[0] || {})], ...data.map((row) => [...Object.values(row)])];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Files");
+
+    XLSX.writeFile(workbook, "ProjectFiles.xlsx");
   };
 
   return (
@@ -73,17 +80,9 @@ export default function ChamPhamTool() {
 
       {Object.keys(allFileNames).length > 0 && (
         <>
-          <Button variant="contained" sx={{ width: "fit-content" }} onClick={createSheet} disabled={loading2 || isGgSheetCreated}>
-            Tạo Sheets
+          <Button variant="contained" sx={{ width: "fit-content" }} onClick={downloadXlsx}>
+            Download XLSX file
           </Button>
-          {isGgSheetCreated && (
-            <Typography>
-              Link nè:{" "}
-              <a href={isGgSheetCreated} target="_blank" rel="noopener noreferrer">
-                {isGgSheetCreated}
-              </a>
-            </Typography>
-          )}
 
           {Object.entries(allFileNames).map(([folderName, folderContent], folderIndex) => (
             <Box key={folderIndex} mb={4}>
