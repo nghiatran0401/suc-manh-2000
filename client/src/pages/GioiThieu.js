@@ -29,8 +29,16 @@ export default function GioiThieu() {
           <br />
           Tham gia chung tay cùng Sức mạnh 2000 (bất kể mệnh giá) tại:
           <br /> <strong>Website:</strong> http://sucmanh2000.com/
-          <br /> <strong>Hotline:</strong> Hoàng Hoa Trung 0975302307
-          <br /> <strong>Email:</strong> Sucmanh2000.doingoai@gmail.com
+          <br /> <strong>Hotline:</strong> 
+            <ul>
+              <li>Hoàng Hoa Trung 0975302307</li>
+              <li>Nguyễn Thị Hiền 0986832256</li>
+            </ul>
+          <strong>Email:</strong> 
+            <ul>
+              <li>duansucmanh2000@gmail.com</li>
+              <li>niemtingroup@gmail.com</li>
+            </ul>
           <br />
           <br />
           Tiến độ chương trình và danh sách người tham gia được cập nhật hàng ngày và hiển thị công khai trên website.
@@ -51,8 +59,16 @@ export default function GioiThieu() {
           <br />
           Donate to The Power of VND 2000 (regardless of value) at:
           <br /> <strong>Website:</strong> http://sucmanh2000.com/
-          <br /> <strong>Hotline:</strong> Hoang Hoa Trung +84 975302307
-          <br /> <strong>Email:</strong> Sucmanh2000.doingoai@gmail.com
+          <br /> <strong>Hotline:</strong> 
+            <ul>
+              <li>Hoang Hoa Trung +84 975302307</li>
+              <li>Nguyen Thi Hien +84 986832256</li>
+            </ul>
+          <strong>Email:</strong> 
+            <ul>
+              <li>duansucmanh2000@gmail.com</li>
+              <li>niemtingroup@gmail.com</li>
+            </ul>
           <br />
           <br />
           Program schedule and participant list are updated daily and displayed publicly on the website.
