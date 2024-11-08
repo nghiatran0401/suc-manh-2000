@@ -9,6 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "../components/FilterList";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
+import SortMenu from "../components/SortMenu";
 
 export default function PostList() {
   const theme = useTheme();
@@ -309,6 +310,7 @@ export default function PostList() {
           setProvince={(value) => setFilters({ ...filters, province: value })}
           provinceCount={provinceCount}
         />
+        <SortMenu/>
       </Box>
 
       <Typography variant="body1" textAlign={"right"} mr={"16px"}>

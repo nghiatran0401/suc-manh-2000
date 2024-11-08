@@ -10,6 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FilterList from "../components/FilterList";
 import usePostFilter from "../hooks/usePostFilter";
+import SortMenu from "../components/SortMenu";
 
 export default function PostList() {
   const { category } = useParams();
@@ -250,6 +251,7 @@ export default function PostList() {
             setProvince={(value) => setFilters({ ...filters, province: value })}
             provinceCount={provinceCount}
           />
+          <SortMenu/>
         </Box>
       )}
 

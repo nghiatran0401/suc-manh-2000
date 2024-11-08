@@ -15,6 +15,7 @@ import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "./FilterList";
 import usePostFilter from "../hooks/usePostFilter";
+import SortMenu from "./SortMenu";
 
 export default function HeaderBar() {
   const navigate = useNavigate();
@@ -173,6 +174,7 @@ export default function HeaderBar() {
                 setProvince={(value) => setFilters({ ...filters, province: value })}
                 provinceCount={general.province}
               />
+              <SortMenu/>
             </Box>
 
             <Button
