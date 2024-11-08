@@ -195,8 +195,111 @@ async function getHoanCanhDescription(folderId: string) {
   }
 }
 
+async function getAllFileNames(folderId: string) {
+  if (!folderId) {
+    console.error(`Invalid folderId: ${folderId}`);
+    return undefined;
+  }
+
+  await ensureRefreshToken();
+
+  const allFileNames: any = {};
+
+  async function fetchFilesRecursively(currentFolderId: string, parent: any) {
+    try {
+      const res: any = await drive.files.list({
+        auth: auth,
+        q: `'${currentFolderId}' in parents`,
+        fields: "files(id, name, mimeType, parents, createdTime)",
+      });
+
+      const subfolders = res.data.files.filter((file: any) => file.mimeType === "application/vnd.google-apps.folder");
+      const files = res.data.files.filter((file: any) => ["image/jpeg", "image/png"].includes(file.mimeType));
+
+      // Add image files to the current parent object
+      parent.files = files.map((file: any) => ({
+        name: file.name,
+        imageUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
+      }));
+
+      // Recursively fetch files from subfolders
+      for (const subfolder of subfolders) {
+        parent[subfolder.name] = {}; // Create a new key for the subfolder
+        await fetchFilesRecursively(subfolder.id, parent[subfolder.name]);
+      }
+    } catch (err) {
+      console.error(`[fetchFilesRecursively] - ${currentFolderId} - error: ` + err);
+    }
+  }
+
+  await fetchFilesRecursively(folderId, allFileNames);
+
+  return allFileNames;
+}
+
+async function createGoogleSheet(allFileNames: any[]) {
+  const sheets = google.sheets("v4");
+
+  const data: any = [];
+  for (let key in allFileNames) {
+    if (key !== "files") {
+      const tempArr = allFileNames[key]["files"].map((o: any) => ({ folder: key, ...o }));
+      data.push(tempArr);
+    }
+  }
+
+  const now = new Date();
+  const formattedDateTime = now
+    .toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+    .replace(/[/,]/g, "-")
+    .replace(/ /g, "_");
+
+  try {
+    const request = {
+      auth: auth,
+      resource: {
+        properties: {
+          title: formattedDateTime,
+        },
+        sheets: [
+          {
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [{ userEnteredValue: { stringValue: "Folder ID" } }, { userEnteredValue: { stringValue: "Name" } }, { userEnteredValue: { stringValue: "Image URL" } }],
+                  },
+                  ...data.flat().map((row: any) => ({
+                    values: Object.values(row).map((value) => ({
+                      userEnteredValue: { stringValue: String(value) },
+                    })),
+                  })),
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const response = await sheets.spreadsheets.create(request);
+    return response.data.spreadsheetUrl;
+  } catch (error) {
+    console.error("Error creating Google Sheet:", error);
+    throw error;
+  }
+}
+
 // getProjectProgress("19nwDFNisLjZb5g0YLFLmJ65QiGaq73zn").then((res) => {
 //   console.log("Done!", res?.thumbnailImage);
 // });
 
-export { getProjectProgress, getHoanCanhDescription };
+export { getProjectProgress, getHoanCanhDescription, getAllFileNames, createGoogleSheet };

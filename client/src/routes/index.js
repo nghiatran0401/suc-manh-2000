@@ -4,6 +4,7 @@ import GioiThieu from "../pages/GioiThieu";
 import PostList from "../pages/PostList";
 import PostDetails from "../pages/PostDetails";
 import Search from "../pages/Search";
+import ChamPhamTool from "../pages/ChamPhamTool";
 
 export const routes = [
   {
@@ -13,6 +14,10 @@ export const routes = [
   {
     path: "/gioi-thieu",
     element: <GioiThieu />,
+  },
+  {
+    path: "/cham_pham_tool",
+    element: <ChamPhamTool />,
   },
   {
     path: "/:category",
