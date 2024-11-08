@@ -54,7 +54,7 @@ export default function Footer() {
             <div className="content-footer">
               <Typography>P702 - 62 Bà Triệu - TW Đoàn</Typography>
               <Typography>Điện thoại: 0975 302 307 | 0986 832 256</Typography>
-              <Typography sx={{ wordWrap: "break-word" }}>Email: niemtingroup@gmail.com</Typography>
+              <Typography sx={{ wordWrap: "break-word" }}>Email: niemtingroup@gmail.com | duansucmanh2000@gmail.com</Typography>
             </div>
           </Grid>
         </Grid>
