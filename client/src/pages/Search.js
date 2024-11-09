@@ -11,7 +11,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "../components/SortList";
 
-export default function PostList() {
+export default function Search() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -30,6 +30,7 @@ export default function PostList() {
   const { filters, setFilters } = usePostFilter();
   const [provinceCount, setProvinceCount] = useState({});
   const scrollRef = useRef(null);
+  const [sortValue, setSortValue] = useState("");
 
   // get total stats data
   useEffect(() => {
@@ -58,6 +59,13 @@ export default function PostList() {
     if (classification) setFilters({ ...filters, classification: classification });
     if (totalFund) setFilters({ ...filters, totalFund: totalFund });
     if (province) setFilters({ ...filters, province: province });
+  }, [urlSearchParams]);
+
+  // for applying sort into url params
+  useEffect(() => {
+    const sortValue = urlSearchParams.get("sortField");
+
+    if (sortValue) setSortValue(sortValue);
   }, [urlSearchParams]);
 
   // for fetching data from server with/without filters
@@ -92,6 +100,10 @@ export default function PostList() {
       urlSearchParams.set("province", filters.province);
     }
 
+    if (sortValue) {
+      urlSearchParams.set("sortField", sortValue);
+    }
+
     setUrlSearchParams(urlSearchParams);
     setSearchValue(searchParams);
     fetchSearchData();
@@ -102,7 +114,7 @@ export default function PostList() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, searchParams, filters]);
+  }, [urlSearchParams, searchParams, filters, sortValue]);
 
   const fetchSearchData = () => {
     setLoading(true);
@@ -127,13 +139,19 @@ export default function PostList() {
       setUrlSearchParams(urlSearchParams);
     }
 
-    setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
+    if (sortValue) {
+      urlSearchParams.set("sortField", sortValue);
+      setUrlSearchParams(urlSearchParams);
+    }
+
+    setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all", sortField: sortValue });
 
     urlSearchParams.delete("category");
     urlSearchParams.delete("classification");
     urlSearchParams.delete("totalFund");
     urlSearchParams.delete("status");
     urlSearchParams.delete("province");
+    urlSearchParams.delete("sortField");
     setUrlSearchParams(urlSearchParams);
   };
 
@@ -310,7 +328,9 @@ export default function PostList() {
           setProvince={(value) => setFilters({ ...filters, province: value })}
           provinceCount={provinceCount}
         />
-        <SortList/>
+        <SortList
+          setSortField={(value) => setSortValue(value)}
+        />
       </Box>
 
       <Typography variant="body1" textAlign={"right"} mr={"16px"}>

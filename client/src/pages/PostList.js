@@ -28,6 +28,7 @@ export default function PostList() {
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
   const [provinceCount, setProvinceCount] = useState({});
+  const [sortValue, setSortValue] = useState("");
 
   const scrollRef = useRef(null);
   const isProject = category.includes("du-an");
@@ -45,6 +46,14 @@ export default function PostList() {
     if (classification) setFilters({ ...filters, classification: classification });
     if (totalFund) setFilters({ ...filters, totalFund: totalFund });
     if (province) setFilters({ ...filters, province: province });
+  }, [urlSearchParams]);
+
+  // for applying sort into url params
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const sortFieldValue = urlSearchParams.get('sortField');
+
+    if (sortFieldValue) setSortValue(sortFieldValue);
   }, [urlSearchParams]);
 
   // for fetching data from server with/without filters
@@ -76,7 +85,7 @@ export default function PostList() {
     setUrlSearchParams(urlSearchParams);
 
     axios
-      .get(SERVER_URL + "/" + category, { params: { filters } })
+      .get(SERVER_URL + "/" + category, { params: { filters, sortField: sortValue } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
@@ -94,7 +103,7 @@ export default function PostList() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, category, filters]);
+  }, [urlSearchParams, category, filters, sortValue]);
 
   return (
     <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
@@ -251,7 +260,9 @@ export default function PostList() {
             setProvince={(value) => setFilters({ ...filters, province: value })}
             provinceCount={provinceCount}
           />
-          <SortList/>
+          <SortList
+            setSortField={(value) => setSortValue(value)}
+          />
         </Box>
       )}
 
