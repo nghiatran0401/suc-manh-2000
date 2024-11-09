@@ -30,6 +30,7 @@ export default function HeaderBar() {
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
+  const [sortValue, setSortValue] = useState("");
 
   useEffect(() => {
     Promise.all([axios.get(SERVER_URL + "/getTotalStatisticsCount"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
@@ -58,7 +59,8 @@ export default function HeaderBar() {
       if (filters.status !== "all") q += `&status=${filters.status}`;
       if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
       if (filters.province !== "all") q += `&province=${filters.province}`;
-
+      if (sortValue) q += `&sortField=${sortValue}`;
+      
       navigate(q);
     } else {
       navigate("/search");
@@ -67,6 +69,7 @@ export default function HeaderBar() {
     e.preventDefault();
     setOpenSearch(false);
     setSearchValue("");
+    setSortValue("");
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -174,7 +177,9 @@ export default function HeaderBar() {
                 setProvince={(value) => setFilters({ ...filters, province: value })}
                 provinceCount={general.province}
               />
-              <SortList/>
+              <SortList
+                setSortField={(value) => setSortValue(value)}
+              />
             </Box>
 
             <Button
