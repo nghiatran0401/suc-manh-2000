@@ -1,5 +1,5 @@
 import React from "react";
-import { StyledSelectComponent } from "./StyledComponent";
+import { StyledSelectComponent, SELECT_TYPE } from "./StyledComponent";
 import { sortOptionsMapping } from "../constants";
 
 const SortList = (props) => {
@@ -15,6 +15,7 @@ const SortList = (props) => {
         label,
         value,
       }))}
+      selectType={SELECT_TYPE.SORT}
     />
   );
 };
