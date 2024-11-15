@@ -17,7 +17,6 @@ const scriptRouter = express.Router();
 // 2. Dự án đã khởi công nhưng chưa có tiến độ
 // 3. Dự án đang được xây dựng
 // 4. Dự án đã hoàn thiện
-// 5. Dự án đã khánh thành
 
 scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => {
   const requestedYears = ["2023", "2024"];
@@ -161,7 +160,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     2: { name: "Dự án đã khởi công nhưng chưa có tiến độ", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
     3: { name: "Dự án đang được xây dựng", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
     4: { name: "Dự án đã hoàn thiện", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
-    5: { name: "Dự án đã khánh thành", list: { Trường: [], "Khu Nội Trú": [], "Nhà Hạnh Phúc": [], Cầu: [] } },
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
@@ -218,16 +216,9 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             }
 
             // 4. Dự án đã hoàn thiện
-            if (docData.status === "dang-xay-dung" && airtableData.rawStatus === "13. Chuẩn bị khánh thành: in banner +2-3 Bảng A3") {
+            if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
               if (!orders[4].list[airtableData.classification]) return;
               orders[4].list[airtableData.classification].push({ name: airtableData.name });
-              return;
-            }
-
-            // 5. Dự án đã khánh thành
-            if (docData.status === "dang-xay-dung" && airtableData.rawStatus === "14. Hoàn công + chuyển tiền L2 NTT") {
-              if (!orders[5].list[airtableData.classification]) return;
-              orders[5].list[airtableData.classification].push({ name: airtableData.name });
               return;
             }
           }
@@ -302,20 +293,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     const section4 = orders[4];
     htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section4.list) as any).flat().length} ${section4.name}</strong></p>`;
     for (const [classification, projectList] of Object.entries(section4.list) as any) {
-      if (projectList.length > 0) {
-        htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
-        htmlContent += `<ol style="padding-left: 20px;">`;
-        for (const project of projectList) {
-          htmlContent += `<li>${project.name}</li>`;
-        }
-        htmlContent += `</ol>`;
-      }
-    }
-
-    // 5. Dự án đã khánh thành
-    const section5 = orders[5];
-    htmlContent += `<p style="font-size: 1.5rem;"><strong>${(Object.values(section5.list) as any).flat().length} ${section5.name}</strong></p>`;
-    for (const [classification, projectList] of Object.entries(section5.list) as any) {
       if (projectList.length > 0) {
         htmlContent += `<p style="margin-top: revert;"><strong>${classification}</strong></p>`;
         htmlContent += `<ol style="padding-left: 20px;">`;
@@ -795,7 +772,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               // 3. Dự án cập nhật thêm ảnh
               progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
               // 4. Dự án cập nhật ảnh đại diện
-              thumbnail: isImagesUpdated ? projectThumbnail : docData.thumbnail,
+              thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
               // 5. Dự án cập nhật phiếu khảo sát
               contentNew: {
                 tabs:
