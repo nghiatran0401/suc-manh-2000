@@ -16,10 +16,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "./FilterList";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "./SortList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function HeaderBar() {
   const navigate = useNavigate();
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const autocompleteRef = useRef();
@@ -30,7 +33,6 @@ export default function HeaderBar() {
   const [openSearch, setOpenSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
-  const [sortValue, setSortValue] = useState("");
 
   useEffect(() => {
     Promise.all([axios.get(SERVER_URL + "/getTotalStatisticsCount"), axios.get(SERVER_URL + "/getTotalProjectsCount")])
@@ -59,8 +61,7 @@ export default function HeaderBar() {
       if (filters.status !== "all") q += `&status=${filters.status}`;
       if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
       if (filters.province !== "all") q += `&province=${filters.province}`;
-      if (sortValue) q += `&sortField=${sortValue}`;
-      
+      if (sortField) q += `&sortField=${sortField}`;
       navigate(q);
     } else {
       navigate("/search");
@@ -69,7 +70,7 @@ export default function HeaderBar() {
     e.preventDefault();
     setOpenSearch(false);
     setSearchValue("");
-    setSortValue("");
+    setSortField(sortField);
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -178,7 +179,7 @@ export default function HeaderBar() {
                 provinceCount={general.province}
               />
               <SortList
-                setSortField={(value) => setSortValue(value)}
+                setSortField={(value) => setSortField(value)}
               />
             </Box>
 
