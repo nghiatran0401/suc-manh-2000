@@ -10,6 +10,7 @@ import FilterList from "../components/FilterList";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "../components/SortList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function Search() {
   const theme = useTheme();
@@ -28,15 +29,16 @@ export default function Search() {
 
   const [searchValue, setSearchValue] = useState(searchParams);
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
+  
   const [provinceCount, setProvinceCount] = useState({});
   const scrollRef = useRef(null);
-  const [sortValue, setSortValue] = useState("");
 
   // get total stats data
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + "/search", { params: { filters } })
+      .get(SERVER_URL + "/search", { params: { filters, sortField } })
       .then((postsResponse) => {
         setStatsData(postsResponse.data.stats);
         setTotalPosts(postsResponse.data.totalPosts);
@@ -63,12 +65,12 @@ export default function Search() {
 
   // for applying sort into url params
   useEffect(() => {
-    const sortValue = urlSearchParams.get("sortField");
+    const sortField = urlSearchParams.get("sortField");
 
-    if (sortValue) setSortValue(sortValue);
+    if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters
+  // for fetching data from server with/without filters and with sort
   useEffect(() => {
     if (filters.category === "all") {
       urlSearchParams.delete("category");
@@ -100,8 +102,8 @@ export default function Search() {
       urlSearchParams.set("province", filters.province);
     }
 
-    if (sortValue) {
-      urlSearchParams.set("sortField", sortValue);
+    if (sortField) {
+      urlSearchParams.set("sortField", sortField);
     }
 
     setUrlSearchParams(urlSearchParams);
@@ -114,7 +116,7 @@ export default function Search() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, searchParams, filters, sortValue]);
+  }, [urlSearchParams, searchParams, filters, sortField]);
 
   const fetchSearchData = () => {
     setLoading(true);
@@ -139,12 +141,8 @@ export default function Search() {
       setUrlSearchParams(urlSearchParams);
     }
 
-    if (sortValue) {
-      urlSearchParams.set("sortField", sortValue);
-      setUrlSearchParams(urlSearchParams);
-    }
-
-    setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all", sortField: sortValue });
+    setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
+    setSortField("createdAt");
 
     urlSearchParams.delete("category");
     urlSearchParams.delete("classification");
@@ -329,7 +327,7 @@ export default function Search() {
           provinceCount={provinceCount}
         />
         <SortList
-          setSortField={(value) => setSortValue(value)}
+          setSortField={(value) => setSortField(value)}
         />
       </Box>
 
