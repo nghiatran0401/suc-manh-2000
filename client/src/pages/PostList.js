@@ -11,6 +11,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FilterList from "../components/FilterList";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "../components/SortList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function PostList() {
   const { category } = useParams();
@@ -18,6 +19,7 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
 
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
@@ -28,7 +30,6 @@ export default function PostList() {
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
   const [provinceCount, setProvinceCount] = useState({});
-  const [sortValue, setSortValue] = useState("");
 
   const scrollRef = useRef(null);
   const isProject = category.includes("du-an");
@@ -51,12 +52,12 @@ export default function PostList() {
   // for applying sort into url params
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    const sortFieldValue = urlSearchParams.get('sortField');
+    const sortField = urlSearchParams.get('sortField');
 
-    if (sortFieldValue) setSortValue(sortFieldValue);
+    if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters
+  // for fetching data from server with/without filters and with sort
   useEffect(() => {
     if (filters.classification === "all") {
       urlSearchParams.delete("classification");
@@ -82,10 +83,14 @@ export default function PostList() {
       urlSearchParams.set("province", filters.province);
     }
 
+    if (sortField) {
+      urlSearchParams.set("sortField", sortField);
+    }
+
     setUrlSearchParams(urlSearchParams);
 
     axios
-      .get(SERVER_URL + "/" + category, { params: { filters, sortField: sortValue } })
+      .get(SERVER_URL + "/" + category, { params: { filters, sortField } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
@@ -103,7 +108,7 @@ export default function PostList() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, category, filters, sortValue]);
+  }, [urlSearchParams, category, filters, sortField]);
 
   return (
     <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
@@ -261,7 +266,7 @@ export default function PostList() {
             provinceCount={provinceCount}
           />
           <SortList
-            setSortField={(value) => setSortValue(value)}
+            setSortField={(value) => setSortField(value)}
           />
         </Box>
       )}
