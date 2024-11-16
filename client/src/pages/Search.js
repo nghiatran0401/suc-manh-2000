@@ -108,6 +108,7 @@ export default function Search() {
 
     setUrlSearchParams(urlSearchParams);
     setSearchValue(searchParams);
+    setSortField(sortField);
     fetchSearchData();
 
     if (scrollRef.current && posts.length > 0) {
@@ -142,14 +143,13 @@ export default function Search() {
     }
 
     setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
-    setSortField("createdAt");
+    setSortField(sortField);
 
     urlSearchParams.delete("category");
     urlSearchParams.delete("classification");
     urlSearchParams.delete("totalFund");
     urlSearchParams.delete("status");
     urlSearchParams.delete("province");
-    urlSearchParams.delete("sortField");
     setUrlSearchParams(urlSearchParams);
   };
 
