@@ -86,6 +86,6 @@ async function indexFirestoreDocsToRedis() {
   process.exit(0);
 }
 
-indexFirestoreDocsToRedis();
+// indexFirestoreDocsToRedis();
 
 export default indexFirestoreDocsToRedis;
