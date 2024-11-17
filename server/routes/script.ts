@@ -13,8 +13,9 @@ const scriptRouter = express.Router();
 
 scriptRouter.get("/oauth2callback", async (req: Request, res: Response) => {
   const code = req.query.code as string;
+
   try {
-    await saveGoogleAuthRefreshToken(code);
+    await saveGoogleAuthRefreshToken(decodeURIComponent(code));
     res.redirect(`${process.env.ADMIN_URL}/thong-bao?googleOauthSuccess=true`);
   } catch (err: any) {
     res.status(500).send({ error: `[oauth2callback] failed: ${err.response ? err.response.data : err.message}` });
@@ -866,6 +867,13 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
 scriptRouter.post("/chamPhamTool", async (req: Request, res: Response) => {
   const { folderId } = req.body;
+
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
+
   try {
     const allFileNames = await getAllFileNames(folderId);
     res.header("Access-Control-Allow-Origin", "*");

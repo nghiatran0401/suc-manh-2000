@@ -9,24 +9,28 @@ const drive = google.drive("v3");
 const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL + "/script/oauth2callback");
 
 function generateAuthUrl() {
-  const urlObj = { access_type: "offline", scope: ["https://www.googleapis.com/auth/drive"] };
+  const urlObj = { access_type: "offline", scope: ["https://www.googleapis.com/auth/drive"], prompt: "consent" };
   return auth.generateAuthUrl(urlObj);
 }
 
 async function saveGoogleAuthRefreshToken(code: string) {
-  const { tokens } = await auth.getToken(code);
-  auth.setCredentials(tokens);
+  try {
+    const { tokens } = await auth.getToken(code);
+    auth.setCredentials(tokens);
 
-  if (tokens.refresh_token) {
-    const querySnapshot = await firestore.collection("credentials").get();
-    if (querySnapshot.docs.length > 0) {
-      const batch = firestore.batch();
-      querySnapshot.docs.forEach((doc) => batch.delete(doc.ref));
-      await batch.commit();
+    if (tokens.refresh_token) {
+      const querySnapshot = await firestore.collection("credentials").get();
+      if (querySnapshot.docs.length > 0) {
+        const batch = firestore.batch();
+        querySnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+      }
+      const newId = uuidv4().replace(/-/g, "").substring(0, 20);
+      const postDocRef = firestore.collection("credentials").doc(newId);
+      await postDocRef.set({ google_auth_refresh_token: tokens.refresh_token });
     }
-    const newId = uuidv4().replace(/-/g, "").substring(0, 20);
-    const postDocRef = firestore.collection("credentials").doc(newId);
-    await postDocRef.set({ google_auth_refresh_token: tokens.refresh_token });
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -206,7 +210,7 @@ async function getAllFileNames(folderId: string) {
 
       // Add image files to the current parent object
       parent.files = files.map((file: any) => ({
-        name: file.name,
+        name: file.name.replace(/^\d+|\.jpe?g$|\.png$/gi, "").trim(),
         imageUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
       }));
 

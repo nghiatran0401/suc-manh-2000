@@ -97,7 +97,8 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
               if (resAirErrors.status === 200) {
                 if (resAirErrors.data.authUrl) {
-                  window.location.href = resAirErrors.data.authUrl;
+                  window.location.href = decodeURIComponent(resAirErrors.data.authUrl);
+                  return;
                 }
 
                 Modal.success({
@@ -239,18 +240,15 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-          {/* @ts-ignore */}
-          {import.meta.env.VITE_CURRENT_ENV === "Development" && (
-            <SaveButton
-              icon={<AlertOutlined />}
-              loading={confirmLoading}
-              disabled={confirmLoading}
-              onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
-              style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
-            >
-              Tạo báo cáo lỗi Airtable
-            </SaveButton>
-          )}
+          <SaveButton
+            icon={<AlertOutlined />}
+            loading={confirmLoading}
+            disabled={confirmLoading}
+            onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
+            style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
+          >
+            Tạo báo cáo lỗi Airtable
+          </SaveButton>
 
           <SaveButton
             icon={<SketchOutlined />}
