@@ -8,6 +8,7 @@ import { fetchAirtableRecords } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/googledrive";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
+import { updateFirestoreCountsCollection } from "../utils/updateFirestoreCountsCollection";
 
 const scriptRouter = express.Router();
 
@@ -218,7 +219,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             // 1. Dự án mới khởi công
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
-              orders[1].list[airtableData.classification].push({ name: airtableData.name });
+              orders[1].list[airtableData.classification].push({ name: airtableData.projectInitName });
               return;
             }
 
@@ -227,21 +228,21 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
-              orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteZalo: airtableData.progressNoteZalo });
+              orders[2].list[airtableData.classification].push({ name: airtableData.projectInitName, progressNoteZalo: airtableData.progressNoteZalo });
               return;
             }
 
             // 3. Dự án đang được xây dựng
             if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
-              orders[3].list[airtableData.classification].push({ name: airtableData.name });
+              orders[3].list[airtableData.classification].push({ name: airtableData.projectInitName });
               return;
             }
 
             // 4. Dự án đã hoàn thiện
             if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
               if (!orders[4].list[airtableData.classification]) return;
-              orders[4].list[airtableData.classification].push({ name: airtableData.name });
+              orders[4].list[airtableData.classification].push({ name: airtableData.projectInitName });
               return;
             }
           }
@@ -407,7 +408,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             // 1. Dự án mới khởi công
             if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
               if (!orders[1].list[airtableData.classification]) return;
-              orders[1].list[airtableData.classification].push({ name: airtableData.name });
+              orders[1].list[airtableData.classification].push({ name: airtableData.projectInitName });
               return;
             }
 
@@ -416,15 +417,15 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
               if (!orders[2].list[airtableData.classification]) return;
-              orders[2].list[airtableData.classification].push({ name: airtableData.name, progressNoteWeb: airtableData.progressNoteWeb });
+              orders[2].list[airtableData.classification].push({ name: airtableData.projectInitName, progressNoteWeb: airtableData.progressNoteWeb });
               return;
             }
 
             // 3. Dự án đang được xây dựng
             if (airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
               if (!orders[3].list[airtableData.classification]) return;
-              orders[3].list[airtableData.classification].push({ name: airtableData.name, projectThumbnail: projectThumbnail });
-              slideshowImages.push({ caption: airtableData.name, image: projectThumbnail });
+              orders[3].list[airtableData.classification].push({ name: airtableData.projectInitName, projectThumbnail: projectThumbnail });
+              slideshowImages.push({ caption: airtableData.projectInitName, image: projectThumbnail });
               return;
             }
           }
@@ -856,6 +857,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
       });
       await Promise.all(cancelledProjectsPromises);
     }
+    await updateFirestoreCountsCollection();
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
