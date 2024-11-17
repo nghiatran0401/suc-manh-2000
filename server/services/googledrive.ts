@@ -1,63 +1,60 @@
 import { google } from "googleapis";
+import { firestore } from "../firebase";
 import * as path from "path";
+import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-import * as readline from "readline";
-import * as fs from "fs";
-import * as XLSX from "xlsx";
 
 const drive = google.drive("v3");
-const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL);
+const auth = new google.auth.OAuth2(process.env.GOOGLE_API_CLIENT_ID, process.env.GOOGLE_API_CLIENT_SECRET, process.env.SERVER_URL + "/script/oauth2callback");
 
-function initiateReauthentication() {
-  const authUrl = auth.generateAuthUrl({
-    access_type: "offline",
-    scope: ["https://www.googleapis.com/auth/drive"],
-  });
-
-  console.log("Authorize this app by visiting this url:", authUrl);
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  rl.question("Enter the authorization code here: ", async (code) => {
-    rl.close();
-    try {
-      const { tokens } = await auth.getToken(code);
-      auth.setCredentials(tokens);
-      console.log("Refresh Token:", tokens.refresh_token);
-    } catch (err: any) {
-      console.error("Failed to exchange authorization code for tokens: ", err.response ? err.response.data : err.message);
-    }
-  });
+function generateAuthUrl() {
+  const urlObj = { access_type: "offline", scope: ["https://www.googleapis.com/auth/drive"], prompt: "consent" };
+  return auth.generateAuthUrl(urlObj);
 }
 
-async function ensureRefreshToken() {
-  const refreshToken = process.env.GOOGLE_API_REFRESH_TOKEN;
+async function saveGoogleAuthRefreshToken(code: string) {
+  try {
+    const { tokens } = await auth.getToken(code);
+    auth.setCredentials(tokens);
+
+    if (tokens.refresh_token) {
+      const querySnapshot = await firestore.collection("credentials").get();
+      if (querySnapshot.docs.length > 0) {
+        const batch = firestore.batch();
+        querySnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+      }
+      const newId = uuidv4().replace(/-/g, "").substring(0, 20);
+      const postDocRef = firestore.collection("credentials").doc(newId);
+      await postDocRef.set({ google_auth_refresh_token: tokens.refresh_token });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function checkIfRefreshTokenValid() {
+  const querySnapshot = await firestore.collection("credentials").get();
+  if (querySnapshot.empty) return false;
+  const firstDoc = querySnapshot.docs[0];
+  const firstDocData = firstDoc.data();
+  const refreshToken = firstDocData?.google_auth_refresh_token;
 
   if (refreshToken) {
-    auth.setCredentials({ refresh_token: refreshToken });
-
     try {
-      const newToken = await auth.getAccessToken();
-      if (newToken.token) {
-        auth.setCredentials({ access_token: newToken.token, refresh_token: refreshToken });
-      } else {
-        console.error("Failed to obtain a new access token. Response:", newToken);
+      auth.setCredentials({ refresh_token: refreshToken });
+      const newTokens = await auth.getAccessToken();
+      if (newTokens.token) {
+        auth.setCredentials({ access_token: newTokens.token, refresh_token: refreshToken });
+        return true;
       }
     } catch (err: any) {
-      if (err.response && err.response.data.error === "invalid_grant") {
-        console.error("Refresh token expired or revoked. Initiating reauthentication.");
-        initiateReauthentication();
-      } else {
-        console.error("Failed to refresh access token: ", err.response ? err.response.data : err.message);
-      }
+      console.error("Failed to refresh access token: ", err.response ? err.response.data : err.message);
+      return false;
     }
-  } else {
-    console.error("No refresh token available. Cannot obtain a new access token.");
   }
+  return false;
 }
 
 async function getProjectProgress(folderId: string) {
@@ -65,8 +62,6 @@ async function getProjectProgress(folderId: string) {
     console.error(`Sai GD folderId: ${folderId}`);
     return undefined;
   }
-
-  await ensureRefreshToken();
 
   const order = ["hiện trạng", "khởi công", "tiến độ", "hoàn th"];
   const anhHienTrang: any = [];
@@ -166,8 +161,6 @@ async function getHoanCanhDescription(folderId: string) {
     return undefined;
   }
 
-  await ensureRefreshToken();
-
   try {
     const res: any = await drive.files.list({
       auth: auth,
@@ -202,8 +195,6 @@ async function getAllFileNames(folderId: string) {
     return undefined;
   }
 
-  await ensureRefreshToken();
-
   const allFileNames: any = {};
 
   async function fetchFilesRecursively(currentFolderId: string, parent: any) {
@@ -219,7 +210,7 @@ async function getAllFileNames(folderId: string) {
 
       // Add image files to the current parent object
       parent.files = files.map((file: any) => ({
-        name: file.name,
+        name: file.name.replace(/^\d+|\.jpe?g$|\.png$/gi, "").trim(),
         imageUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
       }));
 
@@ -238,8 +229,4 @@ async function getAllFileNames(folderId: string) {
   return allFileNames;
 }
 
-// getProjectProgress("19nwDFNisLjZb5g0YLFLmJ65QiGaq73zn").then((res) => {
-//   console.log("Done!", res?.thumbnailImage);
-// });
-
-export { getProjectProgress, getHoanCanhDescription, getAllFileNames };
+export { generateAuthUrl, saveGoogleAuthRefreshToken, checkIfRefreshTokenValid, getProjectProgress, getHoanCanhDescription, getAllFileNames };

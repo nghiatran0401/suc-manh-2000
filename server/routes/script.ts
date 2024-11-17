@@ -5,11 +5,22 @@ import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
 import { fetchAirtableRecords } from "../services/airtable";
-import { getProjectProgress, getHoanCanhDescription, getAllFileNames } from "../services/googledrive";
+import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/googledrive";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
 const scriptRouter = express.Router();
+
+scriptRouter.get("/oauth2callback", async (req: Request, res: Response) => {
+  const code = req.query.code as string;
+
+  try {
+    await saveGoogleAuthRefreshToken(decodeURIComponent(code));
+    res.redirect(`${process.env.ADMIN_URL}/thong-bao?googleOauthSuccess=true`);
+  } catch (err: any) {
+    res.status(500).send({ error: `[oauth2callback] failed: ${err.response ? err.response.data : err.message}` });
+  }
+});
 
 // Báo cáo tiến độ
 // 0. Thống kê số liệu
@@ -26,6 +37,12 @@ scriptRouter.post("/findAirtableErrors", async (req: Request, res: Response) => 
     "DA không có ảnh hiện trạng": [],
   };
   const BATCH_SIZE = 25;
+
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
 
   try {
     for (const requestedYear of requestedYears) {
@@ -163,6 +180,12 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
+
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
 
   try {
     for (const requestedYear of requestedYears) {
@@ -342,6 +365,12 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
   let htmlContent = ``;
   const slideshowImages: { image: string; caption: string }[] = [];
   const BATCH_SIZE = 25;
+
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
 
   try {
     for (const requestedYear of requestedYears) {
@@ -529,6 +558,12 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
   let htmlContent = ``;
   const BATCH_SIZE = 25;
 
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
+
   try {
     for (const requestedYear of requestedYears) {
       const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
@@ -682,6 +717,12 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
   const requestedYears = ["2024"];
   const BATCH_SIZE = 25;
 
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
+
   try {
     for (const requestedYear of requestedYears) {
       const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirtableRecords(requestedYear);
@@ -826,9 +867,15 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
 scriptRouter.post("/chamPhamTool", async (req: Request, res: Response) => {
   const { folderId } = req.body;
+
+  const valid = await checkIfRefreshTokenValid();
+  if (!valid) {
+    const authUrl = generateAuthUrl();
+    res.status(200).send({ authUrl: authUrl });
+  }
+
   try {
     const allFileNames = await getAllFileNames(folderId);
-
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send(allFileNames);
   } catch (error: any) {

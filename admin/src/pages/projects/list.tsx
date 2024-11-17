@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
 import { useTable, List, EditButton, DeleteButton, SaveButton, useEditableTable } from "@refinedev/antd";
 import { Table, Space, Input, Form, Modal } from "antd";
@@ -29,10 +29,20 @@ function standardizePostTitle(str: string) {
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
   const translate = useTranslate();
+  const location = useLocation();
   const { pathname } = useLocation();
   const collectionName = pathname.split("/")[1];
   const isProject = collectionName.includes("du-an");
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const googleOauthSuccess = queryParams.get("googleOauthSuccess");
+    if (googleOauthSuccess === "true") {
+      const baseUrl = window.location.origin + window.location.pathname;
+      window.location.href = baseUrl;
+    }
+  }, []);
 
   const { tableProps, searchFormProps } = useTable<ProjectPost, HttpError, ISearch>({
     syncWithLocation: true,
@@ -86,6 +96,11 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               console.timeEnd("findAirtableErrors");
 
               if (resAirErrors.status === 200) {
+                if (resAirErrors.data.authUrl) {
+                  window.location.href = decodeURIComponent(resAirErrors.data.authUrl);
+                  return;
+                }
+
                 Modal.success({
                   width: 900,
                   title: resAirErrors.data.name,
@@ -126,6 +141,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               console.timeEnd("tienDoZalo");
 
               if (resZalo.status === 200) {
+                if (resZalo.data.authUrl) {
+                  window.location.href = resZalo.data.authUrl;
+                }
+
                 Modal.success({
                   width: 900,
                   title: resZalo.data.name,
@@ -144,6 +163,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               console.timeEnd("tienDoweb");
 
               if (resWeb.status === 200) {
+                if (resWeb.data.authUrl) {
+                  window.location.href = resWeb.data.authUrl;
+                }
+
                 Modal.success({
                   title: "Done!!!",
                   onOk: () => window.location.reload(),
@@ -157,6 +180,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               console.timeEnd("webReport");
 
               if (resWebReport.status === 200) {
+                if (resWebReport.data.authUrl) {
+                  window.location.href = resWebReport.data.authUrl;
+                }
+
                 Modal.success({
                   width: 900,
                   title: resWebReport.data.name,
@@ -175,6 +202,10 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
               console.timeEnd("syncAirAndWeb");
 
               if (resSync.status === 200) {
+                if (resSync.data.authUrl) {
+                  window.location.href = resSync.data.authUrl;
+                }
+
                 Modal.success({
                   title: "Done!!!",
                   onOk: () => window.location.reload(),
@@ -187,7 +218,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
           }
         } catch (error: any) {
           console.error(error);
-          Modal.error({ content: `Lỗi: ${error.mesage}` });
+          Modal.error({ content: `Lỗi: ${error}` });
         } finally {
           setConfirmLoading(false);
         }
@@ -209,18 +240,15 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-          {/* @ts-ignore */}
-          {import.meta.env.VITE_CURRENT_ENV === "Development" && (
-            <SaveButton
-              icon={<AlertOutlined />}
-              loading={confirmLoading}
-              disabled={confirmLoading}
-              onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
-              style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
-            >
-              Tạo báo cáo lỗi Airtable
-            </SaveButton>
-          )}
+          <SaveButton
+            icon={<AlertOutlined />}
+            loading={confirmLoading}
+            disabled={confirmLoading}
+            onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
+            style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
+          >
+            Tạo báo cáo lỗi Airtable
+          </SaveButton>
 
           <SaveButton
             icon={<SketchOutlined />}

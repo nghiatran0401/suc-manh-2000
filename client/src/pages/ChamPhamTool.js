@@ -63,11 +63,10 @@ export default function ChamPhamTool() {
           alignItems: "center",
           width: "100%",
         }}
-        // onSubmit={onSearch}
       >
         <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Nhập link Google Drive ạ" inputProps={{ "aria-label": "search" }} value={ggDriveUrl} onChange={(e) => setGgDriveUrl(e.target.value)} />
 
-        <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
+        <IconButton type="button" sx={{ p: "10px" }} aria-label="search" disabled={!ggDriveUrl} onClick={onSearch}>
           <SearchIcon sx={{ color: "red" }} />
         </IconButton>
       </Paper>
