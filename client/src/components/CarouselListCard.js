@@ -10,6 +10,7 @@ import logoWorking from "../assets/working.png";
 import charityMoneyIcon from "../assets/charity-money.png";
 import Carousel from "react-material-ui-carousel";
 import SM2000 from "../assets/companions/SM2000.svg";
+import { provincesAndCitiesObj } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
   minHeight: "300px",
@@ -111,7 +112,7 @@ export default function CarouselListCard(props) {
 
                         {post.province && (
                           <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                            {post.province}
+                            {provincesAndCitiesObj[post.province] ? provincesAndCitiesObj[post.province] : post.province}{" "}
                           </Typography>
                         )}
                       </Box>

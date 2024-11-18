@@ -28,6 +28,8 @@ const INDEX_SCHEMA = [
   "TAG",
   "status",
   "TAG",
+  "statusOrder",
+  "TAG",
   "totalFund",
   "NUMERIC",
   "province",
@@ -62,6 +64,12 @@ async function removeSearchIndexAndDocuments() {
 }
 
 async function upsertDocumentToIndex(data: any) {
+  const statusOrderMap: Record<string, number> = {
+    "can-quyen-gop": 1,
+    "dang-xay-dung": 2,
+    "da-hoan-thanh": 3,
+  };
+
   try {
     await redis.call(
       "FT.ADD",
@@ -88,10 +96,12 @@ async function upsertDocumentToIndex(data: any) {
       data.classification,
       "status",
       data.status,
+      "statusOrder",
+      statusOrderMap[data.status] || 0,
       "totalFund",
       data.totalFund,
       "province",
-      data.location?.province
+      convertToCleanedName(data.location?.province)
     );
   } catch (error: any) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);
@@ -102,11 +112,7 @@ async function removeDocumentFromIndex(data: any) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
 }
 
-async function redisSearchByName(
-  q: any,
-  filters: any,
-  sortField?: any,
-) {
+async function redisSearchByName(q: any, filters: any, sortField?: any) {
   let query = "";
   const args = [];
   const needAllProjects = !q && Object.keys(filters).length === 0;
@@ -163,7 +169,21 @@ async function redisSearchByName(
   args.push(query);
 
   // Apply sorting
-  applySortByInRedis(args, sortField);
+  const sortDirection = sortField === "createdAt" ? "DESC" : "ASC";
+  switch (sortField) {
+    case "createdAt":
+      args.push("SORTBY", "category", "DESC");
+      break;
+    case "status":
+      args.push("SORTBY", "statusOrder", "ASC");
+      break;
+    case "totalFund":
+      args.push("SORTBY", "totalFund", "ASC");
+      break;
+    default:
+      args.push("SORTBY", "category", "DESC");
+      break;
+  }
 
   args.push("LIMIT", 0, 10000);
 
@@ -191,23 +211,10 @@ async function redisSearchByName(
   return { cachedResultData: transformedResults, totalValuesLength: transformedResults.length, statsData, provinceCount };
 }
 
-async function getValuesByCategoryInRedis(
-  category: any,
-  filters: any,
-  start: any,
-  end: any,
-  sortField: any,
-) {
+async function getValuesByCategoryInRedis(category: any, filters: any, start: any, end: any, sortField: any) {
   try {
     const categoryPostsKeyPattern = `post:${category}:*`;
-    let sortedPosts: any = [];
-    if (sortField) {
-      sortedPosts = await getRedisDataWithKeyPattern(
-        categoryPostsKeyPattern, sortField
-      );
-    } else {
-      sortedPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
-    }
+    let sortedPosts: any = await getRedisDataWithKeyPattern(categoryPostsKeyPattern, sortField);
 
     // Scenario 1: Return a sorted array from start to end point
     if (start !== undefined && end !== undefined) {
@@ -281,30 +288,22 @@ async function delValueInRedis(key: string) {
   }
 }
 
-const getRedisDataWithKeyPattern = async (
-  categoryPostsKeyPattern: string,
-  sortField?: string,
-) => {
+const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string, sortField?: string | undefined) => {
   const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
 
   const pipeline = redis.pipeline();
   categoryPostKeys.forEach((key) => pipeline.hgetall(key));
   const results: any = await pipeline.exec();
 
-  const posts = results
-    .map(([err, postData]: [any, any]) => {
-      if (err) {
-        console.error(`Error fetching data for key: ${err}`);
-        return null;
-      }
-      return postData;
-    });
+  const posts = results.map(([err, postData]: [any, any]) => {
+    if (err) {
+      console.error(`Error fetching data for key: ${err}`);
+      return null;
+    }
+    return postData;
+  });
 
-  if (sortField) {
-    return applySorting(posts, sortField);
-  }
-
-  return posts;
+  return applySorting(posts, sortField);
 };
 
 const getStatsData = (posts: any) => {
@@ -379,40 +378,24 @@ const applyFilters = (values: any, filters: any) => {
   });
 };
 
-const applySorting = (data: any[], sortField: string): any[] => {
+const applySorting = (data: any[], sortField?: string | undefined): any[] => {
   return data.sort((a, b) => {
-    if (sortField === 'createdAt') {
+    if (sortField === undefined || sortField === "createdAt") {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    } else if (sortField === 'totalFund') {
+    } else if (sortField === "totalFund") {
       return a.totalFund - b.totalFund;
-    } else if (sortField === 'status') {
+    } else if (sortField === "status") {
       const orderMap: Record<string, number> = {
-        'can-quyen-gop': 1,
-        'dang-xay-dung': 2,
-        'da-hoan-thanh': 3
+        "can-quyen-gop": 1,
+        "dang-xay-dung": 2,
+        "da-hoan-thanh": 3,
       };
-
       return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
     } else {
       return 0;
     }
-  })
-}
-
-const applySortByInRedis = (args: string[], sortField?: string) => {
-  if (!sortField) {
-    args.push('SORTBY', 'category', 'DESC');
-    return args;
-  }
-
-  if (!args.includes('SORTBY')) {
-    const sortDirection = (sortField === 'createdAt') ? 'DESC' : 'ASC';
-
-    args.push('SORTBY', sortField, sortDirection);
-  }
-
-  return args;
-}
+  });
+};
 
 export {
   INDEX_NAME,

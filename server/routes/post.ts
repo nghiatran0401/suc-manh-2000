@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import { firestore, firebase } from "../firebase";
 import { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } from "../services/redis";
 import { v4 as uuidv4 } from "uuid";
+import { convertToCleanedName } from "../utils/search";
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -165,7 +166,7 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000,
         location: {
-          province: updatedPost.province ?? docData.location?.province,
+          province: updatedPost.province ?? convertToCleanedName(docData.location?.province),
         },
         donor: {
           description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,

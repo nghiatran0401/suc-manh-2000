@@ -1,6 +1,8 @@
 import React from "react";
 import { StyledSelectComponent, SELECT_TYPE } from "./StyledComponent";
 import { categoryMapping, classificationMapping, totalFundMapping, statusMapping } from "../constants";
+import { convertToCleanedName } from "../helpers";
+import { provincesAndCitiesObj } from "../vietnam-provinces";
 
 const FilterList = (props) => {
   const { category, setCategory, classification, setClassification, totalFund, setTotalFund, status, setStatus, province, setProvince, provinceCount } = props;
@@ -56,11 +58,11 @@ const FilterList = (props) => {
       {province && (
         <StyledSelectComponent
           label="Tỉnh"
-          value={Object.entries(provinceCount).find(([p, count]) => p === province) ? { label: province, value: province } : null}
-          onChange={(option) => setProvince(option.value)}
+          value={province !== "all" ? { label: provincesAndCitiesObj[province], value: province } : null}
+          onChange={(option) => setProvince(convertToCleanedName(option.value))}
           options={Object.entries(provinceCount)
             .sort(([, countA], [, countB]) => countB - countA)
-            .map(([p, count]) => ({ label: `${p} (${count})`, value: p }))}
+            .map(([p, count]) => ({ label: `${provincesAndCitiesObj[p]} (${count})`, value: convertToCleanedName(p) }))}
           selectType={SELECT_TYPE.FILTER}
         />
       )}

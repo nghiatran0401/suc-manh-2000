@@ -8,6 +8,7 @@ import logoFinish from "../assets/finish.png";
 import logoDonate from "../assets/donate.png";
 import logoWorking from "../assets/working.png";
 import SM2000 from "../assets/companions/SM2000.svg";
+import { provincesAndCitiesObj } from "../vietnam-provinces";
 
 const Card = styled(MuiCard)({
   minHeight: "300px",
@@ -91,7 +92,7 @@ export default function CardList(props) {
               )}
               {post.province && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(237, 233, 157, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {post.province}
+                  {provincesAndCitiesObj[post.province] ? provincesAndCitiesObj[post.province] : post.province}
                 </Typography>
               )}
               {post.category && window.location.href.includes("/search") && (

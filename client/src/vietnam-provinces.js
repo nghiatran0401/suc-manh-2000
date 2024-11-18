@@ -391,10 +391,10 @@ export const provincesAndCities = [
     distanceToHCMC: 1962,
     distanceToHN: 183,
   },
-].sort((a, b) => a.province.localeCompare(b.province));
+];
 
-export const provincesAndCitiesObj = provincesAndCities.reduce((acc: any, { province }) => {
-  const cleanedName: any = convertToCleanedName(province);
+export const provincesAndCitiesObj = provincesAndCities.reduce((acc, { province }) => {
+  const cleanedName = convertToCleanedName(province);
   acc[cleanedName] = province;
   return acc;
 }, {});

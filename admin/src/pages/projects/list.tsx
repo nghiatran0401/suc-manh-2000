@@ -9,6 +9,7 @@ import { capitalizeEachWord } from "../../utils/helpers";
 import axios from "axios";
 import RichTextEditor from "../../components/RichTextEditor";
 import { ProjectPost } from "../../../../index";
+import { provincesAndCitiesObj } from "../../utils/vietnam-provinces";
 
 interface ISearch {
   name: string;
@@ -309,7 +310,11 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         {isProject && <Table.Column title={translate("post.fields.status")} dataIndex="status" render={(_, record: BaseRecord) => <Space>{statusMapping[record.status as keyof typeof statusMapping] ?? "N/A"}</Space>} />}
 
         {isProject && (
-          <Table.Column title={translate("post.fields.province")} dataIndex="province" render={(_, record: BaseRecord) => <Space>{record.province ? record.province : <span style={{ color: "red" }}>N/A</span>}</Space>} />
+          <Table.Column
+            title={translate("post.fields.province")}
+            dataIndex="province"
+            render={(_, record: BaseRecord) => <Space>{provincesAndCitiesObj[record?.province] ? provincesAndCitiesObj[record?.province] : <span style={{ color: "red" }}>N/A</span>}</Space>}
+          />
         )}
 
         <Table.Column
