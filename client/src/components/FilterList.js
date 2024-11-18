@@ -1,6 +1,8 @@
 import React from "react";
-import { StyledSelectComponent } from "./StyledComponent";
+import { StyledSelectComponent, SELECT_TYPE } from "./StyledComponent";
 import { categoryMapping, classificationMapping, totalFundMapping, statusMapping } from "../constants";
+import { convertToCleanedName } from "../helpers";
+import { provincesAndCitiesObj } from "../vietnam-provinces";
 
 const FilterList = (props) => {
   const { category, setCategory, classification, setClassification, totalFund, setTotalFund, status, setStatus, province, setProvince, provinceCount } = props;
@@ -15,6 +17,7 @@ const FilterList = (props) => {
           options={Object.entries(categoryMapping)
             .filter(([v, l]) => v.includes("du-an"))
             .map(([value, label]) => ({ label, value }))}
+          selectType={SELECT_TYPE.FILTER}
         />
       )}
 
@@ -28,6 +31,7 @@ const FilterList = (props) => {
           }
           onChange={(option) => setClassification(option.value)}
           options={Object.entries(classificationMapping).map(([value, label]) => ({ label, value }))}
+          selectType={SELECT_TYPE.FILTER}
         />
       )}
 
@@ -37,6 +41,7 @@ const FilterList = (props) => {
           value={Object.entries(totalFundMapping).find(([value, label]) => value === totalFund) ? { label: Object.entries(totalFundMapping).find(([value, label]) => value === totalFund)[1], value: totalFund } : null}
           onChange={(option) => setTotalFund(option.value)}
           options={Object.entries(totalFundMapping).map(([value, label]) => ({ label, value }))}
+          selectType={SELECT_TYPE.FILTER}
         />
       )}
 
@@ -46,17 +51,19 @@ const FilterList = (props) => {
           value={Object.entries(statusMapping).find(([value, label]) => value === status) ? { label: Object.entries(statusMapping).find(([value, label]) => value === status)[1], value: status } : null}
           onChange={(option) => setStatus(option.value)}
           options={Object.entries(statusMapping).map(([value, label]) => ({ label, value }))}
+          selectType={SELECT_TYPE.FILTER}
         />
       )}
 
       {province && (
         <StyledSelectComponent
           label="Tỉnh"
-          value={Object.entries(provinceCount).find(([p, count]) => p === province) ? { label: province, value: province } : null}
-          onChange={(option) => setProvince(option.value)}
+          value={province !== "all" ? { label: provincesAndCitiesObj[province], value: province } : null}
+          onChange={(option) => setProvince(convertToCleanedName(option.value))}
           options={Object.entries(provinceCount)
             .sort(([, countA], [, countB]) => countB - countA)
-            .map(([p, count]) => ({ label: `${p} (${count})`, value: p }))}
+            .map(([p, count]) => ({ label: `${provincesAndCitiesObj[p]} (${count})`, value: convertToCleanedName(p) }))}
+          selectType={SELECT_TYPE.FILTER}
         />
       )}
     </>

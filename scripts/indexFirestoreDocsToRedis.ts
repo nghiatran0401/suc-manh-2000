@@ -3,6 +3,7 @@ import { convertToCleanedName } from "./utils";
 import dotenv from "dotenv";
 dotenv.config();
 import Redis from "ioredis";
+
 const redis = new Redis(process.env.REDIS_URL as string);
 
 const INDEX_NAME = "post_index";
@@ -26,6 +27,8 @@ const INDEX_SCHEMA = [
   "TAG",
   "status",
   "TAG",
+  "statusOrder",
+  "TAG",
   "totalFund",
   "NUMERIC",
   "province",
@@ -45,6 +48,12 @@ async function indexFirestoreDocsToRedis() {
         ...doc.data(),
         collection_id: collection.id,
         doc_id: doc.id,
+      };
+
+      const statusOrderMap: Record<string, number> = {
+        "can-quyen-gop": 1,
+        "dang-xay-dung": 2,
+        "da-hoan-thanh": 3,
       };
 
       await redis.call(
@@ -72,10 +81,12 @@ async function indexFirestoreDocsToRedis() {
         data.classification,
         "status",
         data.status,
+        "statusOrder",
+        statusOrderMap[data.status] || 0,
         "totalFund",
         data.totalFund,
         "province",
-        data.location?.province
+        convertToCleanedName(data.location?.province)
       );
     });
 

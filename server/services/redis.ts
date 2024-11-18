@@ -28,6 +28,8 @@ const INDEX_SCHEMA = [
   "TAG",
   "status",
   "TAG",
+  "statusOrder",
+  "TAG",
   "totalFund",
   "NUMERIC",
   "province",
@@ -62,6 +64,12 @@ async function removeSearchIndexAndDocuments() {
 }
 
 async function upsertDocumentToIndex(data: any) {
+  const statusOrderMap: Record<string, number> = {
+    "can-quyen-gop": 1,
+    "dang-xay-dung": 2,
+    "da-hoan-thanh": 3,
+  };
+
   try {
     await redis.call(
       "FT.ADD",
@@ -88,10 +96,12 @@ async function upsertDocumentToIndex(data: any) {
       data.classification,
       "status",
       data.status,
+      "statusOrder",
+      statusOrderMap[data.status] || 0,
       "totalFund",
       data.totalFund,
       "province",
-      data.location?.province
+      convertToCleanedName(data.location?.province)
     );
   } catch (error: any) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);
@@ -102,7 +112,7 @@ async function removeDocumentFromIndex(data: any) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
 }
 
-async function redisSearchByName(q: any, filters: any) {
+async function redisSearchByName(q: any, filters: any, sortField?: any) {
   let query = "";
   const args = [];
   const needAllProjects = !q && Object.keys(filters).length === 0;
@@ -157,7 +167,24 @@ async function redisSearchByName(q: any, filters: any) {
   }
 
   args.push(query);
-  args.push("SORTBY", "category", "DESC");
+
+  // Apply sorting
+  const sortDirection = sortField === "createdAt" ? "DESC" : "ASC";
+  switch (sortField) {
+    case "createdAt":
+      args.push("SORTBY", "category", "DESC");
+      break;
+    case "status":
+      args.push("SORTBY", "statusOrder", "ASC");
+      break;
+    case "totalFund":
+      args.push("SORTBY", "totalFund", "ASC");
+      break;
+    default:
+      args.push("SORTBY", "category", "DESC");
+      break;
+  }
+
   args.push("LIMIT", 0, 10000);
 
   const results: any = await redis.call(...(args as [string, ...any[]]));
@@ -184,34 +211,34 @@ async function redisSearchByName(q: any, filters: any) {
   return { cachedResultData: transformedResults, totalValuesLength: transformedResults.length, statsData, provinceCount };
 }
 
-async function getValuesByCategoryInRedis(category: any, filters: any, start: any, end: any) {
+async function getValuesByCategoryInRedis(category: any, filters: any, start: any, end: any, sortField: any) {
   try {
     const categoryPostsKeyPattern = `post:${category}:*`;
-    const sortedCategoryPosts = await getRedisDataWithKeyPattern(categoryPostsKeyPattern);
+    let sortedPosts: any = await getRedisDataWithKeyPattern(categoryPostsKeyPattern, sortField);
 
     // Scenario 1: Return a sorted array from start to end point
     if (start !== undefined && end !== undefined) {
-      const parsedItems = sortedCategoryPosts.slice(start, end);
+      const parsedItems = sortedPosts.slice(start, end);
       return { cachedResultData: parsedItems, totalValuesLength: parsedItems.length };
     }
 
     // Scenario 2: Return a searched values array in admin
     if (Array.isArray(filters) && filters[0]) {
       const q = JSON.parse(filters[0]).value;
-      if (!q) return { cachedResultData: sortedCategoryPosts, totalValuesLength: sortedCategoryPosts.length };
+      if (!q) return { cachedResultData: sortedPosts, totalValuesLength: sortedPosts.length };
       const searchedResults = await redisSearchByName(q, { category });
       return searchedResults; // { cachedResultData: searchedResults, totalValuesLength: searchedResults.length };
     }
 
     // Scenario 3: Return a sorted array with the stats and/or filters operations
-    let filteredValues = [...sortedCategoryPosts];
+    let filteredValues = [...sortedPosts];
     if (filters && Object.keys(filters).length > 0 && !Object.values(filters).every((f) => f === "all")) {
-      filteredValues = applyFilters(sortedCategoryPosts, filters);
+      filteredValues = applyFilters(sortedPosts, filters);
     }
 
-    const statsData = getStatsData(sortedCategoryPosts);
-    const provinceCount = getProvinceCount(sortedCategoryPosts);
-    return { cachedResultData: filteredValues, totalValuesLength: sortedCategoryPosts.length, statsData, provinceCount };
+    const statsData = getStatsData(sortedPosts);
+    const provinceCount = getProvinceCount(sortedPosts);
+    return { cachedResultData: filteredValues, totalValuesLength: sortedPosts.length, statsData, provinceCount };
   } catch (error: any) {
     console.error("Error getting values from Redis:", error.message);
     throw error;
@@ -261,24 +288,22 @@ async function delValueInRedis(key: string) {
   }
 }
 
-const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string) => {
+const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string, sortField?: string | undefined) => {
   const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
 
   const pipeline = redis.pipeline();
   categoryPostKeys.forEach((key) => pipeline.hgetall(key));
   const results: any = await pipeline.exec();
 
-  const posts = results
-    .map(([err, postData]: [any, any]) => {
-      if (err) {
-        console.error(`Error fetching data for key: ${err}`);
-        return null;
-      }
-      return postData;
-    })
-    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const posts = results.map(([err, postData]: [any, any]) => {
+    if (err) {
+      console.error(`Error fetching data for key: ${err}`);
+      return null;
+    }
+    return postData;
+  });
 
-  return posts;
+  return applySorting(posts, sortField);
 };
 
 const getStatsData = (posts: any) => {
@@ -350,6 +375,25 @@ const applyFilters = (values: any, filters: any) => {
       const itemValue = getNestedValue(item, key);
       return itemValue === filterValue;
     });
+  });
+};
+
+const applySorting = (data: any[], sortField?: string | undefined): any[] => {
+  return data.sort((a, b) => {
+    if (sortField === undefined || sortField === "createdAt") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sortField === "totalFund") {
+      return a.totalFund - b.totalFund;
+    } else if (sortField === "status") {
+      const orderMap: Record<string, number> = {
+        "can-quyen-gop": 1,
+        "dang-xay-dung": 2,
+        "da-hoan-thanh": 3,
+      };
+      return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
+    } else {
+      return 0;
+    }
   });
 };
 

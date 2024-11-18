@@ -9,8 +9,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "../components/FilterList";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
+import SortList from "../components/SortList";
+import usePostSort from "../hooks/usePostSort";
 
-export default function PostList() {
+export default function Search() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -27,6 +29,8 @@ export default function PostList() {
 
   const [searchValue, setSearchValue] = useState(searchParams);
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
+
   const [provinceCount, setProvinceCount] = useState({});
   const scrollRef = useRef(null);
 
@@ -34,7 +38,7 @@ export default function PostList() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + "/search", { params: { filters } })
+      .get(SERVER_URL + "/search", { params: { filters, sortField } })
       .then((postsResponse) => {
         setStatsData(postsResponse.data.stats);
         setTotalPosts(postsResponse.data.totalPosts);
@@ -46,53 +50,52 @@ export default function PostList() {
 
   // for applying filters into url params
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     const category = urlSearchParams.get("category");
-    const classification = urlSearchParams.get("classification");
     const status = urlSearchParams.get("status");
+    const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
+    const sortField = urlSearchParams.get("sortField");
 
-    if (category) setFilters({ ...filters, category: category });
-    if (status) setFilters({ ...filters, status: status });
-    if (classification) setFilters({ ...filters, classification: classification });
-    if (totalFund) setFilters({ ...filters, totalFund: totalFund });
-    if (province) setFilters({ ...filters, province: province });
+    if (category) setFilters((prevFilters) => ({ ...prevFilters, category }));
+    if (status) setFilters((prevFilters) => ({ ...prevFilters, status }));
+    if (classification) setFilters((prevFilters) => ({ ...prevFilters, classification }));
+    if (totalFund) setFilters((prevFilters) => ({ ...prevFilters, totalFund }));
+    if (province) setFilters((prevFilters) => ({ ...prevFilters, province }));
+    if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters
+  // for fetching data from server with/without filters and with sort
   useEffect(() => {
-    if (filters.category === "all") {
-      urlSearchParams.delete("category");
-    } else if (filters.category) {
-      urlSearchParams.set("category", filters.category);
+    const newUrlSearchParams = new URLSearchParams();
+
+    if (filters.category && filters.category !== "all") {
+      newUrlSearchParams.set("category", filters.category);
+    }
+    if (filters.classification && filters.classification !== "all") {
+      newUrlSearchParams.set("classification", filters.classification);
+    }
+    if (filters.status && filters.status !== "all") {
+      newUrlSearchParams.set("status", filters.status);
+    }
+    if (filters.totalFund && filters.totalFund !== "all") {
+      newUrlSearchParams.set("totalFund", filters.totalFund);
+    }
+    if (filters.province && filters.province !== "all") {
+      newUrlSearchParams.set("province", filters.province);
+    }
+    if (sortField && sortField !== "createdAt") {
+      newUrlSearchParams.set("sortField", sortField);
     }
 
-    if (filters.classification === "all") {
-      urlSearchParams.delete("classification");
-    } else if (filters.classification) {
-      urlSearchParams.set("classification", filters.classification);
+    // Only update URL search params if they have changed
+    if (newUrlSearchParams.toString() !== urlSearchParams.toString()) {
+      setUrlSearchParams(newUrlSearchParams);
     }
 
-    if (filters.status === "all") {
-      urlSearchParams.delete("status");
-    } else if (filters.status) {
-      urlSearchParams.set("status", filters.status);
-    }
-
-    if (filters.totalFund === "all") {
-      urlSearchParams.delete("totalFund");
-    } else if (filters.totalFund) {
-      urlSearchParams.set("totalFund", filters.totalFund);
-    }
-
-    if (filters.province === "all") {
-      urlSearchParams.delete("province");
-    } else if (filters.province) {
-      urlSearchParams.set("province", filters.province);
-    }
-
-    setUrlSearchParams(urlSearchParams);
     setSearchValue(searchParams);
+    setSortField(sortField);
     fetchSearchData();
 
     if (scrollRef.current && posts.length > 0) {
@@ -101,12 +104,12 @@ export default function PostList() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, searchParams, filters]);
+  }, [filters, sortField]);
 
   const fetchSearchData = () => {
     setLoading(true);
     axios
-      .get(SERVER_URL + window.location.pathname + window.location.search, { params: { filters } })
+      .get(SERVER_URL + "/search", { params: { filters, sortField } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setLoading(false);
@@ -127,6 +130,7 @@ export default function PostList() {
     }
 
     setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
+    setSortField(sortField);
 
     urlSearchParams.delete("category");
     urlSearchParams.delete("classification");
@@ -295,6 +299,7 @@ export default function PostList() {
         </IconButton>
       </Paper>
 
+      {/* Filters and Sort */}
       <Box display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
         <FilterList
           category={filters.category}
@@ -309,6 +314,7 @@ export default function PostList() {
           setProvince={(value) => setFilters({ ...filters, province: value })}
           provinceCount={provinceCount}
         />
+        <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />{" "}
       </Box>
 
       <Typography variant="body1" textAlign={"right"} mr={"16px"}>

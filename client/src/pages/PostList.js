@@ -10,6 +10,8 @@ import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FilterList from "../components/FilterList";
 import usePostFilter from "../hooks/usePostFilter";
+import SortList from "../components/SortList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function PostList() {
   const { category } = useParams();
@@ -17,6 +19,7 @@ export default function PostList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
 
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
@@ -32,50 +35,49 @@ export default function PostList() {
   const isProject = category.includes("du-an");
   const title = findTitle(HEADER_DROPDOWN_LIST, "/" + category);
 
-  // for applying filters into url params
+  // for applying filters/sort into url params
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
+    const sortField = urlSearchParams.get("sortField");
 
-    if (status) setFilters({ ...filters, status: status });
-    if (classification) setFilters({ ...filters, classification: classification });
-    if (totalFund) setFilters({ ...filters, totalFund: totalFund });
-    if (province) setFilters({ ...filters, province: province });
+    if (status) setFilters((prevFilters) => ({ ...prevFilters, status }));
+    if (classification) setFilters((prevFilters) => ({ ...prevFilters, classification }));
+    if (totalFund) setFilters((prevFilters) => ({ ...prevFilters, totalFund }));
+    if (province) setFilters((prevFilters) => ({ ...prevFilters, province }));
+    if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters
+  // for fetching data from server with/without filters/sort
   useEffect(() => {
-    if (filters.classification === "all") {
-      urlSearchParams.delete("classification");
-    } else if (filters.classification) {
-      urlSearchParams.set("classification", filters.classification);
+    const newUrlSearchParams = new URLSearchParams();
+
+    if (filters.classification && filters.classification !== "all") {
+      newUrlSearchParams.set("classification", filters.classification);
+    }
+    if (filters.status && filters.status !== "all") {
+      newUrlSearchParams.set("status", filters.status);
+    }
+    if (filters.totalFund && filters.totalFund !== "all") {
+      newUrlSearchParams.set("totalFund", filters.totalFund);
+    }
+    if (filters.province && filters.province !== "all") {
+      newUrlSearchParams.set("province", filters.province);
+    }
+    if (sortField && sortField !== "createdAt") {
+      newUrlSearchParams.set("sortField", sortField);
     }
 
-    if (filters.status === "all") {
-      urlSearchParams.delete("status");
-    } else if (filters.status) {
-      urlSearchParams.set("status", filters.status);
+    // Only update URL search params if they have changed
+    if (newUrlSearchParams.toString() !== urlSearchParams.toString()) {
+      setUrlSearchParams(newUrlSearchParams);
     }
-
-    if (filters.totalFund === "all") {
-      urlSearchParams.delete("totalFund");
-    } else if (filters.totalFund) {
-      urlSearchParams.set("totalFund", filters.totalFund);
-    }
-
-    if (filters.province === "all") {
-      urlSearchParams.delete("province");
-    } else if (filters.province) {
-      urlSearchParams.set("province", filters.province);
-    }
-
-    setUrlSearchParams(urlSearchParams);
 
     axios
-      .get(SERVER_URL + "/" + category, { params: { filters } })
+      .get(SERVER_URL + "/" + category, { params: { filters, sortField } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
@@ -93,7 +95,7 @@ export default function PostList() {
         behavior: "smooth",
       });
     }
-  }, [urlSearchParams, category, filters]);
+  }, [category, filters, sortField]);
 
   return (
     <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
@@ -236,7 +238,7 @@ export default function PostList() {
         </Grid>
       )}
 
-      {/* Filters */}
+      {/* Filters and Sort */}
       {isProject && (
         <Box ref={scrollRef} display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
           <FilterList
@@ -250,6 +252,7 @@ export default function PostList() {
             setProvince={(value) => setFilters({ ...filters, province: value })}
             provinceCount={provinceCount}
           />
+          <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />
         </Box>
       )}
 

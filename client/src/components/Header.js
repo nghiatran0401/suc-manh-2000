@@ -15,10 +15,14 @@ import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "./FilterList";
 import usePostFilter from "../hooks/usePostFilter";
+import SortList from "./SortList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function HeaderBar() {
   const navigate = useNavigate();
   const { filters, setFilters } = usePostFilter();
+  const { sortField, setSortField } = usePostSort();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const autocompleteRef = useRef();
@@ -57,7 +61,7 @@ export default function HeaderBar() {
       if (filters.status !== "all") q += `&status=${filters.status}`;
       if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
       if (filters.province !== "all") q += `&province=${filters.province}`;
-
+      if (sortField) q += `&sortField=${sortField}`;
       navigate(q);
     } else {
       navigate("/search");
@@ -66,6 +70,7 @@ export default function HeaderBar() {
     e.preventDefault();
     setOpenSearch(false);
     setSearchValue("");
+    setSortField(sortField);
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -172,6 +177,9 @@ export default function HeaderBar() {
                 province={filters.province}
                 setProvince={(value) => setFilters({ ...filters, province: value })}
                 provinceCount={general.province}
+              />
+              <SortList
+                setSortField={(value) => setSortField(value)}
               />
             </Box>
 

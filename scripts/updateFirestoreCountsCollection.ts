@@ -1,4 +1,5 @@
 import { firestore } from "./firebase";
+import { convertToCleanedName } from "./utils";
 
 async function updateFirestoreCountsCollection() {
   let classificationCounts = {};
@@ -12,7 +13,7 @@ async function updateFirestoreCountsCollection() {
       const data = doc.data();
       const classification = data.classification;
       const category = data.category;
-      const province = data.location?.province;
+      const province = convertToCleanedName(data.location?.province);
 
       if (classification) {
         if (!classificationCounts[classification]) {

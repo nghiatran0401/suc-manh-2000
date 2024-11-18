@@ -98,7 +98,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
       "totalFund",
       mockData.totalFund,
       "province",
-      mockData.location?.province
+      convertToCleanedName(mockData.location?.province)
     );
   });
 
