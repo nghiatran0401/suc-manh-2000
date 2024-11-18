@@ -59,7 +59,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
     category: "category1",
     classification: "classification1",
     status: "active",
-    statusOrder: "1",
+    statusOrder: 0,
     totalFund: 1000,
     location: { province: "province1" },
   };
@@ -96,7 +96,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
       mockData.classification,
       "status",
       mockData.status,
-      "status",
+      "statusOrder",
       mockData.statusOrder,
       "totalFund",
       mockData.totalFund,
