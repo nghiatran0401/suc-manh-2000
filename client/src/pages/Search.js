@@ -50,13 +50,14 @@ export default function Search() {
 
   // for applying filters into url params
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
     const category = urlSearchParams.get("category");
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
     const sortField = urlSearchParams.get("sortField");
+    console.log("here", sortField);
 
     if (category) setFilters((prevFilters) => ({ ...prevFilters, category }));
     if (status) setFilters((prevFilters) => ({ ...prevFilters, status }));
@@ -70,6 +71,9 @@ export default function Search() {
   useEffect(() => {
     const newUrlSearchParams = new URLSearchParams();
 
+    if (searchValue) {
+      newUrlSearchParams.set("q", searchValue);
+    }
     if (filters.category && filters.category !== "all") {
       newUrlSearchParams.set("category", filters.category);
     }
@@ -94,8 +98,8 @@ export default function Search() {
       setUrlSearchParams(newUrlSearchParams);
     }
 
-    setSearchValue(searchParams);
-    setSortField(sortField);
+    // setSearchValue(searchParams);
+    // setSortField(sortField);
     fetchSearchData();
 
     if (scrollRef.current && posts.length > 0) {
@@ -109,7 +113,7 @@ export default function Search() {
   const fetchSearchData = () => {
     setLoading(true);
     axios
-      .get(SERVER_URL + "/search", { params: { filters, sortField } })
+      .get(SERVER_URL + window.location.pathname + window.location.search, { params: { filters, sortField } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
         setLoading(false);
@@ -121,16 +125,8 @@ export default function Search() {
     e.preventDefault();
     fetchSearchData();
 
-    if (searchValue) {
-      urlSearchParams.set("q", searchValue);
-      setUrlSearchParams(urlSearchParams);
-    } else {
-      urlSearchParams.delete("q");
-      setUrlSearchParams(urlSearchParams);
-    }
-
     setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
-    setSortField(sortField);
+    // setSortField(sortField);
 
     urlSearchParams.delete("category");
     urlSearchParams.delete("classification");
@@ -314,7 +310,7 @@ export default function Search() {
           setProvince={(value) => setFilters({ ...filters, province: value })}
           provinceCount={provinceCount}
         />
-        <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />{" "}
+        <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />
       </Box>
 
       <Typography variant="body1" textAlign={"right"} mr={"16px"}>

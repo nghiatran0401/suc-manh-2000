@@ -54,18 +54,21 @@ export default function HeaderBar() {
   }, [openSearch]);
 
   const onSearch = (e) => {
+    let q = `/search`;
+
     if (searchValue) {
-      let q = `/search?q=${searchValue.replace(/\s/g, "+")}`;
-      if (filters.category !== "all") q += `&category=${filters.category}`;
-      if (filters.classification !== "all") q += `&classification=${filters.classification}`;
-      if (filters.status !== "all") q += `&status=${filters.status}`;
-      if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
-      if (filters.province !== "all") q += `&province=${filters.province}`;
-      if (sortField) q += `&sortField=${sortField}`;
-      navigate(q);
+      q += `?q=${searchValue.replace(/\s/g, "+")}`;
     } else {
-      navigate("/search");
+      q += `?q=`;
     }
+
+    if (filters.category !== "all") q += `&category=${filters.category}`;
+    if (filters.classification !== "all") q += `&classification=${filters.classification}`;
+    if (filters.status !== "all") q += `&status=${filters.status}`;
+    if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
+    if (filters.province !== "all") q += `&province=${filters.province}`;
+    if (sortField !== "createdAt") q += `&sortField=${sortField}`;
+    navigate(q);
 
     e.preventDefault();
     setOpenSearch(false);
@@ -164,6 +167,7 @@ export default function HeaderBar() {
               <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Tìm kiếm theo tên Dự án" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             </Paper>
 
+            {/* Filters and Sort */}
             <Box display={"flex"} gap={"12px"} flexWrap={"wrap"} m={"16px"}>
               <FilterList
                 category={filters.category}
@@ -178,9 +182,7 @@ export default function HeaderBar() {
                 setProvince={(value) => setFilters({ ...filters, province: value })}
                 provinceCount={general.province}
               />
-              <SortList
-                setSortField={(value) => setSortField(value)}
-              />
+              <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />{" "}
             </Box>
 
             <Button
