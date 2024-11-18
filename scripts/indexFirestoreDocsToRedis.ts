@@ -3,7 +3,8 @@ import { convertToCleanedName } from "./utils";
 import dotenv from "dotenv";
 dotenv.config();
 import Redis from "ioredis";
-const redis = new Redis(process.env.REDIS_URL ?? "");
+
+const redis = new Redis(process.env.REDIS_URL as string);
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
