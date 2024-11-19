@@ -395,7 +395,10 @@ export default function CardDetails(props) {
                 <Box>--------------</Box>
                 {Boolean(post.totalFund) && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: 
+                    <span style={{ color: "#F5222D" }}>
+                      {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+                    </span>
                   </Typography>
                 )}
                 {post.donors?.length > 0 && (
