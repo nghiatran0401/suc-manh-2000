@@ -5,7 +5,7 @@ import { standardizeString, convertToYoutubeUrl } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusLogoMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -126,18 +126,38 @@ export default function CardDetails(props) {
             </Typography>
           )}
           {post.status !== undefined && (
-            <Typography
-              variant="body2"
-              fontWeight={600}
+            <Box
+              display="flex"
+              alignItems="center"
               sx={{
-                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 102, 102, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                bgcolor: post.status === "can-quyen-gop"
+                  ? "rgba(255, 102, 102, 1)"
+                  : post.status === "dang-xay-dung"
+                  ? "rgba(255, 252, 150, 1)"
+                  : "rgba(210, 238, 130, 1)",
                 p: "6px",
-                width: "fit-content",
                 borderRadius: "8px",
+                width: "fit-content",
               }}
             >
-              {statusMapping[post.status]}
-            </Typography>
+              {/* Display the image icon */}
+              {statusLogoMapping[post.status] && (
+                <img
+                  src={statusLogoMapping[post.status]}
+                  alt={post.status}
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    marginRight: "8px",
+                    borderRadius: "50%",
+                  }}
+                />
+              )}
+              {/* Display the text */}
+              <Typography variant="body2" fontWeight={600}>
+                {statusMapping[post.status]}
+              </Typography>
+            </Box>
           )}
           {Boolean(post.totalFund) && (
             <Typography
