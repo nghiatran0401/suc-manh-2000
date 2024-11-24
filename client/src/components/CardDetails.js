@@ -12,6 +12,7 @@ import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import SM2000 from "../assets/companions/SM2000.svg";
+import WalletIcon from "../assets/wallet.png";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -412,9 +413,19 @@ export default function CardDetails(props) {
                     <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
                   </Typography>
                 )}
-                <Box>--------------</Box>
+                <hr/>
                 {Boolean(post.totalFund) && (
                   <Typography variant="body1" color={"#77777"}>
+                    <img
+                      src={WalletIcon}
+                      alt={post.status}
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        marginRight: "8px",
+                        borderRadius: "50%",
+                      }}
+                    />
                     <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: 
                     <span style={{ color: "#F5222D" }}>
                       {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
