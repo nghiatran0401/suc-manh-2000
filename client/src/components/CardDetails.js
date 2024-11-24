@@ -415,18 +415,28 @@ export default function CardDetails(props) {
                 )}
                 <hr/>
                 {Boolean(post.totalFund) && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <img
-                      src={WalletIcon}
-                      alt={post.status}
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        marginRight: "8px",
-                        borderRadius: "50%",
-                      }}
-                    />
-                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: 
+                  <Typography 
+                    variant="body1" 
+                    color={"#77777"} 
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <img
+                        src={WalletIcon}
+                        alt={post.status}
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          marginRight: "8px",
+                          borderRadius: "50%",
+                        }}
+                      />
+                      <span>Tổng tiền</span>
+                    </div> 
+
                     <span style={{ color: "#F5222D" }}>
                       {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
                     </span>
