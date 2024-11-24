@@ -13,6 +13,7 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import SM2000 from "../assets/companions/SM2000.svg";
 import WalletIcon from "../assets/wallet.png";
+import CharityMoney from "../assets/charity-money.png";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -389,14 +390,45 @@ export default function CardDetails(props) {
                       ([key, value], index) =>
                         metadataMapping[key] &&
                         value && (
-                          <Typography key={index} variant="body1" color={"#77777"}>
+                          <Typography 
+                            key={index} 
+                            variant="body1" 
+                            color={"#77777"}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              width: "100%"
+                            }}
+                          >
                             {["start_date", "end_date"].includes(key) ? (
                               <>
                                 <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {new Date(value).toLocaleDateString("vi-VN")}
                               </>
                             ) : (
                               <>
-                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <img
+                                    src={CharityMoney}
+                                    alt={post.status}
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      marginRight: "8px",
+                                      borderRadius: "50%",
+                                    }}
+                                  />
+                                  <span>{metadataMapping[key]}</span>
+                                </div>
+                                <div style={{ textAlign: "right" }}>
+                                  <span style={{ fontWeight: "bold" }}>{value}</span>
+                                </div>
+                                
                               </>
                             )}
                           </Typography>
@@ -437,14 +469,20 @@ export default function CardDetails(props) {
                       <span>Tổng tiền</span>
                     </div> 
 
-                    <span style={{ color: "#F5222D" }}>
-                      {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
-                    </span>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ color: "#F5222D" }}>
+                        {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VNĐ" : "Đang xử lý"}
+                      </span>
+                    </div>
                   </Typography>
                 )}
+                <hr/>
                 {post.donors?.length > 0 && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
+                    <span>Nhà hảo tâm </span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {post.donors.map((donor) => donor.name).join(", ")}
+                    </span>
                   </Typography>
                 )}
               </Box>
