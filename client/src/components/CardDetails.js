@@ -13,7 +13,7 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import SM2000 from "../assets/companions/SM2000.svg";
 import WalletIcon from "../assets/wallet.png";
-import CharityMoney from "../assets/charity-money.png";
+import StudentIcon from "../assets/student.png";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -390,48 +390,50 @@ export default function CardDetails(props) {
                       ([key, value], index) =>
                         metadataMapping[key] &&
                         value && (
-                          <Typography 
-                            key={index} 
-                            variant="body1" 
-                            color={"#77777"}
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              width: "100%"
-                            }}
-                          >
-                            {["start_date", "end_date"].includes(key) ? (
-                              <>
-                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {new Date(value).toLocaleDateString("vi-VN")}
-                              </>
-                            ) : (
-                              <>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <img
-                                    src={CharityMoney}
-                                    alt={post.status}
+                          <>
+                            <Typography 
+                              key={index} 
+                              variant="body1" 
+                              color={"#77777"}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                width: "100%"
+                              }}
+                            >
+                              {["start_date", "end_date"].includes(key) ? (
+                                <>
+                                  <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {new Date(value).toLocaleDateString("vi-VN")}
+                                </>
+                              ) : (
+                                <>
+                                  <div
                                     style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      marginRight: "8px",
-                                      borderRadius: "50%",
+                                      display: "flex",
+                                      alignItems: "center",
                                     }}
-                                  />
-                                  <span>{metadataMapping[key]}</span>
-                                </div>
-                                <div style={{ textAlign: "right" }}>
-                                  <span style={{ fontWeight: "bold" }}>{value}</span>
-                                </div>
-                                
-                              </>
-                            )}
-                          </Typography>
+                                  >
+                                    <img
+                                      src={StudentIcon}
+                                      alt={post.status}
+                                      style={{
+                                        width: "24px",
+                                        height: "24px",
+                                        marginRight: "8px",
+                                        borderRadius: "50%",
+                                      }}
+                                    />
+                                    <span>{metadataMapping[key]}</span>
+                                  </div>
+                                  <div style={{ textAlign: "right" }}>
+                                    <span style={{ fontWeight: "bold" }}>{value}</span>
+                                  </div>                                
+                                </>
+                              )}
+                            </Typography>
+                            <hr/>
+                          </>
                         )
                     )}
 
@@ -445,7 +447,6 @@ export default function CardDetails(props) {
                     <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
                   </Typography>
                 )}
-                <hr/>
                 {Boolean(post.totalFund) && (
                   <Typography 
                     variant="body1" 
