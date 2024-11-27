@@ -13,16 +13,9 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import DragHandleSharpIcon from "@mui/icons-material/DragHandleSharp";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterList from "./FilterList";
-import usePostFilter from "../hooks/usePostFilter";
-import SortList from "./SortList";
-import usePostSort from "../hooks/usePostSort";
 
 export default function HeaderBar() {
   const navigate = useNavigate();
-  const { filters, setFilters } = usePostFilter();
-  const { sortField, setSortField } = usePostSort();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const autocompleteRef = useRef();
@@ -54,26 +47,14 @@ export default function HeaderBar() {
   }, [openSearch]);
 
   const onSearch = (e) => {
-    let q = `/search`;
-
-    if (searchValue) {
-      q += `?q=${searchValue.replace(/\s/g, "+")}`;
-    } else {
-      q += `?q=`;
-    }
-
-    if (filters.category !== "all") q += `&category=${filters.category}`;
-    if (filters.classification !== "all") q += `&classification=${filters.classification}`;
-    if (filters.status !== "all") q += `&status=${filters.status}`;
-    if (filters.totalFund !== "all") q += `&totalFund=${filters.totalFund}`;
-    if (filters.province !== "all") q += `&province=${filters.province}`;
-    if (sortField !== "createdAt") q += `&sortField=${sortField}`;
-    navigate(q);
-
     e.preventDefault();
+    if (!searchValue) return;
+
+    const q = `/search?q=${searchValue.replace(/\s/g, "+")}`;
+    window.location.href = q;
+
     setOpenSearch(false);
     setSearchValue("");
-    setSortField(sortField);
   };
 
   if (Object.keys(general)?.length <= 0) return <LoadingScreen />;
@@ -164,26 +145,8 @@ export default function HeaderBar() {
               }}
               onSubmit={onSearch}
             >
-              <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Tìm kiếm theo tên Dự án" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+              <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Tìm kiếm theo tên Dự án" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             </Paper>
-
-            {/* Filters and Sort */}
-            <Box display={"flex"} gap={"12px"} flexWrap={"wrap"} m={"16px"}>
-              <FilterList
-                category={filters.category}
-                setCategory={(value) => setFilters({ ...filters, category: value })}
-                classification={filters.classification}
-                setClassification={(value) => setFilters({ ...filters, classification: value })}
-                totalFund={filters.totalFund}
-                setTotalFund={(value) => setFilters({ ...filters, totalFund: value })}
-                status={filters.status}
-                setStatus={(value) => setFilters({ ...filters, status: value })}
-                province={filters.province}
-                setProvince={(value) => setFilters({ ...filters, province: value })}
-                provinceCount={general.province}
-              />
-              <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />{" "}
-            </Box>
 
             <Button
               variant="outlined"
@@ -193,16 +156,15 @@ export default function HeaderBar() {
                 bgcolor: "#FF4747",
                 textTransform: "none",
                 m: "16px",
+                mb: 0,
                 "&:hover": { bgcolor: "#FF4747" },
+                "&.Mui-disabled": { bgcolor: "#FF7F7F" },
               }}
               onClick={onSearch}
+              disabled={!searchValue}
             >
               Tìm kiếm
             </Button>
-
-            <Typography variant="body2" textAlign="center">
-              hoặc
-            </Typography>
 
             <Box display="flex" justifyContent="center">
               <Button

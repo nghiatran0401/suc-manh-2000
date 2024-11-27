@@ -1,64 +1,66 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Pagination, Paper, InputBase, IconButton, Chip, Button } from "@mui/material";
+import { useMediaQuery, Box, LinearProgress, Typography, Grid, Pagination, Chip, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { SERVER_URL, DESKTOP_WIDTH, POSTS_PER_PAGE, classificationMapping, EXCLUDED_FILTER, statusMapping, statusLogoMapping, statusColorMapping, statusColorHoverMapping } from "../constants";
 import CardList from "../components/CardList";
 import { useSearchParams } from "react-router-dom";
-import SearchIcon from "@mui/icons-material/Search";
 import FilterList from "../components/FilterList";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "../components/SortList";
 import usePostSort from "../hooks/usePostSort";
+import SearchBox from "../components/SearchBox";
+import Fuse from "fuse.js";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 export default function Search() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
-  const searchParams = urlSearchParams.get("q") ? urlSearchParams.get("q") : "";
 
+  const [searchedPosts, setSearchedPosts] = useState([]);
   const [posts, setPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [statsData, setStatsData] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const count = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const count = Math.ceil(searchedPosts.length / POSTS_PER_PAGE);
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
 
-  const [searchValue, setSearchValue] = useState(searchParams);
+  const [searchQuery, setSearchQuery] = useState("");
   const { filters, setFilters } = usePostFilter();
   const { sortField, setSortField } = usePostSort();
 
   const [provinceCount, setProvinceCount] = useState({});
   const scrollRef = useRef(null);
 
-  // get total stats data
+  // remain the same statistics data during reloads
   useEffect(() => {
     setLoading(true);
     axios
       .get(SERVER_URL + "/search", { params: { filters, sortField } })
       .then((postsResponse) => {
-        setStatsData(postsResponse.data.stats);
         setTotalPosts(postsResponse.data.totalPosts);
+        setStatsData(postsResponse.data.stats);
         setProvinceCount(postsResponse.data.provinceCount);
         setLoading(false);
       })
       .catch((e) => console.error(e));
   }, []);
 
-  // for applying filters into url params
+  // apply url params into search/filter/sort
   useEffect(() => {
-    // window.scrollTo({ top: 0, behavior: "smooth" });
+    const searchValue = urlSearchParams.get("q");
     const category = urlSearchParams.get("category");
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
     const sortField = urlSearchParams.get("sortField");
-    console.log("here", sortField);
 
+    if (searchValue) setSearchQuery(searchValue ?? "");
     if (category) setFilters((prevFilters) => ({ ...prevFilters, category }));
     if (status) setFilters((prevFilters) => ({ ...prevFilters, status }));
     if (classification) setFilters((prevFilters) => ({ ...prevFilters, classification }));
@@ -67,13 +69,9 @@ export default function Search() {
     if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters and with sort
+  // fetch data from server with/without search/filter/sort
   useEffect(() => {
     const newUrlSearchParams = new URLSearchParams();
-
-    if (searchValue) {
-      newUrlSearchParams.set("q", searchValue);
-    }
     if (filters.category && filters.category !== "all") {
       newUrlSearchParams.set("category", filters.category);
     }
@@ -92,15 +90,44 @@ export default function Search() {
     if (sortField && sortField !== "createdAt") {
       newUrlSearchParams.set("sortField", sortField);
     }
-
-    // Only update URL search params if they have changed
     if (newUrlSearchParams.toString() !== urlSearchParams.toString()) {
       setUrlSearchParams(newUrlSearchParams);
     }
 
-    // setSearchValue(searchParams);
-    // setSortField(sortField);
-    fetchSearchData();
+    setLoading(true);
+    axios
+      .get(SERVER_URL + "/search", { params: { filters, sortField } })
+      .then((postsResponse) => {
+        // onSearch
+        if (searchQuery !== "") {
+          const fuseOptions = {
+            isCaseSensitive: true,
+            includeScore: true,
+            shouldSort: true,
+            // includeMatches: false,
+            // findAllMatches: true,
+            // minMatchCharLength: 1,
+            // location: 0,
+            threshold: 0.5,
+            // distance: 100,
+            useExtendedSearch: true,
+            ignoreLocation: true,
+            // ignoreFieldNorm: false,
+            // fieldNormWeight: 1,
+            keys: ["name", "cleanedName"],
+          };
+          const fuse = new Fuse(postsResponse.data.posts, fuseOptions);
+          const results = fuse.search(searchQuery);
+          const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
+          setPosts(postsResponse.data.posts);
+          setSearchedPosts(filteredResults);
+        } else {
+          setPosts(postsResponse.data.posts);
+          setSearchedPosts(postsResponse.data.posts);
+        }
+        setLoading(false);
+      })
+      .catch((e) => console.error(e));
 
     if (scrollRef.current && posts.length > 0) {
       window.scrollTo({
@@ -108,33 +135,7 @@ export default function Search() {
         behavior: "smooth",
       });
     }
-  }, [filters, sortField]);
-
-  const fetchSearchData = () => {
-    setLoading(true);
-    axios
-      .get(SERVER_URL + window.location.pathname + window.location.search, { params: { filters, sortField } })
-      .then((postsResponse) => {
-        setPosts(postsResponse.data.posts);
-        setLoading(false);
-      })
-      .catch((e) => console.error(e));
-  };
-
-  const onSearch = (e) => {
-    e.preventDefault();
-    fetchSearchData();
-
-    setFilters({ ...filters, category: "all", classification: "all", totalFund: "all", status: "all", province: "all" });
-    // setSortField(sortField);
-
-    urlSearchParams.delete("category");
-    urlSearchParams.delete("classification");
-    urlSearchParams.delete("totalFund");
-    urlSearchParams.delete("status");
-    urlSearchParams.delete("province");
-    setUrlSearchParams(urlSearchParams);
-  };
+  }, [searchQuery, filters, sortField, urlSearchParams]);
 
   return (
     <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={DESKTOP_WIDTH}>
@@ -142,6 +143,7 @@ export default function Search() {
         Tổng hợp tất cả Dự án
       </Typography>
 
+      {/* Statistics */}
       <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
           <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"230px"}>
@@ -254,6 +256,7 @@ export default function Search() {
                           },
                         }}
                         onClick={() => {
+                          setSearchQuery("");
                           setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all" });
                         }}
                       />
@@ -266,6 +269,7 @@ export default function Search() {
                       sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => {
+                        setSearchQuery("");
                         setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all" });
                       }}
                     >
@@ -277,59 +281,46 @@ export default function Search() {
         </Grid>
       </Grid>
 
-      <Paper
-        ref={scrollRef}
-        component="form"
-        sx={{
-          p: "2px 4px",
-          m: "0px auto",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-        }}
-        onSubmit={onSearch}
-      >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Tìm kiếm theo tên Dự án" inputProps={{ "aria-label": "search" }} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
-        <IconButton type="button" sx={{ p: "10px" }} aria-label="search" onClick={onSearch}>
-          <SearchIcon sx={{ color: "red" }} />
-        </IconButton>
-      </Paper>
-
-      {/* Filters and Sort */}
-      <Box display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-        <FilterList
-          category={filters.category}
-          setCategory={(value) => setFilters({ ...filters, category: value })}
-          classification={filters.classification}
-          setClassification={(value) => setFilters({ ...filters, classification: value })}
-          totalFund={filters.totalFund}
-          setTotalFund={(value) => setFilters({ ...filters, totalFund: value })}
-          status={filters.status}
-          setStatus={(value) => setFilters({ ...filters, status: value })}
-          province={filters.province}
-          setProvince={(value) => setFilters({ ...filters, province: value })}
-          provinceCount={provinceCount}
-        />
-        <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />
+      {/* Search/Filter/Sort */}
+      <Box display={"flex"} flexWrap={"wrap"} justifyContent={"flex-end"} alignItems={"center"} gap={"16px"}>
+        <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} inputProps={{ width: "100%", height: "50px" }} />
+        <FilterList searchQuery={searchQuery} filters={filters} setFilters={setFilters} provinceCount={provinceCount} />
+        <SortList searchQuery={searchQuery} sortField={sortField} setSortField={setSortField} />
+        <Button
+          variant="outlined"
+          sx={{ textTransform: "none" }}
+          endIcon={<RestartAltIcon />}
+          onClick={() => {
+            setSearchQuery("");
+            setFilters({
+              category: "all",
+              classification: "all",
+              totalFund: "all",
+              status: "all",
+              province: "all",
+            });
+            setSortField("createdAt");
+          }}
+        >
+          Reset
+        </Button>
       </Box>
 
-      <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-        Hiện có {posts.length} kết quả tìm kiếm
+      <Typography variant="body1" textAlign={"right"}>
+        Hiện có {searchedPosts.length} kết quả tìm kiếm
       </Typography>
 
       {loading ? (
         <LinearProgress />
-      ) : posts.length === 0 ? (
-        <Typography variant="h6" textAlign={"center"}>
+      ) : searchedPosts.length === 0 ? (
+        <Typography variant="h6" textAlign={"center"} height={"300px"}>
           ----------
         </Typography>
       ) : (
         <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-          <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-            <Grid container spacing={3} p={"16px"}>
-              <CardList posts={posts.slice(startIndex, endIndex)} />
-            </Grid>
-          </Box>
+          <Grid container spacing={3}>
+            <CardList posts={searchedPosts.slice(startIndex, endIndex)} />
+          </Grid>
 
           <Box display="flex" justifyContent="center">
             <Pagination

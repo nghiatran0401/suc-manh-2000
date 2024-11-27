@@ -12,21 +12,26 @@ import FilterList from "../components/FilterList";
 import usePostFilter from "../hooks/usePostFilter";
 import SortList from "../components/SortList";
 import usePostSort from "../hooks/usePostSort";
+import SearchBox from "../components/SearchBox";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import Fuse from "fuse.js";
 
 export default function PostList() {
   const { category } = useParams();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [searchQuery, setSearchQuery] = useState("");
   const { filters, setFilters } = usePostFilter();
   const { sortField, setSortField } = usePostSort();
 
   const [posts, setPosts] = useState([]);
+  const [searchedPosts, setSearchedPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [statsData, setStatsData] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const count = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const count = Math.ceil(searchedPosts.length / POSTS_PER_PAGE);
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
   const [provinceCount, setProvinceCount] = useState({});
@@ -35,9 +40,8 @@ export default function PostList() {
   const isProject = category.includes("du-an");
   const title = findTitle(HEADER_DROPDOWN_LIST, "/" + category);
 
-  // for applying filters/sort into url params
+  // apply url params into search/filter/sort
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
@@ -51,10 +55,9 @@ export default function PostList() {
     if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
-  // for fetching data from server with/without filters/sort
+  // fetch data from server with/without search/filter/sort
   useEffect(() => {
     const newUrlSearchParams = new URLSearchParams();
-
     if (filters.classification && filters.classification !== "all") {
       newUrlSearchParams.set("classification", filters.classification);
     }
@@ -70,8 +73,6 @@ export default function PostList() {
     if (sortField && sortField !== "createdAt") {
       newUrlSearchParams.set("sortField", sortField);
     }
-
-    // Only update URL search params if they have changed
     if (newUrlSearchParams.toString() !== urlSearchParams.toString()) {
       setUrlSearchParams(newUrlSearchParams);
     }
@@ -80,6 +81,7 @@ export default function PostList() {
       .get(SERVER_URL + "/" + category, { params: { filters, sortField } })
       .then((postsResponse) => {
         setPosts(postsResponse.data.posts);
+        setSearchedPosts(postsResponse.data.posts);
         setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
         setProvinceCount(postsResponse.data.provinceCount);
@@ -91,11 +93,39 @@ export default function PostList() {
 
     if (scrollRef.current && posts.length > 0) {
       window.scrollTo({
-        top: scrollRef.current.offsetTop - 80,
+        top: scrollRef.current.offsetTop - 100,
         behavior: "smooth",
       });
     }
   }, [category, filters, sortField]);
+
+  // onSearch
+  useEffect(() => {
+    if (searchQuery !== "") {
+      const fuseOptions = {
+        isCaseSensitive: true,
+        includeScore: true,
+        shouldSort: true,
+        // includeMatches: false,
+        // findAllMatches: true,
+        // minMatchCharLength: 1,
+        // location: 0,
+        threshold: 0.5,
+        // distance: 100,
+        useExtendedSearch: true,
+        ignoreLocation: true,
+        // ignoreFieldNorm: false,
+        // fieldNormWeight: 1,
+        keys: ["name", "cleanedName"],
+      };
+      const fuse = new Fuse(posts, fuseOptions);
+      const results = fuse.search(searchQuery);
+      const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
+      setSearchedPosts(filteredResults);
+    } else {
+      setSearchedPosts(posts);
+    }
+  }, [searchQuery]);
 
   return (
     <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"24px"} maxWidth={DESKTOP_WIDTH}>
@@ -238,21 +268,30 @@ export default function PostList() {
         </Grid>
       )}
 
-      {/* Filters and Sort */}
+      {/* Search/Filter/Sort */}
       {isProject && (
-        <Box ref={scrollRef} display={"flex"} flexDirection={"row"} flexWrap={"wrap"} justifyContent={isMobile ? "center" : "flex-end"} alignItems={"center"} gap={"16px"}>
-          <FilterList
-            classification={filters.classification}
-            setClassification={(value) => setFilters({ ...filters, classification: value })}
-            totalFund={filters.totalFund}
-            setTotalFund={(value) => setFilters({ ...filters, totalFund: value })}
-            status={filters.status}
-            setStatus={(value) => setFilters({ ...filters, status: value })}
-            province={filters.province}
-            setProvince={(value) => setFilters({ ...filters, province: value })}
-            provinceCount={provinceCount}
-          />
-          <SortList sortField={sortField} setSortField={(value) => setSortField(value)} />
+        <Box ref={scrollRef} display={"flex"} flexWrap={"wrap"} justifyContent={"flex-end"} alignItems={"center"} gap={"16px"}>
+          <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} inputProps={{ width: isMobile ? "100%" : "30%", height: isMobile ? "50px" : "40px" }} />
+          <FilterList searchQuery={searchQuery} filters={filters} setFilters={setFilters} provinceCount={provinceCount} />
+          <SortList searchQuery={searchQuery} sortField={sortField} setSortField={setSortField} />
+          <Button
+            variant="outlined"
+            sx={{ textTransform: "none" }}
+            endIcon={<RestartAltIcon />}
+            onClick={() => {
+              setSearchQuery("");
+              setFilters({
+                category: "all",
+                classification: "all",
+                totalFund: "all",
+                status: "all",
+                province: "all",
+              });
+              setSortField("createdAt");
+            }}
+          >
+            Reset
+          </Button>
         </Box>
       )}
 
@@ -261,22 +300,20 @@ export default function PostList() {
       ) : (
         <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
           {isProject && (
-            <Typography variant="body1" textAlign={"right"} mr={"16px"}>
-              Số dự án: {posts.length}/{totalPosts}
+            <Typography variant="body1" textAlign={"right"}>
+              Số dự án: {searchedPosts.length}/{totalPosts}
             </Typography>
           )}
 
           {posts.length === 0 && (
-            <Typography variant="h6" textAlign={"center"}>
+            <Typography variant="h6" textAlign={"center"} height={"200px"}>
               Không tìm thấy dự án nào
             </Typography>
           )}
 
-          <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
-            <Grid container spacing={3} p={"16px"}>
-              <CardList posts={posts.slice(startIndex, endIndex)} />
-            </Grid>
-          </Box>
+          <Grid container spacing={3}>
+            <CardList posts={searchedPosts.slice(startIndex, endIndex)} />
+          </Grid>
 
           <Box display="flex" justifyContent="center">
             <Pagination
@@ -288,7 +325,7 @@ export default function PostList() {
               onChange={(e, page) => {
                 setPage(page);
                 window.scrollTo({
-                  top: scrollRef.current.offsetTop - 80,
+                  top: scrollRef.current.offsetTop - 100,
                   behavior: "smooth",
                 });
               }}

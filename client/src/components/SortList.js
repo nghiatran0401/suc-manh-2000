@@ -1,18 +1,66 @@
-import React from "react";
-import { StyledSelectComponent, SELECT_TYPE } from "./StyledComponent";
-import { sortOptionsMapping } from "../constants";
+import React, { useState } from "react";
+import { Box, Button, Menu, MenuItem, Typography, Badge } from "@mui/material";
+import SortIcon from "@mui/icons-material/Sort";
+
+const sortOptionsMapping = {
+  createdAt: "Mới nhất",
+  status: "Trạng thái",
+  totalFund: "Khoảng tiền",
+};
 
 const SortList = (props) => {
-  const { sortField, setSortField } = props;
+  const { searchQuery, sortField, setSortField } = props;
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isOpen = Boolean(anchorEl);
 
   return (
-    <StyledSelectComponent
-      label="Sắp xếp"
-      value={{ label: sortOptionsMapping[sortField], value: sortField }}
-      onChange={(option) => setSortField(option.value)}
-      options={Object.entries(sortOptionsMapping).map(([value, label]) => ({ label, value }))}
-      selectType={SELECT_TYPE.SORT}
-    />
+    <Box>
+      <Badge
+        badgeContent={sortField !== "createdAt" ? 1 : 0}
+        color="error"
+        overlap="rectangular"
+        sx={{
+          "& .MuiBadge-badge": {
+            top: 0,
+            right: 0,
+            transform: "translate(50%, -50%)",
+          },
+        }}
+      >
+        <Button
+          disabled={searchQuery?.length > 0}
+          variant="outlined"
+          endIcon={<SortIcon />}
+          onClick={(event) => setAnchorEl(event.currentTarget)}
+          sx={{
+            color: "#FF5555",
+            borderColor: "#FF5555",
+            textTransform: "none",
+            "&:hover": {
+              borderColor: "#FF5555",
+              backgroundColor: "rgba(255, 85, 85, 0.1)",
+            },
+          }}
+        >
+          Sắp xếp
+        </Button>
+      </Badge>
+
+      <Menu anchorEl={anchorEl} open={isOpen} onClose={() => setAnchorEl(null)} anchorOrigin={{ vertical: "bottom", horizontal: "left" }} transformOrigin={{ vertical: "top", horizontal: "left" }}>
+        {Object.entries(sortOptionsMapping).map(([key, value]) => (
+          <MenuItem
+            key={key}
+            selected={key === sortField}
+            onClick={() => {
+              setSortField(key);
+              setAnchorEl(null);
+            }}
+          >
+            <Typography style={{ fontWeight: key === sortField ? 600 : "normal" }}>{value}</Typography>
+          </MenuItem>
+        ))}
+      </Menu>
+    </Box>
   );
 };
 
