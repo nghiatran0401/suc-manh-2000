@@ -54,6 +54,8 @@ const FilterList = (props) => {
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
 
+  console.log("here", window.location.pathname.includes("search"));
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -153,9 +155,18 @@ const FilterList = (props) => {
             zIndex: 1,
           }}
         >
-          {Object.entries(filters).map(([key, value]) => (
-            <FilterComponent key={key} label={filterOptionsMapping[key]} value={getActiveValue(key, value)} onChange={(option) => setFilters({ ...filters, [key]: option.value })} options={getOptionValues(key, value)} />
-          ))}
+          {Object.entries(filters).map(([key, value]) => {
+            if (!window.location.pathname.includes("search") && key === "category") return;
+            return (
+              <FilterComponent
+                key={key}
+                label={filterOptionsMapping[key]}
+                value={getActiveValue(key, value)}
+                onChange={(option) => setFilters({ ...filters, [key]: option.value })}
+                options={getOptionValues(key, value)}
+              />
+            );
+          })}
         </Box>
       )}
     </Box>
