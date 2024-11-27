@@ -205,7 +205,10 @@ export default function CardDetails(props) {
         post.status === "can-quyen-gop" &&
         !post.donor?.description && (
           <Box bgcolor={"#f1f1f1"} height={"100px"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
-            <Typography variant="h6">Hiện chưa có Nhà Tài Trợ</Typography>
+            <Typography variant="h6" textAlign={"center"}>
+              Hiện chưa có nhà tài trợ. <br />
+              Liên hệ tài trợ hoặc nhận thêm thông tin về dự án này vui lòng liên hệ: 0975302307 - Hoàng Hoa Trung
+            </Typography>
           </Box>
         )
       )}
