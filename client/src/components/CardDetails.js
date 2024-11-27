@@ -5,7 +5,7 @@ import { standardizeString, convertToYoutubeUrl } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusLogoMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataMapping, statusLogoMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -415,7 +415,7 @@ export default function CardDetails(props) {
                                     }}
                                   >
                                     <img
-                                      src={StudentIcon}
+                                      src={iconMapping[key] ?? StudentIcon}
                                       alt={post.status}
                                       style={{
                                         width: "24px",
