@@ -366,7 +366,7 @@ export default function CardDetails(props) {
                 }}
               />
 
-              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
+              <Box display={"flex"} flexDirection={"column"} gap={"8px"} p={"8px 16px"}>
                 {post.metadata &&
                   Object.entries(post.metadata)
                     .sort(([keyA], [keyB]) => {
