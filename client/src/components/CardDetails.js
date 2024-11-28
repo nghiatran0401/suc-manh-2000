@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useMediaQuery, Box, Typography, Avatar, Grid, Breadcrumbs, Link, Button, CircularProgress } from "@mui/material";
 import { Link as RouterLink, useParams, useNavigate } from "react-router-dom";
-import { standardizeString, convertToYoutubeUrl } from "../helpers";
+import { standardizeString } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, metadataMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataLogoMapping, metadataMapping, statusLogoMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import SM2000 from "../assets/companions/SM2000.svg";
+import WalletOutlinedIcon from "@mui/icons-material/WalletOutlined";
+import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -28,7 +31,6 @@ export default function CardDetails(props) {
 
   useEffect(() => {
     setLoading(true);
-
     axios
       .get(SERVER_URL + `/${category}`)
       .then((postsResponse) => {
@@ -97,22 +99,25 @@ export default function CardDetails(props) {
         <Typography color="textPrimary">{standardizeString(post.name)}</Typography>
       </Breadcrumbs>
 
+      {/* Title + Labels */}
       <Box display={"flex"} flexDirection={"column"} gap={"8px"} m={"16px 0"}>
         <Typography variant="h5" fontWeight="bold" dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
 
         <Box display={"flex"} flexWrap={"wrap"} gap={"16px"} alignContent={"center"} mt={"16px"}>
           {!isProject && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography display="flex" alignItems="center" variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(160, 160, 160, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {new Date(post.createdAt).toLocaleDateString("vi-VN")}
             </Typography>
           )}
           {!isProject && (
-            <Typography variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+            <Typography display="flex" alignItems="center" variant="body2" fontWeight={600} sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
               {post.author}
             </Typography>
           )}
           {post.classification && (
             <Typography
+              display="flex"
+              alignItems="center"
               variant="body2"
               fontWeight={600}
               sx={{
@@ -126,21 +131,37 @@ export default function CardDetails(props) {
             </Typography>
           )}
           {post.status !== undefined && (
-            <Typography
-              variant="body2"
-              fontWeight={600}
+            <Box
+              display="flex"
+              alignItems="center"
               sx={{
                 bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 102, 102, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
                 p: "6px",
-                width: "fit-content",
                 borderRadius: "8px",
+                width: "fit-content",
               }}
             >
-              {statusMapping[post.status]}
-            </Typography>
+              {statusLogoMapping[post.status] && (
+                <img
+                  src={statusLogoMapping[post.status]}
+                  alt={post.status}
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    marginRight: "8px",
+                    borderRadius: "50%",
+                  }}
+                />
+              )}
+              <Typography variant="body2" fontWeight={600}>
+                {statusMapping[post.status]}
+              </Typography>
+            </Box>
           )}
           {Boolean(post.totalFund) && (
             <Typography
+              display="flex"
+              alignItems="center"
               variant="body2"
               fontWeight={600}
               sx={{
@@ -150,11 +171,13 @@ export default function CardDetails(props) {
                 borderRadius: "8px",
               }}
             >
-              {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
+              {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VNĐ" : "Đang xử lý"}
             </Typography>
           )}
           {post.location?.province && (
             <Typography
+              display="flex"
+              alignItems="center"
               variant="body2"
               fontWeight={600}
               sx={{
@@ -170,6 +193,7 @@ export default function CardDetails(props) {
         </Box>
       </Box>
 
+      {/* Donors */}
       {isProject && post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
@@ -213,6 +237,7 @@ export default function CardDetails(props) {
         )
       )}
 
+      {/* Progress images */}
       {finalProgress && finalProgress?.length > 0 && (
         <Grid container spacing={3} m={"16px 0px"} width={"100%"} display={"flex"} flexDirection={isMobile ? "column" : "row"}>
           {finalProgress?.map((progress, index) => (
@@ -230,6 +255,7 @@ export default function CardDetails(props) {
         </Grid>
       )}
 
+      {/* Main section */}
       <Grid
         container
         sx={{
@@ -237,6 +263,7 @@ export default function CardDetails(props) {
           flexDirection: { xs: "column-reverse", sm: "row" },
         }}
       >
+        {/* Left section */}
         <Grid item xs={12} sm={9} p={"0px !important"}>
           <Box sx={{ maxWidth: "720px" }}>
             <Box display={"flex"} gap={"10px"}>
@@ -308,6 +335,7 @@ export default function CardDetails(props) {
           </Box>
         </Grid>
 
+        {/* Right section */}
         <Grid item xs={12} sm={3}>
           {isProject && (
             <Box
@@ -315,7 +343,7 @@ export default function CardDetails(props) {
               flexDirection={"column"}
               border={"1px solid #000"}
               borderRadius={"16px"}
-              bgcolor={"#f1f1f1"}
+              bgcolor={"#fff"}
               mb={"40px"}
               pb={"16px"}
               gap={"16px"}
@@ -326,63 +354,97 @@ export default function CardDetails(props) {
               }}
             >
               <img
+                alt={post.name}
+                src={post.thumbnail ? post.thumbnail : SM2000}
                 style={{
                   objectFit: "contain",
                   objectPosition: "center",
                   borderRadius: "16px 16px 0 0",
                 }}
-                alt={post.name}
-                src={post.thumbnail ? post.thumbnail : SM2000}
-              />
-              <Typography
-                variant="body1"
-                fontWeight={"bold"}
-                textAlign={"center"}
-                p={"0 8px"}
-                dangerouslySetInnerHTML={{
-                  __html: standardizeString(post.name),
-                }}
               />
 
-              <Box display={"flex"} flexDirection={"column"} gap={"8px"} ml={"8px"} p={"0 8px"}>
+              <Typography variant="body1" fontWeight={"bold"} textAlign={"center"} p={"0 8px"} dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
+
+              {post.metadata["start_date"] ||
+                (post.metadata["end_date"] && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      padding: "4px 8px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "4px",
+                      borderRadius: "4px",
+                      border: "1px solid #D9D9D9",
+                      background: "#F5F5F5",
+                      width: "fit-content",
+                      m: "auto",
+                    }}
+                  >
+                    <CalendarMonthOutlinedIcon />
+                    <Typography variant="body2" fontWeight={400}>
+                      {new Date(post.metadata["start_date"]).toLocaleDateString("vi-VN")} - {new Date(post.metadata["end_date"]).toLocaleDateString("vi-VN")}
+                    </Typography>
+                  </Box>
+                ))}
+
+              <Box display={"flex"} flexDirection={"column"} gap={"8px"} p={"8px 16px"}>
                 {post.metadata &&
                   Object.entries(post.metadata)
                     .sort(([keyA], [keyB]) => {
-                      const order = [
-                        "stage",
-                        "constructionItems",
-                        "progress",
-                        "type",
-                        "totalStudents",
-                        "totalClassrooms",
-                        "totalPublicAffairsRooms",
-                        "totalToilets",
-                        "totalRooms",
-                        "totalKitchens",
-                        "start_date",
-                        "end_date",
-                      ];
+                      const order = ["stage", "constructionItems", "progress", "type", "totalStudents", "totalClassrooms", "totalPublicAffairsRooms", "totalToilets", "totalRooms", "totalKitchens"];
                       return order.indexOf(keyA) - order.indexOf(keyB);
                     })
                     .map(
                       ([key, value], index) =>
                         metadataMapping[key] &&
                         value && (
-                          <Typography key={index} variant="body1" color={"#77777"}>
-                            {["start_date", "end_date"].includes(key) ? (
-                              <>
-                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {new Date(value).toLocaleDateString("vi-VN")}
-                              </>
-                            ) : (
-                              <>
-                                <span style={{ fontWeight: "bold" }}>{metadataMapping[key]}</span>: {value}
-                              </>
-                            )}
-                          </Typography>
+                          <Box
+                            key={index}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              width: "100%",
+                              borderBottom: "0.5px solid #6d7d9c",
+                              pb: "8px",
+                            }}
+                          >
+                            <Box display={"flex"} alignItems={"center"}>
+                              {metadataLogoMapping[key] ?? <PeopleOutlineIcon />}
+                              <Typography variant="body2" ml={"4px"} fontWeight={400}>
+                                {metadataMapping[key]}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={"bold"} textAlign={"right"}>
+                              {value}
+                            </Typography>
+                          </Box>
                         )
                     )}
 
-                {post.location?.distanceToHN && (
+                {Boolean(post.totalFund) && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Box display={"flex"} alignItems={"center"}>
+                      <WalletOutlinedIcon />
+                      <Typography variant="body2" ml={"4px"} fontWeight={400}>
+                        Số tiền
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" fontWeight={"bold"} textAlign={"right"} color={"#F5222D"}>
+                      {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VNĐ" : "Đang xử lý"}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* {post.location?.distanceToHN && (
                   <Typography variant="body1" color={"#77777"}>
                     <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
                   </Typography>
@@ -392,17 +454,12 @@ export default function CardDetails(props) {
                     <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
                   </Typography>
                 )}
-                <Box>--------------</Box>
-                {Boolean(post.totalFund) && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Tổng tiền</span>: {post.totalFund > 0 ? Number(post.totalFund).toLocaleString() + " VND" : "Đang xử lý"}
-                  </Typography>
-                )}
                 {post.donors?.length > 0 && (
                   <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Nhà hảo tâm</span>: {post.donors.map((donor) => donor.name).join(", ")}
+                    <span>Nhà hảo tâm </span>
+                    <span style={{ fontWeight: "bold" }}>{post.donors.map((donor) => donor.name).join(", ")}</span>
                   </Typography>
-                )}
+                )} */}
               </Box>
             </Box>
           )}
