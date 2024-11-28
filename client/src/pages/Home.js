@@ -51,7 +51,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + projectTab)
+      .get(SERVER_URL + projectTab, { params: { sortField: "random" } })
       .then((projects) => {
         setProjects(projects.data.posts);
         setLoading(false);

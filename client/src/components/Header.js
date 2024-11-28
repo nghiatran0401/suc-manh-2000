@@ -176,7 +176,7 @@ export default function HeaderBar() {
                   m: "16px",
                   "&:hover": { bgcolor: "#fff" },
                 }}
-                onClick={onSearch}
+                onClick={() => (window.location.href = "/search")}
               >
                 Xem tất cả Dự án
               </Button>

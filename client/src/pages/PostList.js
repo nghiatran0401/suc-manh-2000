@@ -296,7 +296,9 @@ export default function PostList() {
       )}
 
       {loading ? (
-        <LinearProgress />
+        <Box height={"400px"}>
+          <LinearProgress />
+        </Box>
       ) : (
         <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
           {isProject && (
@@ -305,8 +307,8 @@ export default function PostList() {
             </Typography>
           )}
 
-          {posts.length === 0 && (
-            <Typography variant="h6" textAlign={"center"} height={"200px"}>
+          {searchedPosts.length === 0 && (
+            <Typography variant="h6" textAlign={"center"} height={"400px"}>
               Không tìm thấy dự án nào
             </Typography>
           )}

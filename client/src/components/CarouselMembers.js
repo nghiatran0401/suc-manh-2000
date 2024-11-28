@@ -187,10 +187,10 @@ export default function CarouselMembers() {
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
         <Carousel indicators={false}>
           {chunkedItems.map((chunk, index) => (
-            <Grid container spacing={2} key={index}>
+            <Grid container key={index}>
               {chunk.map((item, idx) => (
                 <Grid item xs={12} sm={3} key={idx}>
-                  <Card className="card-container" sx={{ margin: "10px" }}>
+                  <Card className="card-container" sx={{ my: "10px" }}>
                     <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
                     <CardContent
                       sx={{
