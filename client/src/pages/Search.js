@@ -119,12 +119,11 @@ export default function Search() {
           const fuse = new Fuse(postsResponse.data.posts, fuseOptions);
           const results = fuse.search(searchQuery);
           const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
-          setPosts(postsResponse.data.posts);
           setSearchedPosts(filteredResults);
         } else {
-          setPosts(postsResponse.data.posts);
           setSearchedPosts(postsResponse.data.posts);
         }
+        setPosts(postsResponse.data.posts);
         setLoading(false);
       })
       .catch((e) => console.error(e));
@@ -310,13 +309,19 @@ export default function Search() {
         Hiện có {searchedPosts.length} kết quả tìm kiếm
       </Typography>
 
-      {loading ? (
-        <LinearProgress />
-      ) : searchedPosts.length === 0 ? (
-        <Typography variant="h6" textAlign={"center"} height={"300px"}>
-          ----------
+      {loading && (
+        <Box height={"550px"}>
+          <LinearProgress />
+        </Box>
+      )}
+
+      {searchedPosts.length === 0 && (
+        <Typography variant="h6" textAlign={"center"} height={"550px"}>
+          Không tìm thấy dự án nào
         </Typography>
-      ) : (
+      )}
+
+      {!loading && searchedPosts.length > 0 && (
         <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
           <Grid container spacing={3}>
             <CardList posts={searchedPosts.slice(startIndex, endIndex)} />

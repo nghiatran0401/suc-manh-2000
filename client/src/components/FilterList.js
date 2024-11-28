@@ -54,8 +54,6 @@ const FilterList = (props) => {
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
 
-  console.log("here", window.location.pathname.includes("search"));
-
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);

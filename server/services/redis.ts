@@ -391,6 +391,8 @@ const applySorting = (data: any[], sortField?: string | undefined): any[] => {
         "da-hoan-thanh": 3,
       };
       return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
+    } else if (sortField === "random") {
+      return Math.random() - 0.5;
     } else {
       return 0;
     }
