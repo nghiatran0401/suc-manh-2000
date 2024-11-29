@@ -32,7 +32,7 @@ export default function CardDetails(props) {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + `/${category}`)
+      .get(SERVER_URL + `/${category}`, { params: { sortField: "random" } })
       .then((postsResponse) => {
         setProjects(postsResponse.data.posts);
         setLoading(false);
@@ -365,28 +365,27 @@ export default function CardDetails(props) {
 
               <Typography variant="body1" fontWeight={"bold"} textAlign={"center"} p={"0 8px"} dangerouslySetInnerHTML={{ __html: standardizeString(post.name) }} />
 
-              {post.metadata["start_date"] ||
-                (post.metadata["end_date"] && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      padding: "4px 8px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "4px",
-                      borderRadius: "4px",
-                      border: "1px solid #D9D9D9",
-                      background: "#F5F5F5",
-                      width: "fit-content",
-                      m: "auto",
-                    }}
-                  >
-                    <CalendarMonthOutlinedIcon />
-                    <Typography variant="body2" fontWeight={400}>
-                      {new Date(post.metadata["start_date"]).toLocaleDateString("vi-VN")} - {new Date(post.metadata["end_date"]).toLocaleDateString("vi-VN")}
-                    </Typography>
-                  </Box>
-                ))}
+              {(post.metadata["start_date"] || post.metadata["end_date"]) && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    padding: "4px 8px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "4px",
+                    borderRadius: "4px",
+                    border: "1px solid #D9D9D9",
+                    background: "#F5F5F5",
+                    width: "fit-content",
+                    m: "auto",
+                  }}
+                >
+                  <CalendarMonthOutlinedIcon />
+                  <Typography variant="body2" fontWeight={400}>
+                    {new Date(post.metadata["start_date"]).toLocaleDateString("vi-VN") ?? "N/A"} - {new Date(post.metadata["end_date"]).toLocaleDateString("vi-VN") ?? "N/A"}
+                  </Typography>
+                </Box>
+              )}
 
               <Box display={"flex"} flexDirection={"column"} gap={"8px"} p={"8px 16px"}>
                 {post.metadata &&
