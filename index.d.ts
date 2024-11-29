@@ -28,11 +28,10 @@ export type ProjectPost = {
   status: string;
   totalFund: number;
   location: Location;
-  description?: string; // temporary
   donor?: any; // temporary
+  donors?: Donors; // temporary optional
   contentNew?: any; // temporary - 2024 only
   progressNew?: any; // temporary - 2024 only
-  donors?: Donors; // temporary optional
   metadata?: Metadata; // temporary optional
   progress: Progress;
   content: {
@@ -50,6 +49,7 @@ type Location = {
 
 type Metadata = {
   constructionItems?: string;
+  constructionUnit?: string;
   type?: string;
   stage?: string;
   totalStudents?: string;
@@ -64,7 +64,7 @@ type Metadata = {
 
 type Donors = {
   name: string;
-  totalProjects: number;
+  totalProjects?: number;
   intro?: string;
   logo?: string;
   notes?: string;
@@ -82,7 +82,7 @@ type Progress = {
 type TabsContent = {
   name: string;
   description: string;
-  slide_show: {
+  slide_show?: {
     image: string;
     caption: string;
   }[];

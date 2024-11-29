@@ -1,8 +1,8 @@
 import path from "path";
-import dotenv from "dotenv";
 import { convertToCleanedName, escapeSpecialCharacters } from "../utils/search";
 import Redis from "ioredis";
 
+import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const redis = new Redis(process.env.REDIS_URL || "");
@@ -33,6 +33,8 @@ const INDEX_SCHEMA = [
   "totalFund",
   "NUMERIC",
   "province",
+  "TAG",
+  "constructionUnit",
   "TAG",
 ];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
@@ -101,7 +103,9 @@ async function upsertDocumentToIndex(data: any) {
       "totalFund",
       data.totalFund,
       "province",
-      convertToCleanedName(data.location?.province)
+      convertToCleanedName(data.location?.province),
+      "constructionUnit",
+      data.metadata.constructionUnit
     );
   } catch (error: any) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);
@@ -123,22 +127,21 @@ async function redisSearchByName(q: any, filters: any, sortField?: any) {
   if (needAllProjects) {
     query = "*";
   } else {
+    // search
     if (q) {
       query += `(@name:${q}*) | (@cleanedName:${convertToCleanedName(q)}*)`;
     }
 
+    // filters
     if (filters.category && filters.category !== "all") {
       query += ` @category:{${escapeSpecialCharacters(filters.category)}}`;
     }
-
     if (filters.classification && filters.classification !== "all") {
       query += ` @classification:{${escapeSpecialCharacters(filters.classification)}}`;
     }
-
     if (filters.status && filters.status !== "all") {
       query += ` @status:{${escapeSpecialCharacters(filters.status)}}`;
     }
-
     if (filters.totalFund && filters.totalFund !== "all") {
       switch (filters.totalFund) {
         case "less-than-100":
@@ -160,16 +163,17 @@ async function redisSearchByName(q: any, filters: any, sortField?: any) {
           break;
       }
     }
-
     if (filters.province && filters.province !== "all") {
       query += ` @province:{${escapeSpecialCharacters(filters.province)}}`;
+    }
+    if (filters.constructionUnit && filters.constructionUnit !== "all") {
+      query += ` @constructionUnit:{${escapeSpecialCharacters(filters.constructionUnit)}}`;
     }
   }
 
   args.push(query);
 
-  // Apply sorting
-  const sortDirection = sortField === "createdAt" ? "DESC" : "ASC";
+  // sort
   switch (sortField) {
     case "createdAt":
       args.push("SORTBY", "category", "DESC");

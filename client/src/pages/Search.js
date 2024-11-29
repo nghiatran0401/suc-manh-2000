@@ -58,6 +58,7 @@ export default function Search() {
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
+    const constructionUnit = urlSearchParams.get("constructionUnit");
     const sortField = urlSearchParams.get("sortField");
 
     if (searchValue) setSearchQuery(searchValue ?? "");
@@ -66,6 +67,7 @@ export default function Search() {
     if (classification) setFilters((prevFilters) => ({ ...prevFilters, classification }));
     if (totalFund) setFilters((prevFilters) => ({ ...prevFilters, totalFund }));
     if (province) setFilters((prevFilters) => ({ ...prevFilters, province }));
+    if (constructionUnit) setFilters((prevFilters) => ({ ...prevFilters, constructionUnit }));
     if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
@@ -86,6 +88,9 @@ export default function Search() {
     }
     if (filters.province && filters.province !== "all") {
       newUrlSearchParams.set("province", filters.province);
+    }
+    if (filters.constructionUnit && filters.constructionUnit !== "all") {
+      newUrlSearchParams.set("constructionUnit", filters.constructionUnit);
     }
     if (sortField && sortField !== "createdAt") {
       newUrlSearchParams.set("sortField", sortField);
@@ -256,7 +261,7 @@ export default function Search() {
                         }}
                         onClick={() => {
                           setSearchQuery("");
-                          setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all" });
+                          setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all", constructionUnit: "all" });
                         }}
                       />
                     ))}
@@ -269,7 +274,7 @@ export default function Search() {
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => {
                         setSearchQuery("");
-                        setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all" });
+                        setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all", constructionUnit: "all" });
                       }}
                     >
                       Tất cả
@@ -297,6 +302,7 @@ export default function Search() {
               totalFund: "all",
               status: "all",
               province: "all",
+              constructionUnit: "all",
             });
             setSortField("createdAt");
           }}

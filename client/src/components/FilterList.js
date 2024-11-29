@@ -1,10 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Box, Button, Stack, Typography, Badge } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
-import { categoryMapping, classificationMapping, totalFundMapping, statusMapping } from "../constants";
+import { categoryMapping, classificationMapping, totalFundMapping, statusMapping, constructionUnitMapping } from "../constants";
 import { convertToCleanedName } from "../helpers";
 import { provincesAndCitiesObj } from "../vietnam-provinces";
 import Select from "react-select";
+
+const filterOptionsMapping = {
+  category: "Năm",
+  classification: "Phân loại công trình",
+  totalFund: "Khoảng tiền",
+  status: "Tiến độ",
+  province: "Tỉnh",
+  constructionUnit: "Đơn vị hợp tác",
+};
 
 const FilterComponent = (props) => {
   const { label, onChange, options, value } = props;
@@ -41,14 +50,6 @@ const FilterComponent = (props) => {
   );
 };
 
-const filterOptionsMapping = {
-  category: "Năm",
-  classification: "Phân loại công trình",
-  totalFund: "Khoảng tiền",
-  status: "Tiến độ",
-  province: "Tỉnh",
-};
-
 const FilterList = (props) => {
   const { searchQuery, filters, setFilters, provinceCount } = props;
   const [showFilters, setShowFilters] = useState(false);
@@ -77,6 +78,8 @@ const FilterList = (props) => {
         return typeValue === "all" ? null : { label: statusMapping[typeValue], value: typeValue };
       case "province":
         return typeValue === "all" ? null : { label: provincesAndCitiesObj[typeValue], value: typeValue };
+      case "constructionUnit":
+        return typeValue === "all" ? null : { label: constructionUnitMapping[typeValue], value: typeValue };
       default:
         return null;
     }
@@ -98,6 +101,8 @@ const FilterList = (props) => {
         return Object.entries(provinceCount)
           .sort(([, countA], [, countB]) => countB - countA)
           .map(([p, count]) => ({ label: `${provincesAndCitiesObj[p]} (${count})`, value: convertToCleanedName(p) }));
+      case "constructionUnit":
+        return Object.entries(constructionUnitMapping).map(([value, label]) => ({ value, label }));
       default:
         return [];
     }

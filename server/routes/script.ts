@@ -9,6 +9,7 @@ import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRef
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 import { updateFirestoreCountsCollection } from "../utils/updateFirestoreCountsCollection";
+import { indexFirestoreDocsToRedis } from "../utils/indexFirestoreDocsToRedis";
 
 const scriptRouter = express.Router();
 
@@ -766,10 +767,9 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               status: airtableData.status,
               totalFund: airtableData.totalFund,
               location: airtableData.location,
-              description: "", // TODO: team web fix manually - hiện tại chưa có
               donors: airtableData.donors,
-              progress: airtableProjectProgress,
               metadata: airtableData.metadata,
+              progress: airtableProjectProgress,
               content: {
                 tabs: [
                   {
@@ -782,20 +782,15 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                     description: airtableData.financialStatementUrl,
                     slide_show: [],
                   },
-                  // {
-                  //   name: "Mô hình xây",
-                  //   description: airtableData.metadata.constructionItems,
-                  //   slide_show: [],
-                  // },
                 ],
               },
             };
 
-            return await Promise.all([
-              postDocRef.set(newProjectPost),
-              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
-              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
-            ]);
+            // return await Promise.all([
+            //   postDocRef.set(newProjectPost),
+            //   upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+            //   updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
+            // ]);
           }
           // Cập nhật dự án hiện tại
           else {
@@ -809,28 +804,34 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
             const updatedProjectPost: ProjectPost = {
               ...(docData as ProjectPost),
-              // 2. Dự án thay đổi trạng thái
-              status: docData.status !== airtableData.status ? airtableData.status : docData.status,
-              // 3. Dự án cập nhật thêm ảnh
-              progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
-              // 4. Dự án cập nhật ảnh đại diện
-              thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
-              // 5. Dự án cập nhật phiếu khảo sát
-              contentNew: {
-                tabs:
-                  webHoanCanhDescription === "" && hoanCanhDescription !== ""
-                    ? webProjectContent?.tabs?.map((t: any) =>
-                        t.name === "Hoàn cảnh"
-                          ? {
-                              name: "Hoàn cảnh",
-                              description: hoanCanhDescription,
-                              slide_show: [],
-                            }
-                          : t
-                      )
-                    : webProjectContent.tabs,
-              },
+              // name: docData.name !== airtableData.name ? airtableData.name : docData.name,
+              // totalFund: docData.totalFund !== airtableData.totalFund ? airtableData.totalFund : docData.totalFund,
+              // // 2. Dự án thay đổi trạng thái
+              // status: docData.status !== airtableData.status ? airtableData.status : docData.status,
+              // // 3. Dự án cập nhật thêm ảnh
+              // progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
+              // // 4. Dự án cập nhật ảnh đại diện
+              // thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
+              // // 5. Dự án cập nhật phiếu khảo sát
+              // contentNew: {
+              //   tabs:
+              //     webHoanCanhDescription === "" && hoanCanhDescription !== ""
+              //       ? webProjectContent?.tabs?.map((t: any) =>
+              //           t.name === "Hoàn cảnh"
+              //             ? {
+              //                 name: "Hoàn cảnh",
+              //                 description: hoanCanhDescription,
+              //                 slide_show: [],
+              //               }
+              //             : t
+              //         )
+              //       : webProjectContent.tabs,
+              // },
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              // only run occasionally
+              // location: airtableData.location,
+              // donors: airtableData.donors,
+              metadata: airtableData.metadata,
             };
 
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
@@ -839,25 +840,26 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
         await Promise.all(projectsPromises);
       }
 
-      // 6. Dự án hủy -> xóa trên web
-      const cancelledProjectsPromises = totalAirtableErrors["DA hủy"].map(async (p: any) => {
-        if (p["projectId"] !== null) {
-          const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
-          if (!querySnapshot.empty) {
-            const docRef = querySnapshot.docs[0].ref;
-            const docData = querySnapshot.docs[0].data();
+      // // 6. Dự án hủy -> xóa trên web
+      // const cancelledProjectsPromises = totalAirtableErrors["DA hủy"].map(async (p: any) => {
+      //   if (p["projectId"] !== null) {
+      //     const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
+      //     if (!querySnapshot.empty) {
+      //       const docRef = querySnapshot.docs[0].ref;
+      //       const docData = querySnapshot.docs[0].data();
 
-            return await Promise.all([
-              docRef.delete(),
-              removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
-              updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
-            ]);
-          }
-        }
-      });
-      await Promise.all(cancelledProjectsPromises);
+      //       return await Promise.all([
+      //         docRef.delete(),
+      //         removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
+      //         updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
+      //       ]);
+      //     }
+      //   }
+      // });
+      // await Promise.all(cancelledProjectsPromises);
     }
-    await updateFirestoreCountsCollection();
+
+    await Promise.all([updateFirestoreCountsCollection(), indexFirestoreDocsToRedis()]);
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});

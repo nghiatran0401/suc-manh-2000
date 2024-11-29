@@ -7,6 +7,7 @@ const usePostFilter = () => {
     totalFund: "all",
     status: "all",
     province: "all",
+    constructionUnit: "all",
   });
   return { filters, setFilters };
 };

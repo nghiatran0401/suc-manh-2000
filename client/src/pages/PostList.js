@@ -46,12 +46,14 @@ export default function PostList() {
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
     const province = urlSearchParams.get("province");
+    const constructionUnit = urlSearchParams.get("constructionUnit");
     const sortField = urlSearchParams.get("sortField");
 
     if (status) setFilters((prevFilters) => ({ ...prevFilters, status }));
     if (classification) setFilters((prevFilters) => ({ ...prevFilters, classification }));
     if (totalFund) setFilters((prevFilters) => ({ ...prevFilters, totalFund }));
     if (province) setFilters((prevFilters) => ({ ...prevFilters, province }));
+    if (constructionUnit) setFilters((prevFilters) => ({ ...prevFilters, constructionUnit }));
     if (sortField) setSortField(sortField);
   }, [urlSearchParams]);
 
@@ -69,6 +71,9 @@ export default function PostList() {
     }
     if (filters.province && filters.province !== "all") {
       newUrlSearchParams.set("province", filters.province);
+    }
+    if (filters.constructionUnit && filters.constructionUnit !== "all") {
+      newUrlSearchParams.set("constructionUnit", filters.constructionUnit);
     }
     if (sortField && sortField !== "createdAt") {
       newUrlSearchParams.set("sortField", sortField);
@@ -247,7 +252,7 @@ export default function PostList() {
                               backgroundColor: statusColorHoverMapping[status],
                             },
                           }}
-                          onClick={() => setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all" })}
+                          onClick={() => setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all", constructionUnit: "all" })}
                         />
                       ))}
                     </Box>
@@ -257,7 +262,7 @@ export default function PostList() {
                         variant="outlined"
                         sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
                         endIcon={<ArrowForwardIcon />}
-                        onClick={() => setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all" })}
+                        onClick={() => setFilters({ ...filters, classification: value, status: "all", totalFund: "all", province: "all", constructionUnit: "all" })}
                       >
                         Tất cả
                       </Button>
@@ -286,6 +291,7 @@ export default function PostList() {
                 totalFund: "all",
                 status: "all",
                 province: "all",
+                constructionUnit: "all",
               });
               setSortField("createdAt");
             }}

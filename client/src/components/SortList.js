@@ -6,6 +6,7 @@ const sortOptionsMapping = {
   createdAt: "Mới nhất",
   status: "Trạng thái",
   totalFund: "Khoảng tiền",
+  random: "Ngẫu nhiên",
 };
 
 const SortList = (props) => {

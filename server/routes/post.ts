@@ -63,7 +63,6 @@ postRouter.post("/", async (req: Request, res: Response) => {
     location: {
       province: createdPost.province ?? null,
     },
-    description: createdPost.description ?? null,
     donor: {
       description: createdPost["donor.description"] ?? null,
       images: createdPost["donor.images"] ?? [],
@@ -161,7 +160,6 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
         updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
         thumbnail: updatedPost.thumbnail ?? docData.thumbnail,
         category: updatedPost.category ?? docData.category,
-        description: updatedPost.description ?? docData.description ?? null,
         classification: updatedPost.classification ?? docData.classification ?? null,
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000,

@@ -404,6 +404,7 @@ export default function CardDetails(props) {
                               display: "flex",
                               justifyContent: "space-between",
                               alignItems: "center",
+                              gap: "8px",
                               width: "100%",
                               borderBottom: "0.5px solid #6d7d9c",
                               pb: "8px",

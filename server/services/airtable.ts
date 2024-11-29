@@ -127,6 +127,7 @@ async function fetchAirtableRecords(requestedYear: string) {
         },
         metadata: {
           constructionItems: record.get("Hạng mục công trình") ? record.get("Hạng mục công trình").trim() : "",
+          constructionUnit: record.get("NE Công trình") ? record.get("NE Công trình")[0] : "",
           type: record.get("Hạng mục") ? record.get("Hạng mục").trim() : "",
           stage: record.get("Cấp") ? record.get("Cấp").trim() : "",
           totalStudents: record.get("Số HS") ? record.get("Số HS") : "",

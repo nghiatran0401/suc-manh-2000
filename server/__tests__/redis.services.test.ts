@@ -62,6 +62,7 @@ describe("insert/update/remove a document from an index in Redis", () => {
     statusOrder: 0,
     totalFund: 1000,
     location: { province: "province1" },
+    metadata: { constructionUnit: "VVC" },
   };
 
   beforeEach(async () => jest.clearAllMocks());
@@ -101,7 +102,9 @@ describe("insert/update/remove a document from an index in Redis", () => {
       "totalFund",
       mockData.totalFund,
       "province",
-      convertToCleanedName(mockData.location?.province)
+      convertToCleanedName(mockData.location?.province),
+      "constructionUnit",
+      mockData.metadata?.constructionUnit
     );
   });
 

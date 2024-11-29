@@ -1,8 +1,10 @@
-import { firestore } from "./firebase";
-import { convertToCleanedName } from "./utils";
-import dotenv from "dotenv";
-dotenv.config();
+import { firestore } from "../firebase";
+import { convertToCleanedName } from "./index";
 import Redis from "ioredis";
+import path from "path";
+
+import dotenv from "dotenv";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const redis = new Redis(process.env.REDIS_URL || "");
 
@@ -37,7 +39,7 @@ const INDEX_SCHEMA = [
   "TAG",
 ];
 
-async function indexFirestoreDocsToRedis() {
+export async function indexFirestoreDocsToRedis() {
   await redis.call("FLUSHALL");
   await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
 
@@ -90,7 +92,7 @@ async function indexFirestoreDocsToRedis() {
         "province",
         convertToCleanedName(data.location?.province),
         "constructionUnit",
-        data.metadata?.constructionUnit || "N/A"
+        data.metadata?.constructionUnit ?? "N/A"
       );
     });
 
@@ -100,7 +102,3 @@ async function indexFirestoreDocsToRedis() {
   console.log("[indexFirestoreDocsToRedis]: Succeeded!");
   process.exit(0);
 }
-
-// indexFirestoreDocsToRedis();
-
-export default indexFirestoreDocsToRedis;
