@@ -250,7 +250,7 @@ export const metadataLogoMapping = {
 export const constructionUnitMapping = {
   "NE - PGD": "Phòng giáo dục",
   "NE - DTN": "Đoàn thanh niên",
-  "NE - QBTTE": "Quĩ bảo trợ trẻ em",
+  "NE - QBTTE": "Quỹ bảo trợ trẻ em",
   VVC: "Trung tâm tình nguyên quốc gia",
 };
 

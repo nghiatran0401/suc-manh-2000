@@ -6,7 +6,6 @@ import { Request, Response } from "express";
 import { firestore, firebase } from "../firebase";
 import { upsertDocumentToIndex, removeDocumentFromIndex, getValuesByCategoryInRedis } from "../services/redis";
 import { v4 as uuidv4 } from "uuid";
-import { convertToCleanedName } from "../utils/search";
 
 const postRouter = express.Router({ mergeParams: true });
 
@@ -60,12 +59,12 @@ postRouter.post("/", async (req: Request, res: Response) => {
     classification: createdPost.classification ?? null,
     status: createdPost.status ?? null,
     totalFund: Number(createdPost.totalFund) * 1000000,
+    donors: [],
+    metadata: {},
     location: {
       province: createdPost.province ?? null,
-    },
-    donor: {
-      description: createdPost["donor.description"] ?? null,
-      images: createdPost["donor.images"] ?? [],
+      district: createdPost.district ?? null,
+      commune: createdPost.commune ?? null,
     },
     progress: [
       {
@@ -163,12 +162,12 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
         classification: updatedPost.classification ?? docData.classification ?? null,
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000,
+        donors: [],
+        metadata: {},
         location: {
-          province: updatedPost.province ?? convertToCleanedName(docData.location?.province),
-        },
-        donor: {
-          description: updatedPost["donor.description"] ?? docData.donor?.description ?? null,
-          images: updatedPost["donor.images"] ?? docData.donor?.images ?? null,
+          province: updatedPost.province ?? docData.location?.province,
+          district: updatedPost.district ?? docData.location?.district,
+          commune: updatedPost.commune ?? docData.location?.commune,
         },
         progress: [
           {

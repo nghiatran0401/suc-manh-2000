@@ -1,5 +1,7 @@
 import path from "path";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
+import { firestore, firebase } from "../firebase";
 import Airtable from "airtable";
 import Bottleneck from "bottleneck";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -50,28 +52,113 @@ function standardizePostTitle(str: string) {
     .replace(/,/g, " -");
 }
 
-async function getDonorsFromIds(donorIds: any) {
-  const donors = [];
-  for (const donorId of donorIds) {
-    const record = await base(DONOR_TABLE).find(donorId);
-    const donor = {
-      name: record.get("Tên Tài Trợ") ?? "",
-      totalProjects: record.get("Công trình Total") ? (record.get("Công trình Total") as any).length : 0,
-      notes: record.get("Notes") ?? "",
-      contact: record.get("Thông tin liên hệ ") ?? "",
-      intro: record.get("Giới thiệu Cty ( lên MoMo )") ?? "",
-      logo: record.get("Logo Drive") ?? "",
+const totalErrorsMap = new Map();
+async function fetchAirDonorRecords(donorIds: string[]) {
+  const airDonorRecords = [];
+  for (let i = 0; i < donorIds.length; i++) {
+    const donorRecord = await base(DONOR_TABLE).find(donorIds[i]);
+
+    const getTotalProjects = () => {
+      const total = donorRecord.get("Công trình Total");
+      const total6 = donorRecord.get("Công trình Total 6");
+
+      if (!total && !total6) {
+        return [];
+      } else if (total && !total6) {
+        return total;
+      } else if (!total && total6) {
+        return total6;
+      } else if (Array.isArray(total) && Array.isArray(total6)) {
+        if (JSON.stringify(total) === JSON.stringify(total6)) {
+          return total;
+        } else {
+          const name = donorRecord.get("Tên Tài Trợ") ?? undefined;
+          if (!name) return total;
+          if (!totalErrorsMap.has(name)) {
+            totalErrorsMap.set(name, true);
+          }
+          return total;
+        }
+      } else {
+        console.error(`Error: ${donorRecord.get("Tên Tài Trợ") ?? ""}`);
+        return [];
+      }
     };
-    donors.push(donor);
+
+    const donor = {
+      name: donorRecord.get("Tên Tài Trợ") ?? "",
+      intro: donorRecord.get("Giới thiệu Cty ( lên MoMo )") ?? "",
+      logo: donorRecord.get("Logo Drive") ?? "",
+      type: donorRecord.get("Loại") ?? "",
+      employeeCount: donorRecord.get("Employees") ?? "",
+      totalProjects: getTotalProjects(),
+    };
+    airDonorRecords.push(donor);
   }
-  return donors;
+  return airDonorRecords;
 }
 
-async function fetchAirtableRecords(requestedYear: string) {
+async function getDonors(noteMoney: any, airDonorRecords: any, projectId: string) {
+  const donors: { donorId: string; donationId: string }[] = [];
+  const donorErrors: any = { airDonorRecords: airDonorRecords.map((r: any) => r.name), noteMoneyDonors: [] };
+
+  for (const line of noteMoney) {
+    let donor = { donorId: "", donationId: "" };
+    const match = line.match(/^\d+\.\s*(.+?)\s*:\s*(\d+)$/);
+
+    if (match) {
+      const donorName = match[1];
+      const donationAmount = parseInt(match[2], 10) * 1000000;
+
+      // Check if the note matches with the donors array
+      const donorMatch = airDonorRecords.filter((r: any) => r.name === donorName);
+      if (donorMatch.length === 1) {
+        // Create new Donor Doc
+        const donorQuerySnapshot = await firestore.collection("donors").where("name", "==", donorName).get();
+        if (donorQuerySnapshot.empty) {
+          const newDonorId = uuidv4().replace(/-/g, "").substring(0, 20);
+          console.log(`Creating new donor: ${projectId} - ${donorName}`);
+          const donorDocRef = firestore.collection("donors").doc(newDonorId);
+          await donorDocRef.set(donorMatch[0]);
+          donor.donorId = newDonorId;
+        } else {
+          donor.donorId = donorQuerySnapshot.docs[0].id;
+        }
+
+        // Create new Donation Doc
+        const donationQuerySnapshot = await firestore.collection("donations").where("donorId", "==", donor.donorId).where("projectId", "==", projectId).get();
+        if (donationQuerySnapshot.empty) {
+          const newDonationId = uuidv4().replace(/-/g, "").substring(0, 20);
+          console.log(`Creating new donation: ${projectId} - ${donorName} - ${donationAmount}`);
+          const donationDocRef = firestore.collection("donations").doc(newDonationId);
+          await donationDocRef.set({
+            id: newDonationId,
+            donorId: donor.donorId,
+            projectId: projectId,
+            amount: donationAmount,
+          });
+          donor.donationId = newDonationId;
+        } else {
+          donor.donationId = donationQuerySnapshot.docs[0].id;
+        }
+
+        donors.push(donor);
+      } else {
+        // Report donor error
+        donorErrors.noteMoneyDonors.push(donorName);
+      }
+    }
+  }
+
+  return { donorsTemp: donors, donorErrors };
+}
+
+async function fetchAirProjectRecords(requestedYear: string) {
   // Report issues/bugs
   const cancelledProjects = [];
   const noStatusProjects = [];
   const noGoogleDriveUrls = [];
+  const donorIssues = [];
 
   try {
     const records: any = await limitedSelect(PROJECT_TABLE, {
@@ -88,7 +175,7 @@ async function fetchAirtableRecords(requestedYear: string) {
       }
 
       if (record.get("Tên công trình").includes("❌") || !record.get("DA")) {
-        cancelledProjects.push({ projectInitNe: record.get("Tên công trình"), projectId: record.get("DA") ? record.get("DA") : null });
+        cancelledProjects.push({ projectInitName: record.get("Tên công trình"), projectId: record.get("DA") ? record.get("DA") : null });
         continue;
       }
 
@@ -108,8 +195,18 @@ async function fetchAirtableRecords(requestedYear: string) {
         continue;
       }
 
-      const projectDonorIds = record.get("Donors - CHỐT");
-      const projectDonors = !projectDonorIds || projectDonorIds.length === 0 ? [] : await getDonorsFromIds(projectDonorIds);
+      let donors: any;
+      const donorIds = record.get("Donors - CHỐT") ? record.get("Donors - CHỐT") : [];
+      const noteMoney = record.get("Note số tiền") ? record.get("Note số tiền").split("\n") : undefined;
+      const qualifiedDonors = projectStatus && ["dang-xay-dung", "da-hoan-thanh"].includes(projectStatus);
+      if (donorIds.length <= 0 || !noteMoney || !qualifiedDonors) {
+        donors = [];
+      } else {
+        const airDonorRecords = await fetchAirDonorRecords(donorIds);
+        const { donorsTemp, donorErrors } = await getDonors(noteMoney, airDonorRecords, projectId);
+        donors = donorsTemp;
+        donorIssues.push({ ...donorErrors, projectId: projectId });
+      }
 
       const airtableData = {
         projectId: projectId,
@@ -119,7 +216,7 @@ async function fetchAirtableRecords(requestedYear: string) {
         rawStatus: record.get("Follow up Step") ? record.get("Follow up Step").trim() : "",
         status: projectStatus,
         totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : "",
-        donors: projectDonors,
+        donors: donors,
         location: {
           province: record.get("Tỉnh/thành (update)") ? record.get("Tỉnh/thành (update)")[0] : "",
           district: record.get("Huyện") ? record.get("Huyện").trim() : "",
@@ -151,13 +248,13 @@ async function fetchAirtableRecords(requestedYear: string) {
     }
 
     const totalAirtableDataList = (Object.values(groupedRecords) as any).flat();
-    const totalAirtableErrors = { "DA hủy": cancelledProjects, "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls };
+    const totalAirtableErrors = { "DA hủy": cancelledProjects, "DA không có trạng thái (Follow up steps)": noStatusProjects, "DA không có link GD": noGoogleDriveUrls, "DA có vấn đề Nhà tài trợ": donorIssues };
 
     return { totalAirtableDataList, totalAirtableErrors };
   } catch (err) {
-    console.error("[fetchAirtableRecords] - error: ", err);
+    console.error("[fetchAirProjectRecords] - error: ", err);
     return [];
   }
 }
 
-export { getProjectStatus, standardizePostTitle, fetchAirtableRecords };
+export { getProjectStatus, standardizePostTitle, fetchAirProjectRecords };

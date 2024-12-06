@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { IResourceComponentsProps, BaseRecord, useTranslate, HttpError } from "@refinedev/core";
-import { useTable, List, EditButton, DeleteButton, SaveButton, useEditableTable } from "@refinedev/antd";
+import { useTable, List, EditButton, DeleteButton, SaveButton } from "@refinedev/antd";
 import { Table, Space, Input, Form, Modal } from "antd";
 import { useLocation } from "react-router-dom";
 import { CLIENT_URL, POSTS_PER_PAGE, SERVER_URL, categoryMapping, classificationMapping, statusMapping } from "../../utils/constants";
@@ -13,19 +13,6 @@ import { provincesAndCitiesObj } from "../../utils/vietnam-provinces";
 
 interface ISearch {
   name: string;
-}
-
-function standardizePostTitle(str: string) {
-  return str
-    .split(" ")
-    .map((word, index, arr) => {
-      if (word.includes("DA")) {
-        return word.toUpperCase();
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(" ")
-    .replace(/,/g, " -");
 }
 
 export const ProjectList: React.FC<IResourceComponentsProps> = () => {
@@ -63,7 +50,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
       if (!data.name) {
         const baseUrl = window.location.origin + window.location.pathname;
         window.history.pushState({}, "", baseUrl);
-        // window.location.replace(baseUrl);
       }
       return [
         {
@@ -91,51 +77,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
         try {
           switch (service) {
-            case "Tạo báo cáo lỗi Airtable":
-              console.time("findAirtableErrors");
-              const resAirErrors = await axios.post(SERVER_URL + "/script/findAirtableErrors");
-              console.timeEnd("findAirtableErrors");
-
-              if (resAirErrors.status === 200) {
-                if (resAirErrors.data.authUrl) {
-                  window.location.href = decodeURIComponent(resAirErrors.data.authUrl);
-                  return;
-                }
-
-                Modal.success({
-                  width: 900,
-                  title: resAirErrors.data.name,
-                  content: (
-                    <div>
-                      {Object.entries(resAirErrors.data.errors as Record<string, { projectInitName: string; projectId: string; web?: string; air?: string }[]>).map(
-                        ([key, value]) =>
-                          value.length > 0 && (
-                            <div key={key}>
-                              <p>
-                                <strong>{key}</strong>
-                              </p>
-                              <ul>
-                                {value.map((v) => (
-                                  <div key={v.projectId}>
-                                    <li>{standardizePostTitle(`${v.projectId} - ${v.projectInitName}`)}</li>
-                                    {v.web && v.air && (
-                                      <ul>
-                                        <li>Web: {v.web}</li>
-                                        <li>Air: {v.air}</li>
-                                      </ul>
-                                    )}
-                                  </div>
-                                ))}
-                              </ul>
-                            </div>
-                          )
-                      )}
-                    </div>
-                  ),
-                });
-              }
-              break;
-
             case "Tạo báo cáo tiến độ Zalo":
               console.time("tienDoZalo");
               const resZalo = await axios.post(SERVER_URL + "/script/createProjectProgressReportZalo");
@@ -241,16 +182,6 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
 
       {collectionName === "thong-bao" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-          <SaveButton
-            icon={<AlertOutlined />}
-            loading={confirmLoading}
-            disabled={confirmLoading}
-            onClick={() => handleButtonClick("Tạo báo cáo lỗi Airtable")}
-            style={{ backgroundColor: "#6666FF", borderColor: "#6666FF", color: "white" }}
-          >
-            Tạo báo cáo lỗi Airtable
-          </SaveButton>
-
           <SaveButton
             icon={<SketchOutlined />}
             loading={confirmLoading}

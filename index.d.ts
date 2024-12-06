@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin";
 
 export type NewsPost = {
-  id: string; // Firestore doc id
+  id: string;
   name: string;
   author: string;
   slug: string;
@@ -15,7 +15,7 @@ export type NewsPost = {
 };
 
 export type ProjectPost = {
-  id: string; // Firestore doc id
+  id: string;
   projectId: string;
   name: string;
   author: string;
@@ -28,21 +28,40 @@ export type ProjectPost = {
   status: string;
   totalFund: number;
   location: Location;
-  donor?: any; // temporary
-  donors?: Donors; // temporary optional
+  donors: {
+    donorId?: string;
+    donationId?: string;
+  }[];
   contentNew?: any; // temporary - 2024 only
   progressNew?: any; // temporary - 2024 only
-  metadata?: Metadata; // temporary optional
+  metadata: Metadata;
   progress: Progress;
   content: {
     tabs: TabsContent;
   };
 };
 
+export type Donor = {
+  id: string;
+  name: string;
+  intro?: string;
+  logo?: string;
+  type?: string;
+  employeeCount?: string;
+  totalProjects?: number;
+};
+
+export type Donation = {
+  id: string;
+  donorId: string;
+  projectId: string;
+  amount: number;
+};
+
 type Location = {
   province: string;
-  district?: string;
-  commune?: string;
+  district: string;
+  commune: string;
   distanceToHCMC?: number;
   distanceToHN?: number;
 };
@@ -61,15 +80,6 @@ type Metadata = {
   start_date?: string;
   end_date?: string;
 };
-
-type Donors = {
-  name: string;
-  totalProjects?: number;
-  intro?: string;
-  logo?: string;
-  notes?: string;
-  contact?: string;
-}[];
 
 type Progress = {
   name: string;
