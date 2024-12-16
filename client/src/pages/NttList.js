@@ -1,5 +1,6 @@
-import { Box, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { DESKTOP_WIDTH } from "../constants";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 
 export default function NttList() {
   const theme = useTheme();
@@ -44,6 +45,80 @@ export default function NttList() {
           </Box>
           
         </Box>
+
+        <Grid 
+          container 
+          item 
+          spacing={2}
+          sx={{
+            border: "1px solid #fff",
+            paddingBottom: 2,
+            borderRadius: 2,
+            margin: "16px auto",
+            boxShadow: 2,
+            width: "100%",
+            display: "flex"
+          }}>
+          
+          <Grid
+            item
+            display={"flex"}
+            flexDirection={"column"}
+            gap={"16px"}
+            md={3}
+            sm={6}
+            xs={6}
+            paddingTop={0}
+            paddingRight={2}
+          >
+            <Box display={"flex"} flexDirection={"column"} alignItems={"center"} gap={"4px"}>
+              <Typography variant="h5" fontWeight={600}>
+                69
+              </Typography>
+              <Typography variant="body1">Trường học</Typography>
+              <Typography fontSize={isMobile ? "12px" : "14px"} fontWeight={600} color={"#00000073"} lineHeight={"16px"}>
+                44/69 Dự án đã khởi công
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: isMobile ? "2px" : "8px",
+                justifyContent: "center"
+              }}
+            >
+              <Chip
+                variant="outline"
+                avatar={<img alt="logo"/>}
+                sx={{
+                  backgroundColor: "",
+                  height: "24px",
+                  "& .MuiChip-avatar": {
+                    width: "16px",
+                    height: "16px",
+                  },
+                  "&:hover": {
+                  },
+                }}
+              />
+            </Box>
+
+            <Box 
+              display="flex" 
+              justifyContent="center" 
+              width="100%" 
+              height={"32px"}>
+                <Button
+                  variant="outlined"
+                  sx={{ width: "100%", textTransform: "none", color: "#000", borderColor: "#D9D9D9", borderRadius: "32px", m: isMobile ? "0px" : "0px 16px" }}
+                  endIcon={<ArrowForward />}
+                >
+                  Xem tất cả
+                </Button>
+            </Box>
+          </Grid>
+        </Grid>
       </Grid>
     </Box>
   );
