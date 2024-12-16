@@ -4,7 +4,8 @@ import GioiThieu from "../pages/GioiThieu";
 import PostList from "../pages/PostList";
 import PostDetails from "../pages/PostDetails";
 import Search from "../pages/Search";
-import ChamPhamTool from "../pages/ChamPhamTool";
+import NttList from "../pages/NttList";
+// import ChamPhamTool from "../pages/ChamPhamTool";
 
 export const routes = [
   {
@@ -15,10 +16,10 @@ export const routes = [
     path: "/gioi-thieu",
     element: <GioiThieu />,
   },
-  {
-    path: "/cham_pham_tool",
-    element: <ChamPhamTool />,
-  },
+  // {
+  //   path: "/cham_pham_tool",
+  //   element: <ChamPhamTool />,
+  // },
   {
     path: "/:category",
     element: <PostList />,
@@ -31,6 +32,10 @@ export const routes = [
     path: "/search",
     element: <Search />,
   },
+  {
+    path: "/ntt",
+    element: <NttList/>
+  }
 ];
 
 export const router = createBrowserRouter(routes);
