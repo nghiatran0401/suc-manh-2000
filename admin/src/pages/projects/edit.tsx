@@ -44,7 +44,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
   useEffect(() => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
-      // formProps.form?.setFieldValue("createdAt", projectData.createdAt ? projectData.createdAt.split("T")[0] : "");
       formProps.form?.setFieldValue("province", projectData.location?.province);
     }
   }, [projectData]);
@@ -86,16 +85,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         </Form.Item>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          {/* Publish date */}
-          {/* <Form.Item
-            label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.createdAt")}</span>}
-            name={"createdAt"}
-            rules={[{ required: true }]}
-            style={{ width: "fit-content", minWidth: "150px" }}
-          >
-            <Input type="date" />
-          </Form.Item> */}
-
           {/* Category */}
           <Form.Item
             label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.category")}</span>}
@@ -179,15 +168,8 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
           )}
         </div>
 
-        {/* Description */}
-        {/* {isProject && (
-          <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.description")}</span>} name={"description"}>
-            <RichTextEditor initialContent={projectData.description ?? ""} onChange={() => {}} />
-          </Form.Item>
-        )} */}
-
         {/* Donor */}
-        {isProject && (
+        {/* {isProject && (
           <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donor.name")}</span>}>
             <div
               style={{
@@ -212,7 +194,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
               </Form.Item>
             </div>
           </Form.Item>
-        )}
+        )} */}
 
         {/* Progress */}
         {isProject && (
@@ -295,6 +277,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
           </div>
         </Form.Item>
 
+        {/* 
         {isProject && (
           <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section2")}</span>}>
             <div
@@ -347,7 +330,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
               </Form.Item>
             </div>
           </Form.Item>
-        )}
+        )} */}
       </Form>
     </Edit>
   );

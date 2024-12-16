@@ -14,19 +14,20 @@ async function updateFirestoreCountsCollection() {
       const classification = data.classification;
       const category = data.category;
       const province = convertToCleanedName(data.location?.province);
+      const qualified = ["dang-xay-dung", "da-hoan-thanh"].includes(data.status);
 
-      if (classification) {
-        if (!classificationCounts[classification]) {
-          classificationCounts[classification] = 0;
-        }
-        classificationCounts[classification]++;
-      }
-
-      if (category) {
+      if ((category?.includes("du-an") && qualified) || !category?.includes("du-an")) {
         if (!categoryCounts[category]) {
           categoryCounts[category] = 0;
         }
         categoryCounts[category]++;
+      }
+
+      if (classification && qualified) {
+        if (!classificationCounts[classification]) {
+          classificationCounts[classification] = 0;
+        }
+        classificationCounts[classification]++;
       }
 
       if (province) {
@@ -39,11 +40,12 @@ async function updateFirestoreCountsCollection() {
   }
 
   try {
-    await firestore.collection("counts").doc("classification").set(classificationCounts);
-    await firestore.collection("counts").doc("category").set(categoryCounts);
-    await firestore.collection("counts").doc("province").set(provinceCounts);
+    await Promise.all([
+      firestore.collection("counts").doc("classification").set(classificationCounts),
+      firestore.collection("counts").doc("category").set(categoryCounts),
+      firestore.collection("counts").doc("province").set(provinceCounts),
+    ]);
 
-    // console.log("counts", { classificationCounts, categoryCounts, provinceCounts });
     console.log("[updateFirestoreCountsCollection]: Succeeded!");
   } catch (error) {
     console.error("[updateFirestoreCountsCollection]: Failed! - ", error);

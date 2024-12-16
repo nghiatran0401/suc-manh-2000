@@ -5,7 +5,7 @@ import { standardizeString } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataLogoMapping, metadataMapping, statusLogoMapping, statusMapping } from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataLogoMapping, metadataMapping, statusColorHoverMapping, statusLogoMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -15,6 +15,7 @@ import SM2000 from "../assets/companions/SM2000.svg";
 import WalletOutlinedIcon from "@mui/icons-material/WalletOutlined";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import CardDonor from "./CardDonor";
 
 export default function CardDetails(props) {
   const { category } = useParams();
@@ -28,6 +29,8 @@ export default function CardDetails(props) {
   const isProject = category.includes("du-an");
   const [finalProgress, setFinalProgress] = useState(post.progressNew || post.progress);
   const [finalTabs, setFinalTabs] = useState(post.contentNew || post.content);
+
+  console.log(post.donors);
 
   useEffect(() => {
     setLoading(true);
@@ -63,9 +66,9 @@ export default function CardDetails(props) {
             width="100%"
             height={"1000px"}
             src={tab.description}
-            frameborder="0"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
+            allowFullScreen
             onLoad={() => setIframeStatus("loaded")}
             onError={() => setIframeStatus("error")}
             style={{
@@ -194,7 +197,7 @@ export default function CardDetails(props) {
       </Box>
 
       {/* Donors */}
-      {isProject && post.donor?.description ? (
+      {/* {isProject && post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography
@@ -235,7 +238,9 @@ export default function CardDetails(props) {
             </Typography>
           </Box>
         )
-      )}
+      )} */}
+
+      {isProject && post.donors.length > 0 && <CardDonor donors={post.donors} />}
 
       {/* Progress images */}
       {finalProgress && finalProgress?.length > 0 && (
@@ -438,7 +443,7 @@ export default function CardDetails(props) {
                         Số tiền
                       </Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight={"bold"} textAlign={"right"} color={"#F5222D"}>
+                    <Typography variant="body2" fontWeight={"bold"} textAlign={"right"} color={statusColorHoverMapping[post.status]}>
                       {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VNĐ" : "Đang xử lý"}
                     </Typography>
                   </Box>

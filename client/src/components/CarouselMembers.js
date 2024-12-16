@@ -166,6 +166,7 @@ export default function CarouselMembers() {
   for (let i = 0; i < MEMBERS.length; i += itemsPerSlide) {
     chunkedItems.push(MEMBERS.slice(i, i + itemsPerSlide));
   }
+
   return (
     <Box
       maxWidth={DESKTOP_WIDTH}

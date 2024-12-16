@@ -219,7 +219,7 @@ export const statusLogoMapping = {
 
 export const metadataMapping = {
   stage: "Cấp",
-  constructionItems: "Hạng mục công trình",
+  constructionItems: "Công trình",
   progress: "Tiến độ",
   type: "Hạng mục",
   totalStudents: "Số học sinh huởng lợi",

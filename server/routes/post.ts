@@ -33,6 +33,24 @@ postRouter.get("/:id", async (req: Request, res: Response) => {
     const postDocData = postDocRefSnapshot.docs[0].data();
     postDocData.createdAt = postDocData.createdAt?.toDate();
 
+    if (postDocData.donors) {
+      const fullDonorsData = [];
+      for (const donor of postDocData.donors) {
+        const { donationId, donorId } = donor;
+
+        const [donationDoc, donorDoc] = await Promise.all([firestore.collection("donations").doc(donationId).get(), firestore.collection("donors").doc(donorId).get()]);
+
+        const donationData = donationDoc.exists ? donationDoc.data() : null;
+        const donorData = donorDoc.exists ? donorDoc.data() : null;
+
+        fullDonorsData.push({
+          donation: donationData ? donationData : [],
+          donor: donorData ? donorData : [],
+        });
+      }
+      postDocData.donors = fullDonorsData;
+    }
+
     res.status(200).json(postDocData);
   } catch (error: any) {
     res.status(404).send({ error: `Error getting a document: ${error.message}` });
