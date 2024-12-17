@@ -1,10 +1,16 @@
-import { Box, Button, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
+import React, { useRef } from "react";
+import { Box, Button, Chip, Grid, Pagination, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { DESKTOP_WIDTH } from "../constants";
 import ArrowForward from "@mui/icons-material/ArrowForward";
+import SearchBox from "../components/SearchBox";
+import FilterList from "../components/FilterList";
+import SortList from "../components/SortList";
 
 export default function NttList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const scrollRef = useRef(null);
 
   return (
     <Box 
@@ -120,6 +126,41 @@ export default function NttList() {
           </Grid>
         </Grid>
       </Grid>
+
+      {/* Search/Filter/Sort */}
+      <Box 
+        ref={scrollRef} 
+        display={"flex"} 
+        flexWrap={"wrap"} 
+        justifyContent={"flex-end"} 
+        alignItems={"center"} 
+        gap={"16px"}>
+          <SearchBox 
+            inputProps={{ 
+              width: isMobile ? "100%" : "30%", 
+              height: isMobile ? "50px" : "40px" 
+            }} />
+          {/* <FilterList /> */}
+          <SortList />
+      </Box>
+
+      <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
+          <Typography variant="body1" textAlign={"left"}>
+            Hiển thị 3 kết quả tìm kiếm
+          </Typography>
+
+          <Grid container spacing={3}>
+            {/* <CardList /> */}
+          </Grid>
+
+          <Box display="flex" justifyContent="center">
+            <Pagination
+              color="primary"
+              variant="outlined"
+              shape="rounded"
+            />
+          </Box>
+        </Box>
     </Box>
   );
 }
