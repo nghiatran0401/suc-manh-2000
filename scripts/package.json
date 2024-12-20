@@ -13,7 +13,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "githubWorkflow": "npx tsx githubWorkflow.ts"
+    "githubWorkflow": "npx tsx githubWorkflow.ts",
+    "indexDonors": "npx tsx indexDonorsDocsToRedis.ts",
+    "indexDonations": "npx tsx indexDonationsDocsToRedis.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
