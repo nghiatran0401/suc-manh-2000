@@ -1,16 +1,45 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Button, Chip, Grid, Pagination, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { DESKTOP_WIDTH } from "../constants";
+import { DESKTOP_WIDTH, SERVER_URL } from "../constants";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import SearchBox from "../components/SearchBox";
 import FilterList from "../components/FilterList";
 import SortList from "../components/SortList";
+import axios from "axios";
 
 export default function NttList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const scrollRef = useRef(null);
+
+  const [loading, setLoading] = useState(false);
+  const [donors, setDonors] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalDonors, setTotalDonors] = useState(0);
+
+  // Fetch data from server
+  useEffect(() => {
+    axios
+      .get(SERVER_URL + "/donors", { params: { page, limit } })
+      .then((donorResponse) => {
+        setDonors(donorResponse.data.donors);
+        setTotalDonors(donorResponse.data.totalDonors);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(`Error fetching donors: ${error}`);
+        setLoading(false);
+      });
+
+    if (scrollRef.current && donors.length > 0) {
+      window.scrollTo({ 
+        top: scrollRef.current.offsetTop - 100,
+        behavior: "smooth" 
+      });
+    }
+  }, [page, limit]);
 
   return (
     <Box 
@@ -146,8 +175,14 @@ export default function NttList() {
 
       <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
           <Typography variant="body1" textAlign={"left"}>
-            Hiển thị 3 kết quả tìm kiếm
+            Hiển thị {donors.length} kết quả tìm kiếm
           </Typography>
+
+          {donors.length === 0 && (
+            <Typography variant="h6" textAlign={"center"} height={"400px"}>
+              Không tìm thấy kết quả nào
+            </Typography>
+          )}
 
           <Grid container spacing={3}>
             {/* <CardList /> */}
@@ -158,6 +193,15 @@ export default function NttList() {
               color="primary"
               variant="outlined"
               shape="rounded"
+              count={Math.ceil(totalDonors / limit)}
+              page={page}
+              onChange={(event, page) => {
+                setPage(page);
+                window.scrollTo({ 
+                  top: scrollRef.current.offsetTop - 100, 
+                  behavior: "smooth",
+                });
+              }}
             />
           </Box>
         </Box>
