@@ -6,6 +6,7 @@ import SearchBox from "../components/SearchBox";
 import FilterList from "../components/FilterList";
 import SortList from "../components/SortList";
 import axios from "axios";
+import CardList from "../components/CardList";
 
 export default function NttList() {
   const theme = useTheme();
@@ -197,7 +198,7 @@ export default function NttList() {
             )}
 
             <Grid container spacing={3}>
-              {/* <CardList /> */}
+              <CardList items={donors}/>
             </Grid>
 
             <Box display="flex" justifyContent="center">

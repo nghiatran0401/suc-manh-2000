@@ -25,13 +25,45 @@ const Card = styled(MuiCard)({
 export default function CardList(props) {
   const { category } = useParams();
 
-  return props.posts.map((post, ix) => (
+  return props.items.map((post, ix) => (
     <Grid key={ix} item xs={6} sm={6} md={3}>
       <Link to={`${props.category ? props.category : category ? `/${category}` : post.redisKey ? `/${post.redisKey.split(":")[1]}` : ""}/${post.slug}`} style={{ textDecoration: "none" }}>
         <Card>
           <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-            <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ? post.thumbnail : SM2000} alt={standardizeString(post.name)} />
+            <img 
+              style={{ width: "100%", height: "225px", objectFit: "cover" }} 
+              src={post.thumbnail || SM2000} // TODO: post.logo of NTT is not valid
+              alt={standardizeString(post.name)} />
 
+            {
+              post?.type && (
+                <div
+                  style={{
+                    margin: "5px",
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    color: "white",
+                    backgroundColor: ["Cá nhân"].includes(post.type)
+                      ? "#4096FF"
+                      : ["Công ty"].includes(post.type)
+                      ? "#9254DE"
+                      : "#F759AB",
+                    padding: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <Typography color={"black"} variant="body2" fontWeight={"bold"}>
+                    {["Cá nhân"].includes(post.type) && "Cá nhân"}
+                    {["Công ty"].includes(post.type) && "Công ty"}
+                    {["Nhóm từ thiện"].includes(post.type) && "Nhóm"}
+                  </Typography>
+                </div>
+              )
+            }
             {post.status && (
               <div
                 style={{

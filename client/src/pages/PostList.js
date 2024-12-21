@@ -311,7 +311,7 @@ export default function PostList() {
           )}
 
           <Grid container spacing={3}>
-            <CardList posts={searchedPosts.slice(startIndex, endIndex)} />
+            <CardList items={searchedPosts.slice(startIndex, endIndex)} />
           </Grid>
 
           <Box display="flex" justifyContent="center">
