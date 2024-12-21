@@ -6,14 +6,14 @@ const donorRouter = express.Router({ mergeParams: true });
 
 donorRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const donorKeyPattern = `donor:*`;
-    const data = await getRedisDataWithKeyPattern(donorKeyPattern);
-
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
+    const sortField = req.query.sortField as string || "name";
 
+    const donorKeyPattern = `donor:*`;
+    const data = await getRedisDataWithKeyPattern(donorKeyPattern, sortField);
     const resultDonors = data.slice(startIndex, endIndex);
 
     res.status(200).send({ 
