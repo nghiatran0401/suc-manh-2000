@@ -7,6 +7,7 @@ import FilterList from "../components/FilterList";
 import SortList from "../components/SortList";
 import axios from "axios";
 import CardList from "../components/CardList";
+import usePostSort from "../hooks/usePostSort";
 
 export default function NttList() {
   const theme = useTheme();
@@ -22,10 +23,12 @@ export default function NttList() {
 
   const mockStatsData = [1, 2, 3, 4]; // TODO: Fetch real data
 
+  const { sortField, setSortField } = usePostSort();
+
   // Fetch data from server
   useEffect(() => {
     axios
-      .get(SERVER_URL + "/donors", { params: { page, limit } })
+      .get(SERVER_URL + "/donors", { params: { page, limit, sortField } })
       .then((donorResponse) => {
         setDonors(donorResponse.data.donors);
         setTotalDonors(donorResponse.data.totalDonors);
@@ -42,7 +45,7 @@ export default function NttList() {
         behavior: "smooth" 
       });
     }
-  }, [page, limit]);
+  }, [page, limit, sortField]);
 
   return (
     <Box 
@@ -177,7 +180,7 @@ export default function NttList() {
               height: isMobile ? "50px" : "40px" 
             }} />
           {/* <FilterList /> */}
-          <SortList /> 
+          <SortList sortField={sortField} setSortField={setSortField} sortType={"ntt"} /> 
       </Box>
 
       {

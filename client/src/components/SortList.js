@@ -2,17 +2,34 @@ import React, { useState } from "react";
 import { Box, Button, Menu, MenuItem, Typography, Badge } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort";
 
-const sortOptionsMapping = {
+const sortOptionsPostMapping = {
   createdAt: "Mới nhất",
   status: "Trạng thái",
   totalFund: "Khoảng tiền",
   random: "Ngẫu nhiên",
 };
 
+const sortOptionsNttMapping = {
+  name: "Tên",
+  type: "Loại",
+}
+
+const getSortOptionsMapping = (sortType) => {
+  switch (sortType) {
+    case 'post':
+      return sortOptionsPostMapping;
+    case 'ntt':
+      return sortOptionsNttMapping;
+    default:
+      return {};
+  }
+}
+
 const SortList = (props) => {
-  const { searchQuery, sortField, setSortField } = props;
+  const { searchQuery, sortField, setSortField, sortType = 'post' } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
+  const sortOptionsMapping = getSortOptionsMapping(sortType);
 
   return (
     <Box>
