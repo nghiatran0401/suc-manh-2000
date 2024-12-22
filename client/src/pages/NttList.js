@@ -8,6 +8,7 @@ import SortList from "../components/SortList";
 import axios from "axios";
 import CardList from "../components/CardList";
 import usePostSort from "../hooks/usePostSort";
+import Fuse from "fuse.js";
 
 export default function NttList() {
   const theme = useTheme();
@@ -20,10 +21,33 @@ export default function NttList() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalDonors, setTotalDonors] = useState(0);
+  const [searchDonors, setSearchDonors] = useState([]);
 
   const mockStatsData = [1, 2, 3, 4]; // TODO: Fetch real data
 
   const { sortField, setSortField } = usePostSort();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // onSearch
+  useEffect(() => {
+    if (searchQuery) {
+      const fuseOptions = {
+        isCaseSensitive: true,
+        includeScore: true,
+        shouldSort: true,
+        threshold: 0.5,
+        useExtendedSearch: true,
+        ignoreLocation: true,
+        keys: ["name"],
+      };
+      const fuse = new Fuse(donors, fuseOptions);
+      const results = fuse.search(searchQuery);
+      const filteredDonors = results.filter((result) => result.score <= 0.5).map((result) => result.item);
+      setSearchDonors(filteredDonors);
+    } else {
+      setSearchDonors(donors);
+    }
+  }, [searchQuery]);
 
   // Fetch data from server
   useEffect(() => {
@@ -175,6 +199,8 @@ export default function NttList() {
         alignItems={"center"} 
         gap={"16px"}>
           <SearchBox 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             inputProps={{ 
               width: isMobile ? "100%" : "30%", 
               height: isMobile ? "50px" : "40px" 
@@ -191,17 +217,17 @@ export default function NttList() {
         ) : (
           <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} display={"flex"} flexDirection={"column"} gap={"32px"}>
             <Typography variant="body1" textAlign={"left"}>
-              Hiển thị {donors.length} kết quả tìm kiếm
+              Hiển thị {searchDonors.length}/{donors.length} kết quả tìm kiếm
             </Typography>
 
-            {donors.length === 0 && (
+            {searchDonors.length === 0 && (
               <Typography variant="h6" textAlign={"center"} height={"400px"}>
                 Không tìm thấy kết quả nào
               </Typography>
             )}
 
             <Grid container spacing={3}>
-              <CardList items={donors}/>
+              <CardList items={searchDonors}/>
             </Grid>
 
             <Box display="flex" justifyContent="center">
