@@ -107,8 +107,9 @@ export default function PostList() {
   // onSearch
   useEffect(() => {
     if (searchQuery !== "") {
+      const normalizedSearchQuery = searchQuery.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       const fuseOptions = {
-        isCaseSensitive: true,
+        isCaseSensitive: false,
         includeScore: true,
         shouldSort: true,
         // includeMatches: false,
@@ -124,7 +125,7 @@ export default function PostList() {
         keys: ["name", "cleanedName"],
       };
       const fuse = new Fuse(posts, fuseOptions);
-      const results = fuse.search(searchQuery);
+      const results = fuse.search(normalizedSearchQuery);
       const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
       setSearchedPosts(filteredResults);
     } else {
