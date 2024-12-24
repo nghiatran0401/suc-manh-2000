@@ -25,4 +25,19 @@ donorRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+donorRouter.get("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const detailDonorKey = `donor:${id}`;
+    const data = await getRedisDataWithKeyPattern(detailDonorKey);
+    
+    res.status(200).json({
+      donor: data
+    });
+  } catch (error: any) {
+    res.status(404).send({ error: `Error getting a document: ${error.message}` });
+  }
+});
+
 export default donorRouter;
