@@ -122,7 +122,16 @@ export default function PostList() {
         ignoreLocation: true,
         // ignoreFieldNorm: false,
         // fieldNormWeight: 1,
-        keys: ["name", "cleanedName"],
+        keys: [
+          { 
+            name: "name", 
+            weight: 0.3 
+          },
+          { 
+            name: "cleanedName", 
+            weight: 0.7 
+          }
+        ],
       };
       const fuse = new Fuse(posts, fuseOptions);
       const results = fuse.search(normalizedSearchQuery);
