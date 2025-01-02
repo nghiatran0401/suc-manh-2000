@@ -30,8 +30,6 @@ export default function CardDetails(props) {
   const [finalProgress, setFinalProgress] = useState(post.progressNew || post.progress);
   const [finalTabs, setFinalTabs] = useState(post.contentNew || post.content);
 
-  console.log(post.donors);
-
   useEffect(() => {
     setLoading(true);
     axios

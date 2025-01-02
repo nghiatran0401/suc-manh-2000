@@ -13,6 +13,7 @@ import usePostSort from "../hooks/usePostSort";
 import SearchBox from "../components/SearchBox";
 import Fuse from "fuse.js";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { convertToCleanedName } from "../helpers";
 
 export default function Search() {
   const theme = useTheme();
@@ -106,24 +107,15 @@ export default function Search() {
         // onSearch
         if (searchQuery !== "") {
           const fuseOptions = {
-            isCaseSensitive: true,
             includeScore: true,
             shouldSort: true,
-            // includeMatches: false,
-            // findAllMatches: true,
-            // minMatchCharLength: 1,
-            // location: 0,
-            threshold: 0.5,
-            // distance: 100,
-            useExtendedSearch: true,
+            threshold: 0,
             ignoreLocation: true,
-            // ignoreFieldNorm: false,
-            // fieldNormWeight: 1,
             keys: ["name", "cleanedName"],
           };
           const fuse = new Fuse(postsResponse.data.posts, fuseOptions);
-          const results = fuse.search(searchQuery);
-          const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
+          const results = fuse.search(convertToCleanedName(searchQuery));
+          const filteredResults = results.map((result) => result.item);
           setSearchedPosts(filteredResults);
         } else {
           setSearchedPosts(postsResponse.data.posts);
