@@ -10,14 +10,26 @@ import Carousel from "react-material-ui-carousel";
 import "./config/styles.css";
 
 const CardDonor = ({ donors }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(Array(donors.length).fill(false));
   const [dialogContent, setDialogContent] = useState({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleClickOpen = (donorObj) => {
+  const handleClickOpen = (index, donorObj) => {
     setDialogContent(donorObj);
-    setOpen(true);
+    setOpen((prev) => {
+      const newOpenDialogs = [...prev];
+      newOpenDialogs[index] = true;
+      return newOpenDialogs;
+    });
+  };
+
+  const handleClose = (index) => {
+    setOpen((prev) => {
+      const newOpenDialogs = [...prev];
+      newOpenDialogs[index] = false;
+      return newOpenDialogs;
+    });
   };
 
   if (donors.length === 1) {
@@ -55,7 +67,7 @@ const CardDonor = ({ donors }) => {
                 </Typography>
 
                 {donor.intro ? (
-                  <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-line" }}>
                     {donor.intro}
                   </Typography>
                 ) : (
@@ -171,15 +183,15 @@ const CardDonor = ({ donors }) => {
                               </IconButton>
                             </Box>
                           </Box>
-                          <IconButton color="primary" sx={{ p: "4px", position: "absolute", bottom: "0", right: "10px" }} onClick={() => handleClickOpen(donorObj)}>
+                          <IconButton color="primary" sx={{ p: "4px", position: "absolute", bottom: "0", right: "10px" }} onClick={() => handleClickOpen(index, donorObj)}>
                             <MoreHorizIcon />
                           </IconButton>
                         </>
                       )}
 
                       <Dialog
-                        open={open}
-                        onClose={() => setOpen(false)}
+                        open={open[index]}
+                        onClose={() => handleClose(index)}
                         sx={{
                           "& .MuiDialog-paper": {
                             minWidth: "200px",
@@ -206,7 +218,7 @@ const CardDonor = ({ donors }) => {
                             </Typography>
                           )}
                           {dialogContent?.donor?.intro && (
-                            <Typography variant="h6">
+                            <Typography variant="h6" sx={{ mt: 1, whiteSpace: "pre-line" }}>
                               <strong>Miêu tả công ty:</strong> {dialogContent?.donor?.intro}
                             </Typography>
                           )}

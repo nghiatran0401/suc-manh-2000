@@ -201,7 +201,7 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                   </Form.Item>
 
                   <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.description")}</span>} name={["donors", index, "donor", "intro"]}>
-                    <RichTextEditor initialContent={donor.donor.intro ?? ""} onChange={() => {}} />
+                    <Input.TextArea defaultValue={donor.donor.intro ?? ""} rows={8} />
                   </Form.Item>
 
                   <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.logo")}</span>} name={["donors", index, "donor", "logo"]}>
