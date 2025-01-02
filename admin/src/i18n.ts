@@ -33,9 +33,17 @@ const resources = {
           start_date: "Ngày khởi công",
           end_date: "Ngày khánh thành",
           donor: {
+            section: "Section Nhà tài trợ",
+            id: "Donor ID",
             name: "Nhà tài trợ",
-            description: "Mô tả",
-            images: "Ảnh",
+            type: "Loại",
+            totalProjects: "Tổng DA",
+            description: "Mô tả / Giới thiệu",
+            logo: "Logo",
+          },
+          donation: {
+            id: "Donation ID",
+            amount: "Số tiền tài trợ",
           },
           progress: {
             name: "Tiến độ dự án",

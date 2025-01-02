@@ -556,26 +556,6 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const projectsPromises = batch.map(async (airtableData: any) => {
-          if (airtableData["currentYear"] === "2025") {
-            const collection2024 = firestore.collection("du-an-2024");
-            const querySnapshot = await collection2024.where("projectId", "==", airtableData["projectId"]).get();
-
-            if (!querySnapshot.empty) {
-              const docRef = querySnapshot.docs[0].ref;
-              const docData = querySnapshot.docs[0].data();
-
-              if (docData.category === "du-an-2024") {
-                console.log("here", airtableData["projectId"], airtableData["currentYear"], docData.category);
-
-                return await Promise.all([
-                  docRef.delete(),
-                  removeDocumentFromIndex({ collection_id: collection2024, doc_id: querySnapshot.docs[0].id }),
-                  updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
-                ]);
-              }
-            }
-          }
-
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
@@ -659,8 +639,8 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                 ],
               },
               location: airtableData.location,
-              donors: airtableData.donors,
-              metadata: airtableData.metadata,
+              // donors: airtableData.donors,
+              // metadata: airtableData.metadata,
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 

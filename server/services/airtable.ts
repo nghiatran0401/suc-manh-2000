@@ -90,7 +90,7 @@ async function fetchAirDonorRecords(donorIds: string[]) {
       intro: donorRecord.get("Giới thiệu Cty ( lên MoMo )") ?? "",
       logo: donorRecord.get("Logo Drive") ?? "",
       type: donorRecord.get("Loại") ?? "",
-      employeeCount: donorRecord.get("Employees") ?? "",
+      // employeeCount: donorRecord.get("Employees") ?? "",
       totalProjects: getTotalProjects(),
     };
     airDonorRecords.push(donor);
@@ -119,7 +119,7 @@ async function getDonors(noteMoney: any, airDonorRecords: any, projectId: string
           const newDonorId = uuidv4().replace(/-/g, "").substring(0, 20);
           console.log(`Creating new donor: ${projectId} - ${donorName}`);
           const donorDocRef = firestore.collection("donors").doc(newDonorId);
-          await donorDocRef.set(donorMatch[0]);
+          await donorDocRef.set({ ...donorMatch[0], id: newDonorId });
           donor.donorId = newDonorId;
         } else {
           donor.donorId = donorQuerySnapshot.docs[0].id;
@@ -213,7 +213,6 @@ async function fetchAirProjectRecords(requestedYear: string) {
         projectInitName: projectInitName,
         name: projectName,
         classification: classification,
-        currentYear: record.get("Năm thực hiện") ? record.get("Năm thực hiện").trim() : "",
         rawStatus: record.get("Follow up Step") ? record.get("Follow up Step").trim() : "",
         status: projectStatus,
         totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : "",

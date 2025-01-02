@@ -44,8 +44,8 @@ postRouter.get("/:id", async (req: Request, res: Response) => {
         const donorData = donorDoc.exists ? donorDoc.data() : null;
 
         fullDonorsData.push({
-          donation: donationData ? donationData : [],
-          donor: donorData ? donorData : [],
+          donation: donationData ? { ...donationData, id: donationId } : [],
+          donor: donorData ? { ...donorData, id: donorId } : [],
         });
       }
       postDocData.donors = fullDonorsData;
@@ -165,6 +165,22 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
     const docData = querySnapshot.docs[0].data();
     const projectId = updatedPost.name.split(" - ") ? updatedPost.name.split(" - ")[0] : "";
 
+    if (updatedPost.donors && ["du-an-2024", "du-an-2025"].includes(category)) {
+      for (const donor of updatedPost.donors) {
+        const { donation: donationInfo, donor: donorInfo } = donor;
+
+        if (donationInfo && donationInfo.id) {
+          const donationObj = { id: donationInfo.id, amount: donationInfo.amount * 1000000, donorId: donorInfo.id, projectId: projectId };
+          await firestore.collection("donations").doc(donationInfo.id).set(donationObj, { merge: true });
+        }
+
+        if (donorInfo && donorInfo.id) {
+          const donorObj = { id: donorInfo.id, name: donorInfo.name, intro: donorInfo.intro, logo: donorInfo.logo, type: donorInfo.type, totalProjects: donorInfo.totalProjects };
+          await firestore.collection("donors").doc(donorInfo.id).set(donorObj, { merge: true });
+        }
+      }
+    }
+
     let postToSave: ProjectPost | NewsPost;
     if (isProject) {
       postToSave = {
@@ -180,7 +196,7 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
         classification: updatedPost.classification ?? docData.classification ?? null,
         status: updatedPost.status ?? docData.status ?? null,
         totalFund: Number(updatedPost.totalFund) * 1000000,
-        donors: [],
+        donors: docData.donors ?? [],
         metadata: {},
         location: {
           province: updatedPost.province ?? docData.location?.province,

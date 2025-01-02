@@ -45,6 +45,9 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
     if (projectData) {
       formProps.form?.setFieldValue("totalFund", projectData.totalFund ? projectData.totalFund / 1000000 : 0);
       formProps.form?.setFieldValue("province", projectData.location?.province);
+      projectData.donors?.forEach((donor: any, index) => {
+        formProps.form?.setFieldValue(["donors", index, "donation", "amount"], donor.donation.amount / 1000000);
+      });
     }
   }, [projectData]);
 
@@ -169,32 +172,62 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         </div>
 
         {/* Donor */}
-        {/* {isProject && (
-          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donor.name")}</span>}>
+        {isProject && (
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donor.section")}</span>}>
             <div
               style={{
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "16px",
+                flexDirection: "column",
               }}
             >
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.description")}</span>} name={"donor.description"}>
-                <RichTextEditor initialContent={projectData.donor?.description ?? ""} onChange={() => {}} />
-              </Form.Item>
+              {projectData.donors?.map((donor: any, index) => (
+                <div key={index} style={{ border: "1px solid #ccc", padding: "16px", borderRadius: "8px" }}>
+                  <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donor.id")}</span>} name={["donors", index, "donor", "id"]}>
+                    <Input defaultValue={donor.donor.id} disabled />
+                  </Form.Item>
 
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.images")}</span>} name={"donor.images"}>
-                <ImageUploader
-                  initialImages={projectData.donor?.images}
-                  handleChange={(urls) => {
-                    if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("donor.images", urls);
-                    }
-                  }}
-                />
-              </Form.Item>
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.totalProjects")}</span>} name={["donors", index, "donor", "totalProjects"]}>
+                    <Input defaultValue={donor.donor.totalProjects} disabled />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.name") + ` ${index + 1}`}</span>} name={["donors", index, "donor", "name"]}>
+                    <Input defaultValue={donor.donor.name} />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.type")}</span>} name={["donors", index, "donor", "type"]}>
+                    <Input defaultValue={donor.donor.type} />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.description")}</span>} name={["donors", index, "donor", "intro"]}>
+                    <RichTextEditor initialContent={donor.donor.intro ?? ""} onChange={() => {}} />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.logo")}</span>} name={["donors", index, "donor", "logo"]}>
+                    <ImageUploader
+                      maxCount={1}
+                      initialImages={[{ image: donor.donor.logo, caption: "Logo" }]}
+                      handleChange={(urls) => {
+                        if (urls && urls.length > 0) {
+                          formProps.form?.setFieldValue(["donors", index, "donor", "logo"], urls[0].image);
+                        }
+                      }}
+                    />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.donation.id")}</span>} name={["donors", index, "donation", "id"]}>
+                    <Input defaultValue={donor.donation.donationId} disabled />
+                  </Form.Item>
+
+                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donation.amount")}</span>} name={["donors", index, "donation", "amount"]}>
+                    <InputNumber defaultValue={donor.donation.amount} style={{ width: "100%" }} addonAfter={".000.000"} />
+                  </Form.Item>
+                </div>
+              ))}
             </div>
           </Form.Item>
-        )} */}
+        )}
 
         {/* Progress */}
         {isProject && (
@@ -252,34 +285,8 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
         )}
 
         {/* Tabs content */}
-        <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{isProject ? translate("post.fields.content.section1") : ""}</span>}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "16px",
-            }}
-          >
-            <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description1"}>
-              <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section1") || t.name === "Main content")?.description ?? ""} onChange={() => {}} />
-            </Form.Item>
-
-            <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images1"}>
-              <ImageUploader
-                initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section1"))?.slide_show}
-                handleChange={(urls) => {
-                  if (urls && urls.length > 0) {
-                    formProps.form?.setFieldValue("content.images1", urls);
-                  }
-                }}
-              />
-            </Form.Item>
-          </div>
-        </Form.Item>
-
-        {/* 
-        {isProject && (
-          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section2")}</span>}>
+        {!isProject && (
+          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{isProject ? translate("post.fields.content.section1") : ""}</span>}>
             <div
               style={{
                 display: "flex",
@@ -287,16 +294,16 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                 gap: "16px",
               }}
             >
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description2"}>
-                <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section2"))?.description ?? ""} onChange={() => {}} />
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description1"}>
+                <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section1") || t.name === "Main content")?.description ?? ""} onChange={() => {}} />
               </Form.Item>
 
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images2"}>
+              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images1"}>
                 <ImageUploader
-                  initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section2"))?.slide_show}
+                  initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section1"))?.slide_show}
                   handleChange={(urls) => {
                     if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("content.images2", urls);
+                      formProps.form?.setFieldValue("content.images1", urls);
                     }
                   }}
                 />
@@ -304,33 +311,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
             </div>
           </Form.Item>
         )}
-
-        {isProject && (
-          <Form.Item label={<span style={{ fontSize: "18px", fontWeight: "bold" }}>{translate("post.fields.content.section3")}</span>}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "16px",
-              }}
-            >
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.description")}</span>} name={"content.description3"}>
-                <RichTextEditor initialContent={projectData.content.tabs.find((t) => t.name === translate("post.fields.content.section3"))?.description ?? ""} onChange={() => {}} />
-              </Form.Item>
-
-              <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.content.images")}</span>} name={"content.images3"}>
-                <ImageUploader
-                  initialImages={projectData.content.tabs.find((p) => p.name === translate("post.fields.content.section3"))?.slide_show}
-                  handleChange={(urls) => {
-                    if (urls && urls.length > 0) {
-                      formProps.form?.setFieldValue("content.images3", urls);
-                    }
-                  }}
-                />
-              </Form.Item>
-            </div>
-          </Form.Item>
-        )} */}
       </Form>
     </Edit>
   );
