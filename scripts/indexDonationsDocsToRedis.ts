@@ -63,9 +63,9 @@ async function indexDonationsDocsToRedis() {
   }
 }
 
-indexDonationsDocsToRedis().then(() => {
-  console.log("Done");
-  process.exit(0);
-});
+// indexDonationsDocsToRedis().then(() => {
+//   console.log("Done");
+//   process.exit(0);
+// });
 
 export default indexDonationsDocsToRedis;

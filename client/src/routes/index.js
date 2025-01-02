@@ -6,7 +6,7 @@ import PostDetails from "../pages/PostDetails";
 import Search from "../pages/Search";
 import NttList from "../pages/NttList";
 import NttDetails from "../pages/NttDetails";
-// import ChamPhamTool from "../pages/ChamPhamTool";
+import ChamPhamTool from "../pages/ChamPhamTool";
 
 export const routes = [
   {
@@ -17,10 +17,10 @@ export const routes = [
     path: "/gioi-thieu",
     element: <GioiThieu />,
   },
-  // {
-  //   path: "/cham_pham_tool",
-  //   element: <ChamPhamTool />,
-  // },
+  {
+    path: "/cham_pham_tool",
+    element: <ChamPhamTool />,
+  },
   {
     path: "/:category",
     element: <PostList />,
