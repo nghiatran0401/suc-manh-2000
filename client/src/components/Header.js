@@ -221,6 +221,18 @@ export default function HeaderBar() {
               {item.children.length > 0 && (
                 <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
+                    {item.name === "du-an" && (
+                      <ListItem
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          window.location.href = "/search";
+                          setOpenIndex(null);
+                          setIsDrawerOpen(false);
+                        }}
+                      >
+                        <ListItemText primary={<Typography variant="body1">Tất cả Dự án ({totalFinishedProjects})</Typography>} />
+                      </ListItem>
+                    )}
                     {item.children.map((child, childIndex) => (
                       <ListItem
                         key={childIndex}

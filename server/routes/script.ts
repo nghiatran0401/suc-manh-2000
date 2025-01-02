@@ -30,7 +30,7 @@ scriptRouter.get("/oauth2callback", async (req: Request, res: Response) => {
 // 4. Dự án đã hoàn thiện
 
 scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: Response) => {
-  const requestedYears = ["2023", "2024"];
+  const requestedYears = ["2023", "2024", "2025"];
   const orders: any = {
     0: {
       name: "Thống kê số liệu",
@@ -41,6 +41,11 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
           inProgress: 0,
         },
         2024: {
+          total: 0,
+          completed: 0,
+          inProgress: 0,
+        },
+        2025: {
           total: 0,
           completed: 0,
           inProgress: 0,
@@ -125,7 +130,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
       }
     }
 
-    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total;
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total + orders[0].list["2025"].total;
 
     // Generate HTML content
     htmlContent += `<p style="font-size: 1.5rem;"><strong>Thống kê số liệu</strong></p>`;
@@ -141,6 +146,12 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
     htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2024"].total}</strong></li>`;
     htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2024"].completed}</strong></li>`;
     htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2024"].inProgress}</strong></li>`;
+    htmlContent += `</ul>`;
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2025</strong></p>`;
+    htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2025"].total}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2025"].completed}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2025"].inProgress}</strong></li>`;
     htmlContent += `</ul>`;
     for (let i = 1; i <= Object.keys(orders).length - 1; i++) {
       htmlContent += `<p style="font-size: 1.2rem;"><strong>${(Object.values(orders[i].list) as any).flat().length} ${orders[i].name}</strong></p>`;
@@ -171,7 +182,7 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
 });
 
 scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: Response) => {
-  const requestedYears = ["2023", "2024"];
+  const requestedYears = ["2023", "2024", "2025"];
   const orders: any = {
     0: {
       name: "Thống kê số liệu",
@@ -182,6 +193,11 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
           inProgress: 0,
         },
         2024: {
+          total: 0,
+          inProgress: 0,
+          completed: 0,
+        },
+        2025: {
           total: 0,
           inProgress: 0,
           completed: 0,
@@ -264,7 +280,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
       }
     }
 
-    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total;
+    const totalKhoiCongProjects = 486 + orders[0].list["2024"].total + orders[0].list["2025"].total;
 
     // Generate HTML content
     // 0. Thống kê số liệu
@@ -281,6 +297,12 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
     htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2024"].total}</strong></li>`;
     htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2024"].completed}</strong></li>`;
     htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2024"].inProgress}</strong></li>`;
+    htmlContent += `</ul>`;
+    htmlContent += `<p style="font-size: 1.2rem;"><strong>Năm 2025</strong></p>`;
+    htmlContent += `<ul style="list-style-type: disc; padding-left: 20px;">`;
+    htmlContent += `<li>Tổng dự án đã khởi công: <strong>${orders[0].list["2025"].total}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đã hoàn thành: <strong>${orders[0].list["2025"].completed}</strong></li>`;
+    htmlContent += `<li>Tổng dự án đang được xây: <strong>${orders[0].list["2025"].inProgress}</strong></li>`;
     htmlContent += `</ul>`;
 
     // 1. Dự án mới khởi công
@@ -378,7 +400,7 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 // 8. DA không có link GD
 
 scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) => {
-  const requestedYears = ["2024"];
+  const requestedYears = ["2024", "2025"];
   const orders: any = {
     1: { name: "DA mới", list: [] },
     2: { name: "DA thay đổi trạng thái", list: [] },
@@ -495,7 +517,7 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 });
 
 scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => {
-  const requestedYears = ["2024"];
+  const requestedYears = ["2024", "2025"];
   const BATCH_SIZE = 25;
 
   const valid = await checkIfRefreshTokenValid();
@@ -534,6 +556,26 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
         const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
 
         const projectsPromises = batch.map(async (airtableData: any) => {
+          if (airtableData["currentYear"] === "2025") {
+            const collection2024 = firestore.collection("du-an-2024");
+            const querySnapshot = await collection2024.where("projectId", "==", airtableData["projectId"]).get();
+
+            if (!querySnapshot.empty) {
+              const docRef = querySnapshot.docs[0].ref;
+              const docData = querySnapshot.docs[0].data();
+
+              if (docData.category === "du-an-2024") {
+                console.log("here", airtableData["projectId"], airtableData["currentYear"], docData.category);
+
+                return await Promise.all([
+                  docRef.delete(),
+                  removeDocumentFromIndex({ collection_id: collection2024, doc_id: querySnapshot.docs[0].id }),
+                  updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
+                ]);
+              }
+            }
+          }
+
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
 
           const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));

@@ -213,6 +213,7 @@ async function fetchAirProjectRecords(requestedYear: string) {
         projectInitName: projectInitName,
         name: projectName,
         classification: classification,
+        currentYear: record.get("Năm thực hiện") ? record.get("Năm thực hiện").trim() : "",
         rawStatus: record.get("Follow up Step") ? record.get("Follow up Step").trim() : "",
         status: projectStatus,
         totalFund: record.get("Trị giá tiền") ? Number(String(record.get("Trị giá tiền")).replace("VNĐ ", "").trim()) : "",

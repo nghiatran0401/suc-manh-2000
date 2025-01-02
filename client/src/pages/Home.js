@@ -21,7 +21,7 @@ export default function Home() {
   const [news, setNews] = useState([]);
   const [projects, setProjects] = useState([]);
   const [general, setGeneral] = useState({});
-  const [projectTab, setProjectTab] = useState("/du-an-2024");
+  const [projectTab, setProjectTab] = useState("/du-an-2025");
   const [loading, setLoading] = useState(false);
   const [totalFinishedProjects, setTotalFinishedProjects] = useState(0);
   const [totalBeneficialStudents, setTotalBeneficialStudents] = useState(0);

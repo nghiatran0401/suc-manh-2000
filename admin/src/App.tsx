@@ -100,7 +100,7 @@ function App() {
                 </Authenticated>
               }
             >
-              <Route index element={<NavigateToResource resource={"du-an-2024"} />} />
+              <Route index element={<NavigateToResource resource={"du-an-2025"} />} />
               {resources.map((resource: any) => (
                 <Route key={resource?.name} path={resource?.name}>
                   <Route index element={<ProjectList />} />

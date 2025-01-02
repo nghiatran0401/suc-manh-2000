@@ -203,7 +203,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         </div>
       )}
 
-      {collectionName === "du-an-2024" && (
+      {collectionName === "du-an-2025" && (
         <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
           <SaveButton
             icon={<RadarChartOutlined />}

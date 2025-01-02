@@ -27,6 +27,7 @@ export const POSTS_PER_PAGE = 12;
 
 export const categoryMapping = {
   "thong-bao": "Tiến độ",
+  "du-an-2025": "DA 25",
   "du-an-2024": "DA 24",
   "du-an-2023": "DA 23",
   "du-an-2022": "DA 22",

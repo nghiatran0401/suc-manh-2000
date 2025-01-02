@@ -197,7 +197,7 @@ export default function CardDetails(props) {
       </Box>
 
       {/* Donors */}
-      {/* {isProject && post.donor?.description ? (
+      {isProject && !["du-an-2024", "du-an-2025"].includes(category) && post.donor?.description ? (
         <Box bgcolor={"#f1f1f1"} p={"24px"}>
           <Box display={"flex"} flexDirection={isMobile ? "column-reverse" : "row"} gap={"16px"}>
             <Typography
@@ -238,9 +238,9 @@ export default function CardDetails(props) {
             </Typography>
           </Box>
         )
-      )} */}
+      )}
 
-      {isProject && post.donors.length > 0 && <CardDonor donors={post.donors} />}
+      {isProject && post.donors.length > 0 && ["du-an-2024", "du-an-2025"].includes(category) && <CardDonor donors={post.donors} />}
 
       {/* Progress images */}
       {finalProgress && finalProgress?.length > 0 && (
@@ -285,7 +285,7 @@ export default function CardDetails(props) {
                     }}
                   >
                     <Box display={"flex"} flexDirection={"column"} gap={"16px"}>
-                      {["du-an-2024", "du-an-2023", "du-an-2022"].includes(category) ? (
+                      {["du-an-2025", "du-an-2024", "du-an-2023", "du-an-2022"].includes(category) ? (
                         <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
                           <IframeComponent tab={tab} />
                         </Box>

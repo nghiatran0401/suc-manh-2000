@@ -33,7 +33,7 @@ postRouter.get("/:id", async (req: Request, res: Response) => {
     const postDocData = postDocRefSnapshot.docs[0].data();
     postDocData.createdAt = postDocData.createdAt?.toDate();
 
-    if (postDocData.donors) {
+    if (postDocData.donors && ["du-an-2024", "du-an-2025"].includes(category)) {
       const fullDonorsData = [];
       for (const donor of postDocData.donors) {
         const { donationId, donorId } = donor;

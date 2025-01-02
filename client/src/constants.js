@@ -97,6 +97,10 @@ export const HEADER_DROPDOWN_LIST = [
     title: "Dự án theo năm",
     children: [
       {
+        path: "/du-an-2025",
+        title: "Dự án 2025",
+      },
+      {
         path: "/du-an-2024",
         title: "Dự án 2024",
       },
