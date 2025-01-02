@@ -5,7 +5,7 @@ import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH, EXCLUDED_FILTER } from "../constants";
 import CardList from "../components/CardList";
-import { findTitle } from "../helpers";
+import { convertToCleanedName, findTitle } from "../helpers";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FilterList from "../components/FilterList";
@@ -107,35 +107,16 @@ export default function PostList() {
   // onSearch
   useEffect(() => {
     if (searchQuery !== "") {
-      const normalizedSearchQuery = searchQuery.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       const fuseOptions = {
-        isCaseSensitive: false,
         includeScore: true,
         shouldSort: true,
-        // includeMatches: false,
-        // findAllMatches: true,
-        // minMatchCharLength: 1,
-        // location: 0,
-        threshold: 0.5,
-        // distance: 100,
-        useExtendedSearch: true,
+        threshold: 0,
         ignoreLocation: true,
-        // ignoreFieldNorm: false,
-        // fieldNormWeight: 1,
-        keys: [
-          { 
-            name: "name", 
-            weight: 0.3 
-          },
-          { 
-            name: "cleanedName", 
-            weight: 0.7 
-          }
-        ],
+        keys: ["name", "cleanedName"],
       };
       const fuse = new Fuse(posts, fuseOptions);
-      const results = fuse.search(normalizedSearchQuery);
-      const filteredResults = results.filter((result) => result.score <= 0.5).map((result) => result.item);
+      const results = fuse.search(convertToCleanedName(searchQuery));
+      const filteredResults = results.map((result) => result.item);
       setSearchedPosts(filteredResults);
     } else {
       setSearchedPosts(posts);
