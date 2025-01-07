@@ -6,6 +6,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SM2000 from "../assets/companions/SM2000.svg";
+import DefaultCharity from "../assets/companions/Default_charity.svg";
 import Carousel from "react-material-ui-carousel";
 import "./config/styles.css";
 
@@ -54,7 +55,7 @@ const CardDonor = ({ donors }) => {
                     height: 120,
                   }}
                 >
-                  <img src={donor.logo ? donor.logo : SM2000} alt="Donor logo" style={{ maxWidth: "80%" }} />
+                  <img src={donor.logo ? donor.logo : DefaultCharity} alt="Donor logo" style={{ maxWidth: "80%" }} />
                 </Box>
               </Grid>
 
@@ -146,7 +147,7 @@ const CardDonor = ({ donors }) => {
                           height: 120,
                         }}
                       >
-                        <img src={donorObj.donor.logo ? donorObj.donor.logo : SM2000} alt="Donor logo" style={{ maxWidth: "80%" }} />
+                        <img src={donorObj.donor.logo ? donorObj.donor.logo : DefaultCharity} alt="Donor logo" style={{ maxWidth: "80%" }} />
                       </Box>
                     </Grid>
 
