@@ -165,6 +165,7 @@ export const categoryMapping = {
   "cau-chuyen": "Câu chuyện",
   "tai-tro": "Tài trợ",
   "phong-tin-hoc": "Phòng Tin Học Cho Em",
+  "du-an-2025": "Dự án 2025",
   "du-an-2024": "Dự án 2024",
   "du-an-2023": "Dự án 2023",
   "du-an-2022": "Dự án 2022",
