@@ -115,13 +115,13 @@ export default function Home() {
                   <img
                     style={{
                       width: "100%",
-                      height: "400px",
+                      // height: "400px",
                       objectFit: "cover",
                     }}
                     alt={news[0].name}
                     src={news[0].thumbnail}
                   />
-                  <Box
+                  {/* <Box
                     style={{
                       position: "absolute",
                       bottom: 0,
@@ -137,7 +137,7 @@ export default function Home() {
                         {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
-                  </Box>
+                  </Box> */}
                 </Card>
               </Link>
             </Grid>

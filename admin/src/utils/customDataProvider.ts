@@ -1,8 +1,7 @@
 import { DataProvider } from "@refinedev/core";
 import { axiosInstance } from "@refinedev/simple-rest";
-import { AxiosInstance } from "axios";
 
-const customDataProvider = (apiUrl: string, httpClient: AxiosInstance = axiosInstance): DataProvider => ({
+const customDataProvider = (apiUrl: string, httpClient: any): DataProvider => ({
   getList: async ({ resource, pagination, filters }) => {
     const { data } = await httpClient.get(`${apiUrl}/${resource}`, { params: { pagination, filters } });
     return {

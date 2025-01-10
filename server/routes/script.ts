@@ -610,6 +610,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               },
             };
 
+            console.log("uploading new post", airtableData["projectId"]);
             return await Promise.all([
               postDocRef.set(newProjectPost),
               upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
@@ -649,6 +650,7 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 
+            console.log("updating current post", airtableData["projectId"]);
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
           }
         });

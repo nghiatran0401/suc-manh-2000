@@ -99,7 +99,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
         <div>
           <strong>Lưu ý:</strong>
           <br />
-          - Check kĩ data trên Airtable trước khi chạy
+          - Check kĩ data trên Lark trước khi chạy
           <br />- Chỉ chạy báo cáo định kì vào mỗi chủ nhật hằng tuần, nếu không báo cáo sẽ bị thiếu/sai so với lần báo cáo trước
         </div>
       ),
@@ -331,7 +331,7 @@ export const ProjectList: React.FC<IResourceComponentsProps> = () => {
             onClick={() => handleButtonClick("Đồng bộ Airtable và Web")}
             style={{ backgroundColor: "#CC0066", borderColor: "#CC0066", color: "white" }}
           >
-            Đồng bộ Airtable và Web
+            Đồng bộ Web
           </SaveButton>
         </div>
       )}
