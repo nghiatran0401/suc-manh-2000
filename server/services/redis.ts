@@ -105,7 +105,7 @@ async function upsertDocumentToIndex(data: any) {
       "province",
       convertToCleanedName(data.location?.province),
       "constructionUnit",
-      data.metadata.constructionUnit
+      data.metadata?.constructionUnit
     );
   } catch (error: any) {
     console.error(`Error adding document '${data.doc_id}' to index '${INDEX_NAME}':`, error.message);

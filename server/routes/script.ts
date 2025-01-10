@@ -4,6 +4,7 @@ import { NewsPost, ProjectPost } from "../../index";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
+import { fetchProjectRecordsFromCsv } from "../services/csv";
 import { fetchAirProjectRecords, standardizePostTitle } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/googledrive";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
@@ -60,22 +61,23 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   let htmlContent = ``;
   const BATCH_SIZE = 25;
 
-  const valid = await checkIfRefreshTokenValid();
-  if (!valid) {
-    const authUrl = generateAuthUrl();
-    res.status(200).send({ authUrl: authUrl });
-  }
+  // const valid = await checkIfRefreshTokenValid();
+  // if (!valid) {
+  //   const authUrl = generateAuthUrl();
+  //   res.status(200).send({ authUrl: authUrl });
+  // }
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
-      if (totalAirtableDataList.length <= 0) continue;
+      const { totalCsvDataList }: any = await fetchProjectRecordsFromCsv(requestedYear);
+      // const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
+      if (totalCsvDataList.length <= 0) continue;
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
 
-      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
-        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
+        const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
           if (!airtableData["rawStatus"].match(/^\d+/)) return;
@@ -220,14 +222,15 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
-      if (totalAirtableDataList.length <= 0) continue;
+      // const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
+      const { totalCsvDataList }: any = await fetchProjectRecordsFromCsv(requestedYear);
+      if (totalCsvDataList.length <= 0) continue;
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
 
-      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
-        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
+        const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
           if (!airtableData["rawStatus"].match(/^\d+/)) return;
@@ -404,12 +407,12 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
   const orders: any = {
     1: { name: "DA mới", list: [] },
     2: { name: "DA thay đổi trạng thái", list: [] },
-    3: { name: "DA không có phiếu khảo sát", list: [] },
+    3: { name: "DA không có link GD", list: [] },
     4: { name: "DA không có ảnh hiện trạng", list: [] },
-    5: { name: "DA có vấn đề Nhà tài trợ", list: [] },
+    5: { name: "DA không có phiếu khảo sát", list: [] },
     6: { name: "DA sai link GD", list: [] },
     7: { name: "DA không có trạng thái (Follow up steps)", list: [] },
-    8: { name: "DA không có link GD", list: [] },
+    8: { name: "DA có vấn đề Nhà tài trợ", list: [] },
   };
   let htmlContent = ``;
   const BATCH_SIZE = 25;
@@ -422,34 +425,35 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
-      if (totalAirtableDataList.length <= 0) continue;
+      // const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
+      const { totalCsvDataList, totalCsvErrors }: any = await fetchProjectRecordsFromCsv(requestedYear);
+      if (totalCsvDataList.length <= 0) continue;
 
       // DA không có link GD
-      totalAirtableErrors["DA không có link GD"].map((da: any) => {
+      totalCsvErrors["DA không có link GD"].map((da: any) => {
         const daName = standardizePostTitle(`${da.projectId} - ${da.projectInitName}`);
-        orders[8].list.push(daName);
+        orders[3].list.push(daName);
       });
 
       // DA không có trạng thái (Follow up steps)
-      totalAirtableErrors["DA không có trạng thái (Follow up steps)"].map((da: any) => {
+      totalCsvErrors["DA không có trạng thái (Follow up steps)"].map((da: any) => {
         const daName = standardizePostTitle(`${da.projectId} - ${da.projectInitName}`);
         orders[7].list.push(daName);
       });
 
       // DA có vấn đề Nhà tài trợ
-      totalAirtableErrors["DA có vấn đề Nhà tài trợ"].map((da: any) => {
+      totalCsvErrors["DA có vấn đề Nhà tài trợ"].map((da: any) => {
         if (da.noteMoneyDonors.length > 0) {
           const donorUpdate = `${da.projectId}: Chốt donors [${da.airDonorRecords.join(", ")}] - Note tiến độ [${da.noteMoneyDonors.join(", ")}]`;
-          orders[5].list.push(donorUpdate);
+          orders[8].list.push(donorUpdate);
         }
       });
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
 
-      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
-        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
+        const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
         const promises = batch.map(async (airtableData: any) => {
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
@@ -470,7 +474,7 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
           let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
             hoanCanhDescription = "";
-            orders[3].list.push(airtableData.name);
+            orders[5].list.push(airtableData.name);
           }
 
           // DA mới
@@ -528,14 +532,15 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
   try {
     for (const requestedYear of requestedYears) {
-      const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
-      if (totalAirtableDataList.length <= 0) continue;
+      // const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
+      const { totalCsvDataList, totalCsvErrors }: any = await fetchProjectRecordsFromCsv(requestedYear);
+      if (totalCsvDataList.length <= 0) continue;
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
 
       // 6. Dự án hủy -> xóa trên web
-      const cancelledProjectsPromises = totalAirtableErrors["DA hủy"].map(async (p: any) => {
+      const cancelledProjectsPromises = totalCsvErrors["DA hủy"].map(async (p: any) => {
         if (p["projectId"] !== null) {
           const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
           if (!querySnapshot.empty) {
@@ -552,8 +557,8 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
       });
       await Promise.all(cancelledProjectsPromises);
 
-      for (let i = 0; i < totalAirtableDataList.length; i += BATCH_SIZE) {
-        const batch = totalAirtableDataList.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
+        const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
         const projectsPromises = batch.map(async (airtableData: any) => {
           const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
