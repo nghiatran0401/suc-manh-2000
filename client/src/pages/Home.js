@@ -14,6 +14,7 @@ import constructionIcon from "../assets/construction.svg";
 import peopleIcon from "../assets/people.svg";
 import { findTitle, standardizeString } from "../helpers";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { bgcolor } from "@mui/system";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -115,21 +116,22 @@ export default function Home() {
                   <img
                     style={{
                       width: "100%",
-                      // height: "400px",
+                      height: "400px",
                       objectFit: "cover",
                     }}
                     alt={news[0].name}
                     src={news[0].thumbnail}
                   />
-                  {/* <Box
-                    style={{
+                  <Box
+                    sx={{
                       position: "absolute",
                       bottom: 0,
                       color: "#fff",
                       width: "100%",
+                      backgroundColor: "rgba(0, 0, 0, 0.5)",
                     }}
                   >
-                    <CardContent>
+                    <CardContent sx={{ "&.MuiCardContent-root:last-child": { p: 2 } }}>
                       <Typography variant="h6" color="#fff">
                         {news[0].name}
                       </Typography>
@@ -137,7 +139,7 @@ export default function Home() {
                         {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
                       </Typography>
                     </CardContent>
-                  </Box> */}
+                  </Box>
                 </Card>
               </Link>
             </Grid>
