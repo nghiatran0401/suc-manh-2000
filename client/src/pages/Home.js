@@ -14,7 +14,6 @@ import constructionIcon from "../assets/construction.svg";
 import peopleIcon from "../assets/people.svg";
 import { findTitle, standardizeString } from "../helpers";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { bgcolor } from "@mui/system";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -287,7 +286,6 @@ export default function Home() {
             Xây dựng đủ <strong>Nhà hạnh phúc</strong>, <strong>Cầu đi học</strong>, và <strong>Khu nội trú</strong>.
           </Typography>
         </Box>
-
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
           <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
             <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
@@ -309,7 +307,6 @@ export default function Home() {
             </Typography>
           </Box>
         </Box>
-
         {/* Statistics row 1 */}
         <Box
           sx={{
