@@ -276,7 +276,7 @@ export default function Home() {
       </Box>
 
       {/* Projects Statistics */}
-      <Box display="flex" flexDirection={"column"} gap={"24px"} p={isMobile ? "24px 16px" : "40px"}>
+      <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
         <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={"100%"}>
           <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
             Dự Án Sức Mạnh 2000
@@ -310,6 +310,7 @@ export default function Home() {
           </Box>
         </Box>
 
+        {/* Statistics row 1 */}
         <Box
           sx={{
             border: "1px solid #fff",
@@ -384,6 +385,85 @@ export default function Home() {
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Khu nội trú
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Statistics row 2 */}
+        <Box
+          sx={{
+            border: "1px solid #fff",
+            borderRadius: 2,
+            margin: "16px auto",
+            boxShadow: 2,
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr",
+            gap: 2,
+            width: "100%",
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.metadata["totalClassrooms"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Phòng học
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.metadata["totalPublicAffairsRooms"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Phòng công vụ
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              borderRight: isMobile ? "none" : "2px solid #D9D9D9",
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.metadata["totalToilets"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Nhà vệ sinh
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              padding: "16px",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            <Typography variant="h2" fontWeight="bold" color="red">
+              <CountUp start={0} end={general?.metadata["totalKitchens"]} duration={10} />
+            </Typography>
+            <Typography variant="body1" fontWeight="bold">
+              Bếp ăn
             </Typography>
           </Box>
         </Box>

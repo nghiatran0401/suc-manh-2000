@@ -30,3 +30,37 @@ const fetchDocumentWithMetadata = async () => {
   }
 };
 // fetchDocumentWithMetadata();
+
+async function calculateTotals() {
+  const collections = await firestore.listCollections();
+  const duAnCollections = collections.filter((collection) => collection.id.includes("du-an"));
+
+  const totals = {
+    totalClassrooms: 0,
+    totalPublicAffairsRooms: 0,
+    totalRooms: 0,
+    totalToilets: 0,
+    totalKitchens: 0,
+  };
+
+  for (const collection of duAnCollections) {
+    const snapshot = await collection.get();
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.metadata) {
+        const { totalClassrooms, totalPublicAffairsRooms, totalRooms, totalToilets, totalKitchens } = data.metadata;
+
+        totals.totalClassrooms += Number(totalClassrooms) || 0;
+        totals.totalPublicAffairsRooms += Number(totalPublicAffairsRooms) || 0;
+        totals.totalRooms += Number(totalRooms) || 0;
+        totals.totalToilets += Number(totalToilets) || 0;
+        totals.totalKitchens += Number(totalKitchens) || 0;
+      }
+    });
+  }
+
+  console.log("Totals:", totals);
+  const countsCollection = firestore.collection("counts");
+  await countsCollection.doc("metadata").set(totals);
+}
+// calculateTotals().catch(console.error);

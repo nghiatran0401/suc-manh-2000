@@ -14,16 +14,17 @@ homeRouter.get("/getTotalStatisticsCount", async (req: Request, res: Response) =
     if (cachedResultData) {
       res.status(200).send(JSON.stringify(cachedResultData));
     } else {
-      const [classificationDoc, categoryDoc, provinceDoc] = await Promise.all([
+      const [classificationDoc, categoryDoc, provinceDoc, metadataDoc] = await Promise.all([
         firestore.collection("counts").doc("classification").get(),
         firestore.collection("counts").doc("category").get(),
         firestore.collection("counts").doc("province").get(),
+        firestore.collection("counts").doc("metadata").get(),
       ]);
 
       if (!classificationDoc.exists || !categoryDoc.exists) {
         res.status(404).send({ error: "No data found for this page" });
       }
-      const resultData = { classification: classificationDoc.data(), category: categoryDoc.data(), province: provinceDoc.data() };
+      const resultData = { classification: classificationDoc.data(), category: categoryDoc.data(), province: provinceDoc.data(), metadata: metadataDoc.data() };
 
       await setExValueInRedis(cachedKey, resultData, false);
       res.status(200).send(JSON.stringify(resultData));
