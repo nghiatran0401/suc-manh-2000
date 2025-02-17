@@ -9,7 +9,11 @@ const bucketName = "gs://savvy-serenity-424116-g1.appspot.com";
 
 async function getLatestCsvFile() {
   const [files] = await storage.bucket(bucketName).getFiles({ prefix: "projects_csv/" });
-  const latestFile = files.sort((a: any, b: any) => b.metadata.updated - a.metadata.updated)[0];
+  const latestFile = files.sort((a: any, b: any) => {
+    const dateA = new Date(a.metadata.updated);
+    const dateB = new Date(b.metadata.updated);
+    return dateB.getTime() - dateA.getTime();
+  })[0];
   return latestFile;
 }
 
@@ -217,7 +221,7 @@ async function fetchProjectRecordsFromCsv(requestedYear: string) {
       progressImagesUrl: progressImagesUrl,
       financialStatementUrl: record["Link sao kê"] ? record["Link sao kê"].trim() : "",
       trelloCardUrl: record["Link Trello"] ? record["Link Trello"].trim() : "",
-      isInProgress: record["Ảnh tiến độ (Check)"] ? true : false,
+      isInProgress: record["Ảnh tiến độ (Check)"],
       progressNoteWeb: record["Note tiến độ Web"] ? record["Note tiến độ Web"] : "",
       progressNoteZalo: record["Note tiến độ"] ? record["Note tiến độ"] : "",
     };

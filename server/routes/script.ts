@@ -106,14 +106,14 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === false) {
+            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 0) {
               if (!orders[2].list[airtableData.classification]) return;
               orders[2].list[airtableData.classification].push({ name: airtableData.projectInitName, progressNoteZalo: airtableData.progressNoteZalo });
               return;
             }
 
             // 3. Dự án đang được xây dựng
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && airtableData.isInProgress === true) {
+            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 1) {
               if (!orders[3].list[airtableData.classification]) return;
               orders[3].list[airtableData.classification].push({ name: airtableData.projectInitName });
               return;
