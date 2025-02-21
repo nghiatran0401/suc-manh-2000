@@ -5,7 +5,13 @@ import Redis from "ioredis";
 import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const redis = new Redis(process.env.REDIS_URL || "");
+const redis = new Redis({
+  port: 16958,
+  host: process.env.REDIS_URL || "",
+  username: "default",
+  password: process.env.REDIS_PASSWORD,
+  db: 0, // Defaults to 0
+});
 
 const INDEX_NAME = "post_index";
 const INDEX_SCHEMA = [
