@@ -25,6 +25,7 @@ jobs:
         working-directory: ./server
         env:
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
   workflowScripts:
     runs-on: ubuntu-latest
@@ -49,3 +50,4 @@ jobs:
           MY_FIREBASE_CLIENT_EMAIL: ${{ secrets.MY_FIREBASE_CLIENT_EMAIL }}
           MY_FIREBASE_STORAGE_BUCKET: ${{ secrets.MY_FIREBASE_STORAGE_BUCKET }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
