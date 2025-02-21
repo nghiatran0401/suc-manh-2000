@@ -24,5 +24,5 @@
 
 Note:
 
-- Ask Nghia for env files
+- Ask for env files
 - Create PR for any new feat / bug fixes / maintenance
