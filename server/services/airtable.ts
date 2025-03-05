@@ -6,24 +6,6 @@ import Airtable from "airtable";
 import Bottleneck from "bottleneck";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-Airtable.configure({ endpointUrl: "https://api.airtable.com", apiKey: process.env.AIRTABLE_API_KEY });
-const base = Airtable.base("appWc36BLa58SIqi8");
-const PROJECT_TABLE = "Công trình Total";
-const DONOR_TABLE = "Tài trợ";
-const AIRTABLE_VIEW = "Nghia Web";
-
-// Create a limiter with a max rate of 5 requests per second
-const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 200 });
-const limitedSelect = limiter.wrap((tableName: any, options: any) => {
-  return new Promise((resolve, reject) => {
-    base(tableName)
-      .select(options)
-      .all()
-      .then((records) => resolve(records))
-      .catch((err) => reject(err));
-  });
-});
-
 function getProjectStatus(statusFull: any) {
   if (!statusFull.match(/^\d+/)) return undefined;
 
@@ -52,108 +34,126 @@ function standardizePostTitle(str: string) {
     .replace(/,/g, " -");
 }
 
-const totalErrorsMap = new Map();
-async function fetchAirDonorRecords(donorIds: string[]) {
-  const airDonorRecords = [];
-  for (let i = 0; i < donorIds.length; i++) {
-    const donorRecord = await base(DONOR_TABLE).find(donorIds[i]);
+async function fetchAirProjectRecords(requestedYear: string) {
+  Airtable.configure({ endpointUrl: "https://api.airtable.com", apiKey: process.env.AIRTABLE_API_KEY });
+  const base = Airtable.base("appWc36BLa58SIqi8");
+  const PROJECT_TABLE = "Công trình Total";
+  const DONOR_TABLE = "Tài trợ";
+  const AIRTABLE_VIEW = "Nghia Web";
 
-    const getTotalProjects = () => {
-      const total = donorRecord.get("Công trình Total");
-      const total6 = donorRecord.get("Công trình Total 6");
+  // Create a limiter with a max rate of 5 requests per second
+  const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 200 });
+  const limitedSelect = limiter.wrap((tableName: any, options: any) => {
+    return new Promise((resolve, reject) => {
+      base(tableName)
+        .select(options)
+        .all()
+        .then((records) => resolve(records))
+        .catch((err) => reject(err));
+    });
+  });
 
-      if (!total && !total6) {
-        return [];
-      } else if (total && !total6) {
-        return total;
-      } else if (!total && total6) {
-        return total6;
-      } else if (Array.isArray(total) && Array.isArray(total6)) {
-        if (JSON.stringify(total) === JSON.stringify(total6)) {
+  const totalErrorsMap = new Map();
+  async function fetchAirDonorRecords(donorIds: string[]) {
+    const airDonorRecords = [];
+    for (let i = 0; i < donorIds.length; i++) {
+      const donorRecord = await base(DONOR_TABLE).find(donorIds[i]);
+
+      const getTotalProjects = () => {
+        const total = donorRecord.get("Công trình Total");
+        const total6 = donorRecord.get("Công trình Total 6");
+
+        if (!total && !total6) {
+          return [];
+        } else if (total && !total6) {
           return total;
-        } else {
-          const name = donorRecord.get("Tên Tài Trợ") ?? undefined;
-          if (!name) return total;
-          if (!totalErrorsMap.has(name)) {
-            totalErrorsMap.set(name, true);
+        } else if (!total && total6) {
+          return total6;
+        } else if (Array.isArray(total) && Array.isArray(total6)) {
+          if (JSON.stringify(total) === JSON.stringify(total6)) {
+            return total;
+          } else {
+            const name = donorRecord.get("Tên Tài Trợ") ?? undefined;
+            if (!name) return total;
+            if (!totalErrorsMap.has(name)) {
+              totalErrorsMap.set(name, true);
+            }
+            return total;
           }
-          return total;
+        } else {
+          console.error(`Error: ${donorRecord.get("Tên Tài Trợ") ?? ""}`);
+          return [];
         }
-      } else {
-        console.error(`Error: ${donorRecord.get("Tên Tài Trợ") ?? ""}`);
-        return [];
-      }
-    };
+      };
 
-    const donor = {
-      name: donorRecord.get("Tên Tài Trợ") ?? "",
-      intro: donorRecord.get("Giới thiệu Cty ( lên MoMo )") ?? "",
-      logo: donorRecord.get("Logo Drive") ?? "",
-      type: donorRecord.get("Loại") ?? "",
-      // employeeCount: donorRecord.get("Employees") ?? "",
-      totalProjects: getTotalProjects(),
-    };
-    airDonorRecords.push(donor);
+      const donor = {
+        name: donorRecord.get("Tên Tài Trợ") ?? "",
+        intro: donorRecord.get("Giới thiệu Cty ( lên MoMo )") ?? "",
+        logo: donorRecord.get("Logo Drive") ?? "",
+        type: donorRecord.get("Loại") ?? "",
+        // employeeCount: donorRecord.get("Employees") ?? "",
+        totalProjects: getTotalProjects(),
+      };
+      airDonorRecords.push(donor);
+    }
+    return airDonorRecords;
   }
-  return airDonorRecords;
-}
 
-async function getDonors(noteMoney: any, airDonorRecords: any, projectId: string) {
-  const donors: { donorId: string; donationId: string }[] = [];
-  const donorErrors: any = { airDonorRecords: airDonorRecords.map((r: any) => r.name), noteMoneyDonors: [] };
+  async function getDonors(noteMoney: any, airDonorRecords: any, projectId: string) {
+    const donors: { donorId: string; donationId: string }[] = [];
+    const donorErrors: any = { airDonorRecords: airDonorRecords.map((r: any) => r.name), noteMoneyDonors: [] };
 
-  for (const line of noteMoney) {
-    let donor = { donorId: "", donationId: "" };
-    const match = line.match(/^\d+\.\s*(.+?)\s*:\s*(\d+)$/);
+    for (const line of noteMoney) {
+      let donor = { donorId: "", donationId: "" };
+      const match = line.match(/^\d+\.\s*(.+?)\s*:\s*(\d+)$/);
 
-    if (match) {
-      const donorName = match[1];
-      const donationAmount = parseInt(match[2], 10) * 1000000;
+      if (match) {
+        const donorName = match[1];
+        const donationAmount = parseInt(match[2], 10) * 1000000;
 
-      // Check if the note matches with the donors array
-      const donorMatch = airDonorRecords.filter((r: any) => r.name === donorName);
-      if (donorMatch.length === 1) {
-        // Create new Donor Doc
-        const donorQuerySnapshot = await firestore.collection("donors").where("name", "==", donorName).get();
-        if (donorQuerySnapshot.empty) {
-          const newDonorId = uuidv4().replace(/-/g, "").substring(0, 20);
-          console.log(`Creating new donor: ${projectId} - ${donorName}`);
-          const donorDocRef = firestore.collection("donors").doc(newDonorId);
-          await donorDocRef.set({ ...donorMatch[0], id: newDonorId });
-          donor.donorId = newDonorId;
+        // Check if the note matches with the donors array
+        const donorMatch = airDonorRecords.filter((r: any) => r.name === donorName);
+        if (donorMatch.length === 1) {
+          // Create new Donor Doc
+          const donorQuerySnapshot = await firestore.collection("donors").where("name", "==", donorName).get();
+          if (donorQuerySnapshot.empty) {
+            const newDonorId = uuidv4().replace(/-/g, "").substring(0, 20);
+            console.log(`Creating new donor: ${projectId} - ${donorName}`);
+            const donorDocRef = firestore.collection("donors").doc(newDonorId);
+            await donorDocRef.set({ ...donorMatch[0], id: newDonorId });
+            donor.donorId = newDonorId;
+          } else {
+            donor.donorId = donorQuerySnapshot.docs[0].id;
+          }
+
+          // Create new Donation Doc
+          const donationQuerySnapshot = await firestore.collection("donations").where("donorId", "==", donor.donorId).where("projectId", "==", projectId).get();
+          if (donationQuerySnapshot.empty) {
+            const newDonationId = uuidv4().replace(/-/g, "").substring(0, 20);
+            console.log(`Creating new donation: ${projectId} - ${donorName} - ${donationAmount}`);
+            const donationDocRef = firestore.collection("donations").doc(newDonationId);
+            await donationDocRef.set({
+              id: newDonationId,
+              donorId: donor.donorId,
+              projectId: projectId,
+              amount: donationAmount,
+            });
+            donor.donationId = newDonationId;
+          } else {
+            donor.donationId = donationQuerySnapshot.docs[0].id;
+          }
+
+          donors.push(donor);
         } else {
-          donor.donorId = donorQuerySnapshot.docs[0].id;
+          // Report donor error
+          donorErrors.noteMoneyDonors.push(donorName);
         }
-
-        // Create new Donation Doc
-        const donationQuerySnapshot = await firestore.collection("donations").where("donorId", "==", donor.donorId).where("projectId", "==", projectId).get();
-        if (donationQuerySnapshot.empty) {
-          const newDonationId = uuidv4().replace(/-/g, "").substring(0, 20);
-          console.log(`Creating new donation: ${projectId} - ${donorName} - ${donationAmount}`);
-          const donationDocRef = firestore.collection("donations").doc(newDonationId);
-          await donationDocRef.set({
-            id: newDonationId,
-            donorId: donor.donorId,
-            projectId: projectId,
-            amount: donationAmount,
-          });
-          donor.donationId = newDonationId;
-        } else {
-          donor.donationId = donationQuerySnapshot.docs[0].id;
-        }
-
-        donors.push(donor);
-      } else {
-        // Report donor error
-        donorErrors.noteMoneyDonors.push(donorName);
       }
     }
+
+    return { donorsTemp: donors, donorErrors };
   }
 
-  return { donorsTemp: donors, donorErrors };
-}
-
-async function fetchAirProjectRecords(requestedYear: string) {
   // Report issues/bugs
   const cancelledProjects = [];
   const noStatusProjects = [];

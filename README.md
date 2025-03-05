@@ -13,16 +13,12 @@
 - Go to `server`
 - Install package dependency `npm install`
 - Start backend server `npm run server`
-- Initialize backend local docker redis (one time only) `npm run server:local-docker-redis`
-- Sync index Firestore and Redis (optional) `node scripts/indexFirestoreDocsToRedis`
 
 3. Admin
 
 - Go to `admin`
 - Install package dependency `npm install`
 - Start admin `npm run admin`
+- Account: admin@gmail.com - A11111111
 
-Note:
-
-- Ask for env files
-- Create PR for any new feat / bug fixes / maintenance
+**Create a new Pull Request for each new feat dev / bug fixe / maintenance**
