@@ -13,6 +13,7 @@
 firebase-debug.log
 firestore-debug.log
 firestore-ui.log
+firebase.json
 
 scripts/
-.github/
+index.d.ts
