@@ -645,8 +645,8 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                 ],
               },
               location: airtableData.location,
-              // donors: airtableData.donors,
-              // metadata: airtableData.metadata,
+              donors: airtableData.donors,
+              metadata: airtableData.metadata,
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 

@@ -8,6 +8,7 @@
 **/build
 **/dist
 **/coverage
+**/env-local-*.txt
 
 .firebase/
 firebase-debug.log
@@ -16,4 +17,3 @@ firestore-ui.log
 firebase.json
 
 scripts/
-index.d.ts

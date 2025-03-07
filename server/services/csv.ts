@@ -58,7 +58,7 @@ async function getDonors(noteMoney: any, donorNames: any, projectId: string) {
           const newDonorId = uuidv4().replace(/-/g, "").substring(0, 20);
           // console.log(`Creating new donor: ${projectId} - ${donorName}`);
           const donorDocRef = firestore.collection("donors").doc(newDonorId);
-          await donorDocRef.set({ ...donorMatch[0], id: newDonorId });
+          await donorDocRef.set({ id: newDonorId, name: donorName, type: "", logo: "", intro: "" });
           donor.donorId = newDonorId;
         } else {
           donor.donorId = donorQuerySnapshot.docs[0].id;
