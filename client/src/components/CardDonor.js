@@ -1,6 +1,6 @@
 import React from "react";
 import { useMediaQuery, useTheme, Box, Card, CardContent, Grid, Typography } from "@mui/material";
-import DefaultCharity from "../assets/companions/Default_charity.svg";
+import Sm2000Logo from "../assets/companions/SM2000.svg";
 import Carousel from "react-material-ui-carousel";
 import "./config/styles.css";
 
@@ -12,6 +12,8 @@ const CardDonor = ({ donors }) => {
     const donor = donors[0].donor;
     const donationAmount = donors[0].donation.amount;
 
+    const donorLogo = donor.logo ? donor.logo : Sm2000Logo;
+
     return (
       <Box>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -22,14 +24,8 @@ const CardDonor = ({ donors }) => {
           <CardContent>
             <Grid container spacing={2} justifyContent="center" alignItems="center" minHeight={"200px"}>
               <Grid item xs={12} md={2}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <img src={donor.logo ? donor.logo : DefaultCharity} alt="Donor logo" style={{ maxWidth: isMobile ? "50%" : "80%" }} />
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <img src={donorLogo} alt="Donor logo" style={{ maxWidth: isMobile ? "50%" : "80%" }} />
                 </Box>
               </Grid>
 
@@ -83,45 +79,46 @@ const CardDonor = ({ donors }) => {
         <Carousel indicators={true} navButtonsAlwaysInvisible={true}>
           {chunkedDonors.map((chunk, index) => (
             <Grid container spacing={4} justifyContent="center" key={index}>
-              {chunk.map((donorObj) => (
-                <Grid item xs={12} md={6} key={donorObj.donor.id}>
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      display: "flex",
-                      padding: "16px",
-                      boxShadow: 1,
-                      minHeight: "200px",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <Grid item xs={3} md={3} container spacing={2} justifyContent="center" alignItems="center">
-                      <img src={donorObj.donor.logo ? donorObj.donor.logo : DefaultCharity} alt="Donor logo" style={{ maxWidth: "80%" }} />
-                    </Grid>
+              {chunk.map((donorObj) => {
+                const donorLogo = donorObj.donor.logo ? donorObj.donor.logo : Sm2000Logo;
 
-                    <Grid item xs={9} md={9}>
-                      <Typography variant="h6" fontWeight="bold">
-                        {donorObj.donor.name ? donorObj.donor.name : "Đang cập nhật"}
-                      </Typography>
-                      {/* <Typography variant="body1" color="text.secondary">
-                        {donorObj.donor.type ? donorObj.donor.type : ""}
-                      </Typography> */}
-                      <Typography variant="h6" color="error" fontWeight="bold">
-                        {Number(donorObj.donation.amount).toLocaleString()} VNĐ
-                      </Typography>
-                      {donorObj.donor.intro ? (
-                        <Typography variant="body1" color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-line" }}>
-                          {donorObj.donor.intro}
+                return (
+                  <Grid item xs={12} md={6} key={donorObj.donor.id}>
+                    <Card
+                      variant="outlined"
+                      sx={{
+                        display: "flex",
+                        padding: "16px",
+                        boxShadow: 1,
+                        minHeight: "200px",
+                        borderRadius: "12px",
+                      }}
+                    >
+                      <Grid item xs={3} md={3} container spacing={2} justifyContent="center" alignItems="center">
+                        <img src={donorLogo} alt="Donor logo" style={{ maxWidth: "80%" }} />
+                      </Grid>
+
+                      <Grid item xs={9} md={9}>
+                        <Typography variant="h6" fontWeight="bold">
+                          {donorObj.donor.name ? donorObj.donor.name : "Đang cập nhật"}
                         </Typography>
-                      ) : (
-                        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                          Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay ủng hộ!
+                        <Typography variant="h6" color="error" fontWeight="bold">
+                          {Number(donorObj.donation.amount).toLocaleString()} VNĐ
                         </Typography>
-                      )}
-                    </Grid>
-                  </Card>
-                </Grid>
-              ))}
+                        {donorObj.donor.intro ? (
+                          <Typography variant="body1" color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-line" }}>
+                            {donorObj.donor.intro}
+                          </Typography>
+                        ) : (
+                          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                            Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay ủng hộ!
+                          </Typography>
+                        )}
+                      </Grid>
+                    </Card>
+                  </Grid>
+                );
+              })}
             </Grid>
           ))}
         </Carousel>
