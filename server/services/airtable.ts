@@ -59,32 +59,32 @@ async function fetchAirProjectRecords(requestedYear: string) {
     for (let i = 0; i < donorIds.length; i++) {
       const donorRecord = await base(DONOR_TABLE).find(donorIds[i]);
 
-      const getTotalProjects = () => {
-        const total = donorRecord.get("Công trình Total");
-        const total6 = donorRecord.get("Công trình Total 6");
+      // const getTotalProjects = () => {
+      //   const total = donorRecord.get("Công trình Total");
+      //   const total6 = donorRecord.get("Công trình Total 6");
 
-        if (!total && !total6) {
-          return [];
-        } else if (total && !total6) {
-          return total;
-        } else if (!total && total6) {
-          return total6;
-        } else if (Array.isArray(total) && Array.isArray(total6)) {
-          if (JSON.stringify(total) === JSON.stringify(total6)) {
-            return total;
-          } else {
-            const name = donorRecord.get("Tên Tài Trợ") ?? undefined;
-            if (!name) return total;
-            if (!totalErrorsMap.has(name)) {
-              totalErrorsMap.set(name, true);
-            }
-            return total;
-          }
-        } else {
-          console.error(`Error: ${donorRecord.get("Tên Tài Trợ") ?? ""}`);
-          return [];
-        }
-      };
+      //   if (!total && !total6) {
+      //     return [];
+      //   } else if (total && !total6) {
+      //     return total;
+      //   } else if (!total && total6) {
+      //     return total6;
+      //   } else if (Array.isArray(total) && Array.isArray(total6)) {
+      //     if (JSON.stringify(total) === JSON.stringify(total6)) {
+      //       return total;
+      //     } else {
+      //       const name = donorRecord.get("Tên Tài Trợ") ?? undefined;
+      //       if (!name) return total;
+      //       if (!totalErrorsMap.has(name)) {
+      //         totalErrorsMap.set(name, true);
+      //       }
+      //       return total;
+      //     }
+      //   } else {
+      //     console.error(`Error: ${donorRecord.get("Tên Tài Trợ") ?? ""}`);
+      //     return [];
+      //   }
+      // };
 
       const donor = {
         name: donorRecord.get("Tên Tài Trợ") ?? "",
@@ -92,7 +92,7 @@ async function fetchAirProjectRecords(requestedYear: string) {
         logo: donorRecord.get("Logo Drive") ?? "",
         type: donorRecord.get("Loại") ?? "",
         // employeeCount: donorRecord.get("Employees") ?? "",
-        totalProjects: getTotalProjects(),
+        // totalProjects: getTotalProjects(),
       };
       airDonorRecords.push(donor);
     }

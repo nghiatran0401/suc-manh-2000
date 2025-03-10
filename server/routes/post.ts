@@ -175,7 +175,7 @@ postRouter.patch("/:id", async (req: Request, res: Response) => {
         }
 
         if (donorInfo && donorInfo.id) {
-          const donorObj = { id: donorInfo.id, name: donorInfo.name, intro: donorInfo.intro, logo: donorInfo.logo, type: donorInfo.type, totalProjects: donorInfo.totalProjects };
+          const donorObj = { id: donorInfo.id, name: donorInfo.name, intro: donorInfo.intro, logo: donorInfo.logo, type: donorInfo.type };
           await firestore.collection("donors").doc(donorInfo.id).set(donorObj, { merge: true });
         }
       }

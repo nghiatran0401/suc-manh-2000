@@ -188,10 +188,6 @@ export const ProjectEdit: React.FC<IResourceComponentsProps> = () => {
                     <Input defaultValue={donor?.donor?.id} disabled />
                   </Form.Item>
 
-                  <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.totalProjects")}</span>} name={["donors", index, "donor", "totalProjects"]}>
-                    <Input defaultValue={donor?.donor?.totalProjects} disabled />
-                  </Form.Item>
-
                   <Form.Item label={<span style={{ fontSize: "16px", fontWeight: "bold" }}>{translate("post.fields.donor.name") + ` ${index + 1}`}</span>} name={["donors", index, "donor", "name"]}>
                     <Input defaultValue={donor?.donor?.name} />
                   </Form.Item>

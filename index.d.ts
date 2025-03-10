@@ -48,7 +48,6 @@ export type Donor = {
   logo?: string;
   type?: string;
   employeeCount?: string;
-  totalProjects?: number;
 };
 
 export type Donation = {

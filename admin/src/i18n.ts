@@ -37,7 +37,6 @@ const resources = {
             id: "Donor ID",
             name: "Nhà tài trợ",
             type: "Loại",
-            totalProjects: "Tổng DA",
             description: "Mô tả / Giới thiệu",
             logo: "Logo",
           },
