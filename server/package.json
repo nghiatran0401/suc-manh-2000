@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc",
     "server": "cp .env.local .env && npx tsx --watch index.ts",
+    "server:windows": "copy .env.local .env && npx tsx --watch index.ts",
     "deploy:server": "cp .env.prod .env && npm run build && firebase deploy --only functions",
     "test": "jest",
     "test:watch": "jest --watch"
