@@ -80,9 +80,11 @@ homeRouter.get("/getTotalStudentsCount", async (req: Request, res: Response) => 
           let total = 0;
           snapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.metadata && typeof data.metadata.totalStudents === "string") return;
-            if (data.metadata && Number(data.metadata.totalStudents) && Number(data.metadata.totalStudents) > 0) {
-              total += data.metadata.totalStudents;
+            if (data.metadata) {
+              let totalStudents = Number(data.metadata.totalStudents);
+              if (!isNaN(totalStudents) && totalStudents > 0) {
+                total += totalStudents;
+              }
             }
           });
           return total;
