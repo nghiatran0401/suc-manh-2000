@@ -1,6 +1,6 @@
 import React from "react";
 import { useMediaQuery, useTheme, Box, Card, CardContent, Grid, Typography } from "@mui/material";
-import Sm2000Logo from "../assets/companions/SM2000.svg";
+import DefaultCharity from "../assets/companions/Default_charity.svg";
 import Carousel from "react-material-ui-carousel";
 import "./config/styles.css";
 
@@ -12,7 +12,7 @@ const CardDonor = ({ donors }) => {
     const donor = donors[0].donor;
     const donationAmount = donors[0].donation.amount;
 
-    const donorLogo = donor.logo ? donor.logo : Sm2000Logo;
+    const donorLogo = donor.logo ? donor.logo : DefaultCharity;
 
     return (
       <Box>
@@ -43,7 +43,7 @@ const CardDonor = ({ donors }) => {
                   </Typography>
                 ) : (
                   <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                    Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay ủng hộ!
+                    Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay đóng góp!
                   </Typography>
                 )}
               </Grid>
@@ -80,7 +80,7 @@ const CardDonor = ({ donors }) => {
           {chunkedDonors.map((chunk, index) => (
             <Grid container spacing={4} justifyContent="center" key={index}>
               {chunk.map((donorObj) => {
-                const donorLogo = donorObj.donor.logo ? donorObj.donor.logo : Sm2000Logo;
+                const donorLogo = donorObj.donor.logo ? donorObj.donor.logo : DefaultCharity;
 
                 return (
                   <Grid item xs={12} md={6} key={donorObj.donor.id}>
@@ -111,7 +111,7 @@ const CardDonor = ({ donors }) => {
                           </Typography>
                         ) : (
                           <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                            Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay ủng hộ!
+                            Xin chân thành cảm ơn các cá nhân, đơn vị đã chung tay đóng góp!
                           </Typography>
                         )}
                       </Grid>

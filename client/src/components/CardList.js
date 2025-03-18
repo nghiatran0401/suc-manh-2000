@@ -97,9 +97,9 @@ export default function CardList(props) {
                 </Typography>
               )}
               {post.constructionUnit && constructionUnitMapping[post.constructionUnit] && (
-                <Typography variant="body2" sx={{ bgcolor: "rgb(33, 150, 243, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                {constructionUnitMapping[post.constructionUnit]}
-                </Typography> 
+                <Typography variant="body2" sx={{ bgcolor: "rgb(255, 192, 203, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
+                  {constructionUnitMapping[post.constructionUnit]}
+                </Typography>
               )}
               {post.category && window.location.href.includes("/search") && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(255, 204, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
@@ -109,7 +109,7 @@ export default function CardList(props) {
             </Box>
           </CardContent>
         </Card>
-      </Link> 
+      </Link>
     </Grid>
   ));
 }

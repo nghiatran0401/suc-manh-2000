@@ -429,12 +429,12 @@ export default function Home() {
               <CountUp start={0} end={general?.metadata["totalPublicAffairsRooms"]} duration={10} />
             </Typography>
             <Typography variant="body1" fontWeight="bold">
-              Phòng công vụ<br />
+              Phòng công vụ
+              <br />
             </Typography>
-            <Typography variant="caption" fontWeight="light">
-            Nằm trong điểm trường, không đếm vào số tổng
+            <Typography variant="body2" fontWeight="light" fontSize={"0.7rem"}>
+              *Nằm trong điểm trường, không đếm vào số tổng
             </Typography>
-
           </Box>
 
           <Box
@@ -451,8 +451,8 @@ export default function Home() {
             <Typography variant="body1" fontWeight="bold">
               Nhà vệ sinh
             </Typography>
-            <Typography variant="caption" fontWeight="light">
-            Nằm trong điểm trường, không đếm vào số tổng
+            <Typography variant="body2" fontWeight="light" fontSize={"0.7rem"}>
+              *Nằm trong điểm trường, không đếm vào số tổng
             </Typography>
           </Box>
 

@@ -5,7 +5,19 @@ import { standardizeString } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataLogoMapping, metadataMapping, statusColorHoverMapping, statusLogoMapping, statusMapping } from "../constants";
+import {
+  DESKTOP_WIDTH,
+  HEADER_DROPDOWN_LIST,
+  categoryMapping,
+  classificationMapping,
+  constructionUnitMapping,
+  iconMapping,
+  metadataLogoMapping,
+  metadataMapping,
+  statusColorHoverMapping,
+  statusLogoMapping,
+  statusMapping,
+} from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -182,13 +194,29 @@ export default function CardDetails(props) {
               variant="body2"
               fontWeight={600}
               sx={{
-                bgcolor: "rgba(255, 153, 204, 1)",
+                bgcolor: "rgba(237, 233, 157, 1)",
                 p: "6px",
                 width: "fit-content",
                 borderRadius: "8px",
               }}
             >
               {post.location?.province}
+            </Typography>
+          )}
+          {post.metadata?.constructionUnit && (
+            <Typography
+              display="flex"
+              alignItems="center"
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                bgcolor: "rgba(255, 192, 203, 1)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
+              {constructionUnitMapping[post.metadata?.constructionUnit]}
             </Typography>
           )}
         </Box>
