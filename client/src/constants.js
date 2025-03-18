@@ -35,24 +35,16 @@ export const HEADER_DROPDOWN_LIST = [
     title: "Quyên Góp",
     children: [
       {
-        path: "#",
-        title: "Quét QR code MoMo",
+        path: "https://goptruongle.sucmanh2000.com/",
+        title: "Trường học",
       },
       {
-        path: "#",
-        title: "Đăng ký bỏ lợn đất",
+        path: "https://cauhanhphuc.sucmanh2000.com/",
+        title: "Cầu dân sinh",
       },
       {
-        path: "#",
-        title: "Góp 2000 MỖI NGÀY",
-      },
-      {
-        path: "#",
-        title: "Rủ 3 người bạn",
-      },
-      {
-        path: "#",
-        title: "Gây quỹ",
+        path: "https://nhahanhphuc.sucmanh2000.com/",
+        title: "Nhà hạnh phúc",
       },
     ],
   },
