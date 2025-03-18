@@ -430,6 +430,10 @@ export default function Home() {
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Phòng công vụ
+              <br />
+            </Typography>
+            <Typography variant="body2" fontWeight="light" fontSize={"0.7rem"}>
+              *Nằm trong điểm trường, không đếm vào số tổng
             </Typography>
           </Box>
 
@@ -446,6 +450,9 @@ export default function Home() {
             </Typography>
             <Typography variant="body1" fontWeight="bold">
               Nhà vệ sinh
+            </Typography>
+            <Typography variant="body2" fontWeight="light" fontSize={"0.7rem"}>
+              *Nằm trong điểm trường, không đếm vào số tổng
             </Typography>
           </Box>
 

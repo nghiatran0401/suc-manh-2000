@@ -5,7 +5,19 @@ import { standardizeString } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, iconMapping, metadataLogoMapping, metadataMapping, statusColorHoverMapping, statusLogoMapping, statusMapping } from "../constants";
+import {
+  DESKTOP_WIDTH,
+  HEADER_DROPDOWN_LIST,
+  categoryMapping,
+  classificationMapping,
+  constructionUnitMapping,
+  iconMapping,
+  metadataLogoMapping,
+  metadataMapping,
+  statusColorHoverMapping,
+  statusLogoMapping,
+  statusMapping,
+} from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -49,7 +61,20 @@ export default function CardDetails(props) {
     const [iframeStatus, setIframeStatus] = useState("loading");
 
     if (!tab.description) {
-      return <></>;
+      if (isProject && post.donors.length > 0 && ["du-an-2024", "du-an-2025"].includes(category)) {
+        return <CardDonor donors={post.donors} />;
+      } else if (isProject && post.status === "can-quyen-gop" && !post.donor?.description) {
+        return (
+          <Box bgcolor={"#f1f1f1"} p={"24px"} display={"flex"} alignItems={"center"} justifyContent={"center"}>
+            <Typography variant="h6" textAlign={"center"}>
+              Hiện chưa có nhà tài trợ. <br />
+              Liên hệ tài trợ hoặc nhận thêm thông tin về dự án này vui lòng liên hệ: 0975302307 - Hoàng Hoa Trung
+            </Typography>
+          </Box>
+        );
+      } else {
+        return <></>;
+      }
     } else {
       return (
         <>
@@ -82,6 +107,7 @@ export default function CardDetails(props) {
   if (loading) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} m={"auto"} display={"flex"} flexDirection={"column"} gap={"16px"}>
+      {/* Breadcrumbs */}
       <Breadcrumbs aria-label="breadcrumb">
         <Link sx={{ color: "#334862", textDecoration: "none" }} component={RouterLink} to="/">
           Trang chủ
@@ -182,13 +208,29 @@ export default function CardDetails(props) {
               variant="body2"
               fontWeight={600}
               sx={{
-                bgcolor: "rgba(255, 153, 204, 1)",
+                bgcolor: "rgba(237, 233, 157, 1)",
                 p: "6px",
                 width: "fit-content",
                 borderRadius: "8px",
               }}
             >
               {post.location?.province}
+            </Typography>
+          )}
+          {post.metadata?.constructionUnit && (
+            <Typography
+              display="flex"
+              alignItems="center"
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                bgcolor: "rgba(255, 192, 203, 1)",
+                p: "6px",
+                width: "fit-content",
+                borderRadius: "8px",
+              }}
+            >
+              {constructionUnitMapping[post.metadata?.constructionUnit]}
             </Typography>
           )}
         </Box>
@@ -446,23 +488,6 @@ export default function CardDetails(props) {
                     </Typography>
                   </Box>
                 )}
-
-                {/* {post.location?.distanceToHN && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Cách Hà Nội</span>: {post.location?.distanceToHN} km
-                  </Typography>
-                )}
-                {post.location?.distanceToHCMC && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span style={{ fontWeight: "bold" }}>Cách TP Hồ Chí Minh</span>: {post.location?.distanceToHCMC} km
-                  </Typography>
-                )}
-                {post.donors?.length > 0 && (
-                  <Typography variant="body1" color={"#77777"}>
-                    <span>Nhà hảo tâm </span>
-                    <span style={{ fontWeight: "bold" }}>{post.donors.map((donor) => donor.name).join(", ")}</span>
-                  </Typography>
-                )} */}
               </Box>
             </Box>
           )}
