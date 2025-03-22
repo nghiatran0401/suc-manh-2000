@@ -192,24 +192,28 @@ export const totalFundMapping = {
 
 export const statusMapping = {
   "da-hoan-thanh": "Đã hoàn thành",
+  "dang-gop-le": "Đang góp lẻ",
   "dang-xay-dung": "Đang xây dựng",
   "can-quyen-gop": "Cần quyên góp",
 };
 
 export const statusColorMapping = {
   "can-quyen-gop": "#F5222D",
+  "dang-gop-le": "#4d9aed",
   "dang-xay-dung": "#FAAD14",
   "da-hoan-thanh": "#58C27D",
 };
 
 export const statusColorHoverMapping = {
   "can-quyen-gop": "rgba(245, 34, 45, 0.8)",
+  "dang-gop-le": "rgba(77, 154, 237, 0.8)",
   "dang-xay-dung": "rgba(250, 173, 20, 0.8)",
   "da-hoan-thanh": "rgba(88, 194, 125, 0.8)",
 };
 
 export const statusLogoMapping = {
   "can-quyen-gop": logoDonate,
+  "dang-gop-le": logoDonate,
   "dang-xay-dung": logoWorking,
   "da-hoan-thanh": logoFinish,
 };

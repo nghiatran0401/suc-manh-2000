@@ -61,6 +61,7 @@ export const classificationMapping = {
 
 export const statusMapping = {
   "can-quyen-gop": "Cần quyên góp",
+  "dang-gop-le": "Đang góp lẻ",
   "dang-xay-dung": "Đang xây dựng",
   "da-hoan-thanh": "Đã hoàn thành",
 };

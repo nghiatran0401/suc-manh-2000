@@ -74,8 +74,9 @@ async function removeSearchIndexAndDocuments() {
 async function upsertDocumentToIndex(data: any) {
   const statusOrderMap: Record<string, number> = {
     "can-quyen-gop": 1,
-    "dang-xay-dung": 2,
-    "da-hoan-thanh": 3,
+    "dang-gop-le": 2,
+    "dang-xay-dung": 3,
+    "da-hoan-thanh": 4,
   };
 
   try {
@@ -317,7 +318,7 @@ const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string, sortF
 };
 
 const getStatsData = (posts: any) => {
-  const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+  const STATUSES = ["can-quyen-gop", "dang-gop-le", "dang-xay-dung", "da-hoan-thanh"];
   const statsData: any = {};
   for (const post of posts) {
     if (statsData[post.classification]) {
@@ -332,6 +333,7 @@ const getStatsData = (posts: any) => {
         [STATUSES[0]]: 0,
         [STATUSES[1]]: 0,
         [STATUSES[2]]: 0,
+        [STATUSES[3]]: 0,
         totalFund: 0,
       };
       statsData[post.classification][post.status] += 1;
@@ -397,8 +399,9 @@ const applySorting = (data: any[], sortField?: string | undefined): any[] => {
     } else if (sortField === "status") {
       const orderMap: Record<string, number> = {
         "can-quyen-gop": 1,
-        "dang-xay-dung": 2,
-        "da-hoan-thanh": 3,
+        "dang-gop-le": 2,
+        "dang-xay-dung": 3,
+        "da-hoan-thanh": 4,
       };
       return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
     } else if (sortField === "random") {
