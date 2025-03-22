@@ -84,6 +84,9 @@ export default function CardDetails(props) {
               Đang tải nội dung
             </Box>
           )}
+
+          {isProject && tab.name === "Nhà hảo tâm" && post.donors.length > 0 && ["du-an-2024", "du-an-2025"].includes(category) && <CardDonor donors={post.donors} />}
+
           <iframe
             title={tab.name}
             width="100%"
@@ -162,7 +165,14 @@ export default function CardDetails(props) {
               display="flex"
               alignItems="center"
               sx={{
-                bgcolor: post.status === "can-quyen-gop" ? "rgba(255, 102, 102, 1)" : post.status === "dang-xay-dung" ? "rgba(255, 252, 150, 1)" : "rgba(210, 238, 130, 1)",
+                bgcolor:
+                  post.status === "can-quyen-gop"
+                    ? "rgba(255, 102, 102, 1)"
+                    : post.status === "dang-xay-dung"
+                    ? "rgba(255, 252, 150, 1)"
+                    : post.status === "dang-gop-le"
+                    ? "rgba(77, 154, 237, 0.8)"
+                    : "rgba(210, 238, 130, 1)",
                 p: "6px",
                 borderRadius: "8px",
                 width: "fit-content",

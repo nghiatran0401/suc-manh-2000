@@ -521,7 +521,7 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 });
 
 scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => {
-  const requestedYears = ["2024", "2025"];
+  const requestedYears = ["2023", "2024", "2025"];
   const BATCH_SIZE = 25;
 
   const valid = await checkIfRefreshTokenValid();

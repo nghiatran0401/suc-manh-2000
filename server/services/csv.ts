@@ -113,8 +113,12 @@ function splitDonorNames(donorString: string): string[] {
   return donorString.split(",").map((name) => name.trim().replace(/\r/g, ""));
 }
 
-function getProjectStatus(statusFull: any) {
+function getProjectStatus(statusFull: any, gopleStatus: any) {
   if (!statusFull.match(/^\d+/)) return undefined;
+
+  if (gopleStatus.includes("Đang góp lẻ")) {
+    return "dang-gop-le";
+  }
 
   const statusNumber = parseInt(statusFull.match(/^\d+/)[0], 10);
   if (statusNumber >= 0 && statusNumber <= 10) {
@@ -166,7 +170,7 @@ async function fetchProjectRecordsFromCsv(requestedYear: string) {
     const projectInitName = record["Tên công trình"].trim();
     const projectName = standardizePostTitle(`${projectId} - ${projectInitName}`);
 
-    const projectStatus = record["Follow up Step"] ? getProjectStatus(record["Follow up Step"].trim()) : undefined;
+    const projectStatus = record["Follow up Step"] ? getProjectStatus(record["Follow up Step"].trim(), record["Aki xác nhận góp lẻ"]) : undefined;
     if (projectStatus === undefined) {
       noStatusProjects.push({ projectInitName: projectInitName, projectId: projectId });
       continue;
