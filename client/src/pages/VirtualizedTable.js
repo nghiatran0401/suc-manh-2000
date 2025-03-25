@@ -92,6 +92,7 @@ const VirtualizedTable = ({ data }) => {
                       onClick={() => toggleRow(index)}
                     >
                       {/* Row Content (Collapsed View) */}
+
                       <Box
                         sx={{
                           display: "flex",
@@ -99,14 +100,13 @@ const VirtualizedTable = ({ data }) => {
                           width: "100%",
                         }}
                       >
-                        {Object.keys(keysMapping).map((dataKey, colIndex) => {
+                        {Object.keys(keysMapping).map((dataKey) => {
                           if (dataKey === "allocated_project") return null;
 
                           if (dataKey === "project" && row["allocated_project"] !== "N/A") {
                             return (
-                              <a href={row["allocated_project"]} target="__blank">
+                              <a key={dataKey} href={row["allocated_project"]} target="__blank">
                                 <Typography
-                                  key={dataKey}
                                   variant="body2"
                                   sx={{
                                     width: columnWidths[keysMapping[dataKey]] || "auto",

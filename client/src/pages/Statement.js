@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, TextField, InputAdornment, Typography, Chip, Select, MenuItem, FormControl, Button, Link, Checkbox, ListItemText } from "@mui/material";
+import { Box, TextField, InputAdornment, Typography, Select, MenuItem, FormControl, Button, Link, FormHelperText, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { useConfirm } from "material-ui-confirm";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
 import VirtualizedTable from "./VirtualizedTable";
@@ -17,6 +18,8 @@ export const keysMapping = {
   month_sheet: "Tháng GD",
 };
 
+const SHEETS_TO_CHECK = ["MB2000. 2025 SK Tổng"]; // "MB2002. 2025 SK Tổng", "VVC. 2025 SK Tổng"
+
 export default function Statement() {
   const [data, setData] = useState([]);
   const [capialSum, setCapitalSum] = useState(0);
@@ -26,20 +29,29 @@ export default function Statement() {
   const [bank, setBank] = useState("");
   const [page, setPage] = useState(1);
 
+  const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
+  const confirm = useConfirm();
+  const [isFetchingButtonClicked, setIsFetchingButtonClicked] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState(["MB2000. 2025 SK Tổng"]);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [errors, setErrors] = useState({ sheets: false, fromDate: false, toDate: false });
+  const [logs, setLogs] = useState([]);
+
   // Pagination
-  const rowsPerPage = 10;
-  const pageCount = Math.ceil(data.length / rowsPerPage);
+  const rowsPerPage = 100;
+  const pageCount = 100; // Math.ceil(data.length / rowsPerPage);
 
   // Calculate total amount based on search/filter
-  const totalAmount = data.reduce((total, row) => {
-    const numeric = parseFloat(row.amount.toString().replace(/[^\d.-]/g, "") || 0);
-    return total + (isNaN(numeric) ? 0 : numeric);
-  }, 0);
+  // const totalAmount = data.reduce((total, row) => {
+  //   const numeric = parseFloat(row.amount.toString().replace(/[^\d.-]/g, "") || 0);
+  //   return total + (isNaN(numeric) ? 0 : numeric);
+  // }, 0);
 
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`${SERVER_URL}/statement`, {
+        const response = await axios.get(SERVER_URL + "/statement", {
           params: {
             search: search,
             month: month,
@@ -57,11 +69,129 @@ export default function Statement() {
     })();
   }, [search, month, year, bank, page]);
 
+  const handleSyncData = async () => {
+    let hasErrors = false;
+    let newErrors = { sheets: false, fromDate: false, toDate: false };
+
+    if (selectedOptions.length === 0) {
+      newErrors.sheets = true;
+      hasErrors = true;
+    }
+    if (!fromDate) {
+      newErrors.fromDate = true;
+      hasErrors = true;
+    }
+    if (!toDate) {
+      newErrors.toDate = true;
+      hasErrors = true;
+    }
+
+    setErrors(newErrors);
+    if (hasErrors) return;
+
+    const { confirmed } = await confirm({
+      title: "Bạn có chắc muốn tiếp tục không?",
+      description: (
+        <p>
+          Sync data có thể sẽ mất một khoảng thời gian, tùy vào cần update bao nhiêu rows từ Google Sheets sang. Một khi chạy rồi sẽ không dừng được, hãy suy nghĩ kĩ trước khi nhấn nút!!!
+          <br />
+          <br />
+          Sync data {selectedOptions.length} sheet{selectedOptions.length > 1 && "s"} <strong>"{selectedOptions.join(", ")}"</strong> từ ngày <strong>{fromDate}</strong> đến ngày <strong>{toDate}</strong>.
+        </p>
+      ),
+      confirmationButtonProps: { autoFocus: true },
+    });
+
+    if (confirmed) {
+      setIsFetchingButtonClicked(true);
+      const response = await axios.post(SERVER_URL + "/statement/fetchTransactionDataFromGsheet", { selectedOptions, fromDate, toDate });
+      setLogs(response.data.logs);
+      setIsFetchingButtonClicked(false);
+    }
+  };
+
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} my={"24px"} display="flex" flexDirection={"column"} gap={"16px"}>
       <Typography variant="h5" fontWeight={"bold"} textAlign="center">
         SAO KÊ TÀI KHOẢN SỨC MẠNH 2000
       </Typography>
+
+      {/* Sync data from Google Sheets */}
+      {isAdmin && (
+        <Box>
+          <Typography variant="h5" fontWeight={"bold"}>
+            Sync data from Google Sheets
+          </Typography>
+
+          <Dialog open={logs.length > 0} onClose={() => setLogs([])} maxWidth="md" fullWidth>
+            <DialogTitle>Results</DialogTitle>
+            <DialogContent dividers sx={{ maxHeight: 400, overflowY: "auto" }}>
+              {logs.length === 0 ? (
+                <Typography>No logs available.</Typography>
+              ) : (
+                logs.map((log, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      padding: "8px",
+                      backgroundColor: log.error ? "#ffebee" : "#e8f5e9",
+                      color: log.error ? "#d32f2f" : "#2e7d32",
+                      borderRadius: "4px",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {log.message || log.error}
+                  </Box>
+                ))
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setLogs([])} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          <Typography color="red">*Note: sync toàn bộ data nếu không chọn 2 fields "From Date" và "To Date"</Typography>
+          <Box display="flex" gap={2} alignItems="center" my={2}>
+            <FormControl sx={{ minWidth: 250, flex: 1 }} error={errors.sheets}>
+              <Select multiple value={selectedOptions} onChange={(e) => setSelectedOptions(e.target.value)} renderValue={(selected) => (selected.length ? selected.join(", ") : "Select sheets")} displayEmpty>
+                {SHEETS_TO_CHECK.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.sheets && <FormHelperText>Please select at least one sheet</FormHelperText>}
+            </FormControl>
+
+            <TextField
+              label="From Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              sx={{ minWidth: 180 }}
+              error={errors.fromDate}
+              helperText={errors.fromDate ? "Please select a from date" : ""}
+            />
+            <TextField
+              label="To Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              sx={{ minWidth: 180 }}
+              error={errors.toDate}
+              helperText={errors.toDate ? "Please select a to date" : ""}
+            />
+
+            <Button variant="contained" onClick={handleSyncData} disabled={isFetchingButtonClicked}>
+              {isFetchingButtonClicked ? "Loading..." : "Sync data"}
+            </Button>
+          </Box>
+        </Box>
+      )}
 
       {/* Announcement + Report */}
       <Box display="flex" justifyContent="space-between" width="100%">
@@ -149,55 +279,6 @@ export default function Statement() {
           }}
         />
 
-        {/* Month */}
-        {/* <FormControl sx={{ flex: "0.5" }}>
-          <Select
-            multiple
-            displayEmpty
-            value={month}
-            onChange={(e) => setmonth(e.target.value)}
-            renderValue={() => "Tháng"}
-            sx={{
-              height: "40px",
-              background: "#FFFFFF",
-              borderRadius: "4px",
-              ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "#D9D9D9",
-              },
-            }}
-          >
-            {["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"].map((month, idx) => (
-              <MenuItem
-                key={idx}
-                value={month}
-                disableRipple
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "8px 12px",
-                  backgroundColor: month.indexOf(month) > -1 ? "#FFF2F1" : "transparent",
-                  "&.Mui-selected": {
-                    backgroundColor: "#FFF2F1 !important",
-                    color: "#F5232D",
-                  },
-                  "&:hover": { backgroundColor: "#FFF2F1", color: "#F5232D" },
-                }}
-              >
-                <Checkbox
-                  checked={month.indexOf(month) > -1}
-                  sx={{
-                    color: month.indexOf(month) > -1 ? "#F5232D" : "inherit",
-                    "&.Mui-checked": { color: "#F5232D" },
-                    transform: "scale(0.8)",
-                    padding: 0,
-                  }}
-                />
-                <ListItemText primary={month} sx={{ color: month.indexOf(month) > -1 ? "#F5232D" : "inherit" }} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
-
         <FormControl sx={{ flex: "0.5" }}>
           <Select
             value={month}
@@ -215,15 +296,14 @@ export default function Statement() {
             <MenuItem key={0} value={""}>
               Tháng
             </MenuItem>
-            {[...Array(12)].map((_, index) => (
-              <MenuItem key={index + 1} value={index + 1}>
-                Tháng {index + 1}
+            {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((_) => (
+              <MenuItem key={_} value={_}>
+                Tháng {_}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        {/* Year */}
         <FormControl sx={{ flex: "0.5" }}>
           <Select
             value={year}
@@ -241,7 +321,7 @@ export default function Statement() {
             <MenuItem key={0} value={""}>
               Năm
             </MenuItem>
-            {["2025", "2024", "2023"].map((_, index) => (
+            {["2025", "2024", "2023"].map((_) => (
               <MenuItem key={_} value={_}>
                 Năm {_}
               </MenuItem>
@@ -249,7 +329,6 @@ export default function Statement() {
           </Select>
         </FormControl>
 
-        {/* Bank */}
         <FormControl sx={{ flex: "0.5" }}>
           <Select
             value={bank}
@@ -267,31 +346,22 @@ export default function Statement() {
             <MenuItem key={0} value={""}>
               Ngân hàng
             </MenuItem>
-            {["MB2000", "MB", "VVC"].map((_, index) => (
+            {["MB2000", "MB", "VVC"].map((_) => (
               <MenuItem key={_} value={_}>
                 {_}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-
-        {/* Search Button (optional) */}
-        {/* <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#F5232D",
-            color: "#FFFFFF",
-            height: "40px",
-            borderRadius: "8px",
-            "&:hover": { backgroundColor: "#F5232D" },
-          }}
-        >
-          Tìm kiếm
-        </Button> */}
       </Box>
 
-      <Typography>Nhấn vào từng hàng để xem chi tiết giao dịch.</Typography>
-      <VirtualizedTable data={data} />
+      {/* Statement table */}
+      <Box display="flex" flexDirection="column" gap="8px">
+        <Typography variant="body1">Nhấn vào từng hàng để xem chi tiết giao dịch</Typography>
+        <VirtualizedTable data={data} />
+      </Box>
+
+      {/* Pagination */}
       <Box display="flex" justifyContent="center">
         <Pagination count={pageCount} page={page} onChange={(event, newPage) => setPage(newPage)} shape="rounded" />
       </Box>

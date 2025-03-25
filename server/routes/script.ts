@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
 import { fetchProjectRecordsFromCsv } from "../services/csv";
 import { fetchAirProjectRecords, standardizePostTitle } from "../services/airtable";
-import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/googledrive";
+import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/google";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
 
