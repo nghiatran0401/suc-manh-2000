@@ -229,4 +229,19 @@ async function getAllFileNames(folderId: string) {
   return allFileNames;
 }
 
-export { generateAuthUrl, saveGoogleAuthRefreshToken, checkIfRefreshTokenValid, getProjectProgress, getHoanCanhDescription, getAllFileNames };
+async function initializeGoogleSheets(spreadsheetId: string) {
+  const googleCredentials = JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}");
+  const auth: any = new google.auth.GoogleAuth({
+    credentials: googleCredentials,
+    scopes: "https://www.googleapis.com/auth/spreadsheets.readonly",
+  });
+
+  const client = await auth.getClient();
+  const clientSheet = google.sheets({ version: "v4", auth: client });
+  const sheetsMeta = await clientSheet.spreadsheets.get({ spreadsheetId });
+  const totalSheets = sheetsMeta.data.sheets || [];
+
+  return { clientSheet, totalSheets };
+}
+
+export { generateAuthUrl, saveGoogleAuthRefreshToken, checkIfRefreshTokenValid, getProjectProgress, getHoanCanhDescription, getAllFileNames, initializeGoogleSheets };
