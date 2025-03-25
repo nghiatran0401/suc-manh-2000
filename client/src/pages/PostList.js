@@ -158,14 +158,17 @@ export default function PostList() {
                   gap: "2px",
                 }}
               >
-                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                {/* <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
-                </Typography>
+                </Typography> */}
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["da-hoan-thanh"], 0)} Dự án đã hoàn thành
                 </Typography>
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"], 0)} Dự án đang xây dựng
+                </Typography>
+                <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
+                  {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-gop-le"], 0)} Dự án đang góp lẻ
                 </Typography>
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["can-quyen-gop"], 0)} Dự án cần quyên góp

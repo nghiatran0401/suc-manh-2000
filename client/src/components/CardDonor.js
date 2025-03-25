@@ -71,7 +71,7 @@ const CardDonor = ({ donors }) => {
     }
 
     return (
-      <Box>
+      <Box width={"100%"}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           Thông tin <span style={{ color: "#d32f2f", fontWeight: "bold" }}>nhà tài trợ</span>
         </Typography>

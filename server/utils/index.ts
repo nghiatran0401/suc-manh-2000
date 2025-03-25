@@ -54,6 +54,8 @@ function vietnameseProjectStatus(status: string) {
   switch (status) {
     case "can-quyen-gop":
       return "Cần quyên góp";
+    case "dang-gop-le":
+      return "Đang góp lẻ";
     case "dang-xay-dung":
       return "Đang xây dựng";
     case "da-hoan-thanh":

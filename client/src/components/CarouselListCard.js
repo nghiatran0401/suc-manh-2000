@@ -60,6 +60,8 @@ export default function CarouselListCard(props) {
                             ? "rgba(255, 76, 48, 1)"
                             : ["dang-xay-dung", "dangxaydung"].includes(post.status)
                             ? "rgba(255, 252, 0, 1)"
+                            : ["dang-gop-le", "danggople"].includes(post.status)
+                            ? "rgba(77, 154, 237, 0.8)"
                             : "rgba(210, 238, 130, 1)",
                           padding: "5px",
                           display: "flex",
@@ -70,10 +72,12 @@ export default function CarouselListCard(props) {
                       >
                         {["can-quyen-gop", "canquyengop"].includes(post.status) && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
                         {["dang-xay-dung", "dangxaydung"].includes(post.status) && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                        {["dang-gop-le", "danggople"].includes(post.status) && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
                         {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
                         <Typography color={"black"} variant="body2" fontWeight={"bold"}>
                           {["can-quyen-gop", "canquyengop"].includes(post.status) && "Cần quyên góp"}
                           {["dang-xay-dung", "dangxaydung"].includes(post.status) && "Đang xây dựng"}
+                          {["dang-gop-le", "danggople"].includes(post.status) && "Đang góp lẻ"}
                           {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && "Đã hoàn thành"}
                         </Typography>
                       </div>
