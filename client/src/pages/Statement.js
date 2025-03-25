@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, TextField, Typography, Chip, Select, MenuItem, FormControl, Button, Link, Checkbox, ListItemText } from "@mui/material";
+import { Box, TextField, InputAdornment, Typography, Chip, Select, MenuItem, FormControl, Button, Link, Checkbox, ListItemText } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
 import VirtualizedTable from "./VirtualizedTable";
 import { DESKTOP_WIDTH, SERVER_URL } from "../constants";
-import LoadingScreen from "../components/LoadingScreen";
-import { sampleData } from "./sample";
 
-const keysMapping = {
+export const keysMapping = {
   date: "Ngày",
   transaction_code: "Mã giao dịch",
   amount: "Số tiền",
@@ -19,82 +17,45 @@ const keysMapping = {
   month_sheet: "Tháng GD",
 };
 
-const USE_SAMPLE_DATA = false;
-
 export default function Statement() {
-  const [loading, setLoading] = useState(!USE_SAMPLE_DATA);
-  const [data, setData] = useState(USE_SAMPLE_DATA ? sampleData : []);
+  const [data, setData] = useState([]);
+  const [capialSum, setCapitalSum] = useState(0);
   const [search, setSearch] = useState("");
-  const [selectedYears, setSelectedYears] = useState([]);
-  const [selectedBank, setSelectedBank] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState([]);
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [bank, setBank] = useState("");
   const [page, setPage] = useState(1);
-  const rowsPerPage = 20;
 
-  useEffect(() => {
-    if (!USE_SAMPLE_DATA) {
-      (async () => {
-        try {
-          const response = await axios.get(`${SERVER_URL}/statement`);
-          setData(response.data);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }
-  }, []);
+  // Pagination
+  const rowsPerPage = 10;
+  const pageCount = Math.ceil(data.length / rowsPerPage);
 
-  // Simple date formatter (DD/MM/YYYY)
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  // Filter the data based on search, month, unit, etc.
-  const filteredData = data
-    .filter((row) => {
-      const matchesSearch = Object.values(row).some((cell) => cell?.toString().toLowerCase().includes(search.toLowerCase()));
-
-      // If selectedMonth is an array of "Tháng X" strings, row.month_sheet can be matched if it’s in that set
-      const matchesMonth = selectedMonth.length > 0 ? selectedMonth.includes(row.month_sheet) : true;
-
-      // If selectedBank is non‐empty
-      const matchesBank = selectedBank ? row.construction_unit === selectedBank : true;
-
-      // If selectedYears is an array of strings, you can parse row’s date if needed
-      const rowYear = new Date(row.date).getFullYear().toString();
-      const matchesYear = selectedYears.length > 0 ? selectedYears.includes(rowYear) : true;
-
-      return matchesSearch && matchesMonth && matchesBank && matchesYear;
-    })
-    .map((row) => ({
-      ...row,
-      date: formatDate(row.date),
-      // Format amount with commas
-      amount: row.amount ? parseFloat(row.amount).toLocaleString() : "0",
-    }));
-
-  // Calculate total amount
-  const totalAmount = filteredData.reduce((total, row) => {
+  // Calculate total amount based on search/filter
+  const totalAmount = data.reduce((total, row) => {
     const numeric = parseFloat(row.amount.toString().replace(/[^\d.-]/g, "") || 0);
     return total + (isNaN(numeric) ? 0 : numeric);
   }, 0);
 
-  // Pagination logic
-  const pageCount = Math.ceil(filteredData.length / rowsPerPage);
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage);
-  };
-  const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(`${SERVER_URL}/statement`, {
+          params: {
+            search: search,
+            month: month,
+            year: year,
+            bank: bank,
+            page: page,
+            limit: rowsPerPage,
+          },
+        });
+        setData(response.data.data);
+        setCapitalSum(response.data.capitalSum);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    })();
+  }, [search, month, year, bank, page]);
 
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} my={"24px"} display="flex" flexDirection={"column"} gap={"16px"}>
@@ -158,20 +119,26 @@ export default function Statement() {
             BÁO CÁO TỔNG TIỀN
           </Typography>
           <Typography variant="h3" fontWeight="bold" textAlign="center" sx={{ color: "#F5232D" }}>
-            {totalAmount.toLocaleString()} VNĐ
+            {capialSum.toLocaleString()} VNĐ
           </Typography>
         </Box>
       </Box>
 
       {/* Filters */}
       <Box display="flex" gap={2} alignItems="center" justifyContent="space-between" width="100%" sx={{ marginTop: "30px", marginBottom: "30px" }}>
-        {/* Search */}
         <TextField
           value={search}
           placeholder="Tìm kiếm theo tên, mã GD, công trình"
           onChange={(e) => setSearch(e.target.value)}
           variant="outlined"
           size="medium"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="disabled" />
+              </InputAdornment>
+            ),
+          }}
           sx={{
             flex: 2,
             background: "#FFFFFF",
@@ -183,32 +150,32 @@ export default function Statement() {
         />
 
         {/* Month */}
-        <FormControl sx={{ flex: "0.5" }}>
+        {/* <FormControl sx={{ flex: "0.5" }}>
           <Select
             multiple
             displayEmpty
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+            value={month}
+            onChange={(e) => setmonth(e.target.value)}
             renderValue={() => "Tháng"}
             sx={{
               height: "40px",
               background: "#FFFFFF",
-              borderRadius: "8px",
+              borderRadius: "4px",
               ".MuiOutlinedInput-notchedOutline": {
                 borderColor: "#D9D9D9",
               },
             }}
           >
-            {["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6"].map((month) => (
+            {["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"].map((month, idx) => (
               <MenuItem
-                key={month}
+                key={idx}
                 value={month}
                 disableRipple
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   padding: "8px 12px",
-                  backgroundColor: selectedMonth.indexOf(month) > -1 ? "#FFF2F1" : "transparent",
+                  backgroundColor: month.indexOf(month) > -1 ? "#FFF2F1" : "transparent",
                   "&.Mui-selected": {
                     backgroundColor: "#FFF2F1 !important",
                     color: "#F5232D",
@@ -217,20 +184,40 @@ export default function Statement() {
                 }}
               >
                 <Checkbox
-                  checked={selectedMonth.indexOf(month) > -1}
+                  checked={month.indexOf(month) > -1}
                   sx={{
-                    color: selectedMonth.indexOf(month) > -1 ? "#F5232D" : "inherit",
+                    color: month.indexOf(month) > -1 ? "#F5232D" : "inherit",
                     "&.Mui-checked": { color: "#F5232D" },
                     transform: "scale(0.8)",
                     padding: 0,
                   }}
                 />
-                <ListItemText
-                  primary={month}
-                  sx={{
-                    color: selectedMonth.indexOf(month) > -1 ? "#F5232D" : "inherit",
-                  }}
-                />
+                <ListItemText primary={month} sx={{ color: month.indexOf(month) > -1 ? "#F5232D" : "inherit" }} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl> */}
+
+        <FormControl sx={{ flex: "0.5" }}>
+          <Select
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            displayEmpty
+            sx={{
+              height: "40px",
+              background: "#FFFFFF",
+              borderRadius: "4px",
+              ".MuiOutlinedInput-notchedOutline": {
+                borderColor: "#D9D9D9",
+              },
+            }}
+          >
+            <MenuItem key={0} value={""}>
+              Tháng
+            </MenuItem>
+            {[...Array(12)].map((_, index) => (
+              <MenuItem key={index + 1} value={index + 1}>
+                Tháng {index + 1}
               </MenuItem>
             ))}
           </Select>
@@ -239,52 +226,24 @@ export default function Statement() {
         {/* Year */}
         <FormControl sx={{ flex: "0.5" }}>
           <Select
-            multiple
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
             displayEmpty
-            value={selectedYears}
-            onChange={(e) => setSelectedYears(e.target.value)}
-            renderValue={() => "Năm"}
             sx={{
               height: "40px",
               background: "#FFFFFF",
-              borderRadius: "8px",
+              borderRadius: "4px",
               ".MuiOutlinedInput-notchedOutline": {
                 borderColor: "#D9D9D9",
               },
             }}
           >
-            {["2025", "2024", "2023", "2022", "2021", "2020"].map((year) => (
-              <MenuItem
-                key={year}
-                value={year}
-                disableRipple
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: 2,
-                  backgroundColor: selectedYears.indexOf(year) > -1 ? "#FFF2F1" : "transparent",
-                  "&.Mui-selected": {
-                    backgroundColor: "#FFF2F1 !important",
-                    color: "#F5232D",
-                  },
-                  "&:hover": { backgroundColor: "#FFF2F1", color: "#F5232D" },
-                }}
-              >
-                <Checkbox
-                  checked={selectedYears.indexOf(year) > -1}
-                  sx={{
-                    color: selectedYears.indexOf(year) > -1 ? "#F5232D" : "inherit",
-                    "&.Mui-checked": { color: "#F5232D" },
-                    transform: "scale(0.8)",
-                    padding: 0,
-                  }}
-                />
-                <ListItemText
-                  primary={year}
-                  sx={{
-                    color: selectedYears.indexOf(year) > -1 ? "#F5232D" : "inherit",
-                  }}
-                />
+            <MenuItem key={0} value={""}>
+              Năm
+            </MenuItem>
+            {["2025", "2024", "2023"].map((_, index) => (
+              <MenuItem key={_} value={_}>
+                Năm {_}
               </MenuItem>
             ))}
           </Select>
@@ -293,28 +252,31 @@ export default function Statement() {
         {/* Bank */}
         <FormControl sx={{ flex: "0.5" }}>
           <Select
-            value={selectedBank}
-            onChange={(e) => setSelectedBank(e.target.value)}
+            value={bank}
+            onChange={(e) => setBank(e.target.value)}
             displayEmpty
             sx={{
               height: "40px",
               background: "#FFFFFF",
-              borderRadius: "8px",
+              borderRadius: "4px",
               ".MuiOutlinedInput-notchedOutline": {
                 borderColor: "#D9D9D9",
               },
             }}
           >
-            <MenuItem value="">Ngân hàng</MenuItem>
-            <MenuItem value="MB2000">MB2000</MenuItem>
-            <MenuItem value="ACB">ACB</MenuItem>
-            <MenuItem value="BIDV">BIDV</MenuItem>
-            {/* Add more if needed */}
+            <MenuItem key={0} value={""}>
+              Ngân hàng
+            </MenuItem>
+            {["MB2000", "MB", "VVC"].map((_, index) => (
+              <MenuItem key={_} value={_}>
+                {_}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
         {/* Search Button (optional) */}
-        <Button
+        {/* <Button
           variant="contained"
           sx={{
             backgroundColor: "#F5232D",
@@ -325,19 +287,14 @@ export default function Statement() {
           }}
         >
           Tìm kiếm
-        </Button>
+        </Button> */}
       </Box>
 
       <Typography>Nhấn vào từng hàng để xem chi tiết giao dịch.</Typography>
-
-      <div>
-        {/* Pass the paginated data to the VirtualizedTable */}
-        <VirtualizedTable filteredData={paginatedData} keysMapping={keysMapping} />
-        {/* Pagination */}
-        <Box display="flex" justifyContent="center" marginTop="20px">
-          <Pagination count={pageCount} page={page} onChange={handlePageChange} shape="rounded" />
-        </Box>
-      </div>
+      <VirtualizedTable data={data} />
+      <Box display="flex" justifyContent="center">
+        <Pagination count={pageCount} page={page} onChange={(event, newPage) => setPage(newPage)} shape="rounded" />
+      </Box>
     </Box>
   );
 }

@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from "react-virtualized";
 import { Box, Typography, Paper, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { keysMapping } from "./Statement";
 
-const VirtualizedTable = ({ filteredData, keysMapping }) => {
-  const [expandedRow, setExpandedRow] = useState(null);
+const VirtualizedTable = ({ data }) => {
+  const [expandedRow, setExpandedRow] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Total width: 1100px
   const columnWidths = {
     Ngày: isMobile ? 80 : 130,
     "Mã giao dịch": isMobile ? 120 : 170,
@@ -16,9 +16,10 @@ const VirtualizedTable = ({ filteredData, keysMapping }) => {
     "Nội dung giao dịch": isMobile ? 200 : 400,
     "Công trình": isMobile ? 150 : 100,
     "Ngân hàng": isMobile ? 80 : 100,
-    "Tháng GD": isMobile ? 80 : 100,
+    // "Tháng GD": isMobile ? 80 : 100,
   };
 
+  // Handles dynamic height for expanded rows
   const cache = new CellMeasurerCache({
     fixedWidth: true,
     defaultHeight: 40,
@@ -32,7 +33,7 @@ const VirtualizedTable = ({ filteredData, keysMapping }) => {
 
   return (
     <Box sx={{ border: "1px solid #ddd", borderRadius: "8px", overflow: "hidden" }}>
-      {/* Virtualized Header */}
+      {/* Table Header */}
       <Box
         sx={{
           display: "flex",
@@ -50,7 +51,6 @@ const VirtualizedTable = ({ filteredData, keysMapping }) => {
                 sx={{
                   width: columnWidths[title] || "auto",
                   padding: "8px",
-                  // borderRight: index !== Object.values(keysMapping).length - 1 ? "1px solid #bbb" : "none",
                   textOverflow: "ellipsis",
                   overflow: "hidden",
                   whiteSpace: "nowrap",
@@ -68,36 +68,62 @@ const VirtualizedTable = ({ filteredData, keysMapping }) => {
           <List
             width={width}
             height={800}
-            rowCount={filteredData.length}
-            rowHeight={cache.rowHeight}
+            rowCount={data.length}
+            rowHeight={({ index }) => (expandedRow === index ? cache.rowHeight({ index }) : 40)}
             deferredMeasurementCache={cache}
             rowRenderer={({ index, key, style, parent }) => {
-              const row = filteredData[index];
-              // const isExpanded = expandedRow === index;
+              const row = data[index];
+              const isExpanded = expandedRow === index;
 
               return (
                 <CellMeasurer key={key} cache={cache} parent={parent} columnIndex={0} rowIndex={index}>
-                  <div
-                    style={{
-                      ...style,
-                      display: "flex",
-                      alignItems: "center",
-                      // cursor: "pointer",
-                      background: index % 2 === 0 ? "#fafafa" : "#fff",
-                      borderBottom: "1px solid #ddd",
-                      // padding: "8px",
-                      flexDirection: "column",
-                    }}
-                    onClick={() => toggleRow(index)}
-                  >
-                    {/* Row (collapsed view) */}
-                    <Box sx={{ display: "flex", width: "100%" }}>
-                      {Object.keys(keysMapping).map((dataKey, colIndex) => {
-                        if (dataKey === "allocated_project") return;
+                  {({ measure }) => (
+                    <div
+                      style={{
+                        ...style,
+                        display: "flex",
+                        flexDirection: "column",
+                        background: index % 2 === 0 ? "#fafafa" : "#fff",
+                        borderBottom: "1px solid #ddd",
+                        padding: "8px",
+                        width: "100%",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => toggleRow(index)}
+                    >
+                      {/* Row Content (Collapsed View) */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          width: "100%",
+                        }}
+                      >
+                        {Object.keys(keysMapping).map((dataKey, colIndex) => {
+                          if (dataKey === "allocated_project") return null;
 
-                        if (dataKey === "project") {
-                          return (
-                            <a href={row["allocated_project"]} target="__blank">
+                          if (dataKey === "project" && row["allocated_project"] !== "N/A") {
+                            return (
+                              <a href={row["allocated_project"]} target="__blank">
+                                <Typography
+                                  key={dataKey}
+                                  variant="body2"
+                                  sx={{
+                                    width: columnWidths[keysMapping[dataKey]] || "auto",
+                                    padding: "8px",
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                    whiteSpace: isExpanded ? "normal" : "nowrap", // Expand only if row is clicked
+                                    wordWrap: isExpanded ? "break-word" : "normal",
+                                  }}
+                                  ref={measure}
+                                >
+                                  {row[dataKey]}
+                                </Typography>
+                              </a>
+                            );
+                          } else {
+                            return (
                               <Typography
                                 key={dataKey}
                                 variant="body2"
@@ -106,51 +132,19 @@ const VirtualizedTable = ({ filteredData, keysMapping }) => {
                                   padding: "8px",
                                   textOverflow: "ellipsis",
                                   overflow: "hidden",
-                                  whiteSpace: "nowrap",
-                                  // fontSize: isMobile ? "0.7rem" : "1rem",
-                                  // borderRight: colIndex !== Object.keys(keysMapping).length - 1 ? "1px solid #bbb" : "none",
+                                  whiteSpace: isExpanded ? "normal" : "nowrap", // Expand only if row is clicked
+                                  wordWrap: isExpanded ? "break-word" : "normal",
                                 }}
+                                ref={measure}
                               >
                                 {row[dataKey]}
                               </Typography>
-                            </a>
-                          );
-                        } else {
-                          return (
-                            <Typography
-                              key={dataKey}
-                              variant="body2"
-                              sx={{
-                                width: columnWidths[keysMapping[dataKey]] || "auto",
-                                padding: "8px",
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                                whiteSpace: "nowrap",
-                                // fontSize: isMobile ? "0.7rem" : "1rem",
-                                // borderRight: colIndex !== Object.keys(keysMapping).length - 1 ? "1px solid #bbb" : "none",
-                              }}
-                            >
-                              {row[dataKey]}
-                            </Typography>
-                          );
-                        }
-                      })}
-                    </Box>
-
-                    {/* Expanded details, only visible if expanded */}
-                    {/* {isExpanded && (
-                      <Paper sx={{ padding: "12px", marginTop: "8px", width: "100%" }}>
-                        <Typography variant="body2">
-                          {Object.keys(keysMapping).map((dataKey) => (
-                            <div key={dataKey} style={{ marginBottom: "8px" }}>
-                              <strong>{keysMapping[dataKey]}: </strong>
-                              {row[dataKey]}
-                            </div>
-                          ))}
-                        </Typography>
-                      </Paper>
-                    )} */}
-                  </div>
+                            );
+                          }
+                        })}
+                      </Box>
+                    </div>
+                  )}
                 </CellMeasurer>
               );
             }}

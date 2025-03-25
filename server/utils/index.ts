@@ -17,12 +17,13 @@ async function updateClassificationAndCategoryCounts(classification: string | un
   }
 }
 
-function formatDate(date: any) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+const formatDate = (date: any) => {
+  const convertedDate = new Date(date);
+  const day = String(convertedDate.getDate()).padStart(2, "0");
+  const month = String(convertedDate.getMonth() + 1).padStart(2, "0");
+  const year = convertedDate.getFullYear();
   return `${day}/${month}/${year}`;
-}
+};
 
 function extractFolderId(ggDriveUrl: any) {
   const match = ggDriveUrl.match(/\/folders\/([a-zA-Z0-9_-]+)/);
