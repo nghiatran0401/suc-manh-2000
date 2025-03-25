@@ -6,6 +6,10 @@ import { formatDate } from "../utils";
 import { firestore } from "../firebase";
 import { getValueInRedis, setExValueInRedis } from "../services/redis";
 import { initializeGoogleSheets } from "../services/google";
+import csv from "csv-parser";
+import fs from "fs";
+import { parse, format } from "date-fns";
+import path from "path";
 
 const statementRouter = express.Router();
 
@@ -131,7 +135,7 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
 
               if (formattedDate < formattedFromDate || formattedDate > formattedToDate) return;
 
-              const monthYear = `${month}.${year}`;
+              const monthYear = `${month.toString().padStart(2, "0")}.${year}`;
               const projectId = allocatedFunds.toLowerCase();
               if (!/^da\d{4}$/.test(projectId)) {
                 logs.push({ error: `Incorrect column "Mã DA": "${projectId}" in transaction "${transactionCode}"` });
@@ -186,5 +190,153 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
     res.status(500).json({ message: "Error processing data.", logs });
   }
 });
+
+// Old: to migrate data from 2024 transactions sheets
+statementRouter.get("/migrateDataFromCSV", async (req: Request, res: Response): Promise<any> => {
+  const BATCH_SIZE = 100;
+  let batch: any = [];
+  const processingRows: any = [];
+
+  console.log("Starting CSV migration...");
+
+  // Read all CSV files in the `/csv/` directory
+  const csvDirectory = path.join(__dirname, "../csv");
+  const files = fs.readdirSync(csvDirectory).filter((file) => file.endsWith(".csv"));
+
+  if (files.length === 0) {
+    return res.status(400).json({ message: "No CSV files found in the folder." });
+  }
+
+  // Function to process a single file
+  async function processFile(fileName: string) {
+    console.log(`Processing file: ${fileName}`);
+
+    return new Promise<void>((resolve, reject) => {
+      fs.createReadStream(path.join(csvDirectory, fileName))
+        .pipe(csv())
+        .on("data", async (row: any) => {
+          const formattedRow = await formatRow(row);
+          if (formattedRow) {
+            batch.push(formattedRow);
+          }
+
+          if (batch.length >= BATCH_SIZE) {
+            const batchToInsert = [...batch];
+            batch = [];
+            await upsertData(batchToInsert);
+          }
+        })
+        .on("end", async () => {
+          if (batch.length > 0) {
+            await upsertData(batch);
+          }
+          console.log(`Finished processing ${fileName}`);
+          resolve();
+        })
+        .on("error", (err: any) => {
+          console.error(`Error reading ${fileName}:`, err);
+          reject(err);
+        });
+    });
+  }
+
+  try {
+    await Promise.all(files.map((file) => processFile(file)));
+
+    console.log("All CSV files processed successfully.");
+    res.send("CSV migration completed."); // ✅ Now sent only once after all files finish
+  } catch (error) {
+    console.error("Error processing CSV files:", error);
+    res.status(500).send("Error processing CSV files.");
+  }
+});
+
+async function formatRow(row: any) {
+  const transactionCode = row["Mã giao dịch"].trim();
+
+  function parseDate(dateString: any) {
+    if (!dateString) return null;
+    if (!isNaN(Date.parse(dateString))) {
+      return new Date(dateString).toISOString();
+    }
+    const dateParts = dateString.split("/");
+    if (dateParts.length === 3) {
+      const parsedDate = parse(dateString, "dd/MM/yyyy", new Date());
+      return format(parsedDate, "yyyy-MM-dd'T'HH:mm:ssXXX");
+    }
+    console.error(`Invalid date format: ${dateString}`);
+    return null;
+  }
+
+  function cleanAmount(amountString: any) {
+    if (!amountString) return 0;
+    return parseFloat(amountString.replace(/\./g, "").replace(",", ".")); // Remove dots, replace commas with dots
+  }
+
+  function formatMonthSheet(monthString: any, year: string) {
+    if (!monthString) return null;
+    return monthString.padStart(2, "0") + "." + year;
+  }
+
+  return {
+    date: parseDate(row["Ngày"]),
+    transaction_code: transactionCode,
+    amount: cleanAmount(row["Số tiền"]), // ✅ Ensure numeric format
+    description: row["Nội dung giao dịch"].trim(),
+    project: row["Công trình"].trim(),
+    construction_unit: row["Quĩ"].trim(),
+    month_sheet: formatMonthSheet(row["Tháng GD"], row["Năm GD"]),
+    allocated_project: await getAllocatedProjectUrl(row["CK được phân bổ vào công trình"], row["Công trình"], transactionCode),
+  };
+}
+
+async function upsertData(rows: any) {
+  if (rows.length === 0) return;
+
+  try {
+    const values = rows.map((_: any, i: any) => `($${i * 8 + 1}, $${i * 8 + 2}, $${i * 8 + 3}, $${i * 8 + 4}, $${i * 8 + 5}, $${i * 8 + 6}, $${i * 8 + 7}, $${i * 8 + 8})`).join(",");
+
+    const query = `
+      INSERT INTO statement (date, transaction_code, amount, description, project, construction_unit, month_sheet, allocated_project)
+      VALUES ${values}
+      ON CONFLICT (transaction_code, date) 
+      DO UPDATE SET 
+        amount = EXCLUDED.amount,
+        description = EXCLUDED.description,
+        project = EXCLUDED.project,
+        construction_unit = EXCLUDED.construction_unit,
+        month_sheet = EXCLUDED.month_sheet,
+        allocated_project = EXCLUDED.allocated_project;
+    `;
+
+    const params = rows.flatMap((row: any) => [row.date, row.transaction_code, row.amount, row.description, row.project, row.construction_unit, row.month_sheet, row.allocated_project]);
+
+    await pool.query(query, params);
+    console.log(`Upserted batch of ${rows.length} records`);
+  } catch (err) {
+    console.error("Error upserting batch:", err);
+  }
+}
+
+async function getAllocatedProjectUrl(allocatedFunds: any, project: any, transactionCode: any) {
+  if (!allocatedFunds.includes("DA")) return "N/A";
+
+  const match = allocatedFunds.match(/(DA\d{4})/);
+  const projectId = match ? match[0].toLowerCase() : null;
+
+  if (!projectId || !/^da\d{4}$/.test(projectId)) {
+    console.log(`--- Incorrect "Mã DA": ${allocatedFunds} - ${project} in transaction ${transactionCode}`);
+    return "N/A";
+  }
+
+  const projectYears = ["du-an-2023", "du-an-2024", "du-an-2025"];
+  for (const projectYear of projectYears) {
+    const querySnapshot = await firestore.collection(projectYear).where("slug", "==", projectId).get();
+    if (!querySnapshot.empty) {
+      return `/${projectYear}/${projectId}`;
+    }
+  }
+  return "N/A";
+}
 
 export default statementRouter;

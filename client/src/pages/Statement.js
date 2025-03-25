@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, TextField, InputAdornment, Typography, Select, MenuItem, FormControl, Button, Link, FormHelperText, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { useMediaQuery, Box, TextField, InputAdornment, Typography, Select, MenuItem, FormControl, Button, Link, FormHelperText, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useConfirm } from "material-ui-confirm";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
@@ -29,6 +30,8 @@ export default function Statement() {
   const [bank, setBank] = useState("");
   const [page, setPage] = useState(1);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isAdmin = new URLSearchParams(window.location.search).get("admin") === "true";
   const confirm = useConfirm();
   const [isFetchingButtonClicked, setIsFetchingButtonClicked] = useState(false);
@@ -40,7 +43,7 @@ export default function Statement() {
 
   // Pagination
   const rowsPerPage = 100;
-  const pageCount = 100; // Math.ceil(data.length / rowsPerPage);
+  const pageCount = 10; // Math.ceil(data.length / rowsPerPage);
 
   // Calculate total amount based on search/filter
   // const totalAmount = data.reduce((total, row) => {
@@ -194,7 +197,7 @@ export default function Statement() {
       )}
 
       {/* Announcement + Report */}
-      <Box display="flex" justifyContent="space-between" width="100%">
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} justifyContent="space-between" width="100%">
         {/* Announcement Section */}
         <Box p={2} border={1} borderColor="#FFF2F0" borderRadius={3} bgcolor="#FFF2F0" sx={{ flex: 3, margin: 1, padding: 2 }}>
           <Typography variant="h6" gutterBottom color="#F5232D" textAlign="center" sx={{ marginBottom: 2, marginTop: 2 }}>
