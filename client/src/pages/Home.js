@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton, Divider } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -14,6 +14,7 @@ import constructionIcon from "../assets/construction.svg";
 import peopleIcon from "../assets/people.svg";
 import { findTitle, standardizeString } from "../helpers";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import Companion from "../components/Companion";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
 
@@ -62,230 +63,92 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
-      {/* News: Tien do du an */}
-      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "24px auto"}>
-        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
-          <Typography variant="h5" fontWeight="bold" color={"red"}>
-            Cập nhật tiến độ dự án
+      {/* gioi thieuthieu du an */}
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"} alignItems="center">
+        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={isMobile ? "100%" : "50%"}>
+          <Typography variant="h6" color={"red"} textAlign={"left"} mt={5} mb={5}>
+            GIỚI THIỆU
           </Typography>
-
-          {isMobile ? (
-            <IconButton
-              sx={{
-                border: "1px solid red",
-                borderRadius: "4px",
-                height: "30px",
-              }}
-              onClick={() => navigate("/thong-bao")}
-            >
-              <ArrowForwardIcon sx={{ color: "red" }} />
-            </IconButton>
-          ) : (
-            <Button
-              variant="outlined"
-              endIcon={<ArrowForwardIcon />}
-              sx={{
-                color: "red",
-                textTransform: "none",
-                borderColor: "red",
-                "&:hover": {
-                  borderColor: "red",
-                },
-              }}
-              onClick={() => navigate("/thong-bao")}
-            >
-              Xem tất cả tin tức
-            </Button>
-          )}
-        </Box>
-
-        <Box>
-          <Grid container spacing={3} sx={{ alignItems: "center" }}>
-            <Grid item xs={12} sm={8}>
-              <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`}>
-                <Card
-                  sx={{
-                    position: "relative",
-                    transition: "transform 0.3s ease-in-out",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                    },
-                  }}
-                >
-                  <img
-                    style={{
-                      width: "100%",
-                      height: "400px",
-                      objectFit: "cover",
-                    }}
-                    alt={news[0].name}
-                    src={news[0].thumbnail}
-                  />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 0,
-                      color: "#fff",
-                      width: "100%",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    }}
-                  >
-                    <CardContent sx={{ "&.MuiCardContent-root:last-child": { p: 2 } }}>
-                      <Typography variant="h6" color="#fff">
-                        {news[0].name}
-                      </Typography>
-                      <Typography variant="body1" color="#fff">
-                        {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
-                      </Typography>
-                    </CardContent>
-                  </Box>
-                </Card>
-              </Link>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
-                {news.map((latestPost, index) => {
-                  if (index === 0) return null;
-                  return (
-                    <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
-                      <Box
-                        display={"flex"}
-                        gap={"8px"}
-                        alignItems={"center"}
-                        minHeight={"100px"}
-                        sx={{
-                          transition: "transform 0.3s ease-in-out",
-                          "&:hover": {
-                            transform: "scale(1.05)",
-                          },
-                        }}
-                      >
-                        <Avatar
-                          variant="rounded"
-                          src={latestPost.thumbnail}
-                          sx={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
-                          <Typography variant="body2" color="#334862">
-                            {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
-                          </Typography>
-
-                          <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.createdAt).toLocaleDateString("vi-VN", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Link>
-                  );
-                })}
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-
-      {/* Projects: Du an thien nguyen */}
-      <Box
-        display={"flex"}
-        flexDirection={"column"}
-        gap={"24px"}
-        m={"40px auto 0px"}
-        sx={{
-          "@media (max-width: 600px)": {
-            m: "16px auto",
-            p: "0 16px",
-          },
-        }}
-      >
-        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
-          <Typography variant="h5" fontWeight="bold" color={"red"}>
-            Dự án thiện nguyện
-          </Typography>
-
-          <Button
-            variant="outlined"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              color: "red",
-              textTransform: "none",
-              borderColor: "red",
-              "&:hover": { borderColor: "red" },
-            }}
-            onClick={() => navigate("/search")}
-          >
-            {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
-          </Button>
-        </Box>
-
-        <Tabs>
-          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap" }}>
-            <TabList>
-              {PROJECT_LIST.children.map(
-                (child, index) =>
-                  !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
-                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
-                      <Typography variant="body1">
-                        {child.title} ({general?.category[child.path.replace("/", "")]})
-                      </Typography>
-                    </Tab>
-                  )
-              )}
-            </TabList>
-          </Box>
-
-          {loading ? (
-            <Box minHeight={"500px"} mt={"200px"}>
-              <LinearProgress />
-            </Box>
-          ) : (
-            <>
-              {PROJECT_LIST.children
-                .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
-                .map((child, index) => (
-                  <TabPanel key={index}>
-                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
-                    <Button
-                      variant="outlined"
-                      endIcon={<ArrowForwardIcon />}
-                      sx={{
-                        marginTop: "16px",
-                        color: "red",
-                        textTransform: "none",
-                        borderColor: "red",
-                        "&:hover": { borderColor: "red", bgcolor: "#ff474c", color: "#fff" },
-                        width: "100%",
-                      }}
-                      onClick={() => navigate(projectTab)}
-                    >
-                      Xem tất cả {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
-                    </Button>
-                  </TabPanel>
-                ))}
-            </>
-          )}
-        </Tabs>
-      </Box>
-
-      {/* Projects Statistics */}
-      <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
-        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={"100%"}>
-          <Typography variant="h3" fontWeight={"bold"} color={"red"} textAlign={"center"}>
+          <Typography variant="h3" fontWeight="bold" color={"black"} textAlign={"left"}>
             Dự Án Sức Mạnh 2000
           </Typography>
-          <Typography variant="h6" textAlign={"center"} p={isMobile ? "8px" : "8px 80px"}>
-            Mục tiêu cùng cộng đồng xóa toàn bộ <strong>Điểm trường</strong> gỗ, tôn tạm bợ trên toàn quốc.
+          <Typography variant="h6" textAlign={"left"} p={isMobile ? "8px 0" : "8px 0"}>
+            Mục tiêu cùng cộng đồng xóa TOÀN BỘ điểm trường gỗ, tôn tạm bợ trên TOÀN QUỐC.
             <br />
-            Xây dựng đủ <strong>Nhà hạnh phúc</strong>, <strong>Cầu đi học</strong>, và <strong>Khu nội trú</strong>.
+            Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
           </Typography>
+          <Box mt={2}>
+            <Companion />
+          </Box>
         </Box>
+        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center">
+          <img 
+            src="#" 
+            alt="Dự án Sức Mạnh 2000" 
+            style={{ 
+              width: "100%", 
+              maxHeight: "400px", 
+              objectFit: "cover", 
+              borderRadius: "8px" 
+            }} 
+          />
+        </Box>
+      </Box>
+
+      {/* Thống kê bên trái */}
+      <Box display="flex" flexDirection="column"  width={isMobile ? "100%" : "40%"} mb={isMobile ? 4 : 5} >
+        <Typography variant="h6" fontWeight="bold" color="black" textAlign="left" mb={1}>
+          Bản đồ các công trình dự án ánh sáng núi rừng - SỨC MẠNH 2000
+        </Typography>
+        <Typography variant="body1" color="gray" textAlign="left" mb={2}>
+          Tính từ 2012 đến tháng 3/2025
+        </Typography>
+      </Box>
+
+      <Box 
+          display="flex" 
+          flexDirection="column" 
+          bgcolor="#FFF1F0" 
+          p={"24px"} 
+          borderRadius={2} 
+          width={isMobile ? "100%" : "30%"} 
+          mb={isMobile ? 3 : 0}
+          boxShadow={1}
+        >
+          <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color="red" textAlign="center" mb={1}>
+            TỔNG <CountUp start={0} end={722} duration={2.5} /> 
+          </Typography>
+          <Typography variant="h6" color="red" textAlign="center" mb={1} mt={2}>
+            CÔNG TRÌNH GIÁO DỤC
+          </Typography>
+          
+          <Divider sx={{ my: 2, borderColor: "rgba(255, 0, 0, 0.83)" }} />
+          
+          <Typography variant="subtitle1" fontWeight="bold" color="black" textAlign="left" mb={2}>
+            Số lượng chi tiết:
+          </Typography>
+          
+          <Box display="flex" flexDirection="column" gap={1.5}>
+            <Box display="flex" alignItems="center" justifyContent="left">              
+              <Typography fontWeight="bold" textAlign="left">424 - TRƯỜNG HỌC</Typography>
+            </Box>
+            
+            <Box display="flex" alignItems="center" justifyContent="left">              
+              <Typography fontWeight="bold" textAlign="left">211 - NHÀ HẠNH PHÚC</Typography>
+            </Box>
+            
+            <Box display="flex" alignItems="center" justifyContent="left">              
+              <Typography fontWeight="bold" textAlign="left">21 - KHU NỘI TRÚ</Typography>
+            </Box>
+            
+            <Box display="flex" alignItems="center" justifyContent="left">              
+              <Typography fontWeight="bold" textAlign="left">66 - CẦU ĐI HỌC</Typography>
+            </Box>
+          </Box>
+        </Box>
+      
+      {/* Projects Statistics */}
+      <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
           <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
             <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
@@ -464,6 +327,218 @@ export default function Home() {
             </Typography>
           </Box>
         </Box>
+      </Box>
+
+      
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} m={isMobile ? "24px 16px" : "24px auto"}>
+        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+          <Typography variant="h5" fontWeight="bold" color={"black"}>
+            Tiến độ dự án
+          </Typography>
+
+          {isMobile ? (
+            <IconButton
+              sx={{
+                border: "1px solid red",
+                borderRadius: "4px",
+                height: "30px",
+              }}
+              onClick={() => navigate("/thong-bao")}
+            >
+              <ArrowForwardIcon sx={{ color: "red" }} />
+            </IconButton>
+          ) : (
+            <Button
+              variant="outlined"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                color: "red",
+                textTransform: "none",
+                borderColor: "red",
+                "&:hover": {
+                  borderColor: "red",
+                },
+              }}
+              onClick={() => navigate("/thong-bao")}
+            >
+              Xem tất cả tin tức
+            </Button>
+          )}
+        </Box>
+
+        <Box>
+          <Grid container spacing={3} sx={{ alignItems: "center" }}>
+            <Grid item xs={12} sm={8}>
+              <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`}>
+                <Card
+                  sx={{
+                    position: "relative",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                >
+                  <img
+                    style={{
+                      width: "100%",
+                      height: "400px",
+                      objectFit: "cover",
+                    }}
+                    alt={news[0].name}
+                    src={news[0].thumbnail}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      color: "#fff",
+                      width: "100%",
+                      backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    }}
+                  >
+                    <CardContent sx={{ "&.MuiCardContent-root:last-child": { p: 2 } }}>
+                      <Typography variant="h6" color="#fff">
+                        {news[0].name}
+                      </Typography>
+                      <Typography variant="body1" color="#fff">
+                        {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                      </Typography>
+                    </CardContent>
+                  </Box>
+                </Card>
+              </Link>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
+                {news.map((latestPost, index) => {
+                  if (index === 0) return null;
+                  return (
+                    <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
+                      <Box
+                        display={"flex"}
+                        gap={"8px"}
+                        alignItems={"center"}
+                        minHeight={"100px"}
+                        sx={{
+                          transition: "transform 0.3s ease-in-out",
+                          "&:hover": {
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                      >
+                        <Avatar
+                          variant="rounded"
+                          src={latestPost.thumbnail}
+                          sx={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
+                          <Typography variant="body2" color="#334862">
+                            {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
+                          </Typography>
+
+                          <Typography variant="body2" color="#334862" fontSize={"12px"}>
+                            {new Date(latestPost.createdAt).toLocaleDateString("vi-VN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Link>
+                  );
+                })}
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+
+      {/* Projects: Du an thien nguyen */}
+      <Box
+        display={"flex"}
+        flexDirection={"column"}
+        gap={"24px"}
+        m={"40px auto 0px"}
+        sx={{
+          "@media (max-width: 600px)": {
+            m: "16px auto",
+            p: "0 16px",
+          },
+        }}
+      >
+        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+          <Typography variant="h5" fontWeight="bold" color={"black"}>
+            Dự án thiện nguyện
+          </Typography>
+
+          <Button
+            variant="outlined"
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              color: "red",
+              textTransform: "none",
+              borderColor: "red",
+              "&:hover": { borderColor: "red" },
+            }}
+            onClick={() => navigate("/search")}
+          >
+            {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
+          </Button>
+        </Box>
+
+        <Tabs>
+          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+            <TabList>
+              {PROJECT_LIST.children.map(
+                (child, index) =>
+                  !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
+                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
+                      <Typography variant="body1">
+                        {child.title} ({general?.category[child.path.replace("/", "")]})
+                      </Typography>
+                    </Tab>
+                  )
+              )}
+            </TabList>
+          </Box>
+
+          {loading ? (
+            <Box minHeight={"500px"} mt={"200px"}>
+              <LinearProgress />
+            </Box>
+          ) : (
+            <>
+              {PROJECT_LIST.children
+                .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
+                .map((child, index) => (
+                  <TabPanel key={index}>
+                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
+                    <Button
+                      variant="outlined"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{
+                        marginTop: "16px",
+                        color: "red",
+                        textTransform: "none",
+                        borderColor: "red",
+                        "&:hover": { borderColor: "red", bgcolor: "#ff474c", color: "#fff" },
+                        width: "100%",
+                      }}
+                      onClick={() => navigate(projectTab)}
+                    >
+                      Xem tất cả {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
+                    </Button>
+                  </TabPanel>
+                ))}
+            </>
+          )}
+        </Tabs>
       </Box>
     </Box>
   );
