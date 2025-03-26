@@ -26,8 +26,26 @@ export const HEADER_DROPDOWN_LIST = [
   },
   {
     path: "/gioi-thieu",
+    name: "gioi-thieu",
     title: "Giới Thiệu",
-    children: [],
+    children: [
+      {
+        path: "#",
+        title: "Sứ mệnh",
+      },
+      {
+        path: "#",
+        title: "Đội ngũ",
+      },
+      {
+        path: "#",
+        title: "Giải thưởng & ấn phẩm",
+      },
+      {
+        path: "#",
+        title: "Yêu cầu hình ảnh",
+      },
+    ],
   },
   {
     path: "#",
@@ -36,7 +54,7 @@ export const HEADER_DROPDOWN_LIST = [
     children: [
       {
         path: "#",
-        title: "Quét QR code MoMo",
+        title: "Quét QR MoMo",
       },
       {
         path: "#",
@@ -44,15 +62,11 @@ export const HEADER_DROPDOWN_LIST = [
       },
       {
         path: "#",
-        title: "Góp 2000 MỖI NGÀY",
+        title: "Góp 2000đ mỗi ngày",
       },
       {
         path: "#",
         title: "Rủ 3 người bạn",
-      },
-      {
-        path: "#",
-        title: "Gây quỹ",
       },
     ],
   },
@@ -94,7 +108,7 @@ export const HEADER_DROPDOWN_LIST = [
   {
     path: "#",
     name: "du-an",
-    title: "Dự án theo năm",
+    title: "Dự án",
     children: [
       {
         path: "/du-an-2025",

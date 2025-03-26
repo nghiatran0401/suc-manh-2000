@@ -63,9 +63,9 @@ export default function Home() {
   if (!(news?.length > 0 && projects?.length > 0 && Object.keys(general)?.length > 0)) return <LoadingScreen />;
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
-      {/* gioi thieuthieu du an */}
+      {/* gioi thieu du an */}
       <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"} alignItems="center">
-        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={isMobile ? "100%" : "50%"}>
+        <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={isMobile ? "100%" : "50%"} >
           <Typography variant="h6" color={"red"} textAlign={"left"} mt={5} mb={5}>
             GIỚI THIỆU
           </Typography>
