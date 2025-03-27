@@ -13,10 +13,10 @@ export const keysMapping = {
   transaction_code: "Mã giao dịch",
   amount: "Số tiền",
   description: "Nội dung giao dịch",
-  project: "Công trình",
-  allocated_project: "Link",
-  construction_unit: "Ngân hàng",
-  month_sheet: "Tháng GD",
+  project_name: "Công trình phân bổ",
+  project_url: "Link web công trình",
+  bank: "Ngân hàng",
+  // month_sheet: "Tháng GD",
 };
 
 const SHEETS_TO_CHECK = ["MB2000. 2025 SK Tổng"]; // "MB2002. 2025 SK Tổng", "VVC. 2025 SK Tổng"
