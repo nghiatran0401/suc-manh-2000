@@ -181,8 +181,8 @@ export default function CarouselMembers() {
         },
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color={"red"}>
-        Đội ngũ vận hành
+      <Typography variant="h5" fontWeight="bold" color={"black"}>
+        Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
 
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
@@ -208,7 +208,7 @@ export default function CarouselMembers() {
                             {item.name}
                           </Typography>
 
-                          <Typography align="center" variant="body2" fontWeight={"bold"}>
+                          <Typography align="center" variant="body2" fontWeight={"bold"} color="red">
                             {item.role}
                           </Typography>
 

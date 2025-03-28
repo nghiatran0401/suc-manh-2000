@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton, Divider } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton, Divider, FormControl, Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
       {/* gioi thieu du an */}
-      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"} alignItems="center">
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "24px 16px" : "40px 0"} alignItems="center">
         <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={isMobile ? "100%" : "50%"} >
           <Typography variant="h6" color={"red"} textAlign={"left"} mt={5} mb={5}>
             GIỚI THIỆU
@@ -464,81 +464,107 @@ export default function Home() {
         display={"flex"}
         flexDirection={"column"}
         gap={"24px"}
-        m={"40px auto 0px"}
         sx={{
+          backgroundColor: "#f5f5f5",
+          width: "100vw",
+          position: "relative",
+          left: "50%",
+          transform: "translateX(-50%)",
+          padding: "50px 0",
+          marginTop: "80px",
+          marginBottom: "80px",
           "@media (max-width: 600px)": {
-            m: "16px auto",
-            p: "0 16px",
+            marginTop: "16px",
+            marginBottom: "16px",
+            padding: "16px 0",
           },
         }}
       >
-        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
-          <Typography variant="h5" fontWeight="bold" color={"black"}>
-            Dự án thiện nguyện
-          </Typography>
+        <Box
+          maxWidth={DESKTOP_WIDTH}
+          width={"100%"}
+          m={"0 auto"}
+          px={"24px"}
+          sx={{
+            "@media (max-width: 600px)": {
+              px: "16px",
+            },
+          }}
+        >
+          <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+            <Typography variant="h5" fontWeight="bold" color={"black"}>
+              Dự án thiện nguyện
+            </Typography>
 
-          <Button
-            variant="outlined"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              color: "red",
-              textTransform: "none",
-              borderColor: "red",
-              "&:hover": { borderColor: "red" },
-            }}
-            onClick={() => navigate("/search")}
-          >
-            {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
-          </Button>
-        </Box>
-
-        <Tabs>
-          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap" }}>
-            <TabList>
-              {PROJECT_LIST.children.map(
-                (child, index) =>
-                  !["/du-an-2014-2015", "/du-an-2012"].includes(child.path) && (
-                    <Tab key={child.path + index} onClick={() => setProjectTab(child.path)}>
-                      <Typography variant="body1">
-                        {child.title} ({general?.category[child.path.replace("/", "")]})
-                      </Typography>
-                    </Tab>
-                  )
-              )}
-            </TabList>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "gray",
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                
+              }}
+              onClick={() => navigate("/search")}
+            >
+              {isMobile ? "Tất cả" : "Xem tất cả"}
+            </Typography>
           </Box>
 
-          {loading ? (
-            <Box minHeight={"500px"} mt={"200px"}>
-              <LinearProgress />
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, mt: 3 }}>
+            <Box sx={{ width: 200 }}>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={projectTab.replace("/", "")}
+                  onChange={(event) => setProjectTab(`/${event.target.value}`)}
+                  displayEmpty
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: "4px",
+                    padding: 0,
+                    margin: 0,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#e0e0e0'
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#bdbdbd'
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#bdbdbd'
+                    }
+                  }}
+                >
+                  <MenuItem disabled value="">
+                    <em>Năm</em>
+                  </MenuItem>
+                  {PROJECT_LIST.children.map((child) => (
+                    <MenuItem key={child.path} value={child.path.replace("/", "")}>
+                      {child.title} {general?.category[child.path.replace("/", "")] && `(${general?.category[child.path.replace("/", "")]})`}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
-          ) : (
-            <>
-              {PROJECT_LIST.children
-                .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
-                .map((child, index) => (
-                  <TabPanel key={index}>
-                    <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
-                    <Button
-                      variant="outlined"
-                      endIcon={<ArrowForwardIcon />}
-                      sx={{
-                        marginTop: "16px",
-                        color: "red",
-                        textTransform: "none",
-                        borderColor: "red",
-                        "&:hover": { borderColor: "red", bgcolor: "#ff474c", color: "#fff" },
-                        width: "100%",
-                      }}
-                      onClick={() => navigate(projectTab)}
-                    >
-                      Xem tất cả {standardizeString(findTitle(HEADER_DROPDOWN_LIST, projectTab))}
-                    </Button>
-                  </TabPanel>
-                ))}
-            </>
-          )}
-        </Tabs>
+          </Box>
+          
+          <Tabs>
+            {loading ? (
+              <Box minHeight={"500px"} mt={"200px"}>
+                <LinearProgress />
+              </Box>
+            ) : (
+              <>
+                {PROJECT_LIST.children
+                  .filter((child) => !["/du-an-2014-2015", "/du-an-2012"].includes(child.path))
+                  .map((child, index) => (
+                    <TabPanel key={index}>
+                      <CarouselListCard posts={projects} category={projectTab.replace("/", "")} />
+                    </TabPanel>
+                  ))}
+              </>
+            )}
+          </Tabs>
+        </Box>
       </Box>
     </Box>
   );
