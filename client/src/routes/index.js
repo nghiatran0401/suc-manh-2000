@@ -5,6 +5,7 @@ import PostList from "../pages/PostList";
 import PostDetails from "../pages/PostDetails";
 import Search from "../pages/Search";
 import ChamPhamTool from "../pages/ChamPhamTool";
+import Donor from "../pages/Donor";
 
 export const routes = [
   {
@@ -30,6 +31,10 @@ export const routes = [
   {
     path: "/search",
     element: <Search />,
+  },
+  {
+    path: "/nha-tai-tro",
+    element: <Donor />,
   },
 ];
 
