@@ -8,6 +8,6 @@ export default function routes(app: Express) {
   app.use("/", homeRouter);
   app.use("/search", searchRouter);
   app.use("/script", scriptRouter);
-  app.use("/:category", postRouter);
   app.use("/api/donors", donorRouters);
+  app.use("/:category", postRouter);
 }
