@@ -1,94 +1,37 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, LinearProgress, Typography, Grid, Pagination, Chip, Button, Paper, Card, CardContent } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Pagination, Chip, Button, Paper, Card, CardContent } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { SERVER_URL, DESKTOP_WIDTH, POSTS_PER_PAGE, classificationMapping, EXCLUDED_FILTER, statusMapping, statusLogoMapping, statusColorMapping, statusColorHoverMapping } from "../constants";
-import CardList from "../components/CardList";
-import { useSearchParams } from "react-router-dom";
-import FilterList from "../components/FilterList";
+// import { useSearchParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import usePostFilter from "../hooks/usePostFilter";
-import SortList from "../components/SortList";
 import usePostSort from "../hooks/usePostSort";
 import SearchBox from "../components/SearchBox";
-import Fuse from "fuse.js";
+import FilterList from "../components/FilterList";
+import SortList from "../components/SortList";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { convertToCleanedName } from "../helpers";
 import Sm2000Logo from "../assets/companions/SM2000.svg";
-import Carousel from "react-material-ui-carousel";
+// import Carousel from "react-material-ui-carousel";
 
 
 export default function Donor() {
-    const donors = [
-        {
-            id: 1,
-            name: "Hatrice Farm",
-            type: "Góp lẻ",
-            intro: "Hỗ trợ cộng đồng",
-            amount: 50000000,
-            logo: Sm2000Logo,
-          },
-          {
-            id: 1,
-            name: "Hatrice Farm",
-            type: "Góp lẻ",
-            intro: "Hỗ trợ cộng đồng",
-            amount: 50000000,
-            logo: Sm2000Logo,
-          },
-          {
-            id: 1,
-            name: "Hatrice Farm",
-            type: "Góp lẻ",
-            intro: "Hỗ trợ cộng đồng",
-            amount: 50000000,
-            logo: Sm2000Logo,
-          },
-          {
-            id: 2,
-            name: "ABC Corp",
-            type: "Cá nhân",
-            intro: "Hỗ trợ giáo dục",
-            amount: 70000000,
-            logo: Sm2000Logo,
-          },
-          {
-            id: 3,
-            name: "XYZ Group",
-            type: "Nhóm",
-            intro: "Hỗ trợ y tế",
-            amount: 90000000,
-            logo: Sm2000Logo,
-          },
-          {
-            id: 4,
-            name: "MNO Ltd",
-            type: "Tổ chức",
-            intro: "Hỗ trợ từ thiện",
-            amount: 120000000,
-            logo: Sm2000Logo,
-          },
-      ];
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+    const [donors, setDonors] = useState([]);
     const [totalDonors, setTotalDonors] = useState(0);
-    const [searchedPosts, setSearchedPosts] = useState([]);
     const [totalPosts, setTotalPosts] = useState(0);
     const [statsData, setStatsData] = useState({});
     const [page, setPage] = useState(1);
     const count = Math.ceil(donors.length / POSTS_PER_PAGE);
     const startIndex = (page - 1) * POSTS_PER_PAGE;
     const endIndex = startIndex + POSTS_PER_PAGE;
-    const [donorsList, setDonorsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const { filters, setFilters } = usePostFilter();
     const { sortField, setSortField } = usePostSort();
   
-    const [provinceCount, setProvinceCount] = useState({});
-    const scrollRef = useRef(null);
-    
+    const [provinceCount, setProvinceCount] = useState({});    
     const itemsPerSlide = 4;
 
     const chunkedDonors = [];
@@ -108,6 +51,16 @@ export default function Donor() {
           .catch((e) => console.error(e));
       }, []);
 
+    useEffect(() => {
+        axios.get(`${SERVER_URL}/nha-tai-tro`)
+          .then(response => {
+            setDonors(response.data.donors);
+            setTotalDonors(response.data.donors.length); 
+          })
+          .catch(error => {
+            console.error("Lỗi khi lấy danh sách nhà tài trợ:", error);
+          });
+      }, []);
 
     return(
         <Box m={isMobile ? "24px 16px" : "24px auto"} display={"flex"} flexDirection={"column"} gap={"40px"} maxWidth={DESKTOP_WIDTH}>
@@ -232,7 +185,32 @@ export default function Donor() {
                 ))}
                 </Grid>
             </Grid>
-
+            
+            {/* Search/Filter/Sort */}
+            <Box display={"flex"} flexWrap={"wrap"} justifyContent={"flex-end"} alignItems={"center"} gap={"16px"}>
+                <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} inputProps={{ width: "100%", height: "50px" }} />
+                <FilterList searchQuery={searchQuery} filters={filters} setFilters={setFilters} provinceCount={provinceCount} />
+                <SortList searchQuery={searchQuery} sortField={sortField} setSortField={setSortField} />
+                <Button
+                variant="outlined"
+                sx={{ textTransform: "none" }}
+                endIcon={<RestartAltIcon />}
+                onClick={() => {
+                    setSearchQuery("");
+                    setFilters({
+                    category: "all",
+                    classification: "all",
+                    totalFund: "all",
+                    status: "all",
+                    province: "all",
+                    constructionUnit: "all",
+                    });
+                    setSortField("createdAt");
+                }}
+                >
+                Reset
+                </Button>
+            </Box>
             {/* donors grid */}
             <Grid container spacing={2} columns={16}>
                 {donors.length === 0 ? (
@@ -245,16 +223,18 @@ export default function Donor() {
                 <Card
                 sx={{
                     maxWidth: 300,
-                    p: 2,
+                    height: 350, 
+                    padding: 2,
                     borderRadius: "12px",
                     boxShadow: 3,
                     position: "relative",
+
                 }}
                 >
                 {/* Logo */}
                 <Box sx={{ display: "flex" }}>
                     <img
-                    src={item.logo}
+                    src={item.logo || Sm2000Logo}
                     alt="Donor Logo"
                     style={{
                     width: "100%",
@@ -266,12 +246,11 @@ export default function Donor() {
 
                 {/* Badge */}
                 <Chip
-                    label={item.type}
+                    label={item.type || "Khác"}
                     sx={{
                     position: "absolute",
                     top: 10,
                     right: 10,
-                    backgroundColor: "#9068F0",
                     color: "black",
                     fontWeight: "bold",
                     }}
@@ -292,11 +271,24 @@ export default function Donor() {
                             borderRadius: "16px",
                             display: "flex",
                             gap: 1,
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            display: "block",
                         }}
                             >
-                        {item.amount.toLocaleString()} VND
+                        {Number(item.totalDonation).toLocaleString()} VNĐ
+        
                     </Typography>
-                    <Typography fontSize={16} fontWeight={700} mt={1} color="#000">
+                    <Typography 
+                    fontSize={16} fontWeight={700} mt={1} color="#000"
+                    sx ={{
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        display: "block",
+                    }}
+                    >
                         {item.name}
                     </Typography>
                 </CardContent>
@@ -326,7 +318,7 @@ export default function Donor() {
         
             
             {/* Featured Sponsors Carousel*/}
-            <Box>
+            {/* <Box>
                 <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ textAlign: "center" }} >
                     Nhà tài trợ <span style={{ color: "#d32f2f", fontWeight: "bold" }}>tiêu biểu</span>
                 </Typography>
@@ -390,7 +382,9 @@ export default function Donor() {
                                 color="error"
                                 sx={{ mt: 1 }}
                                 >
-                                {donor.amount.toLocaleString()} VNĐ
+                                {donors.donation?.amount
+                                ? `${donors.donation.amount.toLocaleString()} VND`
+                                : "Chưa có thông tin"}                                
                                 </Typography>
                                 <Button size="small" sx={{ mt: 1, color: "#d32f2f", fontWeight: "bold" }}>
                                 Xem thêm
@@ -402,7 +396,7 @@ export default function Donor() {
                     </Grid>
                     ))}
                 </Carousel>
-            </Box>
+            </Box> */}
 
         </Box >
 
