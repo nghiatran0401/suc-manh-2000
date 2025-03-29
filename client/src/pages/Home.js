@@ -335,121 +335,112 @@ export default function Home() {
           <Typography variant="h5" fontWeight="bold" color={"black"}>
             Tiến độ dự án
           </Typography>
-
-          {isMobile ? (
-            <IconButton
-              sx={{
-                border: "1px solid red",
-                borderRadius: "4px",
-                height: "30px",
-              }}
-              onClick={() => navigate("/thong-bao")}
+        
+          <Typography
+            variant="body1"
+            sx={{
+              color: "gray",
+              display: "flex",
+              fontWeight: "800",
+              alignItems: "center",
+              cursor: "pointer",
+            }}
+            onClick={() => navigate("/thong-bao")}
             >
-              <ArrowForwardIcon sx={{ color: "red" }} />
-            </IconButton>
-          ) : (
-            <Button
-              variant="outlined"
-              endIcon={<ArrowForwardIcon />}
-              sx={{
-                color: "red",
-                textTransform: "none",
-                borderColor: "red",
-                "&:hover": {
-                  borderColor: "red",
-                },
-              }}
-              onClick={() => navigate("/thong-bao")}
-            >
-              Xem tất cả tin tức
-            </Button>
-          )}
+            Xem tất cả
+          </Typography>
+          
         </Box>
 
         <Box>
           <Grid container spacing={3} sx={{ alignItems: "center" }}>
             <Grid item xs={12} sm={8}>
-              <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`}>
+              <Link component={RouterLink} to={`/thong-bao/${news[0].slug}`} style={{ textDecoration: "none" }}>
                 <Card
                   sx={{
-                    position: "relative",
-                    transition: "transform 0.3s ease-in-out",
+                    borderRadius: 2,
+                    border: "1px solid #f0f0f0",
+                    transition: "transform 0.2s ease-in-out",
                     "&:hover": {
-                      transform: "scale(1.05)",
+                      transform: "scale(1.02)",
                     },
+                    overflow: "hidden",
+                    
                   }}
                 >
-                  <img
-                    style={{
-                      width: "100%",
-                      height: "400px",
-                      objectFit: "cover",
-                    }}
-                    alt={news[0].name}
-                    src={news[0].thumbnail}
-                  />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 0,
-                      color: "#fff",
-                      width: "100%",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    }}
-                  >
-                    <CardContent sx={{ "&.MuiCardContent-root:last-child": { p: 2 } }}>
-                      <Typography variant="h6" color="#fff">
-                        {news[0].name}
-                      </Typography>
-                      <Typography variant="body1" color="#fff">
-                        {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
-                      </Typography>
-                    </CardContent>
+                  <Box p={1}>
+                    <img
+                      style={{
+                        width: "100%",
+                        height: "400px",
+                        objectFit: "cover",
+                        borderRadius: 8,
+                      }}
+                      alt={news[0].name}
+                      src={news[0].thumbnail}
+                    />
                   </Box>
+                  <CardContent sx={{ p: 2 }}>
+                    <Typography variant="h6" color="#334862" fontWeight="900" mb={1}>
+                      {news[0].name}
+                    </Typography>
+                    <Typography variant="body1" color="#334862" sx={{ whiteSpace: "nowrap" }}>
+                      {new Date(news[0].createdAt).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" })}
+                    </Typography>
+                  </CardContent>
                 </Card>
               </Link>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
+              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"} gap={1}>
                 {news.map((latestPost, index) => {
                   if (index === 0) return null;
                   return (
                     <Link key={index} component={RouterLink} to={`/thong-bao/${latestPost.slug}`} style={{ textDecoration: "none", cursor: "pointer" }}>
-                      <Box
-                        display={"flex"}
-                        gap={"8px"}
-                        alignItems={"center"}
-                        minHeight={"100px"}
+                      <Card
                         sx={{
-                          transition: "transform 0.3s ease-in-out",
+                          borderRadius: 2,
+                          p: 0.5,
+                          border: "1px solid #f0f0f0",
+                          transition: "transform 0.2s ease-in-out",
                           "&:hover": {
-                            transform: "scale(1.05)",
+                            transform: "scale(1.02)",
                           },
                         }}
                       >
-                        <Avatar
-                          variant="rounded"
-                          src={latestPost.thumbnail}
-                          sx={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
-                          <Typography variant="body2" color="#334862">
-                            {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
-                          </Typography>
-
-                          <Typography variant="body2" color="#334862" fontSize={"12px"}>
-                            {new Date(latestPost.createdAt).toLocaleDateString("vi-VN", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </Typography>
+                        <Box
+                          display={"flex"}
+                          gap={"12px"}
+                          alignItems={"flex-start"}
+                          minHeight={"100px"}
+                          p={1}
+                        >
+                          <Box display={"flex"} flexDirection={"column"} gap={"4px"}>
+                            <Avatar
+                              variant="rounded"
+                              src={latestPost.thumbnail}
+                              sx={{
+                                width: "80px",
+                                height: "80px",
+                                objectFit: "cover",
+                                borderRadius: 1,
+                              }}
+                            />
+                            <Typography variant="body2" color="#334862" fontSize={"12px"} sx={{ whiteSpace: "nowrap" }}>
+                              {new Date(latestPost.createdAt).toLocaleDateString("vi-VN", {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </Typography>
+                          </Box>
+                          <Box display={"flex"} flexDirection={"column"} gap={"8px"}>
+                            <Typography variant="body2" color="#334862" fontWeight={"900"}>
+                              {latestPost.name.length > 100 ? `${latestPost.name.substring(0, 100)}...` : latestPost.name}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
+                      </Card>
                     </Link>
                   );
                 })}
@@ -501,6 +492,7 @@ export default function Home() {
               sx={{
                 color: "gray",
                 display: "flex",
+                fontWeight: "800",
                 alignItems: "center",
                 cursor: "pointer",
                 
