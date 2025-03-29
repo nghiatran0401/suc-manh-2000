@@ -241,11 +241,12 @@ export default function Search() {
                         avatar={<img src={statusLogoMapping[status]} alt="logo" />}
                         label={statsData[value]?.[status] ?? 0}
                         sx={{
+                          fontSize: isMobile ? "12px" : "13px",
                           backgroundColor: statusColorMapping[status],
-                          height: "24px",
+                          height: isMobile ? "22px" : "24px",
                           "& .MuiChip-avatar": {
-                            width: "16px",
-                            height: "16px",
+                              width: isMobile ? "13px" : "16px",
+                              height: isMobile ? "13px" : "16px",
                           },
                           "&:hover": {
                             backgroundColor: statusColorHoverMapping[status],

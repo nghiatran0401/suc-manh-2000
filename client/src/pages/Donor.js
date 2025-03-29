@@ -34,6 +34,13 @@ export default function Donor() {
     const [provinceCount, setProvinceCount] = useState({});    
     const itemsPerSlide = 4;
 
+    const typeColorMapping = {
+        "Công ty": "#4F46E5", 
+        "Cá nhân": "#983DEB", 
+        "Nhóm từ thiện": "#983DEB", 
+        "Khác": "#3F7D58", 
+      };
+
     const chunkedDonors = [];
     for (let i = 0; i < donors.length; i += itemsPerSlide) {
       chunkedDonors.push(donors.slice(i, i + itemsPerSlide));
@@ -150,11 +157,14 @@ export default function Donor() {
                                     avatar={<img src={statusLogoMapping[status]} alt="logo" />}
                                     label={statsData[value]?.[status] ?? 0}
                                     sx={{
-                                    backgroundColor: statusColorMapping[status],
-                                    height: "24px",
+
+                                        backgroundColor: statusColorMapping[status],
+                                        height: isMobile ? "22px" : "24px",
+                                        fontSize: isMobile ? "12px" : "13px",
+
                                     "& .MuiChip-avatar": {
-                                        width: "16px",
-                                        height: "16px",
+                                        width: isMobile ? "13px" : "16px",
+                                        height: isMobile ? "13px" : "16px",
                                     },
                                     "&:hover": {
                                         backgroundColor: statusColorHoverMapping[status],
@@ -219,84 +229,89 @@ export default function Donor() {
                 </Typography>
                 ) : (
                 donors.slice(startIndex, endIndex).map((item) => (
-                <Grid key={item.id} item xs={12} sm={6} md={4}>
-                <Card
-                sx={{
-                    maxWidth: 300,
-                    height: 350, 
-                    padding: 2,
-                    borderRadius: "12px",
-                    boxShadow: 3,
-                    position: "relative",
-
-                }}
-                >
-                {/* Logo */}
-                <Box sx={{ display: "flex" }}>
-                    <img
-                    src={item.logo || Sm2000Logo}
-                    alt="Donor Logo"
-                    style={{
-                    width: "100%",
-                    height: "auto",
-                    borderRadius: "8px",
-                    }}
-                    />
-                </Box>
-
-                {/* Badge */}
-                <Chip
-                    label={item.type || "Khác"}
+                    <Grid key={item.id} item xs={8} sm={8} md={4}>
+                    <Card
                     sx={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    color: "black",
-                    fontWeight: "bold",
-                    }}
-                />
+                        maxWidth: 300,
+                        height: isMobile ? 300 : 400, 
+                        padding: isMobile ? 0.5 : 2,
+                        borderRadius: "12px",
+                        boxShadow: 3,
+                        position: "relative",
 
-                <CardContent sx={{ textAlign: "start" }}>
-                    <Typography
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="flex-start"
-                        fontWeight={700}
+                    }}
+                    >
+                    {/* Logo */}
+                    <Box sx={{ display: "flex" }}>
+                        <img
+                        src={item.logo || Sm2000Logo}
+                        alt="Donor Logo"
+                        style={{
+                        width: "100%",
+                        height: "auto",
+                        borderRadius: "8px",
+                        }}
+                        />
+                    </Box>
+
+                    {/* Badge */}
+                    <Chip
+                        label={item.type || "Khác"}
                         sx={{
-                            bgcolor: "white",
-                            color: "#002C8C",
-                            p: "4px 8px",
-                            width: "fit-content",
-                            border: "1px solid #91CAFF",
-                            borderRadius: "16px",
-                            display: "flex",
-                            gap: 1,
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                        position: "absolute",
+                        top: 10,
+                        right: 10,
+                        color: "white",
+                        fontWeight: isMobile ? 500 : 600,
+                        backgroundColor: typeColorMapping[item.type] || typeColorMapping["Khác"], 
+                        }}
+                    />
+
+                    <CardContent sx={{ textAlign: "start" }}>
+                        <Typography
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="flex-start"
+                            sx={{
+                                fontWeight: isMobile ? 500 : 650,
+                                fontSize: isMobile ? "13px" : "16px",
+                                bgcolor: "white",
+                                color: "#002C8C",
+                                p: "4px 8px",
+                                width: "fit-content",
+                                border: "1px solid #91CAFF",
+                                borderRadius: "16px",
+                                display: "flex",
+                                gap: 1,
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                display: "block",
+                            }}
+                                >
+                            {Number(item.totalDonation).toLocaleString()} VNĐ
+            
+                        </Typography>
+                        <Typography 
+                        sx ={{
+                            color:"#000",
+                            mt:1,
+                            fontWeight: isMobile? 500: 650,
+                            fontSize: isMobile ? 13 : 16,
+                            // textOverflow: "ellipsis",
+                            // whiteSpace: "nowrap",
                             overflow: "hidden",
                             display: "block",
                         }}
-                            >
-                        {Number(item.totalDonation).toLocaleString()} VNĐ
-        
-                    </Typography>
-                    <Typography 
-                    fontSize={16} fontWeight={700} mt={1} color="#000"
-                    sx ={{
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        display: "block",
-                    }}
-                    >
-                        {item.name}
-                    </Typography>
-                </CardContent>
-                </Card>
-            </Grid>
+                        >
+                            {item.name}
+                        </Typography>
+                    </CardContent>
+                    </Card>
+                    </Grid>
             
-        ))
-         )}
+                ))
+                )}
             </Grid>
 
             {/* Pagination for donors grid */}
