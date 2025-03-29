@@ -392,7 +392,7 @@ export default function Home() {
               </Link>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"} gap={1}>
+              <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"} gap={1.8}>
                 {news.map((latestPost, index) => {
                   if (index === 0) return null;
                   return (
