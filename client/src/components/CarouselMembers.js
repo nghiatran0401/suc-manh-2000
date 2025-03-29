@@ -188,31 +188,32 @@ export default function CarouselMembers() {
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
         <Carousel indicators={false}>
           {chunkedItems.map((chunk, index) => (
-            <Grid container key={index}>
+            <Grid container spacing={0.25} key={index}>
               {chunk.map((item, idx) => (
                 <Grid item xs={12} sm={3} key={idx}>
-                  <Card className="card-container" sx={{ my: "10px" }}>
-                    <CardMedia component="img" alt={item.caption} height="300" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
+                  <Card className="card-container" sx={{ my: "10px", mx: "8px", borderRadius: "8px" }}>
+                    <CardMedia component="img" alt={item.caption} height="250" image={item.image} style={{ objectFit: "fit", objectPosition: "top" }} />
                     <CardContent
                       sx={{
-                        minHeight: "270px",
+                        minHeight: "220px",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         gap: "8px",
+                        padding: "12px",
                       }}
                     >
                       {item.name && item.role && (
                         <>
-                          <Typography align="center" variant="h6" fontWeight={"bold"}>
+                          <Typography align="center" variant="subtitle1" fontWeight={"bold"}>
                             {item.name}
                           </Typography>
 
-                          <Typography align="center" variant="body2" fontWeight={"bold"} color="red">
+                          <Typography align="center" variant="body2" fontWeight={"bold"} color="red" sx={{ fontSize: "0.9rem" }}>
                             {item.role}
                           </Typography>
 
-                          <Typography align="left" variant="body2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                          <Typography align="left" variant="body2" sx={{ fontSize: "0.8rem" }} dangerouslySetInnerHTML={{ __html: item.description }} />
                         </>
                       )}
                     </CardContent>

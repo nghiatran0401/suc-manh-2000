@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
-import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Button, IconButton, Divider, FormControl, Select, MenuItem } from "@mui/material";
+import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Divider, FormControl, Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { Tabs, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
 import constructionIcon from "../assets/construction.svg";
 import peopleIcon from "../assets/people.svg";
-import { findTitle, standardizeString } from "../helpers";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import {} from "../helpers";
+
 import Companion from "../components/Companion";
 
 const PROJECT_LIST = HEADER_DROPDOWN_LIST.find((item) => item.name === "du-an");
