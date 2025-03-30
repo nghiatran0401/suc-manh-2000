@@ -186,7 +186,31 @@ export default function CarouselMembers() {
       </Typography>
 
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
-        <Carousel indicators={false}>
+        <Carousel
+          autoPlay={false}
+          indicatorContainerProps={{
+            style: {
+              margin: '20px'
+            }
+          }}
+          indicatorIconButtonProps={{
+            style: {
+              margin: '0 5px',
+              backgroundColor: '#bdbdbd',
+              borderRadius: '20px',
+              transform: 'none',
+              position: 'relative',
+              padding: 0
+            }
+          }}
+          activeIndicatorIconButtonProps={{
+            style: {
+              backgroundColor: "red",   
+              
+            }
+          }}
+          IndicatorIcon={<div style={{ width: '30px', height: '5px'}}></div>}
+        >
           {chunkedItems.map((chunk, index) => (
             <Grid container spacing={0.25} key={index}>
               {chunk.map((item, idx) => (

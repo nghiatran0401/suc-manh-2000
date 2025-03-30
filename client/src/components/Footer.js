@@ -28,7 +28,7 @@ export default function Footer() {
                 }}
               />
               <Typography variant="body2" color={"#E4E4E4"} sx={{ fontSize: "0.8rem", lineHeight: 1.5}}>
-                Dự án Sức Mạnh 2000 - Dự án gây quỹ của Ánh Sáng Núi Rừng điều hành bởi Hoàng Hoa Trung - Forbes Việt Nam Under 30 đồng hành bởi Trung tâm Tình Nguyện Quốc Gia.
+                Dự án Sức Mạnh 2000 - Dự án gây quỹ của Ánh Sáng Núi Rừng điều hành bởi Hoàng Hoa Trung - Forbes 30 Under 30 đồng hành bởi Trung tâm Tình Nguyện Quốc Gia.
               </Typography>
               <Typography variant="body2" color={"#E4E4E4"} sx={{ fontSize: "0.8rem", lineHeight: 1.5, mt: 1}}>
                 Phát triển bởi đội ngũ điều hành Dự án Nuôi Em, Ánh Sáng Núi Rừng, nhóm Tình nguyện Niềm Tin.
