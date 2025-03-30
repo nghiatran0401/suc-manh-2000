@@ -113,7 +113,6 @@ export default function Home() {
           borderRadius={2} 
           width={isMobile ? "100%" : "30%"} 
           mb={isMobile ? 3 : 0}
-          boxShadow={1}
         >
           <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color="red" textAlign="center" mb={1}>
             TỔNG <CountUp start={0} end={722} duration={2.5} /> 
@@ -149,8 +148,17 @@ export default function Home() {
       
       {/* Projects Statistics */}
       <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
-        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} alignItems={"center"}>
-          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+        <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} gap={"16px"}>
+          {/* Box 1: Tổng dự án đã thực hiện */}
+          <Box 
+            display={"flex"} 
+            flexDirection={"column"} 
+            alignItems={"center"}
+            bgcolor="#FFF1F0"
+            p={4}
+            borderRadius={2}
+            width={isMobile ? "100%" : "50%"}
+          >
             <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
             <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalFinishedProjects} duration={10} />
@@ -160,7 +168,16 @@ export default function Home() {
             </Typography>
           </Box>
 
-          <Box width={isMobile ? "100%" : "50%"} display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+          {/* Box 2: Tổng số học sinh hưởng lợi */}
+          <Box 
+            display={"flex"} 
+            flexDirection={"column"} 
+            alignItems={"center"}
+            bgcolor="#FFF1F0"
+            p={4}
+            borderRadius={2}
+            width={isMobile ? "100%" : "50%"}
+          >
             <img src={peopleIcon} alt="people" style={{ width: "100px", height: "100px" }} />
             <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalBeneficialStudents} duration={10} />
