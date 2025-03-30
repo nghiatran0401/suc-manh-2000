@@ -230,8 +230,10 @@ export default function Search() {
                   <Box
                     style={{
                       display: "flex",
+                      flexWrap: "wrap", // Allow wrapping to new line
                       gap: isMobile ? "2px" : "8px",
-                      justifyContent: "center",
+                      justifyContent: isMobile ? "center" : "center", // Center align
+                      maxWidth: "100%", // Prevent overflow
                     }}
                   >
                     {Object.keys(statusMapping).map((status, idx) => (
@@ -250,14 +252,27 @@ export default function Search() {
                           "&:hover": {
                             backgroundColor: statusColorHoverMapping[status],
                           },
+                          flex: isMobile ? "0 0 calc(50% - 2px)" : "unset", 
+                          textAlign: "center", 
+                          display: "flex",
+                          justifyContent: "center",
                         }}
                         onClick={() => {
                           setSearchQuery("");
-                          setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all", constructionUnit: "all" });
+                          setFilters({
+                            ...filters,
+                            classification: value,
+                            status: status,
+                            totalFund: "all",
+                            province: "all",
+                            constructionUnit: "all",
+                          });
                         }}
                       />
                     ))}
                   </Box>
+
+
 
                   <Box display="flex" justifyContent="center" width="100%" height={"32px"}>
                     <Button

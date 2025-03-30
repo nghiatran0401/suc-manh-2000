@@ -28,8 +28,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "client": "cp .env.local .env && env-cmd -f .env react-scripts start",
-    "deploy:client": "cp .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
+  "client": "copy .env.local .env && env-cmd -f .env react-scripts start",
+  "deploy:client": "copy .env.prod .env && env-cmd -f .env react-scripts build --no-cache && firebase deploy --only hosting:savvy-serenity-424116-g1"
   },
   "eslintConfig": {
     "extends": [
