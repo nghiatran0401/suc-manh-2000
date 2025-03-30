@@ -12,6 +12,8 @@ import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
 import constructionIcon from "../assets/construction.svg";
 import peopleIcon from "../assets/people.svg";
+import childrenImage from "../assets/children.png";
+import mapSectionImage from "../assets/map-section.svg";
 import {} from "../helpers";
 
 import Companion from "../components/Companion";
@@ -81,70 +83,104 @@ export default function Home() {
             <Companion />
           </Box>
         </Box>
-        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center">
+        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center" ml={isMobile ? 0 : 3} mt={isMobile ? 3 : 0}>
           <img 
-            src="#" 
+            src={childrenImage} 
             alt="Dự án Sức Mạnh 2000" 
             style={{ 
               width: "100%", 
-              maxHeight: "400px", 
               objectFit: "cover", 
-              borderRadius: "8px" 
+              marginLeft: "80px"
             }} 
           />
         </Box>
       </Box>
 
-      {/* Thống kê bên trái */}
-      <Box display="flex" flexDirection="column"  width={isMobile ? "100%" : "40%"} mb={isMobile ? 4 : 5} >
-        <Typography variant="h6" fontWeight="bold" color="black" textAlign="left" mb={1}>
-          Bản đồ các công trình dự án ánh sáng núi rừng - SỨC MẠNH 2000
-        </Typography>
-        <Typography variant="body1" color="gray" textAlign="left" mb={2}>
-          Tính từ 2012 đến tháng 3/2025
-        </Typography>
-      </Box>
-
       <Box 
+        display="flex" 
+        flexDirection={isMobile ? "column" : "row"} 
+        gap={3} 
+        mb={5}
+        width="100%"
+      >
+        {/* Thống kê và tiêu đề bên trái*/}
+        <Box 
           display="flex" 
           flexDirection="column" 
-          bgcolor="#FFF1F0" 
-          p={"24px"} 
-          borderRadius={2} 
           width={isMobile ? "100%" : "30%"} 
           mb={isMobile ? 3 : 0}
         >
-          <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color="red" textAlign="center" mb={1}>
-            TỔNG <CountUp start={0} end={722} duration={2.5} /> 
-          </Typography>
-          <Typography variant="h6" color="red" textAlign="center" mb={1} mt={2}>
-            CÔNG TRÌNH GIÁO DỤC
-          </Typography>
+          <Box mb={3}>
+            <Typography variant="h6" fontWeight="bold" color="black" textAlign="left" mb={1}>
+              Bản đồ các công trình dự án ánh sáng núi rừng - SỨC MẠNH 2000
+            </Typography>
+            <Typography variant="body1" color="gray" textAlign="left" mb={2}>
+              Tính từ 2012 đến tháng 3/2025
+            </Typography>
+          </Box>
           
-          <Divider sx={{ my: 2, borderColor: "rgba(255, 0, 0, 0.83)" }} />
-          
-          <Typography variant="subtitle1" fontWeight="bold" color="black" textAlign="left" mb={2}>
-            Số lượng chi tiết:
-          </Typography>
-          
-          <Box display="flex" flexDirection="column" gap={1.5}>
-            <Box display="flex" alignItems="center" justifyContent="left">              
-              <Typography fontWeight="bold" textAlign="left">424 - TRƯỜNG HỌC</Typography>
-            </Box>
+          {/* Box thống kê */}
+          <Box 
+            display="flex"
+            marginTop={5} 
+            flexDirection="column" 
+            bgcolor="#FFF1F0" 
+            p={"24px"} 
+            borderRadius={5} 
+          >
+            <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color="red" textAlign="center" mb={1}>
+              TỔNG <CountUp start={0} end={722} duration={2.5} /> 
+            </Typography>
+            <Typography variant="h6" color="red" textAlign="center" mb={1} mt={2}>
+              CÔNG TRÌNH GIÁO DỤC
+            </Typography>
             
-            <Box display="flex" alignItems="center" justifyContent="left">              
-              <Typography fontWeight="bold" textAlign="left">211 - NHÀ HẠNH PHÚC</Typography>
-            </Box>
+            <Divider sx={{ my: 2, borderColor: "rgba(255, 0, 0, 0.83)" }} />
             
-            <Box display="flex" alignItems="center" justifyContent="left">              
-              <Typography fontWeight="bold" textAlign="left">21 - KHU NỘI TRÚ</Typography>
-            </Box>
+            <Typography variant="subtitle1" fontWeight="bold" color="black" textAlign="left" mb={2}>
+              Số lượng chi tiết:
+            </Typography>
             
-            <Box display="flex" alignItems="center" justifyContent="left">              
-              <Typography fontWeight="bold" textAlign="left">66 - CẦU ĐI HỌC</Typography>
+            <Box display="flex" flexDirection="column" gap={1.5}>
+              <Box display="flex" alignItems="center" justifyContent="left">              
+                <Typography fontWeight="bold" textAlign="left">424 - TRƯỜNG HỌC</Typography>
+              </Box>
+              
+              <Box display="flex" alignItems="center" justifyContent="left">              
+                <Typography fontWeight="bold" textAlign="left">211 - NHÀ HẠNH PHÚC</Typography>
+              </Box>
+              
+              <Box display="flex" alignItems="center" justifyContent="left">              
+                <Typography fontWeight="bold" textAlign="left">21 - KHU NỘI TRÚ</Typography>
+              </Box>
+              
+              <Box display="flex" alignItems="center" justifyContent="left">              
+                <Typography fontWeight="bold" textAlign="left">66 - CẦU ĐI HỌC</Typography>
+              </Box>
             </Box>
           </Box>
         </Box>
+
+        {/* Bản đồ bên phải*/}
+        <Box 
+          width={isMobile ? "100%" : "70%"} 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="flex-start"
+          borderRadius={2}
+        >
+          <img 
+            src={mapSectionImage} 
+            alt="Bản đồ công trình" 
+            style={{ 
+              width: "100%", 
+              marginLeft: "150px",
+              height: "auto",
+              objectFit: "contain"
+            }} 
+          />
+        </Box>
+      </Box>
       
       {/* Projects Statistics */}
       <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
