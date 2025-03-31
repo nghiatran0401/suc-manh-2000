@@ -93,7 +93,7 @@ function App() {
           <Routes>
             <Route
               element={
-                <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                <Authenticated fallback={<CatchAllNavigate to="/login" />} v3LegacyAuthProviderCompatible={true} key="authenticated-route">
                   <ThemedLayoutV2 Header={() => <Header sticky />} Sider={(props) => <ThemedSiderV2 {...props} fixed />} Title={({ collapsed }) => <ThemedTitleV2 collapsed={collapsed} text="Sức Mạnh 2000" />}>
                     <Outlet />
                   </ThemedLayoutV2>
@@ -113,7 +113,7 @@ function App() {
 
             <Route
               element={
-                <Authenticated fallback={<Outlet />}>
+                <Authenticated fallback={<Outlet />} v3LegacyAuthProviderCompatible={true} key="authenticated-route">
                   <NavigateToResource />
                 </Authenticated>
               }

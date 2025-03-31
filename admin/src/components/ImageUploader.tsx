@@ -164,7 +164,7 @@ const uploadFileToFirebaseStorage = ({ file, filePath, handleSnapshot, handleErr
         if (URL) {
           handleUrlResponse?.call(this, {
             url: URL,
-            fileName: fileToUpload.name,
+            fileName: (fileToUpload as File).name,
           });
         }
       });
