@@ -173,8 +173,9 @@ export default function Home() {
             src={mapSectionImage} 
             alt="Bản đồ công trình" 
             style={{ 
-              width: "100%", 
-              marginLeft: "150px",
+              width: "100%",
+              maxWidth: "100%", 
+              marginLeft: isMobile ? "0" : "20px",
               height: "auto",
               objectFit: "contain"
             }} 

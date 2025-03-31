@@ -13,8 +13,8 @@ export default function Footer() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Box bgcolor={"#262626"}>
-      <Box display={"flex"} flexDirection={"column"} gap={"24px"} p={"30px 40px"} ml={"40px"}>
+    <Box bgcolor={"#262626"} width="100%">
+      <Box display={"flex"} flexDirection={"column"} gap={"24px"} p={"30px 40px"} maxWidth={DESKTOP_WIDTH} m={"0 auto"}>
         <Grid container spacing={1} px={isMobile ? 2 : 1}>
           <Grid item xs={12} sm={3}>
             <Box display={"flex"} flexDirection={"column"} gap={"16px"} alignItems={isMobile ? "center" : "flex-start"} mr={5}>
