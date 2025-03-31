@@ -5,10 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import { firestore, firebase } from "../firebase";
 import { fetchProjectRecordsFromCsv } from "../services/csv";
-import { fetchAirProjectRecords, standardizePostTitle } from "../services/airtable";
 import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/google";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
-import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus } from "../utils/index";
+import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus, standardizePostTitle } from "../utils/index";
 
 const scriptRouter = express.Router();
 
@@ -70,7 +69,6 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
   try {
     for (const requestedYear of requestedYears) {
       const { totalCsvDataList }: any = await fetchProjectRecordsFromCsv(requestedYear);
-      // const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
       if (totalCsvDataList.length <= 0) continue;
 
       const collectionName = `du-an-${requestedYear}`;
@@ -79,9 +77,9 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
       for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
         const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData: any) => {
-          if (!airtableData["rawStatus"].match(/^\d+/)) return;
-          const statusNumber = parseInt(airtableData["rawStatus"].match(/^\d+/)[0], 10);
+        const promises = batch.map(async (csvData: any) => {
+          if (!csvData["rawStatus"].match(/^\d+/)) return;
+          const statusNumber = parseInt(csvData["rawStatus"].match(/^\d+/)[0], 10);
           if (statusNumber >= 11 && statusNumber <= 17) {
             orders[0].list[requestedYear].total += 1;
           }
@@ -92,37 +90,37 @@ scriptRouter.post("/createProjectProgressReportZalo", async (req: Request, res: 
             orders[0].list[requestedYear].inProgress += 1;
           }
 
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+          const querySnapshot = await collection.where("projectId", "==", csvData["projectId"]).get();
           if (!querySnapshot.empty) {
             const docData = querySnapshot.docs[0].data();
 
             // 1. Dự án mới khởi công
-            if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
-              if (!orders[1].list[airtableData.classification]) return;
-              orders[1].list[airtableData.classification].push({ name: airtableData.projectInitName });
+            if (docData.status === "can-quyen-gop" && csvData.status === "dang-xay-dung") {
+              if (!orders[1].list[csvData.classification]) return;
+              orders[1].list[csvData.classification].push({ name: csvData.projectInitName });
               return;
             }
 
-            if (airtableData.isInProgress === undefined || airtableData.progressNoteZalo === undefined) return;
+            if (csvData.isInProgress === undefined || csvData.progressNoteZalo === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 0) {
-              if (!orders[2].list[airtableData.classification]) return;
-              orders[2].list[airtableData.classification].push({ name: airtableData.projectInitName, progressNoteZalo: airtableData.progressNoteZalo });
+            if (docData.status === "dang-xay-dung" && csvData.status === "dang-xay-dung" && Number(csvData.isInProgress) === 0) {
+              if (!orders[2].list[csvData.classification]) return;
+              orders[2].list[csvData.classification].push({ name: csvData.projectInitName, progressNoteZalo: csvData.progressNoteZalo });
               return;
             }
 
             // 3. Dự án đang được xây dựng
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 1) {
-              if (!orders[3].list[airtableData.classification]) return;
-              orders[3].list[airtableData.classification].push({ name: airtableData.projectInitName });
+            if (docData.status === "dang-xay-dung" && csvData.status === "dang-xay-dung" && Number(csvData.isInProgress) === 1) {
+              if (!orders[3].list[csvData.classification]) return;
+              orders[3].list[csvData.classification].push({ name: csvData.projectInitName });
               return;
             }
 
             // 4. Dự án đã hoàn thiện
-            if (docData.status === "dang-xay-dung" && airtableData.status === "da-hoan-thanh") {
-              if (!orders[4].list[airtableData.classification]) return;
-              orders[4].list[airtableData.classification].push({ name: airtableData.projectInitName });
+            if (docData.status === "dang-xay-dung" && csvData.status === "da-hoan-thanh") {
+              if (!orders[4].list[csvData.classification]) return;
+              orders[4].list[csvData.classification].push({ name: csvData.projectInitName });
               return;
             }
           }
@@ -222,7 +220,6 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
 
   try {
     for (const requestedYear of requestedYears) {
-      // const { totalAirtableDataList }: any = await fetchAirProjectRecords(requestedYear);
       const { totalCsvDataList }: any = await fetchProjectRecordsFromCsv(requestedYear);
       if (totalCsvDataList.length <= 0) continue;
 
@@ -232,9 +229,9 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
       for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
         const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData: any) => {
-          if (!airtableData["rawStatus"].match(/^\d+/)) return;
-          const statusNumber = parseInt(airtableData["rawStatus"].match(/^\d+/)[0], 10);
+        const promises = batch.map(async (csvData: any) => {
+          if (!csvData["rawStatus"].match(/^\d+/)) return;
+          const statusNumber = parseInt(csvData["rawStatus"].match(/^\d+/)[0], 10);
           if (statusNumber >= 11 && statusNumber <= 17) {
             orders[0].list[requestedYear].total += 1;
           }
@@ -245,8 +242,8 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             orders[0].list[requestedYear].inProgress += 1;
           }
 
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
-          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          const querySnapshot = await collection.where("projectId", "==", csvData["projectId"]).get();
+          const projectProgressObj = await getProjectProgress(extractFolderId(csvData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
           const { thumbnailImage: projectThumbnail } = projectProgressObj;
 
@@ -254,26 +251,26 @@ scriptRouter.post("/createProjectProgressReportWeb", async (req: Request, res: R
             const docData = querySnapshot.docs[0].data();
 
             // 1. Dự án mới khởi công
-            if (docData.status === "can-quyen-gop" && airtableData.status === "dang-xay-dung") {
-              if (!orders[1].list[airtableData.classification]) return;
-              orders[1].list[airtableData.classification].push({ name: airtableData.projectInitName });
+            if (docData.status === "can-quyen-gop" && csvData.status === "dang-xay-dung") {
+              if (!orders[1].list[csvData.classification]) return;
+              orders[1].list[csvData.classification].push({ name: csvData.projectInitName });
               return;
             }
 
-            if (airtableData.isInProgress === undefined || airtableData.progressNoteWeb === undefined) return;
+            if (csvData.isInProgress === undefined || csvData.progressNoteWeb === undefined) return;
 
             // 2. Dự án đã khởi công nhưng chưa có tiến độ
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 0) {
-              if (!orders[2].list[airtableData.classification]) return;
-              orders[2].list[airtableData.classification].push({ name: airtableData.projectInitName, progressNoteWeb: airtableData.progressNoteWeb });
+            if (docData.status === "dang-xay-dung" && csvData.status === "dang-xay-dung" && Number(csvData.isInProgress) === 0) {
+              if (!orders[2].list[csvData.classification]) return;
+              orders[2].list[csvData.classification].push({ name: csvData.projectInitName, progressNoteWeb: csvData.progressNoteWeb });
               return;
             }
 
             // 3. Dự án đang được xây dựng
-            if (docData.status === "dang-xay-dung" && airtableData.status === "dang-xay-dung" && Number(airtableData.isInProgress) === 1) {
-              if (!orders[3].list[airtableData.classification]) return;
-              orders[3].list[airtableData.classification].push({ name: airtableData.projectInitName, projectThumbnail: projectThumbnail });
-              slideshowImages.push({ caption: airtableData.projectInitName, image: projectThumbnail });
+            if (docData.status === "dang-xay-dung" && csvData.status === "dang-xay-dung" && Number(csvData.isInProgress) === 1) {
+              if (!orders[3].list[csvData.classification]) return;
+              orders[3].list[csvData.classification].push({ name: csvData.projectInitName, projectThumbnail: projectThumbnail });
+              slideshowImages.push({ caption: csvData.projectInitName, image: projectThumbnail });
               return;
             }
           }
@@ -425,7 +422,6 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
 
   try {
     for (const requestedYear of requestedYears) {
-      // const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
       const { totalCsvDataList, totalCsvErrors }: any = await fetchProjectRecordsFromCsv(requestedYear);
       if (totalCsvDataList.length <= 0) continue;
 
@@ -455,36 +451,36 @@ scriptRouter.post("/createWebUpdateReport", async (req: Request, res: Response) 
       for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
         const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
-        const promises = batch.map(async (airtableData: any) => {
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+        const promises = batch.map(async (csvData: any) => {
+          const querySnapshot = await collection.where("projectId", "==", csvData["projectId"]).get();
 
-          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          const projectProgressObj = await getProjectProgress(extractFolderId(csvData.progressImagesUrl));
           if (!projectProgressObj) {
-            orders[6].list.push(airtableData.name);
+            orders[6].list.push(csvData.name);
             return;
           }
 
           // DA không có ảnh hiện trạng
           const { progress: projectProgress }: any = projectProgressObj;
           if (!projectProgress.some((p: any) => p.name === "Ảnh hiện trạng" && p.images?.length > 0)) {
-            orders[4].list.push(airtableData.name);
+            orders[4].list.push(csvData.name);
           }
 
           // DA không có phiếu khảo sát
-          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(csvData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
             hoanCanhDescription = "";
-            orders[5].list.push(airtableData.name);
+            orders[5].list.push(csvData.name);
           }
 
           // DA mới
           if (querySnapshot.empty) {
-            orders[1].list.push(airtableData.name);
+            orders[1].list.push(csvData.name);
           } else {
             const docData = querySnapshot.docs[0].data();
             // DA thay đổi trạng thái
-            if (docData.status !== airtableData.status) {
-              const statusUpdate = `${airtableData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(airtableData.status)}`;
+            if (docData.status !== csvData.status) {
+              const statusUpdate = `${csvData.name}: ${vietnameseProjectStatus(docData.status)} -> ${vietnameseProjectStatus(csvData.status)}`;
               orders[2].list.push(statusUpdate);
             }
           }
@@ -532,43 +528,42 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
   try {
     for (const requestedYear of requestedYears) {
-      // const { totalAirtableDataList, totalAirtableErrors }: any = await fetchAirProjectRecords(requestedYear);
       const { totalCsvDataList, totalCsvErrors }: any = await fetchProjectRecordsFromCsv(requestedYear);
       if (totalCsvDataList.length <= 0) continue;
 
       const collectionName = `du-an-${requestedYear}`;
       const collection = firestore.collection(collectionName);
 
-      // 6. Dự án hủy -> xóa trên web
-      const cancelledProjectsPromises = totalCsvErrors["DA hủy"].map(async (p: any) => {
-        if (p["projectId"] !== null) {
-          const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
-          if (!querySnapshot.empty) {
-            const docRef = querySnapshot.docs[0].ref;
-            const docData = querySnapshot.docs[0].data();
+      // Dự án hủy -> xóa trên web
+      // const cancelledProjectsPromises = totalCsvErrors["DA hủy"].map(async (p: any) => {
+      //   if (p["projectId"] !== null) {
+      //     const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
+      //     if (!querySnapshot.empty) {
+      //       const docRef = querySnapshot.docs[0].ref;
+      //       const docData = querySnapshot.docs[0].data();
 
-            return await Promise.all([
-              docRef.delete(),
-              removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
-              updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
-            ]);
-          }
-        }
-      });
-      await Promise.all(cancelledProjectsPromises);
+      //       return await Promise.all([
+      //         docRef.delete(),
+      //         removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
+      //         updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
+      //       ]);
+      //     }
+      //   }
+      // });
+      // await Promise.all(cancelledProjectsPromises);
 
       for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
         const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
 
-        const projectsPromises = batch.map(async (airtableData: any) => {
-          const querySnapshot = await collection.where("projectId", "==", airtableData["projectId"]).get();
+        const projectsPromises = batch.map(async (csvData: any) => {
+          const querySnapshot = await collection.where("projectId", "==", csvData["projectId"]).get();
 
-          const projectProgressObj = await getProjectProgress(extractFolderId(airtableData.progressImagesUrl));
+          const projectProgressObj = await getProjectProgress(extractFolderId(csvData.progressImagesUrl));
           if (projectProgressObj === undefined) return;
 
           const { thumbnailImage: projectThumbnail, progress: airtableProjectProgress }: any = projectProgressObj;
 
-          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(airtableData.progressImagesUrl));
+          let hoanCanhDescription = await getHoanCanhDescription(extractFolderId(csvData.progressImagesUrl));
           if (hoanCanhDescription === undefined) {
             hoanCanhDescription = "";
           }
@@ -579,20 +574,19 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             const postDocRef = firestore.collection(collectionName).doc(newId);
             const newProjectPost: ProjectPost = {
               id: newId,
-              projectId: airtableData.projectId,
-              name: airtableData.name,
+              projectId: csvData.projectId,
+              name: csvData.name,
               author: "Admin",
-              slug: slugify(airtableData.projectId, { lower: true, strict: true }),
-              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              slug: slugify(csvData.projectId, { lower: true, strict: true }),
               thumbnail: projectThumbnail,
               category: collectionName,
-              classification: getProjectClassification(airtableData.classification),
-              status: airtableData.status,
-              totalFund: airtableData.totalFund,
-              location: airtableData.location,
+              classification: getProjectClassification(csvData.classification),
+              status: csvData.status,
+              subStatus: csvData.subStatus,
+              totalFund: csvData.totalFund,
+              location: csvData.location,
               donors: [],
-              metadata: airtableData.metadata,
+              metadata: csvData.metadata,
               progress: airtableProjectProgress,
               content: {
                 tabs: [
@@ -603,19 +597,21 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
                   },
                   {
                     name: "Nhà hảo tâm",
-                    description: airtableData.financialStatementUrl,
+                    description: csvData.financialStatementUrl,
                     slide_show: [],
                   },
                 ],
               },
+              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 
-            console.log("uploading new post", airtableData["projectId"]);
-            return await Promise.all([
-              postDocRef.set(newProjectPost),
-              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
-              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
-            ]);
+            console.log("uploading new post", csvData["projectId"]);
+            // return await Promise.all([
+            //   postDocRef.set(newProjectPost),
+            //   upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+            //   updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
+            // ]);
           }
           // Update dự án hiện tại
           else {
@@ -627,30 +623,31 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
             const updatedProjectPost: ProjectPost = {
               ...(docData as ProjectPost),
-              name: docData.name !== airtableData.name ? airtableData.name : docData.name,
-              totalFund: docData.totalFund !== airtableData.totalFund ? airtableData.totalFund : docData.totalFund,
-              status: docData.status !== airtableData.status ? airtableData.status : docData.status,
-              progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
-              thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
-              contentNew: {
-                tabs: [
-                  {
-                    name: "Hoàn cảnh",
-                    description: hoanCanhDescription,
-                  },
-                  {
-                    name: "Nhà hảo tâm",
-                    description: airtableData.financialStatementUrl,
-                  },
-                ],
-              },
-              location: airtableData.location,
-              donors: airtableData.donors,
-              metadata: airtableData.metadata,
+              // name: docData.name !== csvData.name ? csvData.name : docData.name,
+              // totalFund: docData.totalFund !== csvData.totalFund ? csvData.totalFund : docData.totalFund,
+              status: docData.status !== csvData.status ? csvData.status : docData.status,
+              subStatus: docData.subStatus !== csvData.subStatus ? csvData.subStatus : docData.subStatus,
+              // progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
+              // thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
+              // location: csvData.location,
+              // donors: csvData.donors,
+              // metadata: csvData.metadata,
+              // contentNew: {
+              //   tabs: [
+              //     {
+              //       name: "Hoàn cảnh",
+              //       description: hoanCanhDescription,
+              //     },
+              //     {
+              //       name: "Nhà hảo tâm",
+              //       description: csvData.financialStatementUrl,
+              //     },
+              //   ],
+              // },
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 
-            console.log("updating current post", airtableData["projectId"]);
+            console.log("updating current post", csvData["projectId"]);
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
           }
         });

@@ -34,6 +34,8 @@ const INDEX_SCHEMA = [
   "TAG",
   "status",
   "TAG",
+  "subStatus",
+  "TAG",
   "statusOrder",
   "TAG",
   "totalFund",
@@ -45,38 +47,11 @@ const INDEX_SCHEMA = [
 ];
 const DEFAULT_EXPIRATION = 60 * 60 * 24; // 24 hours
 
-async function createSearchIndex() {
-  try {
-    await redis.call("FT.INFO", INDEX_NAME);
-    return;
-  } catch (error) {
-    await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
-  }
-}
-
-async function removeSearchIndexAndDocuments() {
-  try {
-    let results: any = await redis.call("FT.SEARCH", INDEX_NAME, "*");
-    while (results[0] > 0) {
-      for (let i = 1; i < results.length; i += 2) {
-        const docId = results[i];
-
-        await redis.call("FT.DEL", INDEX_NAME, docId);
-      }
-      results = await redis.call("FT.SEARCH", INDEX_NAME, "*");
-    }
-    await redis.call("FT.DROPINDEX", INDEX_NAME);
-  } catch (error: any) {
-    console.error(`Error deleting index '${INDEX_NAME}':`, error.message);
-  }
-}
-
 async function upsertDocumentToIndex(data: any) {
   const statusOrderMap: Record<string, number> = {
     "can-quyen-gop": 1,
-    "dang-gop-le": 2,
-    "dang-xay-dung": 3,
-    "da-hoan-thanh": 4,
+    "dang-xay-dung": 2,
+    "da-hoan-thanh": 3,
   };
 
   try {
@@ -105,6 +80,8 @@ async function upsertDocumentToIndex(data: any) {
       data.classification,
       "status",
       data.status,
+      "subStatus",
+      data.subStatus,
       "statusOrder",
       statusOrderMap[data.status] || 0,
       "totalFund",
@@ -147,7 +124,11 @@ async function redisSearchByName(q: any, filters: any, sortField?: any) {
       query += ` @classification:{${escapeSpecialCharacters(filters.classification)}}`;
     }
     if (filters.status && filters.status !== "all") {
-      query += ` @status:{${escapeSpecialCharacters(filters.status)}}`;
+      if (filters.status === "dang-gop-le") {
+        query += ` @subStatus:{${escapeSpecialCharacters("dang-gop-le")}}`;
+      } else {
+        query += ` @status:{${escapeSpecialCharacters(filters.status)}}`;
+      }
     }
     if (filters.totalFund && filters.totalFund !== "all") {
       switch (filters.totalFund) {
@@ -301,11 +282,10 @@ async function delValueInRedis(key: string) {
 
 const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string, sortField?: string | undefined) => {
   const categoryPostKeys = await redis.keys(categoryPostsKeyPattern);
-
   const pipeline = redis.pipeline();
   categoryPostKeys.forEach((key) => pipeline.hgetall(key));
-  const results: any = await pipeline.exec();
 
+  const results: any = await pipeline.exec();
   const posts = results.map(([err, postData]: [any, any]) => {
     if (err) {
       console.error(`Error fetching data for key: ${err}`);
@@ -318,28 +298,27 @@ const getRedisDataWithKeyPattern = async (categoryPostsKeyPattern: string, sortF
 };
 
 const getStatsData = (posts: any) => {
-  const STATUSES = ["can-quyen-gop", "dang-gop-le", "dang-xay-dung", "da-hoan-thanh"];
+  const STATUSES = ["can-quyen-gop", "dang-xay-dung", "da-hoan-thanh"];
+  const SUB_STATUSES = ["dang-gop-le"];
   const statsData: any = {};
+
   for (const post of posts) {
-    if (statsData[post.classification]) {
-      statsData[post.classification].count += 1;
-      statsData[post.classification][post.status] += 1;
-      if (["dang-xay-dung", "da-hoan-thanh"].includes(post.status)) {
-        statsData[post.classification]["totalFund"] += Number(post.totalFund);
-      }
-    } else {
+    if (!statsData[post.classification]) {
       statsData[post.classification] = {
-        count: 1,
+        count: 0,
         [STATUSES[0]]: 0,
         [STATUSES[1]]: 0,
         [STATUSES[2]]: 0,
-        [STATUSES[3]]: 0,
+        [SUB_STATUSES[0]]: 0,
         totalFund: 0,
       };
-      statsData[post.classification][post.status] += 1;
-      if (["dang-xay-dung", "da-hoan-thanh"].includes(post.status)) {
-        statsData[post.classification]["totalFund"] += Number(post.totalFund);
-      }
+    }
+
+    statsData[post.classification].count += 1;
+    statsData[post.classification][post.status] += 1;
+    statsData[post.classification][post.subStatus] += 1;
+    if ([STATUSES[1], STATUSES[2]].includes(post.status)) {
+      statsData[post.classification]["totalFund"] += Number(post.totalFund);
     }
   }
   return statsData;
@@ -383,6 +362,11 @@ const applyFilters = (values: any, filters: any) => {
             return true;
         }
       }
+      // just a trick, not good for scaling
+      if (key === "status" && filters[key] === "dang-gop-le") {
+        const subStatus = "subStatus".split(".").reduce((acc: any, part: any) => acc && acc[part], item);
+        return subStatus === filterValue;
+      }
 
       const itemValue = getNestedValue(item, key);
       return itemValue === filterValue;
@@ -399,9 +383,8 @@ const applySorting = (data: any[], sortField?: string | undefined): any[] => {
     } else if (sortField === "status") {
       const orderMap: Record<string, number> = {
         "can-quyen-gop": 1,
-        "dang-gop-le": 2,
-        "dang-xay-dung": 3,
-        "da-hoan-thanh": 4,
+        "dang-xay-dung": 2,
+        "da-hoan-thanh": 3,
       };
       return (orderMap[a.status] || 0) - (orderMap[b.status] || 0);
     } else if (sortField === "random") {
@@ -416,8 +399,6 @@ export {
   INDEX_NAME,
   INDEX_SCHEMA,
   redisSearchByName,
-  createSearchIndex,
-  removeSearchIndexAndDocuments,
   upsertDocumentToIndex,
   removeDocumentFromIndex,
   getValueInRedis,

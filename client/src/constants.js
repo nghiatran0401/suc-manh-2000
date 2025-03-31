@@ -1,22 +1,15 @@
-import logoDonate from "./assets/donate.png";
-import logoWorking from "./assets/working.png";
-import logoFinish from "./assets/finish.png";
-import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import WcOutlinedIcon from "@mui/icons-material/WcOutlined";
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import ConstructionOutlinedIcon from "@mui/icons-material/ConstructionOutlined";
-import Brightness7OutlinedIcon from "@mui/icons-material/Brightness7Outlined";
-import LoopOutlinedIcon from "@mui/icons-material/LoopOutlined";
-import BeenhereOutlinedIcon from "@mui/icons-material/BeenhereOutlined";
-import BedroomChildOutlinedIcon from "@mui/icons-material/BedroomChildOutlined";
-import KitchenOutlinedIcon from "@mui/icons-material/KitchenOutlined";
+import donate from "./assets/donate.png";
+import working from "./assets/working.png";
+import finish from "./assets/finish.png";
+import { PeopleOutline, HomeOutlined, WcOutlined, AccountBalanceOutlined, ConstructionOutlined, Brightness7Outlined, LoopOutlined, BeenhereOutlined, BedroomChildOutlined, KitchenOutlined } from "@mui/icons-material";
 
 export const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 export const POSTS_PER_PAGE = 96;
 
 export const DESKTOP_WIDTH = "1100px";
+
+export const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac", "gieng-nuoc"];
 
 export const HEADER_DROPDOWN_LIST = [
   {
@@ -139,14 +132,9 @@ export const HEADER_DROPDOWN_LIST = [
     ],
   },
   {
-    path: "#",
-    title: "Phòng Tin Học Cho Em",
-    children: [
-      // {
-      //   path: "/phong-tin-hoc-2023",
-      //   title: "Phòng tin học 2023",
-      // },
-    ],
+    path: "/tra-cuu-sao-ke",
+    title: "Tra cứu sao kê",
+    children: [],
   },
 ];
 
@@ -191,72 +179,66 @@ export const totalFundMapping = {
 };
 
 export const statusMapping = {
-  "da-hoan-thanh": "Đã hoàn thành",
-  "dang-gop-le": "Đang góp lẻ",
-  "dang-xay-dung": "Đang xây dựng",
-  "can-quyen-gop": "Cần quyên góp",
-};
-
-export const statusColorMapping = {
-  "can-quyen-gop": "#F5222D",
-  "dang-gop-le": "#4d9aed",
-  "dang-xay-dung": "#FAAD14",
-  "da-hoan-thanh": "#58C27D",
-};
-
-export const statusColorHoverMapping = {
-  "can-quyen-gop": "rgba(245, 34, 45, 0.8)",
-  "dang-gop-le": "rgba(77, 154, 237, 0.8)",
-  "dang-xay-dung": "rgba(250, 173, 20, 0.8)",
-  "da-hoan-thanh": "rgba(88, 194, 125, 0.8)",
-};
-
-export const statusLogoMapping = {
-  "can-quyen-gop": logoDonate,
-  "dang-gop-le": logoDonate,
-  "dang-xay-dung": logoWorking,
-  "da-hoan-thanh": logoFinish,
+  "can-quyen-gop": { name: "Cần quyên góp", bgColor: "#F5222D", bgColorHover: "rgba(245, 34, 45, 0.9)", logo: donate },
+  "dang-xay-dung": { name: "Đang xây dựng", bgColor: "#FAAD14", bgColorHover: "rgba(250, 173, 20, 0.9)", logo: working },
+  "da-hoan-thanh": { name: "Đã hoàn thành", bgColor: "#58C27D", bgColorHover: "rgba(88, 194, 125, 0.9)", logo: finish },
+  "dang-gop-le": { name: "Đang góp lẻ", bgColor: "#4d9aed", bgColorHover: "rgba(77, 154, 237, 0.9)", logo: donate },
 };
 
 export const metadataMapping = {
-  stage: "Cấp",
-  constructionItems: "Công trình",
-  progress: "Tiến độ",
-  type: "Hạng mục",
-  totalStudents: "Số học sinh huởng lợi",
-  totalClassrooms: "Số phòng học",
-  totalPublicAffairsRooms: "Số phòng công vụ",
-  totalToilets: "Số WC",
-  totalRooms: "Số phòng ở",
-  totalKitchens: "Số bếp",
-  // start_date: "Ngày khởi công",
-  // end_date: "Ngày hoàn thành",
-};
-
-export const metadataLogoMapping = {
-  stage: <Brightness7OutlinedIcon />,
-  constructionItems: <ConstructionOutlinedIcon />,
-  progress: <LoopOutlinedIcon />,
-  type: <BeenhereOutlinedIcon />,
-  totalStudents: <PeopleOutlineIcon />,
-  totalClassrooms: <HomeOutlinedIcon />,
-  totalPublicAffairsRooms: <AccountBalanceOutlinedIcon />,
-  totalToilets: <WcOutlinedIcon />,
-  totalRooms: <BedroomChildOutlinedIcon />,
-  totalKitchens: <KitchenOutlinedIcon />,
-  // start_date: <CalendarMonthOutlinedIcon />,
-  // end_date: <CalendarMonthOutlinedIcon />,
+  stage: {
+    name: "Cấp",
+    logo: <Brightness7Outlined />,
+  },
+  constructionItems: {
+    name: "Công trình",
+    logo: <ConstructionOutlined />,
+  },
+  progress: {
+    name: "Tiến độ",
+    logo: <LoopOutlined />,
+  },
+  type: {
+    name: "Hạng mục",
+    logo: <BeenhereOutlined />,
+  },
+  totalStudents: {
+    name: "Số học sinh huởng lợi",
+    logo: <PeopleOutline />,
+  },
+  totalClassrooms: {
+    name: "Số phòng học",
+    logo: <HomeOutlined />,
+  },
+  totalPublicAffairsRooms: {
+    name: "Số phòng công vụ",
+    logo: <AccountBalanceOutlined />,
+  },
+  totalToilets: {
+    name: "Số WC",
+    logo: <WcOutlined />,
+  },
+  totalRooms: {
+    name: "Số phòng ở",
+    logo: <BedroomChildOutlined />,
+  },
+  totalKitchens: {
+    name: "Số bếp",
+    logo: <KitchenOutlined />,
+  },
+  // start_date: {
+  //   name: "Ngày khởi công",
+  //   logo: <CalendarMonthOutlined />,
+  // },
+  // end_date: {
+  //   name: "Ngày hoàn thành",
+  //   logo: <CalendarMonthOutlined />,
+  // },
 };
 
 export const constructionUnitMapping = {
   "NE - PGD": "Phòng giáo dục",
   "NE - DTN": "Đoàn thanh niên",
   "NE - QBTTE": "Quỹ bảo trợ trẻ em",
-  VVC: "Trung tâm tình nguyên quốc gia",
+  VVC: "TT tình nguyên quốc gia",
 };
-
-export const publicLogoUrl = "https://web.sucmanh2000.com/static/media/logo-header.98d4636d9bfeb88f95d4.png";
-
-export const COMMON_SEO_DESCRIPTION = "Sức mạnh 2000 – Tiền lẻ mỗi ngày Triệu người chung tay Xây nghìn trường mới";
-
-export const EXCLUDED_FILTER = ["phong-tin-hoc", "wc", "loai-khac", "gieng-nuoc"];

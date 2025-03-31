@@ -5,19 +5,7 @@ import { standardizeString } from "../helpers";
 import CarouselSlide from "../components/CarouselSlide";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import {
-  DESKTOP_WIDTH,
-  HEADER_DROPDOWN_LIST,
-  categoryMapping,
-  classificationMapping,
-  constructionUnitMapping,
-  iconMapping,
-  metadataLogoMapping,
-  metadataMapping,
-  statusColorHoverMapping,
-  statusLogoMapping,
-  statusMapping,
-} from "../constants";
+import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, categoryMapping, classificationMapping, constructionUnitMapping, metadataMapping, statusMapping } from "../constants";
 import { useTheme } from "@mui/material/styles";
 import CarouselListCard from "./CarouselListCard";
 import axios from "axios";
@@ -25,7 +13,6 @@ import { SERVER_URL } from "../constants";
 import LoadingScreen from "./LoadingScreen";
 import SM2000 from "../assets/companions/SM2000.svg";
 import WalletOutlinedIcon from "@mui/icons-material/WalletOutlined";
-import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import CardDonor from "./CardDonor";
 
@@ -160,38 +147,29 @@ export default function CardDetails(props) {
               {classificationMapping[post.classification]}
             </Typography>
           )}
-          {post.status !== undefined && (
+          {post.status && (
             <Box
               display="flex"
               alignItems="center"
               sx={{
-                bgcolor:
-                  post.status === "can-quyen-gop"
-                    ? "rgba(255, 102, 102, 1)"
-                    : post.status === "dang-xay-dung"
-                    ? "rgba(255, 252, 150, 1)"
-                    : post.status === "dang-gop-le"
-                    ? "rgba(77, 154, 237, 0.8)"
-                    : "rgba(210, 238, 130, 1)",
+                bgcolor: statusMapping[post.status].bgColorHover,
                 p: "6px",
                 borderRadius: "8px",
                 width: "fit-content",
               }}
             >
-              {statusLogoMapping[post.status] && (
-                <img
-                  src={statusLogoMapping[post.status]}
-                  alt={post.status}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    marginRight: "8px",
-                    borderRadius: "50%",
-                  }}
-                />
-              )}
+              <img
+                src={statusMapping[post.status].logo}
+                alt={post.status}
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  marginRight: "8px",
+                  borderRadius: "50%",
+                }}
+              />
               <Typography variant="body2" fontWeight={600}>
-                {statusMapping[post.status]}
+                {statusMapping[post.status].name}
               </Typography>
             </Box>
           )}
@@ -240,7 +218,7 @@ export default function CardDetails(props) {
                 borderRadius: "8px",
               }}
             >
-              {constructionUnitMapping[post.metadata?.constructionUnit]}
+              {constructionUnitMapping[post.metadata?.constructionUnit] ?? post.metadata?.constructionUnit}
             </Typography>
           )}
         </Box>
@@ -466,9 +444,9 @@ export default function CardDetails(props) {
                             }}
                           >
                             <Box display={"flex"} alignItems={"center"}>
-                              {metadataLogoMapping[key] ?? <PeopleOutlineIcon />}
+                              {metadataMapping[key].logo}
                               <Typography variant="body2" ml={"4px"} fontWeight={400}>
-                                {metadataMapping[key]}
+                                {metadataMapping[key].name}
                               </Typography>
                             </Box>
                             <Typography variant="body2" fontWeight={"bold"} textAlign={"right"}>
@@ -493,7 +471,7 @@ export default function CardDetails(props) {
                         Số tiền
                       </Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight={"bold"} textAlign={"right"} color={statusColorHoverMapping[post.status]}>
+                    <Typography variant="body2" fontWeight={"bold"} textAlign={"right"} color={statusMapping[post.status].bgColorHover}>
                       {post.totalFund > 0 ? " " + Number(post.totalFund).toLocaleString() + " VNĐ" : "Đang xử lý"}
                     </Typography>
                   </Box>

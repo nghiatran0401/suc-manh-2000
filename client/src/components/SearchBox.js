@@ -11,8 +11,8 @@ const SearchBox = (props) => {
       sx={{
         display: "flex",
         alignItems: "center",
-        width: inputProps.width ?? "100%",
-        height: inputProps.height ?? "40px",
+        width: "100%",
+        height: "40px",
       }}
       onSubmit={(e) => e.preventDefault()}
     >

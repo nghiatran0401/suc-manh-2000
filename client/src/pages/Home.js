@@ -219,7 +219,7 @@ export default function Home() {
               borderColor: "red",
               "&:hover": { borderColor: "red" },
             }}
-            onClick={() => navigate("/search")}
+            onClick={() => navigate("/tim-kiem")}
           >
             {isMobile ? "Tất cả" : "Xem tất cả Dự án"}
           </Button>

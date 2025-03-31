@@ -17,7 +17,7 @@ export const routes = [
     element: <GioiThieu />,
   },
   {
-    path: "/statement",
+    path: "/tra-cuu-sao-ke",
     element: <Statement />,
   },
   {
@@ -33,7 +33,7 @@ export const routes = [
     element: <PostDetails />,
   },
   {
-    path: "/search",
+    path: "/tim-kiem",
     element: <Search />,
   },
 ];

@@ -54,8 +54,6 @@ function vietnameseProjectStatus(status: string) {
   switch (status) {
     case "can-quyen-gop":
       return "Cần quyên góp";
-    case "dang-gop-le":
-      return "Đang góp lẻ";
     case "dang-xay-dung":
       return "Đang xây dựng";
     case "da-hoan-thanh":
@@ -214,4 +212,17 @@ function removeVietnameseAccents(str: string) {
   return str?.replace(/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/g, (matched: any) => map[matched]);
 }
 
-export { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus, convertToCleanedName };
+function standardizePostTitle(str: string) {
+  return str
+    .split(" ")
+    .map((word, index, arr) => {
+      if (word.includes("DA")) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ")
+    .replace(/,/g, " -");
+}
+
+export { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus, convertToCleanedName, standardizePostTitle };

@@ -7,8 +7,8 @@ import statementRouter from "./statement";
 
 export default function routes(app: Express) {
   app.use("/", homeRouter);
-  app.use("/search", searchRouter);
-  app.use("/statement", statementRouter);
+  app.use("/tim-kiem", searchRouter);
+  app.use("/tra-cuu-sao-ke", statementRouter);
   app.use("/script", scriptRouter);
   app.use("/:category", postRouter);
 }

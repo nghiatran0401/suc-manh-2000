@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Pagination, Chip, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { SERVER_URL, DESKTOP_WIDTH, POSTS_PER_PAGE, classificationMapping, EXCLUDED_FILTER, statusMapping, statusLogoMapping, statusColorMapping, statusColorHoverMapping } from "../constants";
+import { SERVER_URL, DESKTOP_WIDTH, POSTS_PER_PAGE, classificationMapping, EXCLUDED_FILTER, statusMapping } from "../constants";
 import CardList from "../components/CardList";
 import { useSearchParams } from "react-router-dom";
 import FilterList from "../components/FilterList";
@@ -41,7 +41,7 @@ export default function Search() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(SERVER_URL + "/search", { params: { filters, sortField } })
+      .get(SERVER_URL + "/tim-kiem", { params: { filters, sortField } })
       .then((postsResponse) => {
         setTotalPosts(postsResponse.data.totalPosts);
         setStatsData(postsResponse.data.stats);
@@ -102,7 +102,7 @@ export default function Search() {
 
     setLoading(true);
     axios
-      .get(SERVER_URL + "/search", { params: { filters, sortField } })
+      .get(SERVER_URL + "/tim-kiem", { params: { filters, sortField } })
       .then((postsResponse) => {
         // onSearch
         if (searchQuery !== "") {
@@ -230,6 +230,8 @@ export default function Search() {
                   <Box
                     style={{
                       display: "flex",
+                      flexWrap: "wrap",
+                      maxWidth: "100%",
                       gap: isMobile ? "2px" : "8px",
                       justifyContent: "center",
                     }}
@@ -238,18 +240,22 @@ export default function Search() {
                       <Chip
                         key={idx}
                         variant="outline"
-                        avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                        avatar={<img src={statusMapping[status].logo} alt="logo" />}
                         label={statsData[value]?.[status] ?? 0}
                         sx={{
-                          backgroundColor: statusColorMapping[status],
+                          backgroundColor: statusMapping[status].bgColor,
                           height: "24px",
                           "& .MuiChip-avatar": {
                             width: "16px",
                             height: "16px",
                           },
                           "&:hover": {
-                            backgroundColor: statusColorHoverMapping[status],
+                            backgroundColor: statusMapping[status].bgColorHover,
                           },
+                          flex: isMobile ? "0 0 calc(50% - 2px)" : "unset",
+                          textAlign: "center",
+                          display: "flex",
+                          justifyContent: "center",
                         }}
                         onClick={() => {
                           setSearchQuery("");

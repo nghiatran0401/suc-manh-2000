@@ -54,7 +54,7 @@ export default function Statement() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(SERVER_URL + "/statement", {
+        const response = await axios.get(SERVER_URL + "/tra-cuu-sao-ke", {
           params: {
             search: search,
             month: month,
@@ -107,7 +107,7 @@ export default function Statement() {
 
     if (confirmed) {
       setIsFetchingButtonClicked(true);
-      const response = await axios.post(SERVER_URL + "/statement/fetchTransactionDataFromGsheet", { selectedOptions, fromDate, toDate });
+      const response = await axios.post(SERVER_URL + "/tra-cuu-sao-ke/fetchTransactionDataFromGsheet", { selectedOptions, fromDate, toDate });
       setLogs(response.data.logs);
       setIsFetchingButtonClicked(false);
     }

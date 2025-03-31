@@ -4,12 +4,9 @@ import { styled } from "@mui/system";
 import { Link, useParams } from "react-router-dom";
 import charityMoneyIcon from "../assets/charity-money.png";
 import { standardizeString } from "../helpers";
-import logoFinish from "../assets/finish.png";
-import logoDonate from "../assets/donate.png";
-import logoWorking from "../assets/working.png";
 import SM2000 from "../assets/companions/SM2000.svg";
 import { provincesAndCitiesObj } from "../vietnam-provinces";
-import { constructionUnitMapping } from "../constants";
+import { constructionUnitMapping, statusMapping, classificationMapping } from "../constants";
 
 const Card = styled(MuiCard)({
   minHeight: "300px",
@@ -41,13 +38,7 @@ export default function CardList(props) {
                   top: 0,
                   right: 0,
                   color: "white",
-                  backgroundColor: ["can-quyen-gop", "canquyengop"].includes(post.status)
-                    ? "rgba(255, 76, 48, 1)"
-                    : ["dang-xay-dung", "dangxaydung"].includes(post.status)
-                    ? "rgba(255, 252, 0, 1)"
-                    : ["dang-gop-le", "danggople"].includes(post.status)
-                    ? "rgba(77, 154, 237, 0.8)"
-                    : "rgba(210, 238, 130, 1)",
+                  backgroundColor: statusMapping[post.status].bgColorHover,
                   padding: "5px",
                   display: "flex",
                   alignItems: "center",
@@ -55,15 +46,31 @@ export default function CardList(props) {
                   borderRadius: "10px",
                 }}
               >
-                {["can-quyen-gop", "canquyengop"].includes(post.status) && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {["dang-xay-dung", "dangxaydung"].includes(post.status) && <img src={logoWorking} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {["dang-gop-le", "danggople"].includes(post.status) && <img src={logoDonate} alt="logo" style={{ width: "15px", height: "15px" }} />}
-                {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && <img src={logoFinish} alt="logo" style={{ width: "15px", height: "15px" }} />}
+                <img src={statusMapping[post.status].logo} alt="logo" style={{ width: "15px", height: "15px" }} />
                 <Typography color={"black"} variant="body2" fontWeight={"bold"}>
-                  {["can-quyen-gop", "canquyengop"].includes(post.status) && "Cần quyên góp"}
-                  {["dang-xay-dung", "dangxaydung"].includes(post.status) && "Đang xây dựng"}
-                  {["dang-gop-le", "danggople"].includes(post.status) && "Đang góp lẻ"}
-                  {["da-hoan-thanh", "dahoanthanh"].includes(post.status) && "Đã hoàn thành"}
+                  {statusMapping[post.status].name}
+                </Typography>
+              </div>
+            )}
+            {post.subStatus && post.status !== "da-hoan-thanh" && (
+              <div
+                style={{
+                  margin: "5px",
+                  position: "absolute",
+                  top: 40,
+                  right: 0,
+                  color: "white",
+                  backgroundColor: statusMapping[post.subStatus].bgColorHover,
+                  padding: "5px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  borderRadius: "10px",
+                }}
+              >
+                <img src={statusMapping[post.subStatus].logo} alt="logo" style={{ width: "15px", height: "15px" }} />
+                <Typography color={"black"} variant="body2" fontWeight={"bold"}>
+                  {statusMapping[post.subStatus].name}
                 </Typography>
               </div>
             )}
@@ -85,14 +92,7 @@ export default function CardList(props) {
             <Box display="flex" flexWrap="wrap" gap={"8px"}>
               {post.classification && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(41, 182, 246, 0.2)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {["truong-hoc"].includes(post.classification) && "Trường học"}
-                  {["nha-hanh-phuc"].includes(post.classification) && "Nhà hạnh phúc"}
-                  {["khu-noi-tru"].includes(post.classification) && "Khu nội trú"}
-                  {["cau-hanh-phuc"].includes(post.classification) && "Cầu đi học"}
-                  {["phong-tin-hoc"].includes(post.classification) && "Phòng tin học"}
-                  {["wc"].includes(post.classification) && "WC"}
-                  {["gieng-nuoc"].includes(post.classification) && "Giếng nước"}
-                  {["loai-khac"].includes(post.classification) && "Loại khác"}
+                  {classificationMapping[post.classification]}
                 </Typography>
               )}
               {post.province && (
@@ -105,9 +105,9 @@ export default function CardList(props) {
                   {constructionUnitMapping[post.constructionUnit]}
                 </Typography>
               )}
-              {post.category && window.location.href.includes("/search") && (
+              {post.category && window.location.href.includes("/tim-kiem") && (
                 <Typography variant="body2" sx={{ bgcolor: "rgb(255, 204, 255, 1)", p: "6px", width: "fit-content", borderRadius: "8px" }}>
-                  {post.category.replace(/(du-an-|phong-tin-hoc-)/, "")}
+                  {post.category.replace(/(du-an-)/, "")}
                 </Typography>
               )}
             </Box>

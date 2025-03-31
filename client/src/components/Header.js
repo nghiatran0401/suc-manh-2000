@@ -50,7 +50,7 @@ export default function HeaderBar() {
     e.preventDefault();
     if (!searchValue) return;
 
-    const q = `/search?q=${searchValue.replace(/\s/g, "+")}`;
+    const q = `/tim-kiem?q=${searchValue.replace(/\s/g, "+")}`;
     window.location.href = q;
 
     setOpenSearch(false);
@@ -96,7 +96,7 @@ export default function HeaderBar() {
                             </Typography>
                             <CDropdownMenu color="secondary">
                               {item.name === "du-an" && (
-                                <CDropdownItem href={"/search"}>
+                                <CDropdownItem href={"/tim-kiem"}>
                                   <Typography variant="body1">Tất cả Dự án ({totalFinishedProjects})</Typography>
                                 </CDropdownItem>
                               )}
@@ -176,7 +176,7 @@ export default function HeaderBar() {
                   m: "16px",
                   "&:hover": { bgcolor: "#fff" },
                 }}
-                onClick={() => (window.location.href = "/search")}
+                onClick={() => (window.location.href = "/tim-kiem")}
               >
                 Xem tất cả Dự án
               </Button>
@@ -225,7 +225,7 @@ export default function HeaderBar() {
                       <ListItem
                         onClick={(event) => {
                           event.stopPropagation();
-                          window.location.href = "/search";
+                          window.location.href = "/tim-kiem";
                           setOpenIndex(null);
                           setIsDrawerOpen(false);
                         }}

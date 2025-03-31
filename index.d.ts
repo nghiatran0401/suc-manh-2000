@@ -26,6 +26,7 @@ export type ProjectPost = {
   category: string;
   classification: string;
   status: string;
+  subStatus?: string;
   totalFund: number;
   location: Location;
   donors: {

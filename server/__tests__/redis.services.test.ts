@@ -17,7 +17,7 @@ const redis = new Redis({
 jest.mock("ioredis");
 
 // Mock utility functions
-jest.mock("../utils/search", () => ({
+jest.mock("../utils/tim-kiem", () => ({
   convertToCleanedName: jest.fn((name: string) => name.replace(/[^\w\s]/gi, "")),
   escapeSpecialCharacters: jest.fn((str: string) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")),
 }));

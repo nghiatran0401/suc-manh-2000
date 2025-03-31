@@ -3,7 +3,7 @@ import axios from "axios";
 import { useMediaQuery, Box, LinearProgress, Typography, Grid, Chip, Button, Pagination } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, statusColorMapping, statusLogoMapping, statusColorHoverMapping, DESKTOP_WIDTH, EXCLUDED_FILTER } from "../constants";
+import { POSTS_PER_PAGE, SERVER_URL, HEADER_DROPDOWN_LIST, classificationMapping, statusMapping, DESKTOP_WIDTH, EXCLUDED_FILTER } from "../constants";
 import CardList from "../components/CardList";
 import { convertToCleanedName, findTitle } from "../helpers";
 import { useSearchParams } from "react-router-dom";
@@ -29,7 +29,7 @@ export default function PostList() {
   const [searchedPosts, setSearchedPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [statsData, setStatsData] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const count = Math.ceil(searchedPosts.length / POSTS_PER_PAGE);
   const startIndex = (page - 1) * POSTS_PER_PAGE;
@@ -42,6 +42,8 @@ export default function PostList() {
 
   // apply url params into search/filter/sort
   useEffect(() => {
+    setLoading(true);
+
     const status = urlSearchParams.get("status");
     const classification = urlSearchParams.get("classification");
     const totalFund = urlSearchParams.get("totalFund");
@@ -131,9 +133,9 @@ export default function PostList() {
 
       {/* Statistics */}
       {isProject && (
-        <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"} gap={"16px"} borderRadius={"8px"}>
+        <Grid container display={"flex"} alignItems={"center"} justifyContent={"center"}>
           <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} textAlign={"center"} alignItems={"center"} gap={"16px"} m={"0 auto"}>
-            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"230px"}>
+            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"32px 24px"} borderRadius={2} width={isMobile ? "100%" : "540px"} height={"230px"}>
               <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
                 {Number(Object.values(statsData).reduce((acc, curr) => acc + curr["totalFund"], 0)).toLocaleString()} VND
               </Typography>
@@ -142,7 +144,7 @@ export default function PostList() {
               </Typography>
             </Box>
 
-            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"16px"} borderRadius={2} width={isMobile ? "90%" : "540px"} height={"230px"}>
+            <Box display="flex" flexDirection={"column"} alignItems={"center"} justifyContent={"center"} bgcolor={"#FFF1F0"} p={"8px"} borderRadius={2} width={isMobile ? "100%" : "540px"} height={"230px"}>
               <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"red"}>
                 {/* <CountUp start={0} end={totalPosts} duration={10} /> */}
                 {totalPosts}
@@ -158,9 +160,6 @@ export default function PostList() {
                   gap: "2px",
                 }}
               >
-                {/* <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
-                  {Object.values(statsData).reduce((acc, curr) => acc + curr["dang-xay-dung"] + curr["da-hoan-thanh"], 0)} Dự án đã khởi công
-                </Typography> */}
                 <Typography fontSize={"16px"} fontWeight={600} color={"#00000073"}>
                   {Object.values(statsData).reduce((acc, curr) => acc + curr["da-hoan-thanh"], 0)} Dự án đã hoàn thành
                 </Typography>
@@ -225,6 +224,8 @@ export default function PostList() {
                     <Box
                       style={{
                         display: "flex",
+                        flexWrap: "wrap",
+                        maxWidth: "100%",
                         gap: isMobile ? "2px" : "8px",
                         justifyContent: "center",
                       }}
@@ -233,18 +234,22 @@ export default function PostList() {
                         <Chip
                           key={idx}
                           variant="outline"
-                          avatar={<img src={statusLogoMapping[status]} alt="logo" />}
+                          avatar={<img src={statusMapping[status].logo} alt="logo" />}
                           label={statsData[value]?.[status] ?? 0}
                           sx={{
-                            backgroundColor: statusColorMapping[status],
+                            backgroundColor: statusMapping[status].bgColor,
                             height: "24px",
                             "& .MuiChip-avatar": {
                               width: "16px",
                               height: "16px",
                             },
                             "&:hover": {
-                              backgroundColor: statusColorHoverMapping[status],
+                              backgroundColor: statusMapping[status].bgColorHover,
                             },
+                            flex: isMobile ? "0 0 calc(50% - 2px)" : "unset",
+                            textAlign: "center",
+                            display: "flex",
+                            justifyContent: "center",
                           }}
                           onClick={() => setFilters({ ...filters, classification: value, status: status, totalFund: "all", province: "all", constructionUnit: "all" })}
                         />
@@ -270,7 +275,7 @@ export default function PostList() {
       {/* Search/Filter/Sort */}
       {isProject && (
         <Box ref={scrollRef} display={"flex"} flexWrap={"wrap"} justifyContent={"flex-end"} alignItems={"center"} gap={"16px"}>
-          <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} inputProps={{ width: isMobile ? "100%" : "30%", height: isMobile ? "50px" : "40px" }} />
+          <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           <FilterList searchQuery={searchQuery} filters={filters} setFilters={setFilters} provinceCount={provinceCount} />
           <SortList searchQuery={searchQuery} sortField={sortField} setSortField={setSortField} />
           <Button

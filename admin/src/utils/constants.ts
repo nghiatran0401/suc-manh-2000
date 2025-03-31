@@ -43,9 +43,6 @@ export const categoryMapping = {
   "bao-chi-truyen-hinh": "Truyền thông",
   "cau-chuyen": "Câu chuyện",
   "tai-tro": "Tài trợ",
-  // "tien-do-xay-dung": "Tiến độ xây dựng",
-  // "gay-quy": "Gây quỹ",
-  // "phong-tin-hoc-2023": "PTH-23",
 };
 
 export const classificationMapping = {
@@ -61,7 +58,6 @@ export const classificationMapping = {
 
 export const statusMapping = {
   "can-quyen-gop": "Cần quyên góp",
-  "dang-gop-le": "Đang góp lẻ",
   "dang-xay-dung": "Đang xây dựng",
   "da-hoan-thanh": "Đã hoàn thành",
 };

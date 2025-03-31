@@ -75,7 +75,7 @@ const FilterList = (props) => {
       case "totalFund":
         return typeValue === "all" ? null : { label: totalFundMapping[typeValue], value: typeValue };
       case "status":
-        return typeValue === "all" ? null : { label: statusMapping[typeValue], value: typeValue };
+        return typeValue === "all" ? null : { label: statusMapping[typeValue].name, value: typeValue };
       case "province":
         return typeValue === "all" ? null : { label: provincesAndCitiesObj[typeValue], value: typeValue };
       case "constructionUnit":
@@ -96,7 +96,7 @@ const FilterList = (props) => {
       case "totalFund":
         return Object.entries(totalFundMapping).map(([value, label]) => ({ value, label }));
       case "status":
-        return Object.entries(statusMapping).map(([value, label]) => ({ value, label }));
+        return Object.entries(statusMapping).map(([key, { name }]) => ({ label: name, value: key }));
       case "province":
         return Object.entries(provinceCount)
           .sort(([, countA], [, countB]) => countB - countA)
