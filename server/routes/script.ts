@@ -535,22 +535,22 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
       const collection = firestore.collection(collectionName);
 
       // Dự án hủy -> xóa trên web
-      // const cancelledProjectsPromises = totalCsvErrors["DA hủy"].map(async (p: any) => {
-      //   if (p["projectId"] !== null) {
-      //     const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
-      //     if (!querySnapshot.empty) {
-      //       const docRef = querySnapshot.docs[0].ref;
-      //       const docData = querySnapshot.docs[0].data();
+      const cancelledProjectsPromises = totalCsvErrors["DA hủy"].map(async (p: any) => {
+        if (p["projectId"] !== null) {
+          const querySnapshot = await collection.where("projectId", "==", p["projectId"]).get();
+          if (!querySnapshot.empty) {
+            const docRef = querySnapshot.docs[0].ref;
+            const docData = querySnapshot.docs[0].data();
 
-      //       return await Promise.all([
-      //         docRef.delete(),
-      //         removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
-      //         updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
-      //       ]);
-      //     }
-      //   }
-      // });
-      // await Promise.all(cancelledProjectsPromises);
+            return await Promise.all([
+              docRef.delete(),
+              removeDocumentFromIndex({ collection_id: collectionName, doc_id: querySnapshot.docs[0].id }),
+              updateClassificationAndCategoryCounts(docData.classification, docData.category, -1),
+            ]);
+          }
+        }
+      });
+      await Promise.all(cancelledProjectsPromises);
 
       for (let i = 0; i < totalCsvDataList.length; i += BATCH_SIZE) {
         const batch = totalCsvDataList.slice(i, i + BATCH_SIZE);
@@ -607,11 +607,11 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             };
 
             console.log("uploading new post", csvData["projectId"]);
-            // return await Promise.all([
-            //   postDocRef.set(newProjectPost),
-            //   upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
-            //   updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
-            // ]);
+            return await Promise.all([
+              postDocRef.set(newProjectPost),
+              upsertDocumentToIndex({ ...newProjectPost, doc_id: newId, collection_id: collectionName }),
+              updateClassificationAndCategoryCounts(newProjectPost.classification, newProjectPost.category, +1),
+            ]);
           }
           // Update dự án hiện tại
           else {
@@ -623,27 +623,27 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
 
             const updatedProjectPost: ProjectPost = {
               ...(docData as ProjectPost),
-              // name: docData.name !== csvData.name ? csvData.name : docData.name,
-              // totalFund: docData.totalFund !== csvData.totalFund ? csvData.totalFund : docData.totalFund,
+              name: docData.name !== csvData.name ? csvData.name : docData.name,
+              totalFund: docData.totalFund !== csvData.totalFund ? csvData.totalFund : docData.totalFund,
               status: docData.status !== csvData.status ? csvData.status : docData.status,
               subStatus: docData.subStatus !== csvData.subStatus ? csvData.subStatus : docData.subStatus,
-              // progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
-              // thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
-              // location: csvData.location,
-              // donors: csvData.donors,
-              // metadata: csvData.metadata,
-              // contentNew: {
-              //   tabs: [
-              //     {
-              //       name: "Hoàn cảnh",
-              //       description: hoanCanhDescription,
-              //     },
-              //     {
-              //       name: "Nhà hảo tâm",
-              //       description: csvData.financialStatementUrl,
-              //     },
-              //   ],
-              // },
+              progressNew: isImagesUpdated ? airtableProjectProgress : webProjectProgress,
+              thumbnail: isImagesUpdated || !docData.thumbnail ? projectThumbnail : docData.thumbnail,
+              location: csvData.location,
+              donors: csvData.donors,
+              metadata: csvData.metadata,
+              contentNew: {
+                tabs: [
+                  {
+                    name: "Hoàn cảnh",
+                    description: hoanCanhDescription,
+                  },
+                  {
+                    name: "Nhà hảo tâm",
+                    description: csvData.financialStatementUrl,
+                  },
+                ],
+              },
               updatedAt: firebase.firestore.Timestamp.fromDate(new Date()),
             };
 

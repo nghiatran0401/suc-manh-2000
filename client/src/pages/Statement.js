@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useMediaQuery, Box, TextField, InputAdornment, Typography, Select, MenuItem, FormControl, Button, Link, FormHelperText, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import {
+  useMediaQuery,
+  Box,
+  TextField,
+  InputAdornment,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  Button,
+  Link,
+  FormHelperText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useConfirm } from "material-ui-confirm";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
-import VirtualizedTable from "./VirtualizedTable";
 import { DESKTOP_WIDTH, SERVER_URL } from "../constants";
-
-export const keysMapping = {
-  date: "Ngày",
-  transaction_code: "Mã giao dịch",
-  amount: "Số tiền",
-  description: "Nội dung giao dịch",
-  project_name: "Công trình phân bổ",
-  project_url: "Link web công trình",
-  bank: "Ngân hàng",
-  // month_sheet: "Tháng GD",
-};
 
 const SHEETS_TO_CHECK = ["MB2000. 2025 SK Tổng"]; // "MB2002. 2025 SK Tổng", "VVC. 2025 SK Tổng"
 
@@ -42,14 +53,8 @@ export default function Statement() {
   const [logs, setLogs] = useState([]);
 
   // Pagination
-  const rowsPerPage = 100;
-  const pageCount = 10; // Math.ceil(data.length / rowsPerPage);
-
-  // Calculate total amount based on search/filter
-  // const totalAmount = data.reduce((total, row) => {
-  //   const numeric = parseFloat(row.amount.toString().replace(/[^\d.-]/g, "") || 0);
-  //   return total + (isNaN(numeric) ? 0 : numeric);
-  // }, 0);
+  const rowsPerPage = 20;
+  const pageCount = data.length < rowsPerPage ? Math.ceil(data.length / rowsPerPage) : rowsPerPage;
 
   useEffect(() => {
     (async () => {
@@ -114,7 +119,7 @@ export default function Statement() {
   };
 
   return (
-    <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} my={"24px"} display="flex" flexDirection={"column"} gap={"16px"}>
+    <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"} my={"24px"} display="flex" flexDirection={"column"} gap={"16px"} p={2}>
       <Typography variant="h5" fontWeight={"bold"} textAlign="center">
         SAO KÊ TÀI KHOẢN SỨC MẠNH 2000
       </Typography>
@@ -197,10 +202,10 @@ export default function Statement() {
       )}
 
       {/* Announcement + Report */}
-      <Box display="flex" flexDirection={isMobile ? "column" : "row"} justifyContent="space-between" width="100%">
+      <Box display="flex" flexDirection={isMobile ? "column-reverse" : "row"} justifyContent="space-between" width="100%">
         {/* Announcement Section */}
-        <Box p={2} border={1} borderColor="#FFF2F0" borderRadius={3} bgcolor="#FFF2F0" sx={{ flex: 3, margin: 1, padding: 2 }}>
-          <Typography variant="h6" gutterBottom color="#F5232D" textAlign="center" sx={{ marginBottom: 2, marginTop: 2 }}>
+        <Box p={2} border={1} borderColor="#FFF2F0" borderRadius={1} bgcolor="#FFF2F0" sx={{ flex: 3, margin: 1, padding: 2 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom color="#F5232D" textAlign="center" sx={{ marginBottom: 2, marginTop: 2 }}>
             THÔNG BÁO
           </Typography>
           <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
@@ -236,7 +241,7 @@ export default function Statement() {
           p={2}
           border={1}
           borderColor="#FFF2F0"
-          borderRadius={3}
+          borderRadius={1}
           bgcolor="#FFF2F0"
           sx={{
             flex: 2,
@@ -251,117 +256,152 @@ export default function Statement() {
           <Typography variant="h6" textAlign="center">
             BÁO CÁO TỔNG TIỀN
           </Typography>
-          <Typography variant="h3" fontWeight="bold" textAlign="center" sx={{ color: "#F5232D" }}>
+          <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ color: "#F5232D" }}>
             {capialSum.toLocaleString()} VNĐ
           </Typography>
         </Box>
       </Box>
 
       {/* Filters */}
-      <Box display="flex" gap={2} alignItems="center" justifyContent="space-between" width="100%" sx={{ marginTop: "30px", marginBottom: "30px" }}>
-        <TextField
-          value={search}
-          placeholder="Tìm kiếm theo tên, mã GD, công trình"
-          onChange={(e) => setSearch(e.target.value)}
-          variant="outlined"
-          size="medium"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="disabled" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            flex: 2,
-            background: "#FFFFFF",
-            borderRadius: "12px",
-            "& .MuiOutlinedInput-root": {
-              height: "40px",
-            },
-          }}
-        />
-
-        <FormControl sx={{ flex: "0.5" }}>
-          <Select
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            displayEmpty
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={2} alignItems={isMobile ? "stretch" : "center"} justifyContent="space-between" width="100%" sx={{ mt: 4, mb: 4 }}>
+        {/* Search */}
+        <Box sx={{ width: isMobile ? "100%" : "auto", flex: isMobile ? undefined : 2 }}>
+          <TextField
+            value={search}
+            placeholder="Tìm kiếm theo tên, mã GD, công trình"
+            onChange={(e) => setSearch(e.target.value)}
+            variant="outlined"
+            fullWidth
+            size="medium"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="disabled" />
+                </InputAdornment>
+              ),
+            }}
             sx={{
-              height: "40px",
               background: "#FFFFFF",
-              borderRadius: "4px",
-              ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "#D9D9D9",
+              borderRadius: "12px",
+              "& .MuiOutlinedInput-root": {
+                height: "40px",
               },
             }}
-          >
-            <MenuItem key={0} value={""}>
-              Tháng
-            </MenuItem>
-            {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((_) => (
-              <MenuItem key={_} value={_}>
-                Tháng {_}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          />
+        </Box>
 
-        <FormControl sx={{ flex: "0.5" }}>
-          <Select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            displayEmpty
-            sx={{
-              height: "40px",
-              background: "#FFFFFF",
-              borderRadius: "4px",
-              ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "#D9D9D9",
-              },
-            }}
-          >
-            <MenuItem key={0} value={""}>
-              Năm
-            </MenuItem>
-            {["2025", "2024", "2023"].map((_) => (
-              <MenuItem key={_} value={_}>
-                Năm {_}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {/* Dropdowns */}
+        <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent={isMobile ? "flex-start" : "space-between"} gap={2}>
+          <FormControl sx={{ minWidth: 100, width: "fit-content" }}>
+            <Select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              displayEmpty
+              sx={{
+                height: "40px",
+                background: "#FFFFFF",
+                borderRadius: "4px",
+                ".MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#D9D9D9",
+                },
+              }}
+            >
+              <MenuItem value="">Tháng (Tất cả)</MenuItem>
+              {Array.from({ length: 12 }, (_, i) => (
+                <MenuItem key={i + 1} value={String(i + 1).padStart(2, "0")}>
+                  Tháng {String(i + 1).padStart(2, "0")}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        <FormControl sx={{ flex: "0.5" }}>
-          <Select
-            value={bank}
-            onChange={(e) => setBank(e.target.value)}
-            displayEmpty
-            sx={{
-              height: "40px",
-              background: "#FFFFFF",
-              borderRadius: "4px",
-              ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "#D9D9D9",
-              },
-            }}
-          >
-            <MenuItem key={0} value={""}>
-              Ngân hàng
-            </MenuItem>
-            {["MB2000", "MB", "VVC"].map((_) => (
-              <MenuItem key={_} value={_}>
-                {_}
+          <FormControl sx={{ minWidth: 100, width: "fit-content" }}>
+            <Select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              displayEmpty
+              sx={{
+                height: "40px",
+                background: "#FFFFFF",
+                borderRadius: "4px",
+                ".MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#D9D9D9",
+                },
+              }}
+            >
+              <MenuItem value="">Năm (Tất cả)</MenuItem>
+              {["2025", "2024", "2023"].map((y) => (
+                <MenuItem key={y} value={y}>
+                  Năm {y}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 100, width: "fit-content" }}>
+            <Select
+              value={bank}
+              onChange={(e) => setBank(e.target.value)}
+              displayEmpty
+              sx={{
+                height: "40px",
+                background: "#FFFFFF",
+                borderRadius: "4px",
+                ".MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#D9D9D9",
+                },
+              }}
+            >
+              <MenuItem key={0} value={""}>
+                Ngân hàng
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {["MB2000", "MB", "VVC"].map((_) => (
+                <MenuItem key={_} value={_}>
+                  {_}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {/* Statement table */}
       <Box display="flex" flexDirection="column" gap="8px">
-        <Typography variant="body1">Nhấn vào từng hàng để xem chi tiết giao dịch</Typography>
-        <VirtualizedTable data={data} />
+        <Typography variant="body2" color="red">
+          *Nếu bạn xem trên điện thoại, hãy lướt sang phải để xem đầy đủ thông tin
+        </Typography>
+        <TableContainer component={Paper}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Ngày</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Mã giao dịch</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Số tiền</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "35%" }}>Nội dung</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Công trình phân bổ</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Link web công trình</TableCell>
+                <TableCell sx={{ fontWeight: "bold", width: "10%" }}>Ngân hàng</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((s, i) => (
+                <TableRow key={i} hover>
+                  <TableCell>{s.date}</TableCell>
+                  <TableCell>{s.transaction_code}</TableCell>
+                  <TableCell>{s.amount}</TableCell>
+                  <TableCell>{s.description}</TableCell>
+                  <TableCell>{s.project_name}</TableCell>
+                  <TableCell>
+                    <a href={s.project_url} target="__blank">
+                      <Typography variant="body2">{s.project_id}</Typography>
+                    </a>
+                  </TableCell>
+                  <TableCell>{s.bank}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
 
       {/* Pagination */}
