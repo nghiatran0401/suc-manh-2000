@@ -79,7 +79,7 @@ export default function Footer() {
         </Grid>
       </Box>
       <Divider sx={{ backgroundColor: "white", height: "2px", width: "100%", mx: "auto" }} />
-      <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"center"} py={"20px"}>
+      <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"center"} py={"20px"} px={isMobile ? "15px" : "0px"}>
         <Typography variant="body2" color={"white"} sx={{ fontSize: "0.8rem" }}>Copyright 2024 © Phát triển bởi đội ngũ điều hành Ánh Sáng Núi Rừng và Dự án Nuôi Em.</Typography>
       </Box>
     </Box>

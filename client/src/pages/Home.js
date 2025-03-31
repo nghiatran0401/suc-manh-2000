@@ -66,31 +66,31 @@ export default function Home() {
   return (
     <Box maxWidth={DESKTOP_WIDTH} width={"100%"} m={"0 auto"}>
       {/* gioi thieu du an */}
-      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "24px 16px" : "40px 0"} alignItems="center">
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={"16px"} p={isMobile ? "16px" : "40px 0"} alignItems="center">
         <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} width={isMobile ? "100%" : "50%"} >
-          <Typography variant="h6" color={"red"} textAlign={"left"} mt={5} mb={5}>
+          <Typography variant="h6" color={"red"} textAlign={"left"} mt={isMobile ? 2 : 5} mb={isMobile ? 2 : 5}>
             GIỚI THIỆU
           </Typography>
-          <Typography variant="h3" fontWeight="bold" color={"black"} textAlign={"left"}>
+          <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color={"black"} textAlign={"left"}>
             Dự Án Sức Mạnh 2000
           </Typography>
-          <Typography variant="h6" textAlign={"left"} p={isMobile ? "8px 0" : "8px 0"}>
+          <Typography variant={isMobile ? "body1" : "h6"} textAlign={"left"} p={isMobile ? "4px 0" : "8px 0"}>
             Mục tiêu cùng cộng đồng xóa TOÀN BỘ điểm trường gỗ, tôn tạm bợ trên TOÀN QUỐC.
             <br />
             Xây dựng đủ Khu nội trú, Cầu đi học, và Nhà hạnh phúc.
           </Typography>
-          <Box mt={2}>
+          <Box mt={isMobile ? 1 : 2}>
             <Companion />
           </Box>
         </Box>
-        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center" ml={isMobile ? 0 : 3} mt={isMobile ? 3 : 0}>
+        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center" ml={isMobile ? 0 : 3} mt={isMobile ? 2 : 0}>
           <img 
             src={childrenImage} 
             alt="Dự án Sức Mạnh 2000" 
             style={{ 
               width: "100%", 
               objectFit: "cover", 
-              marginLeft: "80px"
+              marginLeft: isMobile ? "0" : "80px"
             }} 
           />
         </Box>
@@ -102,6 +102,7 @@ export default function Home() {
         gap={3} 
         mb={5}
         width="100%"
+        px={isMobile ? 3 : 0}
       >
         {/* Thống kê và tiêu đề bên trái*/}
         <Box 
@@ -168,6 +169,7 @@ export default function Home() {
           justifyContent="center" 
           alignItems="flex-start"
           borderRadius={2}
+          px={isMobile ? 0 : 2}
         >
           <img 
             src={mapSectionImage} 
@@ -175,7 +177,6 @@ export default function Home() {
             style={{ 
               width: "100%",
               maxWidth: "100%", 
-              marginLeft: isMobile ? "0" : "20px",
               height: "auto",
               objectFit: "contain"
             }} 

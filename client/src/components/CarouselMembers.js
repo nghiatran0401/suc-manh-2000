@@ -181,7 +181,7 @@ export default function CarouselMembers() {
         },
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color={"black"}>
+      <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" color={"black"}>
         Đội ngũ vận hành SỨC MẠNH 2000
       </Typography>
 
