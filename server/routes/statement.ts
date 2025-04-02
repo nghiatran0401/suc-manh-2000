@@ -18,7 +18,6 @@ const statementRouter = express.Router();
 const ENV = process.env.CURRENT_ENV;
 const STATEMENT_SERVER_URL = "https://saoke.sucmanh2000.com";
 const GET_DATA_API = "/api/getData";
-const GET_SUMMARY_API = "/api/getSummary";
 
 statementRouter.get("/", async (req: Request, res: Response) => {
   try {
@@ -113,14 +112,23 @@ statementRouter.get("/summary", async (req: Request, res: Response) => {
     let summaryResult: any, totalResult: any;
     if (ENV === "Development") {
       [summaryResult, totalResult] = await Promise.all([pool.query(summaryQuery, values), pool.query(totalQuery)]);
-    } else if (ENV === "Production") {
-      [summaryResult, totalResult] = await Promise.all([
-        axios.get(STATEMENT_SERVER_URL + GET_SUMMARY_API, { params: { summaryQuery, values } }),
-        axios.get(STATEMENT_SERVER_URL + GET_SUMMARY_API, { params: { totalQuery } }),
+    } else {
+      const [summaryResp, totalResp] = await Promise.all([
+        axios.get(STATEMENT_SERVER_URL + GET_DATA_API, {
+          params: { query: summaryQuery, values },
+        }),
+        axios.get(STATEMENT_SERVER_URL + GET_DATA_API, {
+          params: { query: totalQuery },
+        }),
       ]);
+      summaryResult = summaryResp.data;
+      totalResult = totalResp.data;
     }
 
-    res.json({ summary: summaryResult?.rows, total: totalResult?.rows[0]?.total_capital_sum || 0 });
+    res.json({
+      summary: summaryResult?.rows ?? [],
+      total: totalResult?.rows?.[0]?.total_capital_sum ?? 0,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
