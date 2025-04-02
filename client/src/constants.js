@@ -25,7 +25,7 @@ export const HEADER_DROPDOWN_LIST = [
   {
     path: "#",
     name: "quyen-gop",
-    title: "Quyên Góp",
+    title: "Góp lẻ",
     children: [
       {
         path: "https://goptruongle.sucmanh2000.com/",

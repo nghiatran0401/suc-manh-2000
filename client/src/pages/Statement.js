@@ -23,12 +23,14 @@ import {
   TableHead,
   TableRow,
   Paper,
+  InputLabel,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useConfirm } from "material-ui-confirm";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
 import { DESKTOP_WIDTH, SERVER_URL } from "../constants";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 const SHEETS_TO_CHECK = ["MB2000. 2025 SK Tổng"]; // "MB2002. 2025 SK Tổng", "VVC. 2025 SK Tổng"
 
@@ -40,6 +42,8 @@ export default function Statement() {
   const [year, setYear] = useState("");
   const [bank, setBank] = useState("");
   const [page, setPage] = useState(1);
+  const [summaryData, setSummaryData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("2025");
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -52,7 +56,6 @@ export default function Statement() {
   const [errors, setErrors] = useState({ sheets: false, fromDate: false, toDate: false });
   const [logs, setLogs] = useState([]);
 
-  // Pagination
   const rowsPerPage = 20;
   const pageCount = data.length < rowsPerPage ? Math.ceil(data.length / rowsPerPage) : rowsPerPage;
 
@@ -69,13 +72,55 @@ export default function Statement() {
             limit: rowsPerPage,
           },
         });
-        setData(response.data.data);
-        setCapitalSum(response.data.capitalSum);
+        setData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     })();
   }, [search, month, year, bank, page]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(SERVER_URL + "/tra-cuu-sao-ke/summary", {
+          params: {
+            year: selectedYear,
+          },
+        });
+        setSummaryData(transformSummaryData(res.data.summary));
+        setCapitalSum(res.data.total);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    })();
+  }, [selectedYear]);
+
+  const transformSummaryData = (raw) => {
+    const map = {};
+    raw.forEach(({ month, bank, capital_sum }) => {
+      if (!map[month]) {
+        map[month] = { month: parseInt(month, 10) };
+      }
+      map[month][bank] = Number(capital_sum) || 0;
+    });
+    return Object.values(map).sort((a, b) => a.month - b.month);
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <Paper sx={{ p: 1 }}>
+          <Typography>Tháng: {label}</Typography>
+          {payload.map((item, i) => (
+            <Typography key={i}>
+              {item.name}: {Number(item.value).toLocaleString()} VNĐ
+            </Typography>
+          ))}
+        </Paper>
+      );
+    }
+    return null;
+  };
 
   const handleSyncData = async () => {
     let hasErrors = false;
@@ -160,7 +205,6 @@ export default function Statement() {
             </DialogActions>
           </Dialog>
 
-          <Typography color="red">*Note: sync toàn bộ data nếu không chọn 2 fields "From Date" và "To Date"</Typography>
           <Box display="flex" gap={2} alignItems="center" my={2}>
             <FormControl sx={{ minWidth: 250, flex: 1 }} error={errors.sheets}>
               <Select multiple value={selectedOptions} onChange={(e) => setSelectedOptions(e.target.value)} renderValue={(selected) => (selected.length ? selected.join(", ") : "Select sheets")} displayEmpty>
@@ -204,30 +248,22 @@ export default function Statement() {
       {/* Announcement + Report */}
       <Box display="flex" flexDirection={isMobile ? "column-reverse" : "row"} justifyContent="space-between" width="100%">
         {/* Announcement Section */}
-        <Box p={2} border={1} borderColor="#FFF2F0" borderRadius={1} bgcolor="#FFF2F0" sx={{ flex: 3, margin: 1, padding: 2 }}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom color="#F5232D" textAlign="center" sx={{ marginBottom: 2, marginTop: 2 }}>
+        <Box p={2} border={1} borderColor="#FFF2F0" borderRadius={1} bgcolor="#FFF2F0" sx={{ display: "flex", flexDirection: "column", flex: 3, margin: 1, padding: 2, gap: 0.75 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom color="#F5232D" textAlign="center">
             THÔNG BÁO
           </Typography>
-          <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
-            - Không trích bất kỳ chi phí quản lý nào. 100% số tiền cộng đồng ủng hộ tới tay đối tượng và đúng mục đích.
-          </Typography>
-          <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
-            - Cập nhật sao kê 1 lần/tuần.
-          </Typography>
-          <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
-            - Tất cả các chuyển khoản (CK) nhầm vào tài khoản dự án, chúng tôi xin phép đưa vào nội dung xây Trường/Nhà/Cầu.
-          </Typography>
-          <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
-            - Tìm kiếm theo nội dung CK của bạn.
-          </Typography>
-          <Typography variant="caption" paragraph sx={{ marginBottom: 0.75 }}>
+          <Typography variant="body2">- Không trích bất kỳ chi phí quản lý nào. 100% số tiền cộng đồng ủng hộ tới tay đối tượng và đúng mục đích.</Typography>
+          <Typography variant="body2">- Cập nhật sao kê 1 lần/tuần.</Typography>
+          <Typography variant="body2">- Tất cả các chuyển khoản (CK) nhầm vào tài khoản dự án, chúng tôi xin phép đưa vào nội dung xây Trường/Nhà/Cầu.</Typography>
+          <Typography variant="body2">- Tìm kiếm theo nội dung CK của bạn.</Typography>
+          <Typography variant="body2">
             - CK sẽ được đưa vào xây dựng công trình (CT) dựa theo nội dung CK của bạn.
             <ul>
               <li>Trong trường hợp CK của bạn được đưa vào xây CT khác với nội dung CK của bạn thì là do CT đó đã đủ tiền, dự án sẽ đưa sang CT khác cũng đang kêu gọi tại cùng thời điểm.</li>
               <li>Đối với các CK không có nội dung cụ thể, dự án sẽ chủ động đưa vào các CT dựa trên mức độ cấp thiết.</li>
             </ul>
           </Typography>
-          <Typography variant="caption" sx={{ marginBottom: 2 }}>
+          <Typography variant="body2">
             - Liên hệ với dự án khi có vướng mắc về sao kê: Inbox fanpage
             <Link href="https://facebook.com/sucmanh2000" target="_blank" rel="noopener" sx={{ marginLeft: 0.5 }}>
               Sức mạnh 2000
@@ -261,6 +297,60 @@ export default function Statement() {
           </Typography>
         </Box>
       </Box>
+
+      {/* Chart */}
+      {isAdmin && (
+        <Box py={4}>
+          <Typography variant="h6" gutterBottom fontWeight="bold" mb={2}>
+            📊 Thống kê theo tháng
+          </Typography>
+
+          <Box display="flex" gap={2} mb={3}>
+            <FormControl>
+              <InputLabel>Năm</InputLabel>
+              <Select value={selectedYear} label="Năm" onChange={(e) => setSelectedYear(e.target.value)} sx={{ height: 40 }}>
+                {["2025", "2024"].map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box display="flex" gap={4} mb={2} flexWrap="wrap">
+            {["MB2000", "MB", "TECHCOMBANK"].map((bank) => {
+              const total = summaryData.reduce((sum, row) => sum + (row[bank] || 0), 0);
+              const colorMap = {
+                MB: "#4caf50",
+                MB2000: "#ff9800",
+                TECHCOMBANK: "#2196f3",
+              };
+
+              return (
+                <Typography key={bank} variant="body1" sx={{ color: colorMap[bank], fontWeight: "bold" }}>
+                  {bank}: {total.toLocaleString()} VNĐ
+                </Typography>
+              );
+            })}
+          </Box>
+
+          <Paper sx={{ p: 2 }}>
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart data={summaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%" barGap={8}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tickFormatter={(m) => `Tháng ${m}`} />
+                <YAxis tickFormatter={(v) => `${(v / 1_000_000_000).toFixed(0)} tỷ`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar dataKey="MB" fill="#4caf50" name="MB" />
+                <Bar dataKey="MB2000" fill="#ff9800" name="MB2000" />
+                <Bar dataKey="TECHCOMBANK" fill="#2196f3" name="TECHCOMBANK" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Box>
+      )}
 
       {/* Filters */}
       <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={2} alignItems={isMobile ? "stretch" : "center"} justifyContent="space-between" width="100%" sx={{ mt: 4, mb: 4 }}>
@@ -308,7 +398,7 @@ export default function Statement() {
             >
               <MenuItem value="">Tháng (Tất cả)</MenuItem>
               {Array.from({ length: 12 }, (_, i) => (
-                <MenuItem key={i + 1} value={String(i + 1).padStart(2, "0")}>
+                <MenuItem key={i + 1} value={i + 1}>
                   Tháng {String(i + 1).padStart(2, "0")}
                 </MenuItem>
               ))}
@@ -330,7 +420,7 @@ export default function Statement() {
               }}
             >
               <MenuItem value="">Năm (Tất cả)</MenuItem>
-              {["2025", "2024", "2023"].map((y) => (
+              {["2025", "2024"].map((y) => (
                 <MenuItem key={y} value={y}>
                   Năm {y}
                 </MenuItem>
@@ -355,7 +445,7 @@ export default function Statement() {
               <MenuItem key={0} value={""}>
                 Ngân hàng
               </MenuItem>
-              {["MB2000", "MB", "VVC"].map((_) => (
+              {["MB2000", "MB", "TECHCOMBANK"].map((_) => (
                 <MenuItem key={_} value={_}>
                   {_}
                 </MenuItem>
