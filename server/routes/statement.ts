@@ -10,10 +10,12 @@ import { parse, format } from "date-fns";
 import path from "path";
 import axios from "axios";
 import pool from "../services/postgres";
+import dotenv from "dotenv";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const statementRouter = express.Router();
 
-const ENV = "dev"; // prod
+const ENV = process.env.CURRENT_ENV;
 const STATEMENT_SERVER_URL = "https://saoke.sucmanh2000.com";
 const GET_DATA_API = "/api/getData";
 const GET_SUMMARY_API = "/api/getSummary";
@@ -59,9 +61,9 @@ statementRouter.get("/", async (req: Request, res: Response) => {
     values.push(limit, offset);
 
     let data: any;
-    if (ENV === "dev") {
+    if (ENV === "Development") {
       data = await pool.query(query, values);
-    } else if (ENV === "prod") {
+    } else if (ENV === "Production") {
       const saokeRes = await axios.get(STATEMENT_SERVER_URL + GET_DATA_API, { params: { query, values } });
       data = saokeRes.data;
     }
@@ -109,9 +111,9 @@ statementRouter.get("/summary", async (req: Request, res: Response) => {
     `;
 
     let summaryResult: any, totalResult: any;
-    if (ENV === "dev") {
+    if (ENV === "Development") {
       [summaryResult, totalResult] = await Promise.all([pool.query(summaryQuery, values), pool.query(totalQuery)]);
-    } else if (ENV === "prod") {
+    } else if (ENV === "Production") {
       [summaryResult, totalResult] = await Promise.all([
         axios.get(STATEMENT_SERVER_URL + GET_SUMMARY_API, { params: { summaryQuery, values } }),
         axios.get(STATEMENT_SERVER_URL + GET_SUMMARY_API, { params: { totalQuery } }),
@@ -175,9 +177,9 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
       `;
       const values = rows.flat();
 
-      if (ENV === "dev") {
+      if (ENV === "Development") {
         await pool.query(query, values);
-      } else if (ENV === "prod") {
+      } else if (ENV === "Production") {
         await axios.get(STATEMENT_SERVER_URL + GET_DATA_API, { params: { query, values } });
       }
     }
@@ -333,9 +335,9 @@ statementRouter.get("/migrateDataFromCSV", async (req: Request, res: Response): 
       `;
       const values = rows.flatMap((row) => [row.date, row.transaction_code, row.amount, row.description, row.project_name, row.project_id, row.project_url, row.bank]);
 
-      if (ENV === "dev") {
+      if (ENV === "Development") {
         await pool.query(query, values);
-      } else if (ENV === "prod") {
+      } else if (ENV === "Production") {
         await axios.get(STATEMENT_SERVER_URL + GET_DATA_API, { params: { query, values } });
       }
 
