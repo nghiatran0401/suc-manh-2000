@@ -23,6 +23,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  LinearProgress,
   InputLabel,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -35,6 +36,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const SHEETS_TO_CHECK = ["MB2000. 2025 SK Tổng"]; // "MB2002. 2025 SK Tổng", "VVC. 2025 SK Tổng"
 
 export default function Statement() {
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [capialSum, setCapitalSum] = useState(0);
   const [search, setSearch] = useState("");
@@ -73,6 +75,7 @@ export default function Statement() {
           },
         });
         setData(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -89,6 +92,7 @@ export default function Statement() {
         });
         setSummaryData(transformSummaryData(res.data.summary));
         setCapitalSum(res.data.total);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -169,6 +173,12 @@ export default function Statement() {
         SAO KÊ TÀI KHOẢN SỨC MẠNH 2000
       </Typography>
 
+      {loading && (
+        <Box minHeight={"500px"} mt={"200px"}>
+          <LinearProgress />
+        </Box>
+      )}
+
       {/* Sync data from Google Sheets */}
       {isAdmin && (
         <Box>
@@ -245,6 +255,60 @@ export default function Statement() {
         </Box>
       )}
 
+      {/* Chart */}
+      {isAdmin && (
+        <Box>
+          <Typography variant="h6" gutterBottom fontWeight="bold" mb={2}>
+            📊 Thống kê theo tháng
+          </Typography>
+
+          <Box display="flex" gap={2} mb={3}>
+            <FormControl>
+              <InputLabel>Năm</InputLabel>
+              <Select value={selectedYear} label="Năm" onChange={(e) => setSelectedYear(e.target.value)} sx={{ height: 40 }}>
+                {["2025", "2024", "2023"].map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box display="flex" gap={4} mb={2} flexWrap="wrap">
+            {["MB2000", "MB", "TECHCOMBANK"].map((bank) => {
+              const total = summaryData.reduce((sum, row) => sum + (row[bank] || 0), 0);
+              const colorMap = {
+                MB: "#4caf50",
+                MB2000: "#ff9800",
+                TECHCOMBANK: "#2196f3",
+              };
+
+              return (
+                <Typography key={bank} variant="body1" sx={{ color: colorMap[bank], fontWeight: "bold" }}>
+                  {bank}: {total.toLocaleString()} VNĐ
+                </Typography>
+              );
+            })}
+          </Box>
+
+          <Paper sx={{ p: 2 }}>
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart data={summaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%" barGap={8}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tickFormatter={(m) => `Tháng ${m}`} />
+                <YAxis tickFormatter={(v) => `${(v / 1_000_000_000).toFixed(0)} tỷ`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar dataKey="MB" fill="#4caf50" name="MB" />
+                <Bar dataKey="MB2000" fill="#ff9800" name="MB2000" />
+                <Bar dataKey="TECHCOMBANK" fill="#2196f3" name="TECHCOMBANK" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Box>
+      )}
+
       {/* Announcement + Report */}
       <Box display="flex" flexDirection={isMobile ? "column-reverse" : "row"} justifyContent="space-between" width="100%">
         {/* Announcement Section */}
@@ -297,60 +361,6 @@ export default function Statement() {
           </Typography>
         </Box>
       </Box>
-
-      {/* Chart */}
-      {isAdmin && (
-        <Box py={4}>
-          <Typography variant="h6" gutterBottom fontWeight="bold" mb={2}>
-            📊 Thống kê theo tháng
-          </Typography>
-
-          <Box display="flex" gap={2} mb={3}>
-            <FormControl>
-              <InputLabel>Năm</InputLabel>
-              <Select value={selectedYear} label="Năm" onChange={(e) => setSelectedYear(e.target.value)} sx={{ height: 40 }}>
-                {["2025", "2024"].map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box display="flex" gap={4} mb={2} flexWrap="wrap">
-            {["MB2000", "MB", "TECHCOMBANK"].map((bank) => {
-              const total = summaryData.reduce((sum, row) => sum + (row[bank] || 0), 0);
-              const colorMap = {
-                MB: "#4caf50",
-                MB2000: "#ff9800",
-                TECHCOMBANK: "#2196f3",
-              };
-
-              return (
-                <Typography key={bank} variant="body1" sx={{ color: colorMap[bank], fontWeight: "bold" }}>
-                  {bank}: {total.toLocaleString()} VNĐ
-                </Typography>
-              );
-            })}
-          </Box>
-
-          <Paper sx={{ p: 2 }}>
-            <ResponsiveContainer width="100%" height={500}>
-              <BarChart data={summaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%" barGap={8}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickFormatter={(m) => `Tháng ${m}`} />
-                <YAxis tickFormatter={(v) => `${(v / 1_000_000_000).toFixed(0)} tỷ`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar dataKey="MB" fill="#4caf50" name="MB" />
-                <Bar dataKey="MB2000" fill="#ff9800" name="MB2000" />
-                <Bar dataKey="TECHCOMBANK" fill="#2196f3" name="TECHCOMBANK" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Box>
-      )}
 
       {/* Filters */}
       <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={2} alignItems={isMobile ? "stretch" : "center"} justifyContent="space-between" width="100%" sx={{ mt: 4, mb: 4 }}>
@@ -420,7 +430,7 @@ export default function Statement() {
               }}
             >
               <MenuItem value="">Năm (Tất cả)</MenuItem>
-              {["2025", "2024"].map((y) => (
+              {["2025", "2024", "2023"].map((y) => (
                 <MenuItem key={y} value={y}>
                   Năm {y}
                 </MenuItem>

@@ -18,6 +18,7 @@ const statementRouter = express.Router();
 const ENV = process.env.CURRENT_ENV;
 const STATEMENT_SERVER_URL = "https://saoke.sucmanh2000.com";
 const GET_DATA_API = "/api/getData";
+const POST_DATA_API = "/api/postData";
 
 statementRouter.get("/", async (req: Request, res: Response) => {
   try {
@@ -147,7 +148,6 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
     const formattedToDate = moment(toDate, "YYYY-MM-DD").format("YYYY-MM-DD");
 
     const sheetsToProcess = totalSheets.map((sheet: any) => sheet.properties.title).filter((name) => selectedOptions.includes(name) && /^([A-Za-z0-9]+)\.\s*(\d{4})/.test(name));
-
     logs.push({ message: `Processing Sheets: ${sheetsToProcess.join(", ")} .......` });
 
     const allSlugs: Record<string, string> = {};
@@ -188,7 +188,7 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
       if (ENV === "Development") {
         await pool.query(query, values);
       } else if (ENV === "Production") {
-        await axios.get(STATEMENT_SERVER_URL + GET_DATA_API, { params: { query, values } });
+        await axios.post(STATEMENT_SERVER_URL + POST_DATA_API, { query, values });
       }
     }
 
@@ -229,6 +229,7 @@ statementRouter.post("/fetchTransactionDataFromGsheet", async (req: Request, res
 
           const slug = projectId?.trim()?.toLowerCase();
           const projectUrl = slug && allSlugs[slug] ? allSlugs[slug] : "N/A";
+          if (!projectUrl || projectUrl === "N/A") continue;
 
           const values = [formattedDate, transactionCode.trim(), formattedAmount, maskedDescription, projectName.trim(), projectId.trim(), projectUrl, bank === "VVC" ? "TECHCOMBANK" : bank];
 
@@ -302,6 +303,7 @@ statementRouter.get("/migrateDataFromCSV", async (req: Request, res: Response): 
     }
     const slug = projectId?.trim()?.toLowerCase();
     const projectUrl = slug && allSlugs[slug] ? allSlugs[slug] : "N/A";
+    if (!projectUrl || projectUrl === "N/A") return undefined;
 
     return {
       date: parseDate(row["Ngày"]),
