@@ -18,7 +18,7 @@ export const HEADER_DROPDOWN_LIST = [
     children: [],
   },
   {
-    path: "/gioi-thieu",
+    path: "gioi-thieu",
     title: "Giới Thiệu",
     children: [],
   },

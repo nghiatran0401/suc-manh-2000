@@ -39,7 +39,7 @@ export default function CarouselListCard(props) {
     <Carousel
       indicatorContainerProps={{
         style: {
-          margin: "30px",
+          margin: "16px",
         },
       }}
       indicatorIconButtonProps={{

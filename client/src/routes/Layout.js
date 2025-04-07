@@ -13,7 +13,7 @@ export default function Layout() {
       <Outlet />
 
       <CarouselMembers />
-      <Companion />
+      {/* <Companion /> */}
       <Footer />
     </Box>
   );

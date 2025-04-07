@@ -173,7 +173,7 @@ export default function CarouselMembers() {
       display={"flex"}
       flexDirection={"column"}
       gap={"16px"}
-      m={"16px auto"}
+      m={"0 auto"}
       sx={{
         "@media (max-width: 600px)": {
           m: "16px auto",
@@ -181,8 +181,8 @@ export default function CarouselMembers() {
         },
       }}
     >
-      <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" color={"black"}>
-        Đội ngũ vận hành SỨC MẠNH 2000
+      <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" color={"red"}>
+        Đội ngũ vận hành
       </Typography>
 
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
