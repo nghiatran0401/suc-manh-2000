@@ -10,7 +10,7 @@ const redis = new Redis({
   host: process.env.REDIS_URL || "",
   username: "default",
   password: process.env.REDIS_PASSWORD,
-  db: 0, // Defaults to 0
+  db: 0,
 });
 
 const INDEX_NAME = "post_index";
@@ -98,6 +98,11 @@ async function upsertDocumentToIndex(data: any) {
 
 async function removeDocumentFromIndex(data: any) {
   await redis.call("FT.DEL", INDEX_NAME, `post:${data.collection_id}:${data.doc_id}`);
+}
+
+async function flushAllDataInRedis() {
+  await redis.call("FLUSHALL");
+  await redis.call("FT.CREATE", INDEX_NAME, "PREFIX", "1", "post:", ...INDEX_SCHEMA);
 }
 
 async function redisSearchByName(q: any, filters: any, sortField?: any) {
@@ -401,6 +406,7 @@ export {
   redisSearchByName,
   upsertDocumentToIndex,
   removeDocumentFromIndex,
+  flushAllDataInRedis,
   getValueInRedis,
   getValuesByCategoryInRedis,
   setExValueInRedis,

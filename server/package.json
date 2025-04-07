@@ -9,6 +9,7 @@
     "build": "tsc",
     "server": "cp .env.local .env && npx tsx --watch index.ts",
     "deploy:server": "cp .env.prod .env && npm run build && firebase deploy --only functions",
+    "githubWorkflow": "npx tsx ./helpers/githubWorkflow.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },

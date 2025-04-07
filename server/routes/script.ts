@@ -8,6 +8,8 @@ import { fetchProjectRecordsFromCsv } from "../services/csv";
 import { getProjectProgress, getHoanCanhDescription, getAllFileNames, checkIfRefreshTokenValid, saveGoogleAuthRefreshToken, generateAuthUrl } from "../services/google";
 import { removeDocumentFromIndex, upsertDocumentToIndex } from "../services/redis";
 import { updateClassificationAndCategoryCounts, formatDate, extractFolderId, getProjectClassification, vietnameseProjectStatus, standardizePostTitle } from "../utils/index";
+import updateFirestoreCountsCollection from "../helpers/updateFirestoreCountsCollection";
+import indexFirestoreDocsToRedis from "../helpers/indexFirestoreDocsToRedis";
 
 const scriptRouter = express.Router();
 
@@ -651,9 +653,12 @@ scriptRouter.post("/syncAirtableAndWeb", async (req: Request, res: Response) => 
             return await Promise.all([collection.doc(docId).update(updatedProjectPost), upsertDocumentToIndex({ ...updatedProjectPost, doc_id: docId, collection_id: collectionName })]);
           }
         });
+
         await Promise.all(projectsPromises);
       }
     }
+
+    await Promise.all([updateFirestoreCountsCollection(), indexFirestoreDocsToRedis()]);
 
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).send({});
