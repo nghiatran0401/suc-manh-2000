@@ -11,7 +11,7 @@ import { provincesAndCitiesObj } from "../vietnam-provinces";
 import { classificationMapping, statusMapping } from "../constants";
 
 const Card = styled(MuiCard)({
-  minHeight: "300px",
+  minHeight: "250px",
   height: "100%",
   display: "flex",
   flexDirection: "column",
@@ -20,7 +20,7 @@ const Card = styled(MuiCard)({
   "&:hover": {
     transform: "scale(1.05)",
   },
-  margin: "10px",
+  margin: "9px",
 });
 
 export default function CarouselListCard(props) {
@@ -36,15 +36,33 @@ export default function CarouselListCard(props) {
   }
 
   return (
-    <Carousel indicators={false}>
+    <Carousel
+      indicatorContainerProps={{
+        style: {
+          margin: "30px",
+        },
+      }}
+      indicatorIconButtonProps={{
+        style: {
+          padding: "2px",
+          margin: "0 5px",
+          color: "#bdbdbd",
+        },
+      }}
+      activeIndicatorIconButtonProps={{
+        style: {
+          color: "red",
+        },
+      }}
+    >
       {chunkedItems.map((chunk, index) => (
-        <Grid container spacing={1} key={index}>
+        <Grid container columnSpacing={0.5} rowSpacing={2.5} key={index}>
           {chunk.map((post, idx) => (
             <Grid item xs={6} sm={3} key={idx}>
               <Link replace to={`/${props.category ? props.category : category}/${post.slug}`} style={{ textDecoration: "none" }}>
                 <Card>
                   <div style={{ position: "relative", display: "flex", flexDirection: "row" }}>
-                    <img style={{ width: "100%", height: "225px", objectFit: "cover" }} src={post.thumbnail ? post.thumbnail : SM2000} alt={post.name} />
+                    <img style={{ width: "100%", height: "225px", objectFit: "cover", padding: "10px" }} src={post.thumbnail ? post.thumbnail : SM2000} alt={post.name} />
 
                     {post.status && (
                       <div

@@ -50,20 +50,20 @@ export default function Companion() {
         },
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color={"red"}>
+      <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" color={"red"}>
         Đơn vị đồng hành
       </Typography>
 
-      <div style={{ maxWidth: "100vw", width: "100%", margin: "24px auto" }}>
-        <Grid container spacing={2}>
+      <div style={{ maxWidth: "100vw", width: "100%", margin: isMobile ? "12px auto" : "24px auto" }}>
+        <Grid container spacing={isMobile ? 1 : 2}>
           {COMPANIONS.map((d, idx) => (
-            <Grid item xs={6} sm={12 / COMPANIONS.length} key={idx}>
+            <Grid item xs={12 / 5} sm={12 / COMPANIONS.length} key={idx}>
               <img
                 src={d.url}
                 alt={d.name}
                 style={{
                   width: "100%",
-                  height: "100px",
+                  height: isMobile ? "70px" : "100px",
                   objectFit: "contain",
                 }}
               />
