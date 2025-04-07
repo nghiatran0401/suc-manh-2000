@@ -37,24 +37,12 @@ export default function Companion() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Box
-      maxWidth={DESKTOP_WIDTH}
-      display={"flex"}
-      flexDirection={"column"}
-      gap={"16px"}
-      m={"16px auto"}
-      sx={{
-        "@media (max-width: 600px)": {
-          m: "16px auto",
-          p: "0 16px",
-        },
-      }}
-    >
+    <Box maxWidth={DESKTOP_WIDTH} display={"flex"} flexDirection={"column"} gap={"8px"} m={"8px auto"}>
       <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" color={"red"}>
         Đơn vị đồng hành
       </Typography>
 
-      <div style={{ maxWidth: "100vw", width: "100%", margin: isMobile ? "12px auto" : "24px auto" }}>
+      <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto" }}>
         <Grid container spacing={isMobile ? 1 : 2}>
           {COMPANIONS.map((d, idx) => (
             <Grid item xs={12 / 5} sm={12 / COMPANIONS.length} key={idx}>

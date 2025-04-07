@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST, SERVER_URL } from "../constants";
 import { useMediaQuery, Box, Typography, Grid, Card, Link, CardContent, Avatar, LinearProgress, Divider, FormControl, Select, MenuItem } from "@mui/material";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
+import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import { useTheme } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import CountUp from "react-countup";
@@ -10,8 +12,6 @@ import "react-tabs/style/react-tabs.css";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import CarouselListCard from "../components/CarouselListCard";
-import constructionIcon from "../assets/construction.svg";
-import peopleIcon from "../assets/people.svg";
 import childrenImage from "../assets/children.png";
 import mapSectionImage from "../assets/map-section.svg";
 import Companion from "../components/Companion";
@@ -76,12 +76,10 @@ export default function Home() {
             Chung tay cùng cộng đồng xóa sổ mọi điểm trường gỗ, mái tôn tạm bợ trên khắp mọi miền đất nước — và xây dựng đầy đủ Khu nội trú, Cầu đi học, cùng những Ngôi nhà Hạnh phúc cho trẻ em vùng cao.
           </Typography>
 
-          <Box mt={isMobile ? 1 : 2}>
-            <Companion />
-          </Box>
+          <Companion />
         </Box>
 
-        <Box width={isMobile ? "100%" : "50%"} display="flex" justifyContent="center">
+        <Box width={isMobile ? "100%" : "50%"}>
           <img
             src={childrenImage}
             alt="Dự án Sức Mạnh 2000"
@@ -94,18 +92,18 @@ export default function Home() {
       </Box>
 
       {/* Vietnam map statistics */}
-      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3} mb={5} width="100%" px={isMobile ? 3 : 0}>
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={1} mb={5} px={isMobile ? 3 : 0}>
         <Box display="flex" flexDirection="column" width={isMobile ? "100%" : "30%"} mb={isMobile ? 3 : 0}>
-          <Box mb={3}>
-            <Typography variant="h6" fontWeight="bold" color="black" textAlign="left" mb={1}>
+          <Box>
+            <Typography variant="h6" fontWeight="bold">
               Bản đồ các công trình dự án ánh sáng núi rừng - SỨC MẠNH 2000
             </Typography>
-            <Typography variant="body1" color="gray" textAlign="left" mb={2}>
+            <Typography variant="body1" color="gray">
               Tính từ 2012 đến tháng 3/2025
             </Typography>
           </Box>
 
-          <Box display="flex" marginTop={5} flexDirection="column" bgcolor="#FFF1F0" p={"24px"} borderRadius={5}>
+          <Box display="flex" marginTop={3} flexDirection="column" bgcolor="#FFF1F0" p={"24px"} borderRadius={5}>
             <Typography variant={isMobile ? "h4" : "h3"} fontWeight="bold" color="red" textAlign="center" mb={1}>
               TỔNG <CountUp start={0} end={722} duration={2.5} />
             </Typography>
@@ -166,21 +164,21 @@ export default function Home() {
       <Box display="flex" flexDirection={"column"} gap={"16px"} p={isMobile ? "24px 16px" : "40px"}>
         <Box display={"flex"} flexDirection={isMobile ? "column" : "row"} gap={"16px"}>
           <Box display={"flex"} flexDirection={"column"} alignItems={"center"} bgcolor="#FFF1F0" p={4} borderRadius={2} width={isMobile ? "100%" : "50%"}>
-            <img src={constructionIcon} alt="construction" style={{ width: "100px", height: "100px" }} />
+            <HomeWorkIcon sx={{ color: "red", width: "100px", height: "100px" }} />
             <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalFinishedProjects} duration={10} />
             </Typography>
-            <Typography variant="h6" fontWeight={"bold"}>
+            <Typography variant={isMobile ? "h6" : "h5"} fontWeight={"bold"}>
               TỔNG DỰ ÁN ĐÃ THỰC HIỆN
             </Typography>
           </Box>
 
           <Box display={"flex"} flexDirection={"column"} alignItems={"center"} bgcolor="#FFF1F0" p={4} borderRadius={2} width={isMobile ? "100%" : "50%"}>
-            <img src={peopleIcon} alt="people" style={{ width: "100px", height: "100px" }} />
+            <PeopleOutlinedIcon sx={{ color: "red", width: "100px", height: "100px" }} />
             <Typography variant="h2" fontWeight={"bold"} color={"red"}>
               <CountUp start={0} end={totalBeneficialStudents} duration={10} />
             </Typography>
-            <Typography variant="h6" fontWeight={"bold"}>
+            <Typography variant={isMobile ? "h6" : "h5"} fontWeight={"bold"}>
               TỔNG SỐ HỌC SINH HƯỞNG LỢI
             </Typography>
           </Box>
@@ -466,7 +464,7 @@ export default function Home() {
           position: "relative",
           left: "50%",
           transform: "translateX(-50%)",
-          padding: "24px 0 16px 0",
+          padding: "16px 0",
           my: "40px",
           "@media (max-width: 600px)": {
             marginTop: "16px",
@@ -498,9 +496,9 @@ export default function Home() {
                 alignItems: "center",
                 cursor: "pointer",
               }}
-              onClick={() => navigate("/search")}
+              onClick={() => navigate("/tim-kiem")}
             >
-              {isMobile ? "Tất cả" : "Xem tất cả"}
+              Xem tất cả
             </Typography>
           </Box>
 

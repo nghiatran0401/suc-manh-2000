@@ -1,12 +1,9 @@
 import React from "react";
-import { useMediaQuery, Box, Grid, Typography, IconButton, Divider } from "@mui/material";
+import { useMediaQuery, Box, Grid, Typography, Divider } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import logo from "../assets/logo-header.png";
 import "./config/styles.css";
 import { DESKTOP_WIDTH, HEADER_DROPDOWN_LIST } from "../constants";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import InstagramIcon from "@mui/icons-material/Instagram";
 
 export default function Footer() {
   const theme = useTheme();
@@ -14,78 +11,110 @@ export default function Footer() {
 
   return (
     <Box bgcolor={"#262626"} width="100%">
-      <Box display={"flex"} gap={"24px"} p={"30px 0px"} maxWidth={DESKTOP_WIDTH} m={"0 auto"}>
-        <Box width="30%" display={"flex"} flexDirection={"column"} gap={"16px"} alignItems={isMobile ? "center" : "flex-start"}>
-          <img
-            src={logo}
-            alt="logo"
-            style={{
-              maxWidth: isMobile ? "60px" : "80px",
-              objectFit: "contain",
-              padding: "10px 0",
-            }}
-          />
-          <Typography variant="body2" color={"#E4E4E4"} sx={{ fontSize: "0.8rem", lineHeight: 1.5 }}>
-            Dự án Sức Mạnh 2000 - Dự án gây quỹ của Ánh Sáng Núi Rừng điều hành bởi Hoàng Hoa Trung - Forbes 30 Under 30 đồng hành bởi Trung tâm Tình Nguyện Quốc Gia.
-          </Typography>
-          <Typography variant="body2" color={"#E4E4E4"} sx={{ fontSize: "0.8rem", lineHeight: 1.5, mt: 1 }}>
-            Phát triển bởi đội ngũ điều hành Dự án Nuôi Em, Ánh Sáng Núi Rừng, nhóm Tình nguyện Niềm Tin.
-          </Typography>
-          <Box display="flex" gap={2} mt={1}>
-            <IconButton size="small" sx={{ color: "white", p: 0.5 }}>
-              <FacebookIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" sx={{ color: "white", p: 0.5 }}>
-              <TwitterIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" sx={{ color: "white", p: 0.5 }}>
-              <InstagramIcon fontSize="small" />
-            </IconButton>
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} flexWrap="wrap" gap="24px" py="30px" px={{ xs: 2, md: 0 }} maxWidth={DESKTOP_WIDTH} mx="auto">
+        <Box width={isMobile ? "100%" : "30%"} display="flex" flexDirection="column" gap={2}>
+          <Box textAlign={isMobile ? "center" : "left"}>
+            <img
+              src={logo}
+              alt="logo"
+              style={{
+                maxWidth: "80px",
+                width: "100%",
+                height: "auto",
+                objectFit: "contain",
+                padding: "10px 0",
+              }}
+            />
           </Box>
+
+          <Box textAlign={isMobile ? "center" : "left"} display="flex" flexDirection="column" gap={1}>
+            <Typography variant="body2" color="#E4E4E4">
+              Dự án Sức Mạnh 2000 - Dự án gây quỹ của Ánh Sáng Núi Rừng điều hành bởi Hoàng Hoa Trung - Forbes 30 Under 30 đồng hành với Trung tâm Tình Nguyện Quốc Gia (thuộc Trung ương Đoàn).
+            </Typography>
+          </Box>
+
+          {isMobile && (
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle2" color="#E4E4E4" fontWeight="bold" mb={1}>
+                LIÊN HỆ
+              </Typography>
+              <Box sx={{ color: "#b4b4b4", display: "flex", flexDirection: "column", gap: 1 }}>
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
+                  P702 - 62 Bà Triệu - TW Đoàn
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
+                  <strong>Hotline:</strong>
+                  <ul style={{ margin: 0 }}>
+                    <li>Hoàng Hoa Trung 0975302307</li>
+                    <li>Nguyễn Thị Hiền 0986832256</li>
+                  </ul>
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
+                  <strong>Email:</strong>
+                  <ul style={{ margin: 0 }}>
+                    <li>duansucmanh2000@gmail.com</li>
+                    <li>niemtingroup@gmail.com</li>
+                  </ul>
+                </Typography>
+              </Box>
+            </Grid>
+          )}
         </Box>
 
-        <Box width="70%" display="flex" flexDirection={isMobile ? "column" : "row"} gap={5} pt={8} pl={isMobile ? 0 : 10} justifyContent="space-between">
-          {HEADER_DROPDOWN_LIST.filter((item) => ["gioi-thieu", "quyen-gop", "du-an"].includes(item.name)).map((item, index) => (
-            <Grid key={index} item xs={6} sm={2.5}>
-              <Typography variant="subtitle2" color={"#E4E4E4"} fontWeight="bold" sx={{ fontSize: "0.85rem" }}>
-                {item.title.toUpperCase()}
-              </Typography>
-              <div className="content-footer">
-                {item.children
-                  .filter((_, index) => index <= 4)
-                  .map((child, index) => (
-                    <Typography key={index} variant="body2" sx={{ fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap" }} onClick={() => (window.location.href = child.path)}>
+        {!isMobile && (
+          <Box width="60%" display="flex" flexDirection={isMobile ? "column" : "row"} justifyContent="space-around">
+            {HEADER_DROPDOWN_LIST.filter((item) => ["gioi-thieu", "quyen-gop", "du-an"].includes(item.name)).map((item, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Typography variant="subtitle2" color="#E4E4E4" fontWeight="bold" sx={{ fontSize: "0.85rem", mb: 1 }}>
+                  {item.title.toUpperCase()}
+                </Typography>
+                <Box className="content-footer">
+                  {item.children.slice(0, 5).map((child, idx) => (
+                    <Typography
+                      key={idx}
+                      variant="body2"
+                      sx={{
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        mb: 0.5,
+                      }}
+                      onClick={() => (window.location.href = child.path)}
+                    >
                       {child.title}
                     </Typography>
                   ))}
-              </div>
-            </Grid>
-          ))}
+                </Box>
+              </Grid>
+            ))}
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="subtitle2" color={"#E4E4E4"} fontWeight="bold" sx={{ fontSize: "0.85rem" }}>
-              LIÊN HỆ
-            </Typography>
-            <div className="content-footer">
-              <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
-                P702 - 62 Bà Triệu - TW Đoàn
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle2" color="#E4E4E4" fontWeight="bold" sx={{ fontSize: "0.85rem", mb: 1 }}>
+                LIÊN HỆ
               </Typography>
-              <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
-                Điện thoại: 0975 302 307
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
-                Email: niemtingroup@gmail.com
-              </Typography>
-            </div>
-          </Grid>
-        </Box>
+              <Box className="content-footer">
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap", mb: 0.5 }}>
+                  P702 - 62 Bà Triệu - TW Đoàn
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap", mb: 0.5 }}>
+                  Điện thoại: 0975 302 307
+                </Typography>
+
+                <Typography variant="body2" sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}>
+                  Email: niemtingroup@gmail.com
+                </Typography>
+              </Box>
+            </Grid>
+          </Box>
+        )}
       </Box>
 
       <Divider sx={{ backgroundColor: "white", height: "2px", width: "100%", mx: "auto" }} />
 
       <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"center"} py={"20px"} px={isMobile ? "15px" : "0px"}>
-        <Typography variant="body2" color={"white"} sx={{ fontSize: "0.8rem" }}>
-          Copyright 2024 © Phát triển bởi đội ngũ điều hành Ánh Sáng Núi Rừng và Dự án Nuôi Em.
+        <Typography variant="body2" color={"white"} sx={{ fontSize: "0.8rem" }} textAlign="center">
+          Copyright 2024 © <br />
+          Phát triển bởi đội ngũ điều hành Dự án Nuôi Em, Ánh Sáng Núi Rừng, nhóm Tình nguyện Niềm Tin
         </Typography>
       </Box>
     </Box>

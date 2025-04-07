@@ -35,8 +35,8 @@ export const MEMBERS = [
     role: "Giám Đốc Trung Tâm Tình Nguyện Quốc Gia",
     description: `
       <ul style="margin-left: -24px;">
-        <li>7+ năm công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam”</li>
-        <li>9+ năm điều hành Trung tâm Tình nguyện Quốc gia</li>
+        <li>Điều hành Trung tâm Tình nguyện Quốc gia</li>
+        <li>Công tác tại Dự án “Tăng cường năng lực hoạt động tình nguyện vì sự phát triển ở Việt Nam”</li>
       </ul>`,
     image: DoThiKimHoa,
   },
@@ -45,9 +45,9 @@ export const MEMBERS = [
     role: "Cố Vấn Chiến Lược & Truyền Thông - Nhà Tài Trợ Thiên Thần",
     description: `
       <ul style="margin-left: -24px;">
-        <li>Phó Tổng Marketing Biti's</li>
-        <li>Tổng Giám Đốc điều hành Dentsu Redder</li>
-        <li>Thành Viên Sáng lập Hội Đồng Cố Vấn - Fulbright VN</li>
+        <li>Phó TGĐ Marketing Biti's</li>
+        <li>TGĐ điều hành Dentsu Redder</li>
+        <li>Thành Viên Sáng lập HĐ Cố Vấn - Fulbright VN</li>
       </ul>`,
     image: HungVo,
   },
@@ -60,7 +60,7 @@ export const MEMBERS = [
 
   {
     name: "NGUYỄN THỊ HIỀN",
-    role: "Phó Chủ Nhiệm Dự Án",
+    role: "Phó Chủ Nhiệm Dự Án <br/> Phụ trách team Partnership",
     description: `
       <ul style="margin-left: -24px;">
         <li>12+ năm hoạt động CTXH và tình nguyện từ các CLB sinh viên, tổ chức tại Việt Nam & Thái Lan</li> 
@@ -69,61 +69,50 @@ export const MEMBERS = [
     image: NguyenThiHien,
   },
   {
-    name: "LÊ HOÀNG YẾN",
-    role: "Phụ Trách Tiến Độ",
+    name: "PHẠM NGỌC CHÂM",
+    role: "Phụ trách team Góp lẻ và <br/> Nuôi Em Campuchia & Kenya",
     description: `
       <ul style="margin-left: -24px;">
-        <li>4+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
+        <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
+      </ul>
+    `,
+    image: PhamNgocCham,
+  },
+  {
+    name: "LÊ HOÀNG YẾN",
+    role: "Phụ trách team Tiến độ",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
         <li>Hiện tại đang làm việc trong lĩnh vực Tài chính - Kế toán</li>
       </ul>`,
     image: LeHoangYen,
   },
   {
     name: "VÕ THỊ TUYẾT MINH",
-    role: "Phụ Trách Sao Kê và Góp Lẻ",
+    role: "Phụ trách team Sao kê",
     description: `
       <ul style="margin-left: -24px;">
         <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-        <li>Cử nhân tài chính kế toán</li>
+        <li>Cử nhân Tài chính - Kế toán</li>
       </ul>
     `,
     image: VoThiTuyetMinh,
   },
   {
-    name: "PHẠM NGỌC CHÂM",
-    role: "Phụ Trách Góp Lẻ SM2000 và Nuôi Em Campuchia - Kenya",
+    name: "ĐỖ VĂN LÂM",
+    role: "Phụ trách team Thiết kế",
     description: `
       <ul style="margin-left: -24px;">
-        <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-      </ul>
-    `,
-    image: PhamNgocCham,
-  },
-  {
-    name: "TRẦN THÙY TRANG",
-    role: "Vận Hành Trường và Khu Nội Trú",
-    description: `
-      <ul style="margin-left: -24px;">
-        <li>Nhân sự từ Trung tâm Tình Nguyện Quốc Gia</li>
-        <li>Phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và báo cáo, chứng từ</li>
-      </ul>
-    `,
-    image: TranThuyTrang,
-  },
-  {
-    name: "LÝ PHƯƠNG THẢO",
-    role: "Partnership",
-    description: `
-      <ul style="margin-left: -24px;">
-        <li>2+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-        <li>Sinh viên năm 3 - Đại Học Thương Mại</li>
-      </ul>
-    `,
-    image: LyPhuongThao,
+        <li>3+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
+        <li>Founder Pha chế dễ òm</li>
+        <li>Giám đốc khu vực công ty TNHH Minh Đức</li>
+      </ul>`,
+    image: DoVanLam,
   },
   {
     name: "NGUYỄN THỊ ANH ĐÀO",
-    role: "Phụ Trách Nuôi Em 500 - Nhà Hạnh Phúc",
+    role: "Phụ trách team Nuôi em 500",
     description: `
       <ul style="margin-left: -24px;">
         <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
@@ -132,25 +121,35 @@ export const MEMBERS = [
     image: NguyenThiAnhDao,
   },
   {
+    name: "LÝ PHƯƠNG THẢO",
+    role: "Partnership",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>5+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
+      </ul>
+    `,
+    image: LyPhuongThao,
+  },
+  {
+    name: "TRẦN THÙY TRANG",
+    role: "Vận Hành Trường và Khu Nội Trú",
+    description: `
+      <ul style="margin-left: -24px;">
+        <li>Nhân sự từ Trung tâm Tình Nguyện Quốc Gia (VVC)</li>
+        <li>Phụ trách đầu mối với địa phương, thẩm định bản vẽ, báo giá nội bộ và báo cáo, chứng từ</li>
+      </ul>
+    `,
+    image: TranThuyTrang,
+  },
+  {
     name: "TRẦN HỮU NGHĨA",
-    role: "Phụ Trách Kĩ Thuật Web",
+    role: "Phụ trách Kĩ thuật web",
     description: `
       <ul style="margin-left: -24px;">
         <li>1+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-        <li>Hiện đang là Software Engineer cho công ty Startup tại Singapore</li>
+        <li>Hiện tại đang làm việc trong lĩnh vực Công nghệ</li>
       </ul>`,
     image: TranHuuNghia,
-  },
-  {
-    name: "ĐỖ VĂN LÂM",
-    role: "Phụ Trách Thiết Kế - Truyền Thông",
-    description: `
-      <ul style="margin-left: -24px;">
-        <li>3+ năm hoạt động CTXH và đồng thời làm TNV của dự án</li>
-        <li>Founder Pha chế dễ òm</li>
-        <li>Giám đốc khu vực công ty TNHH Minh Đức</li>
-      </ul>`,
-    image: DoVanLam,
   },
 ];
 
@@ -187,7 +186,7 @@ export default function CarouselMembers() {
 
       <div style={{ maxWidth: "100vw", width: "100%", margin: "0 auto", overflow: "hidden" }}>
         <Carousel
-          autoPlay={false}
+          indicators={!isMobile}
           indicatorContainerProps={{
             style: {
               margin: "20px",
@@ -232,9 +231,7 @@ export default function CarouselMembers() {
                             {item.name}
                           </Typography>
 
-                          <Typography align="center" variant="body2" fontWeight={"bold"} color="red" sx={{ fontSize: "0.9rem" }}>
-                            {item.role}
-                          </Typography>
+                          <Typography align="center" variant="body2" fontWeight={"bold"} color="red" sx={{ fontSize: "0.9rem" }} dangerouslySetInnerHTML={{ __html: item.role }} />
 
                           <Typography align="left" variant="body2" sx={{ fontSize: "0.8rem" }} dangerouslySetInnerHTML={{ __html: item.description }} />
                         </>

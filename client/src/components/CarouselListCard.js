@@ -37,6 +37,7 @@ export default function CarouselListCard(props) {
 
   return (
     <Carousel
+      indicators={!isMobile}
       indicatorContainerProps={{
         style: {
           margin: "16px",
