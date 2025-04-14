@@ -5,10 +5,12 @@ async function githubWorkflow() {
   try {
     await Promise.all([updateFirestoreCountsCollection(), indexFirestoreDocsToRedis()]);
     process.exit(0);
-  } catch (error) {
+  } catch (error: any) {
     console.error(error.message);
     process.exit(1);
   }
 }
 
-githubWorkflow();
+// githubWorkflow();
+
+export default githubWorkflow;
