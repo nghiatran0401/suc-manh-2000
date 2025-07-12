@@ -3,7 +3,8 @@ import indexFirestoreDocsToRedis from "./indexFirestoreDocsToRedis";
 
 async function githubWorkflow() {
   try {
-    await Promise.all([updateFirestoreCountsCollection(), indexFirestoreDocsToRedis()]);
+    await updateFirestoreCountsCollection();
+    await indexFirestoreDocsToRedis();
     process.exit(0);
   } catch (error: any) {
     console.error(error.message);
@@ -11,6 +12,6 @@ async function githubWorkflow() {
   }
 }
 
-// githubWorkflow();
+githubWorkflow();
 
 export default githubWorkflow;
